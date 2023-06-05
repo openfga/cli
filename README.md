@@ -40,26 +40,24 @@ OpenFGA is designed to make it easy for application builders to model their perm
 
 For any command that interacts with an OpenFGA server, these configuration values can be passed (where applicable)
 
-| Name           | Flag                 | CLI                    | Comments                                                                  |
-|----------------|----------------------|------------------------|---------------------------------------------------------------------------|
-| Server Url     | `--server-url`       | `FGA_SERVER_URL`       |                                                                           |
-| Shared Secret  | `--api-token`        | `FGA_API_TOKEN`        |                                                                           |
-| Client ID      | `--client-id`        | `FGA_CLIENT_ID`        |                                                                           |
-| Client Secret  | `--client-secret`    | `FGA_CLIENT_SECRET`    |                                                                           |
-| Token Issuer   | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` |                                                                           |
-| Token Audience | `--api-audience`     | `FGA_API_AUDIENCE`     |                                                                           |
-| Store Id       | `--store_id`         | `FGA_STORE_ID`         | where applicable, e.g. not on `ListStores`                                |
-| Model Id       | `--model_id`         | `FGA_MODEL_ID`         | where applicable, e.g. not on `ReadAuthorizationModels` and store methods |
+| Name           | Flag                 | CLI                    |
+|----------------|----------------------|------------------------|
+| Server Url     | `--server-url`       | `FGA_SERVER_URL`       |
+| Shared Secret  | `--api-token`        | `FGA_API_TOKEN`        |
+| Client ID      | `--client-id`        | `FGA_CLIENT_ID`        |
+| Client Secret  | `--client-secret`    | `FGA_CLIENT_SECRET`    |
+| Token Issuer   | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` |
+| Token Audience | `--api-audience`     | `FGA_API_AUDIENCE`     |
 
 ### Commands
 
 #### Stores
-| command                   | parameters   | example                                                   |
-|---------------------------|--------------|-----------------------------------------------------------|
-| [`create`](#create-store) | `--name`     | `fga stores create --name="FGA Demo Store"`               |
-| [`list`](#list-stores)    |              | `fga stores list`                                         |
-| [`get`](#get-store)       | `--store_id` | `fga stores get --store_id=01H0H015178Y2V4CX10C2KGHF4`    |
-| [`delete`](#delete-store) | `--store_id` | `fga stores delete --store_id=01H0H015178Y2V4CX10C2KGHF4` |
+| Description                     | command  | parameters   | example                                                   |
+|---------------------------------|----------|--------------|-----------------------------------------------------------|
+| [Create a Store](#create-store) | `create` | `--name`     | `fga stores create --name="FGA Demo Store"`               |
+| [List Stores](#list-stores)     | `list`   |              | `fga stores list`                                         |
+| [Get a Store](#get-store)       | `get`    | `--store_id` | `fga stores get --store_id=01H0H015178Y2V4CX10C2KGHF4`    |
+| [Delete a Store](#delete-store) | `delete` | `--store_id` | `fga stores delete --store_id=01H0H015178Y2V4CX10C2KGHF4` |
 
 ##### Create Store
 
