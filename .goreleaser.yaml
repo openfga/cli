@@ -1,0 +1,126 @@
+project_name: fga-cli
+
+builds:
+  -
+    main: ./main.go
+    binary: fga
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    ldflags:
+      - "-s -w"
+      - "-X github.com/openfga/cli/internal/build.Version=v{{ .Version }}"
+      - "-X github.com/openfga/cli/internal/build.Commit={{.Commit}}"
+      - "-X github.com/openfga/cli/internal/build.Date={{.Date}}"
+
+dockers:
+  - goos: linux
+    goarch: amd64
+
+    dockerfile: Dockerfile
+
+    image_templates:
+      - "openfga/cli:latest-amd64"
+      - "openfga/cli:{{ .Tag }}-amd64"
+      - "openfga/cli:v{{ .Version }}-amd64"
+      - "openfga/cli:v{{ .Major }}-amd64"
+      - "openfga/cli:v{{ .Major }}.{{ .Minor }}-amd64"
+      - "openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64"
+
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+
+  - goos: linux
+    goarch: arm64
+
+    dockerfile: Dockerfile
+
+    image_templates:
+      - "openfga/cli:latest-arm64"
+      - "openfga/cli:{{ .Tag }}-arm64"
+      - "openfga/cli:v{{ .Version }}-arm64"
+      - "openfga/cli:v{{ .Major }}-arm64"
+      - "openfga/cli:v{{ .Major }}.{{ .Minor }}-arm64"
+      - "openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64"
+
+    use: buildx
+
+    build_flag_templates:
+      - "--platform=linux/arm64"
+
+docker_manifests:
+  - name_template: openfga/cli:latest
+    image_templates:
+      - openfga/cli:latest-amd64
+      - openfga/cli:latest-arm64
+  - name_template: openfga/cli:v{{ .Version }}
+    image_templates:
+      - openfga/cli:v{{ .Version }}-amd64
+      - openfga/cli:v{{ .Version }}-arm64
+  - name_template: openfga/cli:v{{ .Major }}
+    image_templates:
+      - openfga/cli:v{{ .Major }}-amd64
+      - openfga/cli:v{{ .Major }}-arm64
+  - name_template: openfga/cli:v{{ .Major }}.{{ .Minor }}
+    image_templates:
+      - openfga/cli:v{{ .Major }}.{{ .Minor }}-amd64
+      - openfga/cli:v{{ .Major }}.{{ .Minor }}-arm64
+  - name_template: openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}
+    image_templates:
+      - openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64
+      - openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64
+
+release:
+  github:
+    owner: openfga
+    name: cli
+
+sboms:
+  - artifacts: archive
+
+signs:
+- cmd: cosign
+  env:
+  - COSIGN_EXPERIMENTAL=1
+  certificate: '${artifact}.pem'
+  args:
+    - sign-blob
+    - '--output-certificate=${certificate}'
+    - '--output-signature=${signature}'
+    - '${artifact}'
+    - "--yes" # needed on cosign 2.0.0+
+  artifacts: checksum
+  output: true
+
+docker_signs:
+  - cmd: cosign
+    env:
+    - COSIGN_EXPERIMENTAL=1
+    artifacts: manifests
+    output: true
+    args:
+    - 'sign'
+    - '${artifact}'
+    - "--yes" # needed on cosign 2.0.0+
+
+archives:
+  - rlcp: true
+    files:
+      - assets
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
