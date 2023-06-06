@@ -1,0 +1,17 @@
+run:
+  timeout: 3m
+  modules-download-mode: readonly
+
+linters:
+  enable-all: true
+  disable:
+    - exhaustivestruct
+    - interfacer
+    - maligned
+    - scopelint
+    - structcheck
+    - varcheck
+    - deadcode
+    - ifshort
+    - golint
+    - nosnakecase

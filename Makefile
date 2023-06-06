@@ -11,3 +11,12 @@ run: build
 clean:
 	go clean
 	rm -f ${BINARY_NAME}
+
+lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && golangci-lint run -v
+
+audit:
+	go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./...;
+
+format:
+	gofmt -s -w .
