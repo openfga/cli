@@ -17,19 +17,21 @@ package stores
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	cmd_utils "github.com/openfga/fga-cli/lib/cmd-utils"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/openfga/fga-cli/lib/cmd-utils"
+	"github.com/spf13/cobra"
 )
 
-// getCmd represents the get command
+// getCmd represents the get command.
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get store",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		clientConfig := cmd_utils.GetClientConfig(cmd, args)
+		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
@@ -37,15 +39,24 @@ var getCmd = &cobra.Command{
 		}
 		store, err := fgaClient.GetStore(context.Background()).Execute()
 		if err != nil {
-			fmt.Printf("Failed to get store %v due to %v", clientConfig.StoreId, err)
+			fmt.Printf("Failed to get store %v due to %v", clientConfig.StoreID, err)
 			os.Exit(1)
 		}
 
-		fmt.Printf(`{"id": "%v", "name":"%v", "created_at": "%v", "updated_at":"%v"}`, *store.Id, *store.Name, store.CreatedAt, store.UpdatedAt)
+		storeJSON, err := json.Marshal(store)
+		if err != nil {
+			fmt.Printf("Failed to get store due to %v", err)
+			os.Exit(1)
+		}
+		fmt.Print(string(storeJSON))
 	},
 }
 
 func init() {
 	getCmd.Flags().String("store-id", "", "Store ID")
-	getCmd.MarkFlagRequired("store-id")
+	err := getCmd.MarkFlagRequired("store-id")
+	if err != nil { //nolint:wsl
+		fmt.Print(err)
+		os.Exit(1)
+	}
 }

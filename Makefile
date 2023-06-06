@@ -13,10 +13,11 @@ clean:
 	rm -f ${BINARY_NAME}
 
 lint:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && golangci-lint run -v
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && golangci-lint run
 
 audit:
 	go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./...;
 
 format:
-	gofmt -s -w .
+	go install mvdan.cc/gofumpt@latest && gofumpt -w .
+	go install github.com/daixiang0/gci@latest && gci write -s standard -s default .

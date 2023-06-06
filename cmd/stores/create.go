@@ -17,38 +17,49 @@ package stores
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	cmd_utils "github.com/openfga/fga-cli/lib/cmd-utils"
-	. "github.com/openfga/go-sdk/client"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/openfga/fga-cli/lib/cmd-utils"
+	"github.com/openfga/go-sdk/client"
+	"github.com/spf13/cobra"
 )
 
-// createCmd represents the store create command
+// createCmd represents the store create command.
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create and initialize a store.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		clientConfig := cmd_utils.GetClientConfig(cmd, args)
+		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			panic(err)
 		}
 		storeName, _ := cmd.Flags().GetString("name")
-		body := ClientCreateStoreRequest{Name: storeName}
+		body := client.ClientCreateStoreRequest{Name: storeName}
 		store, err := fgaClient.CreateStore(context.Background()).Body(body).Execute()
 		if err != nil {
 			fmt.Printf("Failed to create store %v due to %v", storeName, err)
 			os.Exit(1)
 		}
 
-		fmt.Printf(`{"id": "%v", "name":"%v", "created_at": "%v", "updated_at":"%v"}`, *store.Id, *store.Name, store.CreatedAt, store.UpdatedAt)
+		storeJSON, err := json.Marshal(store)
+		if err != nil {
+			fmt.Printf("Store %v created, but failed to be printed due to %v", *store.Id, err)
+			os.Exit(1)
+		}
+		fmt.Print(string(storeJSON))
 	},
 }
 
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
-	createCmd.MarkFlagRequired("name")
+	err := createCmd.MarkFlagRequired("name")
+	if err != nil { //nolint:wsl
+		fmt.Print(err)
+		os.Exit(1)
+	}
 }

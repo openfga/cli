@@ -5,6 +5,12 @@ run:
 linters:
   enable-all: true
   disable:
+    - exhaustruct
+    - gochecknoinits
+    - forbidigo
+    - gochecknoglobals
+    - goimports
+    # deprecated
     - exhaustivestruct
     - interfacer
     - maligned
@@ -15,3 +21,28 @@ linters:
     - ifshort
     - golint
     - nosnakecase
+linters-settings:
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - github.com/spf13/cobra
+          - github.com/spf13/viper
+          - github.com/openfga/fga-cli
+          - github.com/openfga/go-sdk
+      test:
+        files:
+          - "$test"
+        allow:
+          - $gostd
+          - github.com/stretchr
+
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake

@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// StoresCmd represents the store command
+// StoresCmd represents the store command.
 var StoresCmd = &cobra.Command{
 	Use:   "stores",
 	Short: "Create, Delete and List OpenFGA Stores",
@@ -30,6 +30,4 @@ func init() {
 	StoresCmd.AddCommand(listCmd)
 	StoresCmd.AddCommand(getCmd)
 	StoresCmd.AddCommand(deleteCmd)
-
-	StoresCmd.MarkFlagRequired("server-url")
 }

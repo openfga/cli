@@ -18,18 +18,19 @@ package stores
 import (
 	"context"
 	"fmt"
-	cmd_utils "github.com/openfga/fga-cli/lib/cmd-utils"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/openfga/fga-cli/lib/cmd-utils"
+	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
+// deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete store",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		clientConfig := cmd_utils.GetClientConfig(cmd, args)
+		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
@@ -37,7 +38,7 @@ var deleteCmd = &cobra.Command{
 		}
 		_, err = fgaClient.DeleteStore(context.Background()).Execute()
 		if err != nil {
-			fmt.Printf("Failed to create store %v due to %v", clientConfig.StoreId, err)
+			fmt.Printf("Failed to create store %v due to %v", clientConfig.StoreID, err)
 			os.Exit(1)
 		}
 
@@ -47,5 +48,9 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.Flags().String("store-id", "", "Store ID")
-	deleteCmd.MarkFlagRequired("store-id")
+	err := deleteCmd.MarkFlagRequired("store-id")
+	if err != nil { //nolint:wsl
+		fmt.Print(err)
+		os.Exit(1)
+	}
 }
