@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openfga/fga-cli/cmd/models"
 	"github.com/openfga/fga-cli/cmd/stores"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -55,6 +56,7 @@ func init() {
 	rootCmd.PersistentFlags().String("client-secret", "", "Client Secret. Sent to the Token Issuer during the Client Credentials flow") //nolint:lll
 
 	rootCmd.AddCommand(stores.StoresCmd)
+	rootCmd.AddCommand(models.ModelsCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

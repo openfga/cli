@@ -8,7 +8,7 @@ import (
 func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
 	serverURL, _ := cmd.Flags().GetString("server-url")
 	storeID, _ := cmd.Flags().GetString("store-id")
-	authorizationModelID, _ := cmd.Flags().GetString("authorization-model-id")
+	authorizationModelID, _ := cmd.Flags().GetString("model-id")
 	apiToken, _ := cmd.Flags().GetString("api-token")
 	clientCredentialsAPITokenIssuer, _ := cmd.Flags().GetString("api-token-issuer")
 	clientCredentialsAPIAudience, _ := cmd.Flags().GetString("api-audience")

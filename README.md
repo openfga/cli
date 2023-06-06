@@ -80,11 +80,6 @@ fga stores **create**
 }
 ```
 
-###### Text Response
-```text
-Store <STORE_NAME> with ID: <ID> has been successfully created.
-```
-
 ##### List Stores
 
 ###### Command
@@ -104,15 +99,6 @@ fga stores **list**
     "deleted_at": ""
   }, { .. }]
 }
-```
-
-###### Text Response
-
-```text
-id, name, created_at, updated_at, deleted_at
-<store_id>, <store_name>, <created_at>, <updated_at>, <deleted_at>
-<store_id>, <store_name>, <created_at>, <updated_at>, <deleted_at>
-<store_id>, <store_name>, <created_at>, <updated_at>, <deleted_at>
 ```
 
 ##### Get Store
@@ -136,16 +122,6 @@ fga stores **get**
 }
 ```
 
-###### Text Response
-
-```text
-id: <store_id>
-name: <store_name>
-created_at: <created_at>
-updated_at: <updated_at>
-deleted_at: <deleted_at>
-```
-
 ##### Delete Store
 
 ###### Command
@@ -162,11 +138,85 @@ fga stores **delete**
 {}
 ```
 
-###### Text Response
+#### Models
+| Description                                                             | command | parameters                 | example                                                                                                     |
+|-------------------------------------------------------------------------|---------|----------------------------|-------------------------------------------------------------------------------------------------------------|
+| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store_id`               | `fga models list --store_id=01H0H015178Y2V4CX10C2KGHF4`                                                     |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store_id`               | `fga models write --store_id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
+| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store_id`, `--model_id` | `fga models get --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`                |
 
-```text
-Store with ID: <ID> has been successfully deleted.
+##### Read Authorization Models 
+
+###### Command
+fga models **list**
+
+###### Parameters
+* `--store_id`: Specifies the store id
+
+###### Example
+`fga models list --store_id=01H0H015178Y2V4CX10C2KGHF4`
+
+###### JSON Response
+```json5
+[{
+    "schema_version": "1.1",
+    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
+    "type_definitions": [
+      {"type": "user"},
+      // { ... }
+    ],
+},
+// { ... }
+]
 ```
+
+##### Write Authorization Model 
+
+###### Command
+fga models **write**
+
+###### Parameters
+* `--store_id`: Specifies the store id
+
+###### Example
+`fga models write --store_id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`
+
+###### JSON Response
+```json5
+{
+    "schema_version": "1.1",
+    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
+    "type_definitions": [
+      {"type": "user"},
+      // { ... }
+    ],
+}
+```
+
+##### Read a Single Authorization Model 
+
+###### Command
+fga models **get**
+
+###### Parameters
+* `--store_id`: Specifies the store id
+* `--model_id`: Specifies the model id
+
+###### Example
+`fga models get --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`
+
+###### JSON Response
+```json5
+{
+    "schema_version": "1.1",
+    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
+    "type_definitions": [
+      {"type": "user"},
+      // { ... }
+    ],
+}
+```
+
 
 ## Contributing
 
