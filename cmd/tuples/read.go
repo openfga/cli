@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package models
+package tuples
 
 import (
 	"context"
@@ -26,11 +26,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// writeCmd represents the write command.
-var writeCmd = &cobra.Command{
-	Use:   "write",
-	Short: "Write Authorization Model",
-	Args:  cobra.ExactArgs(1),
+// readCmd represents the read command.
+var readCmd = &cobra.Command{
+	Use:   "read",
+	Short: "Read Relationship Tuples",
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -38,26 +37,37 @@ var writeCmd = &cobra.Command{
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			os.Exit(1)
 		}
-		body := &client.ClientWriteAuthorizationModelRequest{}
-		err = json.Unmarshal([]byte(args[0]), &body)
-		if err != nil {
-			fmt.Printf("Failed to parse model due to %v", err)
-			os.Exit(1)
+		user, _ := cmd.Flags().GetString("user")
+		relation, _ := cmd.Flags().GetString("relation")
+		object, _ := cmd.Flags().GetString("object")
+		body := &client.ClientReadRequest{}
+		if user != "" {
+			body.User = &user
 		}
-		model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
+		if relation != "" {
+			body.Relation = &relation
+		}
+		if object != "" {
+			body.Object = &object
+		}
+		options := &client.ClientReadOptions{}
+		tuples, err := fgaClient.Read(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
-			fmt.Printf("Failed to write model due to %v", err)
+			fmt.Printf("Failed to read tuples due to %v", err)
 			os.Exit(1)
 		}
 
-		modelJSON, err := json.Marshal(model)
+		tuplesJSON, err := json.Marshal(tuples)
 		if err != nil {
-			fmt.Printf("Failed to write model due to %v", err)
+			fmt.Printf("Failed to read tuples due to %v", err)
 			os.Exit(1)
 		}
-		fmt.Print(string(modelJSON))
+		fmt.Print(string(tuplesJSON))
 	},
 }
 
 func init() {
+	readCmd.Flags().String("user", "", "User")
+	readCmd.Flags().String("relation", "", "Relation")
+	readCmd.Flags().String("object", "", "Object")
 }

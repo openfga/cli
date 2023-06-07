@@ -33,7 +33,7 @@ var MaxModelsLength = 1_000
 // listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List models",
+	Short: "Read Authorization Models",
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

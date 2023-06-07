@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package models
+package tuples
 
 import (
 	"context"
@@ -26,10 +26,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// writeCmd represents the write command.
-var writeCmd = &cobra.Command{
-	Use:   "write",
-	Short: "Write Authorization Model",
+// changesCmd represents the changes command.
+var changesCmd = &cobra.Command{
+	Use:   "changes",
+	Short: "Read Relationship Tuple Changes (Watch)",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -38,24 +38,22 @@ var writeCmd = &cobra.Command{
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			os.Exit(1)
 		}
-		body := &client.ClientWriteAuthorizationModelRequest{}
-		err = json.Unmarshal([]byte(args[0]), &body)
-		if err != nil {
-			fmt.Printf("Failed to parse model due to %v", err)
-			os.Exit(1)
+		body := &client.ClientReadChangesRequest{
+			Type: args[0],
 		}
-		model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
+		options := &client.ClientReadChangesOptions{}
+		tuples, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
-			fmt.Printf("Failed to write model due to %v", err)
+			fmt.Printf("Failed to get tuple changes due to %v", err)
 			os.Exit(1)
 		}
 
-		modelJSON, err := json.Marshal(model)
+		tuplesJSON, err := json.Marshal(tuples)
 		if err != nil {
-			fmt.Printf("Failed to write model due to %v", err)
+			fmt.Printf("Failed to tuple changes due to %v", err)
 			os.Exit(1)
 		}
-		fmt.Print(string(modelJSON))
+		fmt.Print(string(tuplesJSON))
 	},
 }
 

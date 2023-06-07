@@ -30,7 +30,7 @@ import (
 // getCmd represents the get command.
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get model",
+	Short: "Read a Single Authorization Model",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)

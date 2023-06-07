@@ -20,7 +20,9 @@ import (
 	"os"
 
 	"github.com/openfga/fga-cli/cmd/models"
+	"github.com/openfga/fga-cli/cmd/query"
 	"github.com/openfga/fga-cli/cmd/stores"
+	"github.com/openfga/fga-cli/cmd/tuples"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -57,6 +59,8 @@ func init() {
 
 	rootCmd.AddCommand(stores.StoresCmd)
 	rootCmd.AddCommand(models.ModelsCmd)
+	rootCmd.AddCommand(tuples.TupleCmd)
+	rootCmd.AddCommand(query.QueryCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
