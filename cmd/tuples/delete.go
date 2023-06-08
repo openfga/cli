@@ -17,7 +17,6 @@ package tuples
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -30,7 +29,7 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete Relationship Tuples",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -46,18 +45,13 @@ var deleteCmd = &cobra.Command{
 			},
 		}
 		options := &client.ClientWriteOptions{}
-		tuples, err := fgaClient.DeleteTuples(context.Background()).Body(*body).Options(*options).Execute()
+		_, err = fgaClient.DeleteTuples(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
 			fmt.Printf("Failed to delete tuples due to %v", err)
 			os.Exit(1)
 		}
 
-		tuplesJSON, err := json.Marshal(tuples)
-		if err != nil {
-			fmt.Printf("Failed to delete tuples due to %v", err)
-			os.Exit(1)
-		}
-		fmt.Print(string(tuplesJSON))
+		fmt.Print("Ok")
 	},
 }
 

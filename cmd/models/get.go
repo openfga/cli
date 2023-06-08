@@ -31,7 +31,6 @@ import (
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Read a Single Authorization Model",
-	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -40,10 +39,17 @@ var getCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		authorizationModelID := clientConfig.AuthorizationModelID
-		options := client.ClientReadAuthorizationModelOptions{
-			AuthorizationModelId: openfga.PtrString(authorizationModelID),
+
+		var model *openfga.ReadAuthorizationModelResponse
+		if authorizationModelID != "" {
+			options := client.ClientReadAuthorizationModelOptions{
+				AuthorizationModelId: openfga.PtrString(authorizationModelID),
+			}
+			model, err = fgaClient.ReadAuthorizationModel(context.Background()).Options(options).Execute()
+		} else {
+			options := client.ClientReadLatestAuthorizationModelOptions{}
+			model, err = fgaClient.ReadLatestAuthorizationModel(context.Background()).Options(options).Execute()
 		}
-		model, err := fgaClient.ReadAuthorizationModel(context.Background()).Options(options).Execute()
 		if err != nil {
 			fmt.Printf("Failed to get model %v due to %v", clientConfig.AuthorizationModelID, err)
 			os.Exit(1)
@@ -60,9 +66,4 @@ var getCmd = &cobra.Command{
 
 func init() {
 	getCmd.Flags().String("model-id", "", "Authorization Model ID")
-	err := getCmd.MarkFlagRequired("model-id")
-	if err != nil { //nolint:wsl
-		fmt.Print(err)
-		os.Exit(1)
-	}
 }

@@ -26,9 +26,6 @@ import (
 var QueryCmd = &cobra.Command{
 	Use:   "query",
 	Short: "Query a store.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("query called")
-	},
 }
 
 func init() {

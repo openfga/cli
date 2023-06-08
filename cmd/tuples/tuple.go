@@ -26,9 +26,6 @@ import (
 var TupleCmd = &cobra.Command{
 	Use:   "tuples",
 	Short: "Interact with Relationship Tuples in a store.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("tuple called")
-	},
 }
 
 func init() {
