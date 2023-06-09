@@ -31,7 +31,7 @@ var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Check",
 	Long:  "Check if a user has a particular relation with an object.",
-	Args:  cobra.ExactArgs(3),
+	Args:  cobra.ExactArgs(3), //nolint:gomnd
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

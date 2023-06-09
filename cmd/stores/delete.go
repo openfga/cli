@@ -38,7 +38,7 @@ var deleteCmd = &cobra.Command{
 		}
 		_, err = fgaClient.DeleteStore(context.Background()).Execute()
 		if err != nil {
-			fmt.Printf("Failed to create store %v due to %v", clientConfig.StoreID, err)
+			fmt.Printf("Failed to delete store %v due to %v", clientConfig.StoreID, err)
 			os.Exit(1)
 		}
 

@@ -29,7 +29,7 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete Relationship Tuples",
-	Args:  cobra.ExactArgs(3),
+	Args:  cobra.ExactArgs(3), //nolint:gomnd
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

@@ -22,9 +22,13 @@ import (
 	"os"
 
 	"github.com/openfga/fga-cli/lib/cmd-utils"
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
+
+// MaxReadChangesPagesLength Limit the changes so that we are not paginating indefinitely.
+var MaxReadChangesPagesLength = 20
 
 // changesCmd represents the changes command.
 var changesCmd = &cobra.Command{
@@ -38,24 +42,43 @@ var changesCmd = &cobra.Command{
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			os.Exit(1)
 		}
-		body := &client.ClientReadChangesRequest{
-			Type: args[0],
-		}
-		options := &client.ClientReadChangesOptions{}
-		tuples, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
+		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
 			fmt.Printf("Failed to get tuple changes due to %v", err)
 			os.Exit(1)
 		}
+		changes := []openfga.TupleChange{}
+		var continuationToken *string
+		pageIndex := 0
+		for {
+			body := &client.ClientReadChangesRequest{
+				Type: args[0],
+			}
+			options := &client.ClientReadChangesOptions{}
+			response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
+			if err != nil {
+				fmt.Printf("Failed to get tuple changes due to %v", err)
+				os.Exit(1)
+			}
 
-		tuplesJSON, err := json.Marshal(tuples)
+			changes = append(changes, *response.Changes...)
+			pageIndex++
+			if continuationToken == nil || pageIndex >= maxPages {
+				break
+			}
+
+			continuationToken = response.ContinuationToken
+		}
+
+		changesJSON, err := json.Marshal(changes)
 		if err != nil {
 			fmt.Printf("Failed to tuple changes due to %v", err)
 			os.Exit(1)
 		}
-		fmt.Print(string(tuplesJSON))
+		fmt.Print(string(changesJSON))
 	},
 }
 
 func init() {
+	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
 }

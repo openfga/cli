@@ -37,7 +37,7 @@ func init() {
 	QueryCmd.PersistentFlags().String("store-id", "", "Store ID")
 	QueryCmd.Flags().String("store-id", "", "Store ID")
 	err := QueryCmd.MarkFlagRequired("store-id")
-	if err != nil {
+	if err != nil { //nolint:wsl
 		fmt.Print(err)
 		os.Exit(1)
 	}

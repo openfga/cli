@@ -27,8 +27,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// MaxModelsLength Limit the models so that we are not paginating indefinitely.
-var MaxModelsLength = 1_000
+// MaxModelsPagesLength Limit the models so that we are not paginating indefinitely.
+var MaxModelsPagesLength = 20
 
 // listCmd represents the list command.
 var listCmd = &cobra.Command{
@@ -41,12 +41,17 @@ var listCmd = &cobra.Command{
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			os.Exit(1)
 		}
+		maxPages, err := cmd.Flags().GetInt("max-pages")
+		if err != nil {
+			fmt.Printf("Failed to list models due to %v", err)
+			os.Exit(1)
+		}
 		models := []openfga.AuthorizationModel{}
 		var continuationToken *string
+		pageIndex := 0
 		for {
 			options := client.ClientReadAuthorizationModelsOptions{
 				ContinuationToken: continuationToken,
-				PageSize:          nil,
 			}
 			response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
 			if err != nil {
@@ -56,7 +61,8 @@ var listCmd = &cobra.Command{
 
 			models = append(models, *response.AuthorizationModels...)
 
-			if continuationToken == nil || len(models) > MaxModelsLength {
+			pageIndex++
+			if continuationToken == nil || pageIndex > maxPages {
 				break
 			}
 
@@ -73,5 +79,5 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	ModelsCmd.Flags().String("store-id", "", "Store ID")
+	listCmd.Flags().Int("max-pages", MaxModelsPagesLength, "Max number of pages to get.")
 }

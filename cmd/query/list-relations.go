@@ -33,7 +33,7 @@ var listRelationsCmd = &cobra.Command{
 	Use:   "list-relations",
 	Short: "List Relations",
 	Long:  "ListRelations if a user has a particular relation with an object.",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.ExactArgs(2), //nolint:gomnd
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

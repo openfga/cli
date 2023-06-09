@@ -22,9 +22,12 @@ import (
 	"os"
 
 	"github.com/openfga/fga-cli/lib/cmd-utils"
-	"github.com/openfga/go-sdk/client"
+	openfga "github.com/openfga/go-sdk"
 	"github.com/spf13/cobra"
 )
+
+// MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
+var MaxReadPagesLength = 20
 
 // readCmd represents the read command.
 var readCmd = &cobra.Command{
@@ -40,21 +43,45 @@ var readCmd = &cobra.Command{
 		user, _ := cmd.Flags().GetString("user")
 		relation, _ := cmd.Flags().GetString("relation")
 		object, _ := cmd.Flags().GetString("object")
-		body := &client.ClientReadRequest{}
-		if user != "" {
-			body.User = &user
-		}
-		if relation != "" {
-			body.Relation = &relation
-		}
-		if object != "" {
-			body.Object = &object
-		}
-		options := &client.ClientReadOptions{}
-		tuples, err := fgaClient.Read(context.Background()).Body(*body).Options(*options).Execute()
+
 		if err != nil {
 			fmt.Printf("Failed to read tuples due to %v", err)
 			os.Exit(1)
+		}
+		maxPages, _ := cmd.Flags().GetInt("max-pages")
+		if err != nil {
+			fmt.Printf("Failed to read tuples due to %v", err)
+			os.Exit(1)
+		}
+
+		body := &openfga.ReadRequest{}
+		if user != "" || relation != "" || object != "" {
+			body.TupleKey = &openfga.TupleKey{
+				Object:   &object,
+				Relation: &relation,
+				User:     &user,
+			}
+		}
+
+		tuples := []openfga.Tuple{}
+		var continuationToken *string
+		pageIndex := 0
+		for {
+			body.ContinuationToken = continuationToken
+			// Temporary, to work around a bug in Read in the sdk
+			response, _, err := fgaClient.APIClient.OpenFgaApi.Read(context.Background()).Body(*body).Execute()
+			if err != nil {
+				fmt.Printf("Failed to read tuples due to %v", err)
+				os.Exit(1)
+			}
+
+			tuples = append(tuples, *response.Tuples...)
+			pageIndex++
+			if continuationToken == nil || pageIndex >= maxPages {
+				break
+			}
+
+			continuationToken = response.ContinuationToken
 		}
 
 		tuplesJSON, err := json.Marshal(tuples)
@@ -70,4 +97,5 @@ func init() {
 	readCmd.Flags().String("user", "", "User")
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
+	readCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
 }

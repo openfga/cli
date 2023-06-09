@@ -27,14 +27,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// MaxStoresLength Limit the stores so that we are not paginating indefinitely.
-var MaxStoresLength = 1_000
+// MaxStoresPagesLength Limit the pages of stores so that we are not paginating indefinitely.
+var MaxStoresPagesLength = 20 // up to 1000 records
 
 // listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List stores",
-	Long:  ``,
+	Long:  `Get a list of stores.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -42,12 +42,17 @@ var listCmd = &cobra.Command{
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			os.Exit(1)
 		}
+		maxPages, _ := cmd.Flags().GetInt("max-pages")
+		if err != nil {
+			fmt.Printf("Failed to list models due to %v", err)
+			os.Exit(1)
+		}
 		stores := []openfga.Store{}
 		var continuationToken *string
+		pageIndex := 0
 		for {
 			options := client.ClientListStoresOptions{
 				ContinuationToken: continuationToken,
-				PageSize:          nil,
 			}
 			response, err := fgaClient.ListStores(context.Background()).Options(options).Execute()
 			if err != nil {
@@ -56,8 +61,8 @@ var listCmd = &cobra.Command{
 			}
 
 			stores = append(stores, *response.Stores...)
-
-			if continuationToken == nil || len(stores) > MaxStoresLength {
+			pageIndex++
+			if continuationToken == nil || pageIndex >= maxPages {
 				break
 			}
 
@@ -74,4 +79,5 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
+	listCmd.Flags().Int("max-pages", MaxStoresPagesLength, "Max number of pages to get.")
 }

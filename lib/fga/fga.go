@@ -46,14 +46,10 @@ func (c ClientConfig) getCredentials() *credentials.Credentials {
 	}
 }
 
-func (c ClientConfig) getAPIURIParts() (*url.URL, error) {
-	return url.Parse(c.ServerURL) //nolint:wrapcheck
-}
-
 func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
-	apiURIParts, err := c.getAPIURIParts()
+	apiURIParts, err := url.Parse(c.ServerURL)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	return &client.ClientConfiguration{

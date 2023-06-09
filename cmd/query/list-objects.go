@@ -31,7 +31,7 @@ var listObjectsCmd = &cobra.Command{
 	Use:   "list-objects",
 	Short: "List Objects",
 	Long:  "List the relations a user has with an object.",
-	Args:  cobra.ExactArgs(3),
+	Args:  cobra.ExactArgs(3), //nolint:gomnd
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

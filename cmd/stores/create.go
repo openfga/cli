@@ -36,7 +36,7 @@ var createCmd = &cobra.Command{
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			panic(err)
+			os.Exit(1)
 		}
 		storeName, _ := cmd.Flags().GetString("name")
 		body := client.ClientCreateStoreRequest{Name: storeName}

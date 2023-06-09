@@ -22,7 +22,7 @@ import (
 // StoresCmd represents the store command.
 var StoresCmd = &cobra.Command{
 	Use:   "stores",
-	Short: "Create, Delete and List OpenFGA Stores",
+	Short: "Create, Get, Delete and List OpenFGA Stores",
 }
 
 func init() {

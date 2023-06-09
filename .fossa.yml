@@ -7,3 +7,8 @@ project:
   name: github.com/openfga/fga-cli
   link: openfga.dev
   url: github.com/openfga/fga-cli
+
+paths:
+  exclude:
+    - ./NOTICE
+    - ./NOTICE.txt

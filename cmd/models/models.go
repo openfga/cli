@@ -34,8 +34,9 @@ func init() {
 	ModelsCmd.AddCommand(getCmd)
 
 	ModelsCmd.PersistentFlags().String("store-id", "", "Store ID")
+	ModelsCmd.Flags().String("store-id", "", "Store ID")
 	err := ModelsCmd.MarkFlagRequired("store-id")
-	if err != nil {
+	if err != nil { //nolint:wsl
 		fmt.Print(err)
 		os.Exit(1)
 	}
