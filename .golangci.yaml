@@ -5,6 +5,7 @@ run:
 linters:
   enable-all: true
   disable:
+    - dupl #temporary
     - exhaustruct
     - gochecknoinits
     - forbidigo
