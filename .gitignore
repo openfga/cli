@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-fga-cli
+fga
 
 # Test binary, built with `go test -c`
 *.test

@@ -31,7 +31,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
-	Use:   "fga-cli",
+	Use:   "fga",
 	Short: "OpenFGA CLI",
 	Long:  ``,
 }
@@ -48,7 +48,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fga-cli.yaml)") //nolint:lll
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fga.yaml)")
 
 	rootCmd.PersistentFlags().String("server-url", "http://localhost:8080", "OpenFGA API URI e.g. https://api.fga.example:8080") //nolint:lll
 	rootCmd.PersistentFlags().String("api-token", "", "API Token. Will be sent in as a Bearer in the Authorization header")
@@ -77,11 +77,11 @@ func initConfig() {
 		homeDir, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".fga-cli" (without extension).
+		// Search config in home directory with name ".fga" (without extension).
 		viper.AddConfigPath(homeDir)
-		viper.AddConfigPath(configDir + "/" + "fga-cli")
+		viper.AddConfigPath(configDir + "/" + "fga")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".fga-cli")
+		viper.SetConfigName(".fga")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

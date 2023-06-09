@@ -1,4 +1,4 @@
-BINARY_NAME=fga-cli
+BINARY_NAME=fga
 
 all: build
 
