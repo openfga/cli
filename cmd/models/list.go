@@ -69,7 +69,7 @@ var listCmd = &cobra.Command{
 			continuationToken = response.ContinuationToken
 		}
 
-		modelsJSON, err := json.Marshal(models)
+		modelsJSON, err := json.Marshal(openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models})
 		if err != nil {
 			fmt.Printf("Failed to list models due to %v", err)
 			os.Exit(1)

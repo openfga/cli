@@ -34,7 +34,6 @@ var MaxReadChangesPagesLength = 20
 var changesCmd = &cobra.Command{
 	Use:   "changes",
 	Short: "Read Relationship Tuple Changes (Watch)",
-	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -47,12 +46,17 @@ var changesCmd = &cobra.Command{
 			fmt.Printf("Failed to get tuple changes due to %v", err)
 			os.Exit(1)
 		}
+		selectedType, err := cmd.Flags().GetString("type")
+		if err != nil {
+			fmt.Printf("Failed to get tuple changes due to %v", err)
+			os.Exit(1)
+		}
 		changes := []openfga.TupleChange{}
 		var continuationToken *string
 		pageIndex := 0
 		for {
 			body := &client.ClientReadChangesRequest{
-				Type: args[0],
+				Type: selectedType,
 			}
 			options := &client.ClientReadChangesOptions{}
 			response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
@@ -70,7 +74,7 @@ var changesCmd = &cobra.Command{
 			continuationToken = response.ContinuationToken
 		}
 
-		changesJSON, err := json.Marshal(changes)
+		changesJSON, err := json.Marshal(openfga.ReadChangesResponse{Changes: &changes})
 		if err != nil {
 			fmt.Printf("Failed to tuple changes due to %v", err)
 			os.Exit(1)
@@ -80,5 +84,6 @@ var changesCmd = &cobra.Command{
 }
 
 func init() {
+	changesCmd.Flags().String("type", "", "Type to restrict the changes by.")
 	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
 }

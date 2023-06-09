@@ -84,7 +84,7 @@ var readCmd = &cobra.Command{
 			continuationToken = response.ContinuationToken
 		}
 
-		tuplesJSON, err := json.Marshal(tuples)
+		tuplesJSON, err := json.Marshal(openfga.ReadResponse{Tuples: &tuples})
 		if err != nil {
 			fmt.Printf("Failed to read tuples due to %v", err)
 			os.Exit(1)

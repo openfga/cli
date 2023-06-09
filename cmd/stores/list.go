@@ -69,7 +69,7 @@ var listCmd = &cobra.Command{
 			continuationToken = response.ContinuationToken
 		}
 
-		storesJSON, err := json.Marshal(stores)
+		storesJSON, err := json.Marshal(openfga.ListStoresResponse{Stores: &stores})
 		if err != nil {
 			fmt.Printf("Failed to list stores due to %v", err)
 			os.Exit(1)

@@ -331,11 +331,11 @@ fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>] 
 ##### Read Relationship Tuple Changes (Watch)
 
 ###### Command
-fga tuples **changes** [<type>] --store-id=<store-id>
+fga tuples **changes** --type <type> --store-id=<store-id>
 
 ###### Parameters
-* `<type>`: restrict to a specific type (optional)
 * `--store_id`: Specifies the store id
+* `--type`: restrict to a specific type (optional)
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
