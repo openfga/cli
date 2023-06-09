@@ -100,6 +100,9 @@ fga stores **create**
 ###### Command
 fga stores **list**
 
+###### Parameters
+* `--max-pages`: Max number of pages to retrieve (default: 20)
+
 ###### Example
 `fga stores list`
 
@@ -170,6 +173,7 @@ fga models **list**
 
 ###### Parameters
 * `--store_id`: Specifies the store id
+* `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
 `fga models list --store_id=01H0H015178Y2V4CX10C2KGHF4`
@@ -257,6 +261,7 @@ fga tuples **write** <user> <relation> <object> --store-id=<store-id>
 * `<relation>`: Relation
 * `<object>`: Object
 * `--store_id`: Specifies the store id
+* `--model_id`: Specifies the model id to target (optional)
 
 ###### Example
 `fga tuples write --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
@@ -292,7 +297,6 @@ fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>] 
 
 ###### Parameters
 * `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id to target (optional)
 * `--user`: User
 * `--relation`: Relation
 * `--object`: Object
@@ -332,6 +336,7 @@ fga tuples **changes** [<type>] --store-id=<store-id>
 ###### Parameters
 * `<type>`: restrict to a specific type (optional)
 * `--store_id`: Specifies the store id
+* `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
 `fga tuples changes --store_id=01H0H015178Y2V4CX10C2KGHF4 document`
