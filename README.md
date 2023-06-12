@@ -71,8 +71,8 @@ For any command that interacts with an OpenFGA server, these configuration value
 |---------------------------------|----------|--------------|-----------------------------------------------------------|
 | [Create a Store](#create-store) | `create` | `--name`     | `fga stores create --name="FGA Demo Store"`               |
 | [List Stores](#list-stores)     | `list`   |              | `fga stores list`                                         |
-| [Get a Store](#get-store)       | `get`    | `--store_id` | `fga stores get --store_id=01H0H015178Y2V4CX10C2KGHF4`    |
-| [Delete a Store](#delete-store) | `delete` | `--store_id` | `fga stores delete --store_id=01H0H015178Y2V4CX10C2KGHF4` |
+| [Get a Store](#get-store)       | `get`    | `--store-id` | `fga stores get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
+| [Delete a Store](#delete-store) | `delete` | `--store-id` | `fga stores delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
 
 ##### Create Store
 
@@ -125,10 +125,10 @@ fga stores **list**
 fga stores **get**
 
 ###### Parameters
-* `--store_id`: Specifies the store id to get
+* `--store-id`: Specifies the store id to get
 
 ###### Example
-`fga stores get --store_id=01H0H015178Y2V4CX10C2KGHF4`
+`fga stores get --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json
@@ -146,10 +146,10 @@ fga stores **get**
 fga stores **delete**
 
 ###### Parameters
-* `--store_id`: Specifies the store id to delete
+* `--store-id`: Specifies the store id to delete
 
 ###### Example
-`fga stores delete --store_id=01H0H015178Y2V4CX10C2KGHF4`
+`fga stores delete --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json
@@ -162,9 +162,9 @@ fga stores **delete**
 
 | Description                                                             | command | parameters                 | example                                                                                                     |
 |-------------------------------------------------------------------------|---------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store_id`               | `fga models list --store_id=01H0H015178Y2V4CX10C2KGHF4`                                                     |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store_id`               | `fga models write --store_id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
-| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store_id`, `--model_id` | `fga models get --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`                |
+| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga models list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                     |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
+| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                |
 
 ##### Read Authorization Models 
 
@@ -172,11 +172,11 @@ fga stores **delete**
 fga models **list**
 
 ###### Parameters
-* `--store_id`: Specifies the store id
+* `--store-id`: Specifies the store id
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
-`fga models list --store_id=01H0H015178Y2V4CX10C2KGHF4`
+`fga models list --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json5
@@ -198,10 +198,10 @@ fga models **list**
 fga models **write**
 
 ###### Parameters
-* `--store_id`: Specifies the store id
+* `--store-id`: Specifies the store id
 
 ###### Example
-`fga models write --store_id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`
+`fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`
 
 ###### JSON Response
 ```json5
@@ -221,11 +221,11 @@ fga models **write**
 fga models **get**
 
 ###### Parameters
-* `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id
 
 ###### Example
-`fga models get --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`
+`fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`
 
 ###### JSON Response
 ```json5
@@ -245,11 +245,11 @@ fga models **get**
 
 | Description                                                                       | command   | parameters                 | example                                                                                                     |
 |-----------------------------------------------------------------------------------|-----------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store_id`, `--model_id` | `fga tuples write --store_id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
-| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store_id`, `--model_id` | `fga tuples delete --store_id=01H0H015178Y2V4CX10C2KGHF4`                                                   |
-| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store_id`, `--model_id` | `fga tuples read --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`               |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store_id`, `--model_id` | `fga tuples changes --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`            |
-| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store_id`, `--model_id` | `fga tuples import --store_id=01H0H015178Y2V4CX10C2KGHF4 --model_id=01GXSA8YR785C4FYS3C0RTG7B1`             |
+| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` | `fga tuples write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
+| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` | `fga tuples delete --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                   |
+| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id` | `fga tuples read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`               |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id` | `fga tuples changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`            |
+| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id` | `fga tuples import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`             |
 
 ##### Write Relationship Tuples
 
@@ -260,11 +260,11 @@ fga tuples **write** <user> <relation> <object> --store-id=<store-id>
 * `<user>`: User
 * `<relation>`: Relation
 * `<object>`: Object
-* `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id to target (optional)
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
 
 ###### Example
-`fga tuples write --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+`fga tuples write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -280,10 +280,10 @@ fga tuples **delete** <user> <relation> <object> --store-id=<store-id>
 * `<user>`: User
 * `<relation>`: Relation
 * `<object>`: Object
-* `--store_id`: Specifies the store id
+* `--store-id`: Specifies the store id
 
 ###### Example
-`fga tuples delete --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+`fga tuples delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -296,13 +296,13 @@ fga tuples **delete** <user> <relation> <object> --store-id=<store-id>
 fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  --store-id=<store-id>
 
 ###### Parameters
-* `--store_id`: Specifies the store id
+* `--store-id`: Specifies the store id
 * `--user`: User
 * `--relation`: Relation
 * `--object`: Object
 
 ###### Example
-`fga tuples read --store_id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
+`fga tuples read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -334,12 +334,12 @@ fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>] 
 fga tuples **changes** --type <type> --store-id=<store-id>
 
 ###### Parameters
-* `--store_id`: Specifies the store id
+* `--store-id`: Specifies the store id
 * `--type`: restrict to a specific type (optional)
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
-`fga tuples changes --store_id=01H0H015178Y2V4CX10C2KGHF4 document`
+`fga tuples changes --store-id=01H0H015178Y2V4CX10C2KGHF4 document`
 
 ###### JSON Response
 ```json5
@@ -361,10 +361,10 @@ fga tuples **changes** --type <type> --store-id=<store-id>
 
 | Description                       | command          | parameters                 | example                                                                                     |
 |-----------------------------------|------------------|----------------------------|---------------------------------------------------------------------------------------------|
-| [Check](#check)                   | `check`          | `--store_id`, `--model_id` | `fga query check --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap` |
-| [List Objects](#list-objects)     | `list-objects`   | `--store_id`, `--model_id` | `fga query list-objects --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document`  |
-| [List Relations](#list-relations) | `list-relations` | `--store_id`, `--model_id` | `fga query list-relations --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne document`         |
-| [Expand](#expand)                 | `expand`         | `--store_id`, `--model_id` | `fga query expand --store_id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`          |
+| [Check](#check)                   | `check`          | `--store-id`, `--model-id` | `fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap` |
+| [List Objects](#list-objects)     | `list-objects`   | `--store-id`, `--model-id` | `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document`  |
+| [List Relations](#list-relations) | `list-relations` | `--store-id`, `--model-id` | `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document`         |
+| [Expand](#expand)                 | `expand`         | `--store-id`, `--model-id` | `fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`          |
 
 ##### Check
 
@@ -372,12 +372,12 @@ fga tuples **changes** --type <type> --store-id=<store-id>
 fga query **check** <user> <relation> <object> [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
-* `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id to target (optional)
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples
 
 ###### Example
-`fga query check --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple user:anne can_view folder:product --contextual-tuple folder:product parent document:roadmap`
+`fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple user:anne can_view folder:product --contextual-tuple folder:product parent document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -392,12 +392,12 @@ fga query **check** <user> <relation> <object> [--contextual-tuple <user> <relat
 fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
-* `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id to target (optional)
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 
 ###### Example
-`fga query list-objects --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple user:anne can_view folder:product --contextual-tuple folder:product parent document:roadmap`
+`fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple user:anne can_view folder:product --contextual-tuple folder:product parent document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -415,13 +415,13 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple <
 fga query **list-objects** <user> <object> [--relation <relation>]* [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
-* `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id to target (optional)
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 * `--relation`: List of relations to check (optional, defaults to all on that type) (can be multiple)
 
 ###### Example
-`fga query list-relations --store_id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --relation can_edit`
+`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --relation can_edit`
 
 ###### JSON Response
 ```json5
@@ -439,12 +439,12 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 fga query **expand** <relation> <object> [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
-* `--store_id`: Specifies the store id
-* `--model_id`: Specifies the model id to target (optional)
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 
 ###### Example
-`fga query expand --store_id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`
+`fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`
 
 ###### JSON Response
 ```json5
