@@ -1,4 +1,4 @@
-project_name: fga-cli
+project_name: openfga-cli
 
 builds:
   -

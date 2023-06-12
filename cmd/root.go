@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openfga/fga-cli/cmd/models"
-	"github.com/openfga/fga-cli/cmd/query"
-	"github.com/openfga/fga-cli/cmd/stores"
-	"github.com/openfga/fga-cli/cmd/tuples"
+	"github.com/openfga/cli/cmd/models"
+	"github.com/openfga/cli/cmd/query"
+	"github.com/openfga/cli/cmd/stores"
+	"github.com/openfga/cli/cmd/tuples"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

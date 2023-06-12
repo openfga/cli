@@ -3,10 +3,10 @@ version: 3
 server: https://app.fossa.com
 
 project:
-  id: github.com/openfga/fga-cli
-  name: github.com/openfga/fga-cli
+  id: github.com/openfga/cli
+  name: github.com/openfga/cli
   link: openfga.dev
-  url: github.com/openfga/fga-cli
+  url: github.com/openfga/cli
 
 paths:
   exclude:
