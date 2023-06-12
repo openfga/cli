@@ -33,7 +33,7 @@ linters-settings:
           - $gostd
           - github.com/spf13/cobra
           - github.com/spf13/viper
-          - github.com/openfga/fga-cli
+          - github.com/openfga/cli
           - github.com/openfga/go-sdk
       test:
         files:

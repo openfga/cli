@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/openfga/fga-cli/cmd"
+import "github.com/openfga/cli/cmd"
 
 func main() {
 	cmd.Execute()

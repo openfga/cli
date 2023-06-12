@@ -1,4 +1,4 @@
-module github.com/openfga/fga-cli
+module github.com/openfga/cli
 
 go 1.20
 

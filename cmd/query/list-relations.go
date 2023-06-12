@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/openfga/fga-cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/cmd-utils"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
