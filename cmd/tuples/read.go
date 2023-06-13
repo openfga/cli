@@ -23,6 +23,7 @@ import (
 
 	cmdutils "github.com/openfga/cli/lib/cmd-utils"
 	openfga "github.com/openfga/go-sdk"
+	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
@@ -54,22 +55,24 @@ var readCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		body := &openfga.ReadRequest{}
-		if user != "" || relation != "" || object != "" {
-			body.TupleKey = &openfga.TupleKey{
-				Object:   &object,
-				Relation: &relation,
-				User:     &user,
-			}
+		body := &client.ClientReadRequest{}
+		if user != "" {
+			body.User = &user
+		}
+		if relation != "" {
+			body.Relation = &relation
+		}
+		if object != "" {
+			body.Object = &object
 		}
 
 		tuples := []openfga.Tuple{}
 		var continuationToken *string
 		pageIndex := 0
+		options := client.ClientReadOptions{}
 		for {
-			body.ContinuationToken = continuationToken
-			// Temporary, to work around a bug in Read in the sdk
-			response, _, err := fgaClient.APIClient.OpenFgaApi.Read(context.Background()).Body(*body).Execute()
+			options.ContinuationToken = continuationToken
+			response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
 			if err != nil {
 				fmt.Printf("Failed to read tuples due to %v", err)
 				os.Exit(1)
