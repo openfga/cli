@@ -1,0 +1,837 @@
+================================================================================
+================================================================================
+
+                      Third-Party Software for openfga/cli
+
+--------------------------------------------------------------------------------
+
+The following 3rd-party software packages may be used by or distributed with openfga/cli. Any information relevant to third-party vendors listed below are collected using common, reasonable means.
+
+Date generated: 2023-6-14
+
+Revision ID: 850583de90a2382b2948acfc3fedd77ead836ddd
+
+================================================================================
+================================================================================
+
+
+
+
+================================================================================
+
+                                Declared License
+
+================================================================================
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting ...
+
+
+
+
+
+================================================================================
+
+                              First Party Licenses
+
+================================================================================
+
+
+* Apache-2.0 *
+
+File Count: 91
+
+License Text:
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting ...
+
+
+
+
+
+================================================================================
+
+                                  Dependencies
+
+================================================================================
+
+- afero (d92c300a1b6eaa1690b7aecab2ef7fd0d64a94e1) [Apache-2.0]
+- cast (bbed5559a59db54120dda79106f85f9ec0afb038) [MIT]
+- cobra (4dd4b25de38418174a6e859e8a32eaccca32dccc) [Apache-2.0]
+- fsnotify (5f8c606accbcc6913853fe7e083ee461d181d88d) [BSD-3-Clause]
+- go-toml (7b980e792b27b596bb3221bee4676d23ce91bb3c) [MIT]
+- gotenv (d2e64e6317e94db9c598bb9934e75fb80c804bca) [MIT]
+- hcl (8cb6e5b959231cc1119e43259c4a608f9c51a241) [MPL-2.0]
+- ini.v1 (b2f570e5b5b844226bbefe6fb521d891f529a951) [Apache-2.0]
+- jwalterweatherman (94f6ae3ed3bceceafa716478c5fbf8d29ca601a1) [MIT]
+- mapstructure (ab69d8d93410fce4361f4912bb1ff88110a81311) [MIT]
+- mousetrap (4e8053ee7ef85a6bd26368364a6d27f1641c1d21) [Apache-2.0]
+- openfga/go-sdk (a6fb3f6bbb9f14cdeff40adb3810a1045826dedb) [Apache-2.0, BSD-3-Clause, BSD-2-Clause, MIT, ISC]
+- pflag (2e9d26c8c37aae03e3f9d4e90b7116f5accb7cab) [BSD-3-Clause]
+- properties (c9a06e8f8f0164e4e16c0d5c4793cbed4ac90264) [BSD-2-Clause, BSD-3-Clause]
+- sync (1ea32573ddff2d374504dcc8102328ea790af85f) [BSD-3-Clause]
+- sys (55b11dcdae8194618ad245a452849aa95e461114) [BSD-3-Clause]
+- text (3a7a2557e7386e7e39d8b31290c3e8962c39e0fc) [BSD-3-Clause]
+- viper (21a7fd828ed231bbe62068d6aafa5aa9f85dc79e) [MIT]
+- yaml.v3 (f6f7691b1fdeb513f56608cd2c32c51f8194bf51) [Apache-2.0, MIT]
+
+
+--------------------------------------------------------------------------------
+Package Title: afero (d92c300a1b6eaa1690b7aecab2ef7fd0d64a94e1)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+Apache-2.0
+
+
+                                Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that ...
+
+
+--------------------------------------------------------------------------------
+Package Title: cast (bbed5559a59db54120dda79106f85f9ec0afb038)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MIT
+
+
+The MIT License (MIT)
+
+Copyright (c) 2014 Steve Francia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The ab...
+
+
+--------------------------------------------------------------------------------
+Package Title: cobra (4dd4b25de38418174a6e859e8a32eaccca32dccc)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+Apache-2.0
+
+
+                                Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that ...
+
+
+--------------------------------------------------------------------------------
+Package Title: fsnotify (5f8c606accbcc6913853fe7e083ee461d181d88d)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+BSD-3-Clause
+
+
+Copyright © 2012 The Go Authors. All rights reserved.
+Copyright © fsnotify Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the followin...
+
+
+--------------------------------------------------------------------------------
+Package Title: go-toml (7b980e792b27b596bb3221bee4676d23ce91bb3c)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MIT
+
+
+The MIT License (MIT)
+
+Copyright (c) 2013 - 2022 Thomas Pelletier, Eric Anderton
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the foll...
+
+
+--------------------------------------------------------------------------------
+Package Title: gotenv (d2e64e6317e94db9c598bb9934e75fb80c804bca)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MIT
+
+
+The MIT License (MIT)
+
+Copyright (c) 2013 Alif Rachmawadi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The ...
+
+
+--------------------------------------------------------------------------------
+Package Title: hcl (8cb6e5b959231cc1119e43259c4a608f9c51a241)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MPL-2.0
+
+
+Mozilla Public License, version 2.0
+
+1. Definitions
+
+1.1. “Contributor”
+
+     means each individual or legal entity that creates, contributes to the
+     creation of, or owns Covered Software.
+
+1.2. “Contributor Version”
+
+     means the combination of the Contributions of others (if any) used by a
+     Contributor and that particular Contributor’s Contribution.
+
+1.3. “Contribution”
+
+     means Covered Software of a particular Contributor.
+
+1.4. “Covered Software”
+
+     means Source Code Form ...
+
+
+--------------------------------------------------------------------------------
+Package Title: ini.v1 (b2f570e5b5b844226bbefe6fb521d891f529a951)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+Apache-2.0
+
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+"License" shall mean the terms and conditions for use, reproduction, and
+distribution as defined by Sections 1 through 9 of this document.
+
+"Licensor" shall mean the copyright owner or entity authorized by the copyright
+owner that is granting the License.
+
+"Legal Entity" shall mean the union of the acting entity and all other entities
+that co...
+
+
+--------------------------------------------------------------------------------
+Package Title: jwalterweatherman (94f6ae3ed3bceceafa716478c5fbf8d29ca601a1)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MIT
+
+
+The MIT License (MIT)
+
+Copyright (c) 2014 Steve Francia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The ab...
+
+
+--------------------------------------------------------------------------------
+Package Title: mapstructure (ab69d8d93410fce4361f4912bb1ff88110a81311)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MIT
+
+
+The MIT License (MIT)
+
+Copyright (c) 2013 Mitchell Hashimoto
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+T...
+
+
+--------------------------------------------------------------------------------
+Package Title: mousetrap (4e8053ee7ef85a6bd26368364a6d27f1641c1d21)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+Apache-2.0
+
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that...
+
+
+--------------------------------------------------------------------------------
+Package Title: openfga/go-sdk (a6fb3f6bbb9f14cdeff40adb3810a1045826dedb)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+Apache-2.0
+
+
+Copyright 2022 the OpenFGA contributors <contact@openfga.dev> (https://openfga.dev)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or ...
+
+
+* Other Licenses *
+BSD-3-Clause, BSD-2-Clause, MIT, ISC
+
+* BSD-3-Clause *
+
+Copyright (c) 2022 the OpenFGA contributors <contact@openfga.dev> (https://openfga.dev) . All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of cond...
+
+* BSD-2-Clause *
+
+Copyright (c) 2022 the OpenFGA contributors <contact@openfga.dev> (https://openfga.dev)
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the followin...
+
+* MIT *
+
+Copyright (c) 2022 the OpenFGA contributors <contact@openfga.dev> (https://openfga.dev)
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to th...
+
+* ISC *
+
+Copyright (c) 2022 the OpenFGA contributors <contact@openfga.dev> (https://openfga.dev)
+Permission to use, copy, modify, and distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SP...
+
+
+--------------------------------------------------------------------------------
+Package Title: pflag (2e9d26c8c37aae03e3f9d4e90b7116f5accb7cab)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+BSD-3-Clause
+
+
+Copyright (c) 2012 Alex Ogier. All rights reserved.
+Copyright (c) 2012 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the fol...
+
+
+--------------------------------------------------------------------------------
+Package Title: properties (c9a06e8f8f0164e4e16c0d5c4793cbed4ac90264)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+BSD-2-Clause
+
+
+Copyright (c) 2013-2020, Frank Schroeder
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   ...
+
+
+* Other Licenses *
+BSD-3-Clause
+
+
+Copyright (c) 2013-2022 Frank Schroeder. All rights reserved. . All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following d...
+
+
+--------------------------------------------------------------------------------
+Package Title: sync (1ea32573ddff2d374504dcc8102328ea790af85f)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+BSD-3-Clause
+
+
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other ...
+
+
+--------------------------------------------------------------------------------
+Package Title: sys (55b11dcdae8194618ad245a452849aa95e461114)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+BSD-3-Clause
+
+
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other ...
+
+
+--------------------------------------------------------------------------------
+Package Title: text (3a7a2557e7386e7e39d8b31290c3e8962c39e0fc)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+BSD-3-Clause
+
+
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other ...
+
+
+--------------------------------------------------------------------------------
+Package Title: viper (21a7fd828ed231bbe62068d6aafa5aa9f85dc79e)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+MIT
+
+
+The MIT License (MIT)
+
+Copyright (c) 2014 Steve Francia
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The ab...
+
+
+--------------------------------------------------------------------------------
+Package Title: yaml.v3 (f6f7691b1fdeb513f56608cd2c32c51f8194bf51)
+--------------------------------------------------------------------------------
+
+* Declared Licenses *
+Apache-2.0, MIT
+
+* Apache-2.0 *
+
+
+This project is covered by two different licenses: MIT and Apache.
+
+#### MIT License ####
+
+The following files were ported to Go from C files of libyaml, and thus
+are still covered by their original MIT license, with the additional
+copyright staring in 2011 when the project was ported over:
+
+    apic.go emitterc.go parserc.go readerc.go scannerc.go
+    writerc.go yamlh.go yamlprivateh.go
+
+Copyright (c) 2006-2010 Kirill Simonov
+Copyright (c) 2006-2011 Kirill Simonov
+
+Permission is hereby gran...
+
+* MIT *
+
+Copyright (c)  staring in 2011 when the project was ported over:
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:...
+
+
+
+================================================================================
+                                    Licenses
+
+================================================================================
+
+* Apache-2.0 *
+
+
+This project is covered by two different licenses: MIT and Apache.
+
+#### MIT License ####
+
+The following files were ported to Go from C files of libyaml, and thus
+are still covered by their original MIT license, with the additional
+copyright staring in 2011 when the project was ported over:
+
+    apic.go emitterc.go parserc.go readerc.go scannerc.go
+    writerc.go yamlh.go yamlprivateh.go
+
+Copyright (c) 2006-2010 Kirill Simonov
+Copyright (c) 2006-2011 Kirill Simonov
+
+Permission is hereby gran...
+
+* Apache-2.0 *
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that...
+
+* Apache-2.0 *
+
+                                Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that ...
+
+* Apache-2.0 *
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+"License" shall mean the terms and conditions for use, reproduction, and
+distribution as defined by Sections 1 through 9 of this document.
+
+"Licensor" shall mean the copyright owner or entity authorized by the copyright
+owner that is granting the License.
+
+"Legal Entity" shall mean the union of the acting entity and all other entities
+that co...
+
+* Apache-2.0 *
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting ...
+
+* BSD-2-Clause *
+
+Copyright (c) <year> <owner>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+
+   ...
+
+* BSD-3-Clause *
+
+Copyright (c) <year> <owner>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+    ...
+
+* BSD-3-Clause *
+
+Copyright (c) 2009 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other ...
+
+* BSD-3-Clause *
+
+Copyright (c) 2012 Alex Ogier. All rights reserved.
+Copyright (c) 2012 The Go Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the fol...
+
+* BSD-2-Clause *
+
+Copyright (c) 2013-2020, Frank Schroeder
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   ...
+
+* BSD-3-Clause *
+
+Copyright © 2012 The Go Authors. All rights reserved.
+Copyright © fsnotify Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the followin...
+
+* ISC *
+
+ISC License
+Copyright (c) 2004-2010 by Internet Systems Consortium, Inc. ("ISC")
+Copyright (c) 1995-2003 by Internet Software Consortium
+Permission to use, copy, modify, and /or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AN...
+
+* MIT *
+
+MIT License
+Copyright (c) <year> <copyright holders>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above...
+
+* MPL-2.0 *
+
+Mozilla Public License, version 2.0
+
+1. Definitions
+
+1.1. “Contributor”
+
+     means each individual or legal entity that creates, contributes to the
+     creation of, or owns Covered Software.
+
+1.2. “Contributor Version”
+
+     means the combination of the Contributions of others (if any) used by a
+     Contributor and that particular Contributor’s Contribution.
+
+1.3. “Contribution”
+
+     means Covered Software of a particular Contributor.
+
+1.4. “Covered Software”
+
+     means Source Code Form ...
+
+* MIT *
+
+The MIT License (MIT)
+
+Copyright (c) 2013 - 2022 Thomas Pelletier, Eric Anderton
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the foll...
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
