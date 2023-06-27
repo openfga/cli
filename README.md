@@ -56,6 +56,11 @@ OpenFGA is designed to make it easy for application builders to model their perm
 
 ## Installation
 
+### Using Go
+```shell
+go install github.com/openfga/cli@latest
+```
+
 ## Usage
 
 ### Configuration
