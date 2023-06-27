@@ -12,6 +12,17 @@ clean:
 	go clean
 	rm -f ${BINARY_NAME}
 
+test:
+	go test -race \
+			-coverpkg=./... \
+			-coverprofile=coverageunit.tmp.out \
+			-covermode=atomic \
+			-count=1 \
+			-timeout=5m \
+			./...
+	@cat coverageunit.tmp.out | grep -v "mocks" > coverageunit.out
+	@rm coverageunit.tmp.out
+
 lint:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest && golangci-lint run
 

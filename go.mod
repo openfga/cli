@@ -3,7 +3,8 @@ module github.com/openfga/cli
 go 1.20
 
 require (
-	github.com/openfga/go-sdk v0.2.3-0.20230613190254-a6fb3f6bbb9f
+	github.com/golang/mock v1.4.4
+	github.com/openfga/go-sdk v0.2.3-0.20230628172854-99f80f68e981
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 )

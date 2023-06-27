@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	openfga "github.com/openfga/go-sdk"
@@ -30,51 +29,72 @@ import (
 // MaxModelsPagesLength Limit the models so that we are not paginating indefinitely.
 var MaxModelsPagesLength = 20
 
+func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
+	// This is needed to ensure empty array is marshaled as [] instead of nil
+	models := make([]openfga.AuthorizationModel, 0)
+
+	var continuationToken *string
+
+	pageIndex := 0
+
+	for {
+		options := client.ClientReadAuthorizationModelsOptions{
+			ContinuationToken: continuationToken,
+		}
+
+		response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
+		if err != nil {
+			fmt.Printf("XXX Failed to list models due to %v", err)
+
+			return "", fmt.Errorf("xxx failed to list models due to %w", err)
+		}
+
+		models = append(models, *response.AuthorizationModels...)
+
+		pageIndex++
+
+		continuationToken = response.ContinuationToken
+
+		if continuationToken == nil || pageIndex > maxPages {
+			break
+		}
+	}
+
+	modelsJSON, err := json.Marshal(openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models})
+	if err != nil {
+		fmt.Printf("Failed to marshal listed models due to %v", err)
+
+		return "", fmt.Errorf("failed to marshal listed models due to %w", err)
+	}
+
+	return string(modelsJSON), nil
+}
+
 // listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Read Authorization Models",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+
+			return fmt.Errorf("failed to intialized FGA client due to %w", err)
 		}
 		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
 			fmt.Printf("Failed to list models due to %v", err)
-			os.Exit(1)
+
+			return fmt.Errorf("failed to list models due to %w", err)
 		}
-		models := []openfga.AuthorizationModel{}
-		var continuationToken *string
-		pageIndex := 0
-		for {
-			options := client.ClientReadAuthorizationModelsOptions{
-				ContinuationToken: continuationToken,
-			}
-			response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
-			if err != nil {
-				fmt.Printf("Failed to list models due to %v", err)
-				os.Exit(1)
-			}
-
-			models = append(models, *response.AuthorizationModels...)
-
-			pageIndex++
-			if continuationToken == nil || pageIndex > maxPages {
-				break
-			}
-
-			continuationToken = response.ContinuationToken
-		}
-
-		modelsJSON, err := json.Marshal(openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models})
+		output, err := listModels(fgaClient, maxPages)
 		if err != nil {
-			fmt.Printf("Failed to list models due to %v", err)
-			os.Exit(1)
+			return err
 		}
-		fmt.Print(string(modelsJSON))
+		fmt.Print(output)
+
+		return nil
 	},
 }
 
