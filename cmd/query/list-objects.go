@@ -19,12 +19,37 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
+
+// listObjects in the internal function for calling SDK for list objects.
+func listObjects(fgaClient client.SdkClient, user string, relation string, types string) (string, error) {
+	body := &client.ClientListObjectsRequest{
+		User:     user,
+		Relation: relation,
+		Type:     types,
+	}
+	options := &client.ClientListObjectsOptions{}
+
+	response, err := fgaClient.ListObjects(context.Background()).Body(*body).Options(*options).Execute()
+	if err != nil {
+		fmt.Printf("Failed to list objects due to %v", err)
+
+		return "", fmt.Errorf("failed to list objects due to %w", err)
+	}
+
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("Failed to list objects due to %v", err)
+
+		return "", fmt.Errorf("failed to list objects due to %w", err)
+	}
+
+	return string(responseJSON), nil
+}
 
 // listObjectsCmd represents the listObjects command.
 var listObjectsCmd = &cobra.Command{
@@ -32,32 +57,24 @@ var listObjectsCmd = &cobra.Command{
 	Short: "List Objects",
 	Long:  "List the relations a user has with an object.",
 	Args:  cobra.ExactArgs(3), //nolint:gomnd
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
-		}
-		body := &client.ClientListObjectsRequest{
-			User:     args[0],
-			Relation: args[1],
-			Type:     args[2],
-		}
-		options := &client.ClientListObjectsOptions{}
 
-		response, err := fgaClient.ListObjects(context.Background()).Body(*body).Options(*options).Execute()
-		if err != nil {
-			fmt.Printf("Failed to list objects due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		responseJSON, err := json.Marshal(response)
+		output, err := listObjects(fgaClient, args[0], args[1], args[2])
 		if err != nil {
-			fmt.Printf("Failed to list objects due to %v", err)
-			os.Exit(1)
+			return err
 		}
-		fmt.Print(string(responseJSON))
+
+		fmt.Print(output)
+
+		return nil
 	},
 }
 

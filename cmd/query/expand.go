@@ -19,12 +19,34 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
+
+func expand(fgaClient client.SdkClient, relation string, object string) (string, error) {
+	body := &client.ClientExpandRequest{
+		Relation: relation,
+		Object:   object,
+	}
+
+	tuples, err := fgaClient.Expand(context.Background()).Body(*body).Execute()
+	if err != nil {
+		fmt.Printf("Failed to expand tuples due to %v", err)
+
+		return "", fmt.Errorf("failed to expand tuples due to %w", err)
+	}
+
+	tuplesJSON, err := json.Marshal(tuples)
+	if err != nil {
+		fmt.Printf("Failed to expand tuples due to %v", err)
+
+		return "", fmt.Errorf("failed to expand tuples due to %w", err)
+	}
+
+	return string(tuplesJSON), nil
+}
 
 // expandCmd represents the expand command.
 var expandCmd = &cobra.Command{
@@ -32,29 +54,24 @@ var expandCmd = &cobra.Command{
 	Short: "Expand",
 	Long:  "Expands the relationships in userset tree format.",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
-		}
-		body := &client.ClientExpandRequest{
-			Relation: args[0],
-			Object:   args[1],
-		}
-		tuples, err := fgaClient.Expand(context.Background()).Body(*body).Execute()
-		if err != nil {
-			fmt.Printf("Failed to expand tuples due to %v", err)
-			os.Exit(1)
+
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		tuplesJSON, err := json.Marshal(tuples)
+		output, err := expand(fgaClient, args[0], args[1])
 		if err != nil {
-			fmt.Printf("Failed to expand tuples due to %v", err)
-			os.Exit(1)
+			return err
 		}
-		fmt.Print(string(tuplesJSON))
+
+		fmt.Print(output)
+
+		return nil
 	},
 }
 

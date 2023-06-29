@@ -19,14 +19,82 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/fga"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
+
+func listRelations(clientConfig fga.ClientConfig,
+	fgaClient client.SdkClient,
+	user string,
+	objects string,
+) (string, error) {
+	var authorizationModel openfga.AuthorizationModel
+
+	if clientConfig.AuthorizationModelID != "" {
+		// note that the auth model id is already configured in the fgaClient.
+		response, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
+		if err != nil {
+			fmt.Printf("Failed to list relations due to %v", err)
+
+			return "", fmt.Errorf("failed to list relations due to %w", err)
+		}
+
+		authorizationModel = *response.AuthorizationModel
+	} else {
+		response, err := fgaClient.ReadLatestAuthorizationModel(context.Background()).Execute()
+		if err != nil {
+			fmt.Printf("Failed to list relations due to %v", err)
+
+			return "", fmt.Errorf("failed to list relations due to %w", err)
+		}
+
+		authorizationModel = *response.AuthorizationModel
+	}
+
+	typeDefs := *(authorizationModel.TypeDefinitions)
+	objectType := strings.Split(objects, ":")[0]
+
+	var relations []string
+
+	for index := range typeDefs {
+		if typeDefs[index].Type == objectType {
+			typeDef := typeDefs[index]
+			for relation := range *typeDef.Relations {
+				relations = append(relations, relation)
+			}
+
+			break
+		}
+	}
+
+	body := &client.ClientListRelationsRequest{
+		User:      user,
+		Object:    objects,
+		Relations: relations,
+	}
+	options := &client.ClientListRelationsOptions{}
+
+	response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
+	if err != nil {
+		fmt.Printf("Failed to list relations due to %v", err)
+
+		return "", fmt.Errorf("failed to list relations due to %w", err)
+	}
+
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("Failed to list relations due to %v", err)
+
+		return "", fmt.Errorf("failed to list relations due to %w", err)
+	}
+
+	return string(responseJSON), nil
+}
 
 // listRelationsCmd represents the listRelations command.
 var listRelationsCmd = &cobra.Command{
@@ -34,63 +102,23 @@ var listRelationsCmd = &cobra.Command{
 	Short: "List Relations",
 	Long:  "ListRelations if a user has a particular relation with an object.",
 	Args:  cobra.ExactArgs(2), //nolint:gomnd
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		var authorizationModel openfga.AuthorizationModel
-		if clientConfig.AuthorizationModelID != "" {
-			response, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
-			if err != nil {
-				fmt.Printf("Failed to list relations due to %v", err)
-				os.Exit(1)
-			}
-			authorizationModel = *response.AuthorizationModel
-		} else {
-			response, err := fgaClient.ReadLatestAuthorizationModel(context.Background()).Execute()
-			if err != nil {
-				fmt.Printf("Failed to list relations due to %v", err)
-				os.Exit(1)
-			}
-			authorizationModel = *response.AuthorizationModel
-		}
-		typeDefs := *(authorizationModel.TypeDefinitions)
-		objectType := strings.Split(args[1], ":")[0]
-		var relations []string
-
-		for index := range typeDefs {
-			if typeDefs[index].Type == objectType {
-				typeDef := typeDefs[index]
-				for relation := range *typeDef.Relations {
-					relations = append(relations, relation)
-				}
-
-				break
-			}
-		}
-		body := &client.ClientListRelationsRequest{
-			User:      args[0],
-			Object:    args[1],
-			Relations: relations,
-		}
-		options := &client.ClientListRelationsOptions{}
-
-		response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
+		output, err := listRelations(clientConfig, fgaClient, args[0], args[1])
 		if err != nil {
-			fmt.Printf("Failed to list relations due to %v", err)
-			os.Exit(1)
+			return err
 		}
 
-		responseJSON, err := json.Marshal(response)
-		if err != nil {
-			fmt.Printf("Failed to list relations due to %v", err)
-			os.Exit(1)
-		}
-		fmt.Print(string(responseJSON))
+		fmt.Print(output)
+
+		return nil
 	},
 }
 

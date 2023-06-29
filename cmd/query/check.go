@@ -19,12 +19,36 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
+
+func check(fgaClient client.SdkClient, user string, relation string, object string) (string, error) {
+	body := &client.ClientCheckRequest{
+		User:     user,
+		Relation: relation,
+		Object:   object,
+	}
+	options := &client.ClientCheckOptions{}
+
+	response, err := fgaClient.Check(context.Background()).Body(*body).Options(*options).Execute()
+	if err != nil {
+		fmt.Printf("Failed to check due to %v", err)
+
+		return "", fmt.Errorf("failed to check due to %w", err)
+	}
+
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		fmt.Printf("Failed to check due to %v", err)
+
+		return "", fmt.Errorf("failed to check due to %w", err)
+	}
+
+	return string(responseJSON), nil
+}
 
 // checkCmd represents the check command.
 var checkCmd = &cobra.Command{
@@ -32,33 +56,22 @@ var checkCmd = &cobra.Command{
 	Short: "Check",
 	Long:  "Check if a user has a particular relation with an object.",
 	Args:  cobra.ExactArgs(3), //nolint:gomnd
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		body := &client.ClientCheckRequest{
-			User:     args[0],
-			Relation: args[1],
-			Object:   args[2],
-		}
-		options := &client.ClientCheckOptions{}
-
-		response, err := fgaClient.Check(context.Background()).Body(*body).Options(*options).Execute()
+		output, err := check(fgaClient, args[0], args[1], args[2])
 		if err != nil {
-			fmt.Printf("Failed to check due to %v", err)
-			os.Exit(1)
+			return err
 		}
+		fmt.Print(output)
 
-		responseJSON, err := json.Marshal(response)
-		if err != nil {
-			fmt.Printf("Failed to check due to %v", err)
-			os.Exit(1)
-		}
-		fmt.Print(string(responseJSON))
+		return nil
 	},
 }
 
