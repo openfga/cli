@@ -443,12 +443,11 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 ##### Expand
 
 ###### Command
-fga query **expand** <relation> <object> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 
 ###### Example
 `fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`
