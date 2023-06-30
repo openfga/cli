@@ -463,6 +463,34 @@ fga query **expand** <relation> <object> [--contextual-tuple <user> <relation> <
 }
 ```
 
+## Building from Source
+
+Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go.dev/dl/) page.
+
+1. Clone the repo to a local directory, and navigate to that directory:
+
+   ```bash
+   git clone https://github.com/openfga/cli.git && cd cli
+   ```
+
+2. Then use the build command:
+
+   ```bash
+   go build -o ./fga main.go
+   ```
+
+   or if you have `make` installed, just run:
+
+   ```bash
+   make
+   ```
+
+3. Run the OpenFGA CLI with:
+
+   ```bash
+   ./fga 
+   ```
+
 ## Contributing
 
 See [CONTRIBUTING](https://github.com/openfga/.github/blob/main/CONTRIBUTING.md).
