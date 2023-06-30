@@ -33,13 +33,13 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 	// This is needed to ensure empty array is marshaled as [] instead of nil
 	models := make([]openfga.AuthorizationModel, 0)
 
-	var continuationToken *string
+	var continuationToken string
 
 	pageIndex := 0
 
 	for {
 		options := client.ClientReadAuthorizationModelsOptions{
-			ContinuationToken: continuationToken,
+			ContinuationToken: &continuationToken,
 		}
 
 		response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
@@ -51,11 +51,11 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 
 		pageIndex++
 
-		continuationToken = response.ContinuationToken
-
-		if continuationToken == nil || pageIndex > maxPages {
+		if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex > maxPages {
 			break
 		}
+
+		continuationToken = *response.ContinuationToken
 	}
 
 	modelsJSON, err := json.Marshal(openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models})

@@ -48,11 +48,11 @@ var listCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		stores := []openfga.Store{}
-		var continuationToken *string
+		continuationToken := ""
 		pageIndex := 0
 		for {
 			options := client.ClientListStoresOptions{
-				ContinuationToken: continuationToken,
+				ContinuationToken: &continuationToken,
 			}
 			response, err := fgaClient.ListStores(context.Background()).Options(options).Execute()
 			if err != nil {
@@ -62,11 +62,11 @@ var listCmd = &cobra.Command{
 
 			stores = append(stores, *response.Stores...)
 			pageIndex++
-			if continuationToken == nil || pageIndex >= maxPages {
+			if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex >= maxPages {
 				break
 			}
 
-			continuationToken = response.ContinuationToken
+			continuationToken = *response.ContinuationToken
 		}
 
 		storesJSON, err := json.Marshal(openfga.ListStoresResponse{Stores: &stores})
