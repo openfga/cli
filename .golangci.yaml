@@ -22,6 +22,7 @@ linters:
     - ifshort
     - golint
     - nosnakecase
+    - testpackage
 linters-settings:
   depguard:
     rules:
@@ -40,10 +41,20 @@ linters-settings:
           - "$test"
         allow:
           - $gostd
+          - github.com/golang/mock/gomock
           - github.com/stretchr
+          - github.com/openfga/cli
+          - github.com/openfga/go-sdk
 
   tagliatelle:
     case:
       use-field-name: true
       rules:
         json: snake
+
+  funlen:
+    lines: 120
+    statements: 80
+
+  skip-dirs:
+    - mocks
