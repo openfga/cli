@@ -35,8 +35,7 @@ func init() {
 	TupleCmd.AddCommand(changesCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
-	TupleCmd.Flags().String("store-id", "", "Store ID")
-	err := TupleCmd.MarkFlagRequired("store-id")
+	err := TupleCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
 		fmt.Print(err)
 		os.Exit(1)

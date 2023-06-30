@@ -376,7 +376,7 @@ fga tuples **changes** --type <type> --store-id=<store-id>
 ##### Check
 
 ###### Command
-fga query **check** <user> <relation> <object> [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **check** <user> <relation> <object> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
@@ -384,7 +384,7 @@ fga query **check** <user> <relation> <object> [--contextual-tuple <user> <relat
 * `--contextual-tuple`: Contextual tuples
 
 ###### Example
-`fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple user:anne can_view folder:product --contextual-tuple folder:product parent document:roadmap`
+`fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
 
 ###### JSON Response
 ```json5
@@ -396,7 +396,7 @@ fga query **check** <user> <relation> <object> [--contextual-tuple <user> <relat
 ##### List Objects
 
 ###### Command
-fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
@@ -404,7 +404,7 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple <
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 
 ###### Example
-`fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple user:anne can_view folder:product --contextual-tuple folder:product parent document:roadmap`
+`fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
 
 ###### JSON Response
 ```json5
@@ -419,7 +419,7 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple <
 ##### List Relations
 
 ###### Command
-fga query **list-objects** <user> <object> [--relation <relation>]* [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **list-objects** <user> <object> [--relation <relation>]* [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
@@ -443,7 +443,7 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 ##### Expand
 
 ###### Command
-fga query **expand** <relation> <object> [--contextual-tuple <user> <relation> <object>]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **expand** <relation> <object> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
