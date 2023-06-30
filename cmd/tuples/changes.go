@@ -52,13 +52,15 @@ var changesCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		changes := []openfga.TupleChange{}
-		var continuationToken *string
+		continuationToken := ""
 		pageIndex := 0
 		for {
 			body := &client.ClientReadChangesRequest{
 				Type: selectedType,
 			}
-			options := &client.ClientReadChangesOptions{}
+			options := &client.ClientReadChangesOptions{
+				ContinuationToken: &continuationToken,
+			}
 			response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
 			if err != nil {
 				fmt.Printf("Failed to get tuple changes due to %v", err)
@@ -67,11 +69,11 @@ var changesCmd = &cobra.Command{
 
 			changes = append(changes, *response.Changes...)
 			pageIndex++
-			if continuationToken == nil || pageIndex >= maxPages {
+			if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex >= maxPages {
 				break
 			}
 
-			continuationToken = response.ContinuationToken
+			continuationToken = *response.ContinuationToken
 		}
 
 		changesJSON, err := json.Marshal(openfga.ReadChangesResponse{Changes: &changes})

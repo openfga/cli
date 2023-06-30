@@ -29,13 +29,13 @@ func TestListModelsEmpty(t *testing.T) {
 
 	response := openfga.ReadAuthorizationModelsResponse{
 		AuthorizationModels: &models,
-		ContinuationToken:   nil,
+		ContinuationToken:   openfga.PtrString(""),
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
 	mockRequest := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
 	options := client.ClientReadAuthorizationModelsOptions{
-		ContinuationToken: nil,
+		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest)
@@ -64,7 +64,7 @@ func TestListModelsFail(t *testing.T) {
 
 	mockRequest := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
 	options := client.ClientReadAuthorizationModelsOptions{
-		ContinuationToken: nil,
+		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest)
@@ -96,13 +96,13 @@ func TestListModelsSinglePage(t *testing.T) {
 
 	response := openfga.ReadAuthorizationModelsResponse{
 		AuthorizationModels: &models,
-		ContinuationToken:   nil,
+		ContinuationToken:   openfga.PtrString(""),
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
 	mockRequest := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
 	options := client.ClientReadAuthorizationModelsOptions{
-		ContinuationToken: nil,
+		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest)
@@ -144,7 +144,7 @@ func TestListModelsMultiPage(t *testing.T) {
 
 	mockRequest1 := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
 	options1 := client.ClientReadAuthorizationModelsOptions{
-		ContinuationToken: nil,
+		ContinuationToken: openfga.PtrString(""),
 	}
 
 	mockExecute2 := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
@@ -161,7 +161,7 @@ func TestListModelsMultiPage(t *testing.T) {
 	}
 	response2 := openfga.ReadAuthorizationModelsResponse{
 		AuthorizationModels: &models2,
-		ContinuationToken:   nil,
+		ContinuationToken:   continuationToken1,
 	}
 
 	gomock.InOrder(
@@ -220,7 +220,7 @@ func TestListModelsMultiPageMaxPage(t *testing.T) {
 
 	mockRequest1 := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
 	options1 := client.ClientReadAuthorizationModelsOptions{
-		ContinuationToken: nil,
+		ContinuationToken: openfga.PtrString(""),
 	}
 
 	mockExecute1.EXPECT().Execute().Return(&response1, nil)

@@ -67,11 +67,11 @@ var readCmd = &cobra.Command{
 		}
 
 		tuples := []openfga.Tuple{}
-		var continuationToken *string
+		continuationToken := ""
 		pageIndex := 0
 		options := client.ClientReadOptions{}
 		for {
-			options.ContinuationToken = continuationToken
+			options.ContinuationToken = &continuationToken
 			response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
 			if err != nil {
 				fmt.Printf("Failed to read tuples due to %v", err)
@@ -80,11 +80,11 @@ var readCmd = &cobra.Command{
 
 			tuples = append(tuples, *response.Tuples...)
 			pageIndex++
-			if continuationToken == nil || pageIndex >= maxPages {
+			if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex >= maxPages {
 				break
 			}
 
-			continuationToken = response.ContinuationToken
+			continuationToken = *response.ContinuationToken
 		}
 
 		tuplesJSON, err := json.Marshal(openfga.ReadResponse{Tuples: &tuples})
