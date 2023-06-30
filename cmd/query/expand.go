@@ -33,15 +33,11 @@ func expand(fgaClient client.SdkClient, relation string, object string) (string,
 
 	tuples, err := fgaClient.Expand(context.Background()).Body(*body).Execute()
 	if err != nil {
-		fmt.Printf("Failed to expand tuples due to %v", err)
-
 		return "", fmt.Errorf("failed to expand tuples due to %w", err)
 	}
 
 	tuplesJSON, err := json.Marshal(tuples)
 	if err != nil {
-		fmt.Printf("Failed to expand tuples due to %v", err)
-
 		return "", fmt.Errorf("failed to expand tuples due to %w", err)
 	}
 
@@ -59,8 +55,6 @@ var expandCmd = &cobra.Command{
 
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 

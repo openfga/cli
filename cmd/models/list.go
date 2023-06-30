@@ -44,9 +44,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 
 		response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
 		if err != nil {
-			fmt.Printf("XXX Failed to list models due to %v", err)
-
-			return "", fmt.Errorf("xxx failed to list models due to %w", err)
+			return "", fmt.Errorf("failed to list models due to %w", err)
 		}
 
 		models = append(models, *response.AuthorizationModels...)
@@ -62,8 +60,6 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 
 	modelsJSON, err := json.Marshal(openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models})
 	if err != nil {
-		fmt.Printf("Failed to marshal listed models due to %v", err)
-
 		return "", fmt.Errorf("failed to marshal listed models due to %w", err)
 	}
 
@@ -78,14 +74,10 @@ var listCmd = &cobra.Command{
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-
 			return fmt.Errorf("failed to intialized FGA client due to %w", err)
 		}
 		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
-			fmt.Printf("Failed to list models due to %v", err)
-
 			return fmt.Errorf("failed to list models due to %w", err)
 		}
 		output, err := listModels(fgaClient, maxPages)

@@ -36,15 +36,11 @@ func listObjects(fgaClient client.SdkClient, user string, relation string, types
 
 	response, err := fgaClient.ListObjects(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		fmt.Printf("Failed to list objects due to %v", err)
-
 		return "", fmt.Errorf("failed to list objects due to %w", err)
 	}
 
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("Failed to list objects due to %v", err)
-
 		return "", fmt.Errorf("failed to list objects due to %w", err)
 	}
 
@@ -62,8 +58,6 @@ var listObjectsCmd = &cobra.Command{
 
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 

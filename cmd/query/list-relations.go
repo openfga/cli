@@ -39,8 +39,6 @@ func listRelations(clientConfig fga.ClientConfig,
 		// note that the auth model id is already configured in the fgaClient.
 		response, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
 		if err != nil {
-			fmt.Printf("Failed to list relations due to %v", err)
-
 			return "", fmt.Errorf("failed to list relations due to %w", err)
 		}
 
@@ -48,8 +46,6 @@ func listRelations(clientConfig fga.ClientConfig,
 	} else {
 		response, err := fgaClient.ReadLatestAuthorizationModel(context.Background()).Execute()
 		if err != nil {
-			fmt.Printf("Failed to list relations due to %v", err)
-
 			return "", fmt.Errorf("failed to list relations due to %w", err)
 		}
 
@@ -81,15 +77,11 @@ func listRelations(clientConfig fga.ClientConfig,
 
 	response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		fmt.Printf("Failed to list relations due to %v", err)
-
 		return "", fmt.Errorf("failed to list relations due to %w", err)
 	}
 
 	responseJSON, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("Failed to list relations due to %v", err)
-
 		return "", fmt.Errorf("failed to list relations due to %w", err)
 	}
 

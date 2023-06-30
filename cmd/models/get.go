@@ -45,15 +45,11 @@ func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (string
 	}
 
 	if err != nil {
-		fmt.Printf("Failed to get model %v due to %v", clientConfig.AuthorizationModelID, err)
-
 		return "", fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
 	}
 
 	modelJSON, err := json.Marshal(model)
 	if err != nil {
-		fmt.Printf("Failed to get model due to %v", err)
-
 		return "", fmt.Errorf("failed to get model due to %w", err)
 	}
 
@@ -69,8 +65,6 @@ var getCmd = &cobra.Command{
 
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 		output, err := getModel(clientConfig, fgaClient)

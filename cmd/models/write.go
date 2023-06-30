@@ -30,22 +30,16 @@ func write(fgaClient client.SdkClient, text string) (string, error) {
 
 	err := json.Unmarshal([]byte(text), &body)
 	if err != nil {
-		fmt.Printf("Failed to parse model due to %v", err)
-
 		return "", fmt.Errorf("failed to parse model due to %w", err)
 	}
 
 	model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
 	if err != nil {
-		fmt.Printf("Failed to write model due to %v", err)
-
 		return "", fmt.Errorf("failed to write model due to %w", err)
 	}
 
 	modelJSON, err := json.Marshal(model)
 	if err != nil {
-		fmt.Printf("Failed to write model due to %v", err)
-
 		return "", fmt.Errorf("failed to write model due to %w", err)
 	}
 
@@ -62,8 +56,6 @@ var writeCmd = &cobra.Command{
 
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
