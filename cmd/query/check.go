@@ -25,7 +25,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func check(fgaClient client.SdkClient, user string, relation string, object string, contextualTuples []client.ClientTupleKey) (string, error) {
+func check(
+	fgaClient client.SdkClient,
+	user string,
+	relation string,
+	object string,
+	contextualTuples []client.ClientTupleKey,
+) (string, error) {
 	body := &client.ClientCheckRequest{
 		User:             user,
 		Relation:         relation,
@@ -62,12 +68,12 @@ var checkCmd = &cobra.Command{
 
 		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing contextual tuples for check: %w", err)
 		}
 
 		output, err := check(fgaClient, args[0], args[1], args[2], contextualTuples)
 		if err != nil {
-			return err
+			return fmt.Errorf("error calling check: %w", err)
 		}
 		fmt.Print(output)
 

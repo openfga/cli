@@ -32,7 +32,11 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1")
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
+	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
+
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -56,7 +60,11 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 		AuthorizationModelID: "01GXSA8YR785C4FYS3C0RTG7B1",
 	}
 
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1")
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
+	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
+
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -94,10 +102,14 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
 	body := client.ClientListRelationsRequest{
-		User:      "user:foo",
-		Relations: []string{"viewer"},
-		Object:    "doc:doc1",
+		User:             "user:foo",
+		Relations:        []string{"viewer"},
+		Object:           "doc:doc1",
+		ContextualTuples: &contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
@@ -107,7 +119,7 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1")
+	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -147,10 +159,14 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
 	body := client.ClientListRelationsRequest{
-		User:      "user:foo",
-		Relations: []string{"viewer"},
-		Object:    "doc:doc1",
+		User:             "user:foo",
+		Relations:        []string{"viewer"},
+		Object:           "doc:doc1",
+		ContextualTuples: &contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
@@ -160,7 +176,7 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1")
+	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
 	if err != nil {
 		t.Error(err)
 	}

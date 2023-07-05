@@ -31,17 +31,21 @@ func TestCheckWithError(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 
 	mockBody := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
 
 	body := client.ClientCheckRequest{
-		User:     "user:foo",
-		Relation: "writer",
-		Object:   "doc:doc1",
+		User:             "user:foo",
+		Relation:         "writer",
+		Object:           "doc:doc1",
+		ContextualTuples: &contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
 	mockFgaClient.EXPECT().Check(context.Background()).Return(mockBody)
 
-	_, err := check(mockFgaClient, "user:foo", "writer", "doc:doc1")
+	_, err := check(mockFgaClient, "user:foo", "writer", "doc:doc1", contextualTuples)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -71,16 +75,20 @@ func TestCheckWithNoError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)
 
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
 	body := client.ClientCheckRequest{
-		User:     "user:foo",
-		Relation: "writer",
-		Object:   "doc:doc1",
+		User:             "user:foo",
+		Relation:         "writer",
+		Object:           "doc:doc1",
+		ContextualTuples: &contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
 	mockFgaClient.EXPECT().Check(context.Background()).Return(mockBody)
 
-	output, err := check(mockFgaClient, "user:foo", "writer", "doc:doc1")
+	output, err := check(mockFgaClient, "user:foo", "writer", "doc:doc1", contextualTuples)
 	if err != nil {
 		t.Error(err)
 	}

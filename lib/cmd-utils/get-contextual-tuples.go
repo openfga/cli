@@ -1,9 +1,9 @@
 package cmdutils
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/openfga/cli/lib/clierrors"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
@@ -15,9 +15,10 @@ func ParseContextualTuples(cmd *cobra.Command) ([]client.ClientTupleKey, error) 
 	if len(contextualTuplesArray) > 0 {
 		for index := 0; index < len(contextualTuplesArray); index++ {
 			tuple := strings.Split(contextualTuplesArray[index], " ")
-			if len(tuple) != 3 {
+			if len(tuple) != 3 { //nolint:gomnd
 				return contextualTuples,
-					fmt.Errorf("Failed to parse contextual tuples, they must be of the format\"user_type:user_id relation object_type:object_id\"")
+					clierrors.ValidationError("ParseContextualTuples", "Failed to parse contextual tuples,"+ //nolint:wrapcheck
+						"they must be of the format\"user_type:user_id relation object_type:object_id\" ")
 			}
 
 			contextualTuples = append(contextualTuples, client.ClientTupleKey{

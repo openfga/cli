@@ -31,16 +31,20 @@ func TestListObjectsWithError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
 	body := client.ClientListObjectsRequest{
-		User:     "user:foo",
-		Relation: "writer",
-		Type:     "doc",
+		User:             "user:foo",
+		Relation:         "writer",
+		Type:             "doc",
+		ContextualTuples: &contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
 	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
-	_, err := listObjects(mockFgaClient, "user:foo", "writer", "doc")
+	_, err := listObjects(mockFgaClient, "user:foo", "writer", "doc", contextualTuples)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -67,16 +71,20 @@ func TestListObjectsWithNoError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
 	body := client.ClientListObjectsRequest{
-		User:     "user:foo",
-		Relation: "writer",
-		Type:     "doc",
+		User:             "user:foo",
+		Relation:         "writer",
+		Type:             "doc",
+		ContextualTuples: &contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
 	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
-	output, err := listObjects(mockFgaClient, "user:foo", "writer", "doc")
+	output, err := listObjects(mockFgaClient, "user:foo", "writer", "doc", contextualTuples)
 	if err != nil {
 		t.Error(err)
 	}

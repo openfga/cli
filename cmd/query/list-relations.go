@@ -107,12 +107,12 @@ var listRelationsCmd = &cobra.Command{
 
 		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing contextual tuples for listRelations: %w", err)
 		}
 
 		output, err := listRelations(clientConfig, fgaClient, args[0], args[1], contextualTuples)
 		if err != nil {
-			return err
+			return fmt.Errorf("error listing relations: %w", err)
 		}
 
 		fmt.Print(output)
