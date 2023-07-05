@@ -35,9 +35,11 @@ func init() {
 	QueryCmd.AddCommand(listRelationsCmd)
 
 	QueryCmd.PersistentFlags().String("store-id", "", "Store ID")
-	QueryCmd.Flags().String("store-id", "", "Store ID")
-	err := QueryCmd.MarkFlagRequired("store-id")
-	if err != nil { //nolint:wsl
+	QueryCmd.PersistentFlags().String("model-id", "", "Model ID")
+	QueryCmd.PersistentFlags().StringArray("contextual-tuple", []string{}, `Contextual Tuple, format: "user relation object"`) //nolint:lll
+
+	err := QueryCmd.MarkPersistentFlagRequired("store-id")
+	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}

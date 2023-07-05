@@ -26,11 +26,18 @@ import (
 )
 
 // listObjects in the internal function for calling SDK for list objects.
-func listObjects(fgaClient client.SdkClient, user string, relation string, types string) (string, error) {
+func listObjects(
+	fgaClient client.SdkClient,
+	user string,
+	relation string,
+	objectType string,
+	contextualTuples []client.ClientTupleKey,
+) (string, error) {
 	body := &client.ClientListObjectsRequest{
-		User:     user,
-		Relation: relation,
-		Type:     types,
+		User:             user,
+		Relation:         relation,
+		Type:             objectType,
+		ContextualTuples: &contextualTuples,
 	}
 	options := &client.ClientListObjectsOptions{}
 
@@ -61,9 +68,14 @@ var listObjectsCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		output, err := listObjects(fgaClient, args[0], args[1], args[2])
+		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing contextual tuples for listObjects: %w", err)
+		}
+
+		output, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples)
+		if err != nil {
+			return fmt.Errorf("error listing objects: %w", err)
 		}
 
 		fmt.Print(output)

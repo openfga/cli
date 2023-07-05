@@ -25,11 +25,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func check(fgaClient client.SdkClient, user string, relation string, object string) (string, error) {
+func check(
+	fgaClient client.SdkClient,
+	user string,
+	relation string,
+	object string,
+	contextualTuples []client.ClientTupleKey,
+) (string, error) {
 	body := &client.ClientCheckRequest{
-		User:     user,
-		Relation: relation,
-		Object:   object,
+		User:             user,
+		Relation:         relation,
+		Object:           object,
+		ContextualTuples: &contextualTuples,
 	}
 	options := &client.ClientCheckOptions{}
 
@@ -50,7 +57,7 @@ func check(fgaClient client.SdkClient, user string, relation string, object stri
 var checkCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Check",
-	Long:  "Check if a user has a particular relation with an object.",
+	Long:  "Check if a user has a particular relation with an object. E.g. \"check user:anne can_view document:roadmap\"",
 	Args:  cobra.ExactArgs(3), //nolint:gomnd
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -59,9 +66,14 @@ var checkCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		output, err := check(fgaClient, args[0], args[1], args[2])
+		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing contextual tuples for check: %w", err)
+		}
+
+		output, err := check(fgaClient, args[0], args[1], args[2], contextualTuples)
+		if err != nil {
+			return fmt.Errorf("error calling check: %w", err)
 		}
 		fmt.Print(output)
 

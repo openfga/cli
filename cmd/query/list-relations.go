@@ -32,6 +32,7 @@ func listRelations(clientConfig fga.ClientConfig,
 	fgaClient client.SdkClient,
 	user string,
 	objects string,
+	contextualTuples []client.ClientTupleKey,
 ) (string, error) {
 	var authorizationModel openfga.AuthorizationModel
 
@@ -69,9 +70,10 @@ func listRelations(clientConfig fga.ClientConfig,
 	}
 
 	body := &client.ClientListRelationsRequest{
-		User:      user,
-		Object:    objects,
-		Relations: relations,
+		User:             user,
+		Object:           objects,
+		Relations:        relations,
+		ContextualTuples: &contextualTuples,
 	}
 	options := &client.ClientListRelationsOptions{}
 
@@ -103,9 +105,14 @@ var listRelationsCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		output, err := listRelations(clientConfig, fgaClient, args[0], args[1])
+		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error parsing contextual tuples for listRelations: %w", err)
+		}
+
+		output, err := listRelations(clientConfig, fgaClient, args[0], args[1], contextualTuples)
+		if err != nil {
+			return fmt.Errorf("error listing relations: %w", err)
 		}
 
 		fmt.Print(output)
