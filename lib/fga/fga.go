@@ -8,6 +8,8 @@ import (
 	"github.com/openfga/go-sdk/credentials"
 )
 
+const userAgent = "openfga-cli/0.0.1"
+
 type ClientConfig struct {
 	ServerURL            string `json:"server_url,omitempty"`
 	StoreID              string `json:"store_id,omitempty"`
@@ -58,6 +60,7 @@ func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
 		StoreId:              c.StoreID,
 		AuthorizationModelId: openfga.PtrString(c.AuthorizationModelID),
 		Credentials:          c.getCredentials(),
+		UserAgent:            userAgent,
 	}, nil
 }
 
