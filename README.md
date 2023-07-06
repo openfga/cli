@@ -13,6 +13,7 @@ A cross-platform CLI to interact with an OpenFGA server
 - [About OpenFGA](#about)
 - [Resources](#resources)
 - [Installation](#installation)
+- [Building from Source](#building-from-source)
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Commands](#commands)
@@ -55,6 +56,35 @@ OpenFGA is designed to make it easy for application builders to model their perm
 - [Google's Zanzibar Paper (2019)](https://research.google/pubs/pub48190/)
 
 ## Installation
+:TODO:
+
+## Building from Source
+
+Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go.dev/dl/) page.
+
+1. Clone the repo to a local directory, and navigate to that directory:
+
+   ```bash
+   git clone https://github.com/openfga/cli.git && cd cli
+   ```
+
+2. Then use the build command:
+
+   ```bash
+   go build -o ./fga main.go
+   ```
+
+   or if you have `make` installed, just run:
+
+   ```bash
+   make build
+   ```
+
+3. Run the OpenFGA CLI with:
+
+   ```bash
+   ./fga 
+   ```
 
 ## Usage
 
@@ -486,34 +516,6 @@ fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<mode
     ],
 }
 ```
-
-## Building from Source
-
-Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go.dev/dl/) page.
-
-1. Clone the repo to a local directory, and navigate to that directory:
-
-   ```bash
-   git clone https://github.com/openfga/cli.git && cd cli
-   ```
-
-2. Then use the build command:
-
-   ```bash
-   go build -o ./fga main.go
-   ```
-
-   or if you have `make` installed, just run:
-
-   ```bash
-   make
-   ```
-
-3. Run the OpenFGA CLI with:
-
-   ```bash
-   ./fga 
-   ```
 
 ## Contributing
 
