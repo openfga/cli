@@ -120,7 +120,7 @@ fga stores **create**
 * `--name`: Specifies the name of the store to be created
 
 ###### Example
-`fga stores create "FGA Demo Store"`
+`fga stores create --name "FGA Demo Store"`
 
 ###### JSON Response
 ```json
@@ -200,7 +200,7 @@ fga stores **delete**
 | Description                                                             | command | parameters                 | example                                                                                                     |
 |-------------------------------------------------------------------------|---------|----------------------------|-------------------------------------------------------------------------------------------------------------|
 | [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga models list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                     |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
 | [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                |
 
 ##### Read Authorization Models 
@@ -238,7 +238,7 @@ fga models **write**
 * `--store-id`: Specifies the store id
 
 ###### Example
-`fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`
+`fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[{"type":"user"}]}'`
 
 ###### JSON Response
 ```json5
@@ -307,7 +307,7 @@ fga models **get**
 
 | Description                                                                       | command   | parameters                 | example                                                                                                     |
 |-----------------------------------------------------------------------------------|-----------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` | `fga tuples write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1,"type_definitions":[...]}'` |
+| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` | `fga tuples write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
 | [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` | `fga tuples delete --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                   |
 | [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id` | `fga tuples read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`               |
 | [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id` | `fga tuples changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`            |
