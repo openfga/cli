@@ -248,7 +248,7 @@ fga models **get**
 
 ##### Read the Latest Authorization Model 
 
-If `model-id` is not specified using the `get` command, the latest authorization model will be returned.
+If `model-id` is not specified when using the `get` command, the latest authorization model will be returned.
 
 ###### Command
 fga models **get**
