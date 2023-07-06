@@ -26,32 +26,41 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func create(fgaClient client.SdkClient, storeName string) (string, error) {
+	body := client.ClientCreateStoreRequest{Name: storeName}
+
+	store, err := fgaClient.CreateStore(context.Background()).Body(body).Execute()
+	if err != nil {
+		return "", fmt.Errorf("failed to create store %v due to %w", storeName, err)
+	}
+
+	storeJSON, err := json.Marshal(store)
+	if err != nil {
+		return "", fmt.Errorf("store %v created, but failed to be printed due to %w", *store.Id, err)
+	}
+
+	return string(storeJSON), nil
+}
+
 // createCmd represents the store create command.
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create and initialize a store.",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 		storeName, _ := cmd.Flags().GetString("name")
-		body := client.ClientCreateStoreRequest{Name: storeName}
-		store, err := fgaClient.CreateStore(context.Background()).Body(body).Execute()
+		output, err := create(fgaClient, storeName)
 		if err != nil {
-			fmt.Printf("Failed to create store %v due to %v", storeName, err)
-			os.Exit(1)
+			return err
 		}
+		fmt.Print(output)
 
-		storeJSON, err := json.Marshal(store)
-		if err != nil {
-			fmt.Printf("Store %v created, but failed to be printed due to %v", *store.Id, err)
-			os.Exit(1)
-		}
-		fmt.Print(string(storeJSON))
+		return nil
 	},
 }
 
