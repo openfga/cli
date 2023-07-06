@@ -522,4 +522,3 @@ See [CONTRIBUTING](https://github.com/openfga/.github/blob/main/CONTRIBUTING.md)
 ## License
 
 This project is licensed under the Apache-2.0 license. See the [LICENSE](https://github.com/openfga/cli/blob/main/LICENSE) file for more info.
-This project is licensed under the Apache-2.0 license. See the [LICENSE](https://github.com/openfga/cli/blob/main/LICENSE) file for more info.
