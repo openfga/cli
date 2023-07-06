@@ -238,7 +238,7 @@ fga models **write**
 * `--store-id`: Specifies the store id
 
 ###### Example
-`fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[{"type":"user"}]}'`
+`fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
 
 ###### JSON Response
 ```json5
@@ -369,24 +369,16 @@ fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>] 
 ###### JSON Response
 ```json5
 {
-    "tuples": [
-        {
-            "key": {
-                "object": "employee:daniel",
-                "relation": "manager",
-                "user": "employee:matt"
-            },
-            "timestamp": "2022-04-22T15:42:51.341Z"
-        },
-        {
-            "key": {
-                "object": "report:sam-trip",
-                "relation": "submitter",
-                "user": "employee:sam"
-            },
-            "timestamp": "2022-04-22T15:49:11.540Z"
-        }
-    ]
+  "tuples": [
+    {
+      "key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      },
+      "timestamp": "2023-07-06T15:12:55.080666875Z"
+    }
+  ]
 }
 ```
 
@@ -406,14 +398,17 @@ fga tuples **changes** --type <type> --store-id=<store-id>
 ###### JSON Response
 ```json5
 {
-    "tuple_key": {
-        "object": "employee:peter",
-        "relation": "manager",
-        "user": "employee:anne"
-    },
-    "operation": "TUPLE_OPERATION_WRITE",
-    "timestamp": "2023-05-19T16:23:23.104683253Z",
-    "continuation_token" : "..."
+  "changes": [
+    {
+      "operation": "TUPLE_OPERATION_WRITE",
+      "timestamp": "2023-07-06T15:12:40.294950382Z",
+      "tuple_key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      }
+    }
+  ]
 }
 ```
 
@@ -480,10 +475,9 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
-* `--relation`: List of relations to check (optional, defaults to all on that type) (can be multiple)
 
 ###### Example
-`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --relation can_edit`
+`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap`
 
 ###### JSON Response
 ```json5
