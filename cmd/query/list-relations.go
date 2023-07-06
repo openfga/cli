@@ -17,12 +17,12 @@ package query
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/cli/lib/fga"
+	"github.com/openfga/cli/lib/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -33,21 +33,21 @@ func listRelations(clientConfig fga.ClientConfig,
 	user string,
 	objects string,
 	contextualTuples []client.ClientTupleKey,
-) (string, error) {
+) (*client.ClientListRelationsResponse, error) {
 	var authorizationModel openfga.AuthorizationModel
 
 	if clientConfig.AuthorizationModelID != "" {
 		// note that the auth model id is already configured in the fgaClient.
 		response, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
 		if err != nil {
-			return "", fmt.Errorf("failed to list relations due to %w", err)
+			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
 
 		authorizationModel = *response.AuthorizationModel
 	} else {
 		response, err := fgaClient.ReadLatestAuthorizationModel(context.Background()).Execute()
 		if err != nil {
-			return "", fmt.Errorf("failed to list relations due to %w", err)
+			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
 
 		authorizationModel = *response.AuthorizationModel
@@ -79,15 +79,10 @@ func listRelations(clientConfig fga.ClientConfig,
 
 	response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to list relations due to %w", err)
+		return nil, fmt.Errorf("failed to list relations due to %w", err)
 	}
 
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		return "", fmt.Errorf("failed to list relations due to %w", err)
-	}
-
-	return string(responseJSON), nil
+	return response, nil
 }
 
 // listRelationsCmd represents the listRelations command.
@@ -110,14 +105,12 @@ var listRelationsCmd = &cobra.Command{
 			return fmt.Errorf("error parsing contextual tuples for listRelations: %w", err)
 		}
 
-		output, err := listRelations(clientConfig, fgaClient, args[0], args[1], contextualTuples)
+		response, err := listRelations(clientConfig, fgaClient, args[0], args[1], contextualTuples)
 		if err != nil {
 			return fmt.Errorf("error listing relations: %w", err)
 		}
 
-		fmt.Print(output)
-
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 

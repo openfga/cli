@@ -76,12 +76,7 @@ func TestExpandWithNoError(t *testing.T) {
 		t.Error(err)
 	}
 
-	outputResponse := client.ClientExpandResponse{}
-	if err := json.Unmarshal([]byte(output), &outputResponse); err != nil {
-		t.Errorf("%v", err)
-	}
-
-	if !(reflect.DeepEqual(outputResponse, expectedResponse)) {
-		t.Errorf("Expect output response %v actual response %v", expandResponseTxt, output)
+	if !(reflect.DeepEqual(*output, expectedResponse)) {
+		t.Errorf("Expect output response %v actual response %v", expandResponseTxt, *output)
 	}
 }

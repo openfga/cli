@@ -2,6 +2,7 @@ package tuple
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -86,7 +87,13 @@ func TestReadChangesEmpty(t *testing.T) {
 	}
 
 	expectedOutput := `{"changes":[]}`
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expect output %v actual %v", expectedOutput, output)
 	}
 }
@@ -144,7 +151,13 @@ func TestReadChangesSinglePage(t *testing.T) {
 	}
 
 	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}]}` //nolint:lll
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expect output %v actual %v", expectedOutput, output)
 	}
 }
@@ -238,7 +251,13 @@ func TestReadChangesMultiPages(t *testing.T) {
 	}
 
 	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T22:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}},{"operation":"TUPLE_OPERATION_DELETE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}]}` //nolint:lll
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expect output %v actual %v", expectedOutput, output)
 	}
 }
@@ -296,7 +315,13 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 	}
 
 	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}]}` //nolint:lll
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expect output %v actual %v", expectedOutput, output)
 	}
 }

@@ -17,15 +17,15 @@ package query
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func expand(fgaClient client.SdkClient, relation string, object string) (string, error) {
+func expand(fgaClient client.SdkClient, relation string, object string) (*client.ClientExpandResponse, error) {
 	body := &client.ClientExpandRequest{
 		Relation: relation,
 		Object:   object,
@@ -33,15 +33,10 @@ func expand(fgaClient client.SdkClient, relation string, object string) (string,
 
 	tuples, err := fgaClient.Expand(context.Background()).Body(*body).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to expand tuples due to %w", err)
+		return nil, fmt.Errorf("failed to expand tuples due to %w", err)
 	}
 
-	tuplesJSON, err := json.Marshal(tuples)
-	if err != nil {
-		return "", fmt.Errorf("failed to expand tuples due to %w", err)
-	}
-
-	return string(tuplesJSON), nil
+	return tuples, nil
 }
 
 // expandCmd represents the expand command.
@@ -59,14 +54,12 @@ var expandCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		output, err := expand(fgaClient, args[0], args[1])
+		response, err := expand(fgaClient, args[0], args[1])
 		if err != nil {
 			return err
 		}
 
-		fmt.Print(output)
-
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 

@@ -17,10 +17,10 @@ package tuple
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	cmdutils "github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -29,7 +29,9 @@ import (
 // MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
 var MaxReadPagesLength = 20
 
-func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (string, error) {
+func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
+	*openfga.ReadResponse, error,
+) {
 	body := &client.ClientReadRequest{}
 	if user != "" {
 		body.User = &user
@@ -54,7 +56,7 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 
 		response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
 		if err != nil {
-			return "", fmt.Errorf("failed to read tuples due to %w", err)
+			return nil, fmt.Errorf("failed to read tuples due to %w", err)
 		}
 
 		tuples = append(tuples, *response.Tuples...)
@@ -67,12 +69,7 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 		continuationToken = *response.ContinuationToken
 	}
 
-	tuplesJSON, err := json.Marshal(openfga.ReadResponse{Tuples: &tuples})
-	if err != nil {
-		return "", fmt.Errorf("failed to read tuples due to %w", err)
-	}
-
-	return string(tuplesJSON), nil
+	return &openfga.ReadResponse{Tuples: &tuples}, nil
 }
 
 // readCmd represents the read command.
@@ -96,14 +93,12 @@ var readCmd = &cobra.Command{
 			return fmt.Errorf("failed to read tuples due to %w", err)
 		}
 
-		output, err := read(fgaClient, user, relation, object, maxPages)
+		response, err := read(fgaClient, user, relation, object, maxPages)
 		if err != nil {
 			return err
 		}
 
-		fmt.Print(output)
-
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 
@@ -112,4 +107,7 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
+
+	outputFormat := output.StandardJSON
+	readCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 }

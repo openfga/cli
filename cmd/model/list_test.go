@@ -46,7 +46,13 @@ func TestListModelsEmpty(t *testing.T) {
 	}
 
 	expectedOutput := "{\"authorization_models\":[]}"
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
@@ -113,7 +119,12 @@ func TestListModelsSinglePage(t *testing.T) {
 	}
 	expectedOutput := `{"authorization_models":[{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}]}` //nolint:all
 
-	if output != expectedOutput {
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
@@ -189,7 +200,12 @@ func TestListModelsMultiPage(t *testing.T) {
 	}
 	expectedOutput := `{"authorization_models":[{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]},{"id":"01GXSA8YR785C4FYS3C0RTG7B2","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}]}` //nolint:all
 
-	if output != expectedOutput {
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
@@ -235,7 +251,12 @@ func TestListModelsMultiPageMaxPage(t *testing.T) {
 	}
 	expectedOutput := `{"authorization_models":[{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}]}` //nolint:all
 
-	if output != expectedOutput {
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }

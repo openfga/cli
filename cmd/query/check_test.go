@@ -93,8 +93,7 @@ func TestCheckWithNoError(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"allowed":true}`
-	if output != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+	if *output != expectedResponse {
+		t.Errorf("Expected output %v actual %v", expectedResponse, *output)
 	}
 }

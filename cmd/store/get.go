@@ -17,28 +17,23 @@ package store
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/cli/lib/fga"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func getStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (string, error) {
+func getStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*client.ClientGetStoreResponse, error) {
 	store, err := fgaClient.GetStore(context.Background()).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to get store %v due to %w", clientConfig.StoreID, err)
+		return nil, fmt.Errorf("failed to get store %v due to %w", clientConfig.StoreID, err)
 	}
 
-	storeJSON, err := json.Marshal(store)
-	if err != nil {
-		return "", fmt.Errorf("failed to get store due to %w", err)
-	}
-
-	return string(storeJSON), nil
+	return store, nil
 }
 
 // getCmd represents the get command.
@@ -53,21 +48,23 @@ var getCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		output, err := getStore(clientConfig, fgaClient)
+		response, err := getStore(clientConfig, fgaClient)
 		if err != nil {
 			return err
 		}
 
-		fmt.Print(output)
-
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	getCmd.Flags().String("store-id", "", "Store ID")
+
+	outputFormat := output.StandardJSON
+	getCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
+
 	err := getCmd.MarkFlagRequired("store-id")
-	if err != nil { //nolint:wsl
+	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}

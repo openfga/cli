@@ -17,11 +17,11 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -30,7 +30,7 @@ import (
 // MaxModelsPagesLength Limit the models so that we are not paginating indefinitely.
 var MaxModelsPagesLength = 20
 
-func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
+func listModels(fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthorizationModelsResponse, error) {
 	// This is needed to ensure empty array is marshaled as [] instead of nil
 	models := make([]openfga.AuthorizationModel, 0)
 
@@ -45,7 +45,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 
 		response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
 		if err != nil {
-			return "", fmt.Errorf("failed to list models due to %w", err)
+			return nil, fmt.Errorf("failed to list models due to %w", err)
 		}
 
 		models = append(models, *response.AuthorizationModels...)
@@ -59,12 +59,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 		continuationToken = *response.ContinuationToken
 	}
 
-	modelsJSON, err := json.Marshal(openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models})
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal listed models due to %w", err)
-	}
-
-	return string(modelsJSON), nil
+	return &openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models}, nil
 }
 
 // listCmd represents the list command.
@@ -81,13 +76,12 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to list models due to %w", err)
 		}
-		output, err := listModels(fgaClient, maxPages)
+		response, err := listModels(fgaClient, maxPages)
 		if err != nil {
 			return err
 		}
-		fmt.Print(output)
 
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 

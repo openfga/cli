@@ -17,10 +17,10 @@ package tuple
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ import (
 // MaxReadChangesPagesLength Limit the changes so that we are not paginating indefinitely.
 var MaxReadChangesPagesLength = 20
 
-func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) (string, error) {
+func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) (*openfga.ReadChangesResponse, error) {
 	changes := []openfga.TupleChange{}
 	continuationToken := ""
 	pageIndex := 0
@@ -44,7 +44,7 @@ func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) 
 
 		response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
-			return "", fmt.Errorf("failed to get tuple changes due to %w", err)
+			return nil, fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
 		changes = append(changes, *response.Changes...)
@@ -59,12 +59,7 @@ func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) 
 		continuationToken = *response.ContinuationToken
 	}
 
-	changesJSON, err := json.Marshal(openfga.ReadChangesResponse{Changes: &changes})
-	if err != nil {
-		return "", fmt.Errorf("failed to tuple changes due to %w", err)
-	}
-
-	return string(changesJSON), nil
+	return &openfga.ReadChangesResponse{Changes: &changes}, nil
 }
 
 // changesCmd represents the changes command.
@@ -89,18 +84,19 @@ var changesCmd = &cobra.Command{
 			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
-		output, err := readChanges(fgaClient, maxPages, selectedType)
+		response, err := readChanges(fgaClient, maxPages, selectedType)
 		if err != nil {
 			return err
 		}
 
-		fmt.Print(output)
-
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	changesCmd.Flags().String("type", "", "Type to restrict the changes by.")
 	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
+
+	outputFormat := output.StandardJSON
+	changesCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 }

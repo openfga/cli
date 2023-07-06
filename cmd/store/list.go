@@ -17,10 +17,10 @@ package store
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -29,7 +29,7 @@ import (
 // MaxStoresPagesLength Limit the pages of stores so that we are not paginating indefinitely.
 var MaxStoresPagesLength = 20 // up to 1000 records
 
-func listStores(fgaClient client.SdkClient, maxPages int) (string, error) {
+func listStores(fgaClient client.SdkClient, maxPages int) (*openfga.ListStoresResponse, error) {
 	stores := []openfga.Store{}
 	continuationToken := ""
 	pageIndex := 0
@@ -41,7 +41,7 @@ func listStores(fgaClient client.SdkClient, maxPages int) (string, error) {
 
 		response, err := fgaClient.ListStores(context.Background()).Options(options).Execute()
 		if err != nil {
-			return "", fmt.Errorf("failed to list stores due to %w", err)
+			return nil, fmt.Errorf("failed to list stores due to %w", err)
 		}
 
 		stores = append(stores, *response.Stores...)
@@ -54,12 +54,7 @@ func listStores(fgaClient client.SdkClient, maxPages int) (string, error) {
 		continuationToken = *response.ContinuationToken
 	}
 
-	storesJSON, err := json.Marshal(openfga.ListStoresResponse{Stores: &stores})
-	if err != nil {
-		return "", fmt.Errorf("failed to list stores due to %w", err)
-	}
-
-	return string(storesJSON), nil
+	return &openfga.ListStoresResponse{Stores: &stores}, nil
 }
 
 // listCmd represents the list command.
@@ -77,16 +72,18 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to list models due to %w", err)
 		}
-		output, err := listStores(fgaClient, maxPages)
+		response, err := listStores(fgaClient, maxPages)
 		if err != nil {
 			return err
 		}
-		fmt.Print(output)
 
-		return nil
+		return output.Display(cmd, *response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	listCmd.Flags().Int("max-pages", MaxStoresPagesLength, "Max number of pages to get.")
+
+	outputFormat := output.StandardJSON
+	listCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 }

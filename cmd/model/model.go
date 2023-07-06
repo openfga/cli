@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openfga/cli/lib/output"
 	"github.com/spf13/cobra"
 )
 
@@ -33,8 +34,10 @@ func init() {
 	ModelCmd.AddCommand(listCmd)
 	ModelCmd.AddCommand(getCmd)
 	ModelCmd.AddCommand(validateCmd)
-
 	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
+
+	outputFormat := output.StandardJSON
+	ModelCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 
 	err := ModelCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil {
