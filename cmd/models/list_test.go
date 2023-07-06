@@ -159,9 +159,10 @@ func TestListModelsMultiPage(t *testing.T) {
 	models2 := []openfga.AuthorizationModel{
 		model2,
 	}
+	emptyToken := ""
 	response2 := openfga.ReadAuthorizationModelsResponse{
 		AuthorizationModels: &models2,
-		ContinuationToken:   continuationToken1,
+		ContinuationToken:   &emptyToken,
 	}
 
 	gomock.InOrder(

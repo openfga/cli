@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	cmdutils "github.com/openfga/cli/lib/cmd-utils"
 	openfga "github.com/openfga/go-sdk"
@@ -27,72 +26,81 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
-var MaxReadPagesLength = 20
+func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (string, error) {
+	body := &client.ClientReadRequest{}
+	if user != "" {
+		body.User = &user
+	}
+
+	if relation != "" {
+		body.Relation = &relation
+	}
+
+	if object != "" {
+		body.Object = &object
+	}
+
+	tuples := make([]openfga.Tuple, 0)
+
+	continuationToken := ""
+	pageIndex := 0
+	options := client.ClientReadOptions{}
+
+	for {
+		options.ContinuationToken = &continuationToken
+
+		response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
+		if err != nil {
+			return "", fmt.Errorf("failed to read tuples due to %w", err)
+		}
+
+		tuples = append(tuples, *response.Tuples...)
+		pageIndex++
+
+		if response.ContinuationToken == nil || *response.ContinuationToken == "" || pageIndex >= maxPages {
+			break
+		}
+
+		continuationToken = *response.ContinuationToken
+	}
+
+	tuplesJSON, err := json.Marshal(openfga.ReadResponse{Tuples: &tuples})
+	if err != nil {
+		return "", fmt.Errorf("failed to read tuples due to %w", err)
+	}
+
+	return string(tuplesJSON), nil
+}
 
 // readCmd represents the read command.
 var readCmd = &cobra.Command{
 	Use:   "read",
 	Short: "Read Relationship Tuples",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		user, _ := cmd.Flags().GetString("user")
 		relation, _ := cmd.Flags().GetString("relation")
 		object, _ := cmd.Flags().GetString("object")
 
-		if err != nil {
-			fmt.Printf("Failed to read tuples due to %v", err)
-			os.Exit(1)
-		}
 		maxPages, _ := cmd.Flags().GetInt("max-pages")
 		if err != nil {
-			fmt.Printf("Failed to read tuples due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to read tuples due to %w", err)
 		}
 
-		body := &client.ClientReadRequest{}
-		if user != "" {
-			body.User = &user
-		}
-		if relation != "" {
-			body.Relation = &relation
-		}
-		if object != "" {
-			body.Object = &object
-		}
-
-		tuples := []openfga.Tuple{}
-		continuationToken := ""
-		pageIndex := 0
-		options := client.ClientReadOptions{}
-		for {
-			options.ContinuationToken = &continuationToken
-			response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
-			if err != nil {
-				fmt.Printf("Failed to read tuples due to %v", err)
-				os.Exit(1)
-			}
-
-			tuples = append(tuples, *response.Tuples...)
-			pageIndex++
-			if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex >= maxPages {
-				break
-			}
-
-			continuationToken = *response.ContinuationToken
-		}
-
-		tuplesJSON, err := json.Marshal(openfga.ReadResponse{Tuples: &tuples})
+		output, err := read(fgaClient, user, relation, object, maxPages)
 		if err != nil {
-			fmt.Printf("Failed to read tuples due to %v", err)
-			os.Exit(1)
+			return err
 		}
-		fmt.Print(string(tuplesJSON))
+
+		fmt.Print(output)
+
+		return nil
 	},
 }
 

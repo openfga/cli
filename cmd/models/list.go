@@ -51,7 +51,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (string, error) {
 
 		pageIndex++
 
-		if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex > maxPages {
+		if response.ContinuationToken == nil || *response.ContinuationToken == "" || pageIndex > maxPages {
 			break
 		}
 
