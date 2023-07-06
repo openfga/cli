@@ -1,0 +1,77 @@
+package stores
+
+import (
+	"context"
+	"errors"
+	"testing"
+	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/openfga/cli/lib/fga"
+	mock_client "github.com/openfga/cli/mocks"
+	openfga "github.com/openfga/go-sdk"
+	"github.com/openfga/go-sdk/client"
+)
+
+var errMockGet = errors.New("mock error")
+
+func TestGetError(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
+
+	var expectedResponse client.ClientGetStoreResponse
+
+	mockExecute.EXPECT().Execute().Return(&expectedResponse, errMockGet)
+
+	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
+
+	clientConfig := fga.ClientConfig{
+		StoreID: "12345",
+	}
+
+	_, err := getStore(clientConfig, mockFgaClient)
+	if err == nil {
+		t.Error("Expect error but there is none")
+	}
+}
+
+func TestGetSuccess(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
+	expectedTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+
+	expectedResponse := client.ClientGetStoreResponse{
+		Id:        openfga.PtrString("12345"),
+		Name:      openfga.PtrString("foo"),
+		CreatedAt: &expectedTime,
+		UpdatedAt: &expectedTime,
+	}
+
+	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
+
+	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
+
+	clientConfig := fga.ClientConfig{
+		StoreID: "12345",
+	}
+
+	output, err := getStore(clientConfig, mockFgaClient)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedOutput := "{\"created_at\":\"2009-11-10T23:00:00Z\",\"id\":\"12345\",\"name\":\"foo\",\"updated_at\":\"2009-11-10T23:00:00Z\"}" //nolint:lll
+	if output != expectedOutput {
+		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+	}
+}

@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	openfga "github.com/openfga/go-sdk"
@@ -30,58 +29,74 @@ import (
 // MaxReadChangesPagesLength Limit the changes so that we are not paginating indefinitely.
 var MaxReadChangesPagesLength = 20
 
+func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) (string, error) {
+	changes := []openfga.TupleChange{}
+	continuationToken := ""
+	pageIndex := 0
+
+	for {
+		body := &client.ClientReadChangesRequest{
+			Type: selectedType,
+		}
+		options := &client.ClientReadChangesOptions{
+			ContinuationToken: &continuationToken,
+		}
+
+		response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
+		if err != nil {
+			return "", fmt.Errorf("failed to get tuple changes due to %w", err)
+		}
+
+		changes = append(changes, *response.Changes...)
+		pageIndex++
+
+		if response.ContinuationToken == nil ||
+			*response.ContinuationToken == continuationToken ||
+			pageIndex >= maxPages {
+			break
+		}
+
+		continuationToken = *response.ContinuationToken
+	}
+
+	changesJSON, err := json.Marshal(openfga.ReadChangesResponse{Changes: &changes})
+	if err != nil {
+		return "", fmt.Errorf("failed to tuple changes due to %w", err)
+	}
+
+	return string(changesJSON), nil
+}
+
 // changesCmd represents the changes command.
 var changesCmd = &cobra.Command{
 	Use:   "changes",
 	Short: "Read Relationship Tuple Changes (Watch)",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
-			fmt.Printf("Failed to get tuple changes due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
+
 		selectedType, err := cmd.Flags().GetString("type")
 		if err != nil {
-			fmt.Printf("Failed to get tuple changes due to %v", err)
-			os.Exit(1)
-		}
-		changes := []openfga.TupleChange{}
-		continuationToken := ""
-		pageIndex := 0
-		for {
-			body := &client.ClientReadChangesRequest{
-				Type: selectedType,
-			}
-			options := &client.ClientReadChangesOptions{
-				ContinuationToken: &continuationToken,
-			}
-			response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
-			if err != nil {
-				fmt.Printf("Failed to get tuple changes due to %v", err)
-				os.Exit(1)
-			}
-
-			changes = append(changes, *response.Changes...)
-			pageIndex++
-			if response.ContinuationToken == nil || *response.ContinuationToken == continuationToken || pageIndex >= maxPages {
-				break
-			}
-
-			continuationToken = *response.ContinuationToken
+			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
-		changesJSON, err := json.Marshal(openfga.ReadChangesResponse{Changes: &changes})
+		output, err := readChanges(fgaClient, maxPages, selectedType)
 		if err != nil {
-			fmt.Printf("Failed to tuple changes due to %v", err)
-			os.Exit(1)
+			return err
 		}
-		fmt.Print(string(changesJSON))
+
+		fmt.Print(output)
+
+		return nil
 	},
 }
 
