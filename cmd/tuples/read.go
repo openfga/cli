@@ -26,6 +26,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
+var MaxReadPagesLength = 20
+
 func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (string, error) {
 	body := &client.ClientReadRequest{}
 	if user != "" {
@@ -108,5 +111,5 @@ func init() {
 	readCmd.Flags().String("user", "", "User")
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
-	readCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
+	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
 }
