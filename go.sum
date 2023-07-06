@@ -143,6 +143,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/openfga/go-sdk v0.2.3-0.20230628172854-99f80f68e981 h1:O4pso4WIqOlk7Onngw69mbu0smerYFVsW6hkyShNDmk=
 github.com/openfga/go-sdk v0.2.3-0.20230628172854-99f80f68e981/go.mod h1:ZB13O8GilPc0ITWssOszgxmz6CnIe8PQLZqbqAnx2IY=
+github.com/openfga/go-sdk v0.2.3-0.20230706193033-786d614eebbd h1:T/gza+TXR9Ld9FQIOzZhitmFQ+k7k6F8fUFG8NtrWBc=
+github.com/openfga/go-sdk v0.2.3-0.20230706193033-786d614eebbd/go.mod h1:ZB13O8GilPc0ITWssOszgxmz6CnIe8PQLZqbqAnx2IY=
 github.com/pelletier/go-toml/v2 v2.0.8 h1:0ctb6s9mE31h0/lhu+J6OPmVeDxJn+kYnJc2jZR9tGQ=
 github.com/pelletier/go-toml/v2 v2.0.8/go.mod h1:vuYfssBdrU2XDZ9bYydBu6t+6a6PYNcZljzZR9VXg+4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
