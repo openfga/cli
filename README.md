@@ -246,6 +246,31 @@ fga models **get**
 }
 ```
 
+##### Read the Latest Authorization Model 
+
+If `model-id` is not specified using the `get` command, the latest authorization model will be returned.
+
+###### Command
+fga models **get**
+
+###### Parameters
+* `--store-id`: Specifies the store id
+
+###### Example
+`fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 
+
+###### JSON Response
+```json5
+{
+    "schema_version": "1.1",
+    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
+    "type_definitions": [
+      {"type": "user"},
+      // { ... }
+    ],
+}
+```
+
 #### Relationship Tuples
 
 * `tuples`
