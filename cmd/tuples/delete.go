@@ -51,7 +51,7 @@ var deleteCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Print("Ok")
+		fmt.Print("{}")
 	},
 }
 
