@@ -57,6 +57,13 @@ func init() {
 	rootCmd.PersistentFlags().String("client-id", "", "Client ID. Sent to the Token Issuer during the Client Credentials flow")         //nolint:lll
 	rootCmd.PersistentFlags().String("client-secret", "", "Client Secret. Sent to the Token Issuer during the Client Credentials flow") //nolint:lll
 
+	rootCmd.MarkFlagsRequiredTogether(
+		"api-token-issuer",
+		"api-audience",
+		"client-id",
+		"client-secret",
+	)
+
 	rootCmd.AddCommand(stores.StoresCmd)
 	rootCmd.AddCommand(models.ModelsCmd)
 	rootCmd.AddCommand(tuples.TupleCmd)
