@@ -98,7 +98,7 @@ var readCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(cmd, *response) //nolint:wrapcheck
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 
@@ -107,7 +107,4 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
-
-	outputFormat := output.StandardJSON
-	readCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 }

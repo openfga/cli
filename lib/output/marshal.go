@@ -1,33 +1,61 @@
 package output
 
 import (
-	"encoding/json"
 	"fmt"
+	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/mattn/go-isatty"
+	json "github.com/neilotoole/jsoncolor"
+	"github.com/nwidger/jsoncolor"
 )
 
-// Marshal encodes the object in JSON and format it accordingly.
-func Marshal(v any, format string) ([]byte, error) {
-	switch format {
-	case string(StandardJSON):
-		return json.Marshal(v) //nolint:wrapcheck
-	case string(PrettyJSON):
-		return json.MarshalIndent(v, "", "  ") //nolint:wrapcheck
-	default:
-		return []byte{}, ErrUnknownFormat
-	}
-}
+// EmptyStruct is used when we wish to return an empty object.
+type EmptyStruct struct{}
 
-func Display(cmd *cobra.Command, v any) error {
-	format := cmd.Flags().Lookup("format").Value
+func displayColorTerminal(data any) error {
+	// create custom formatter
+	f := jsoncolor.NewFormatter()
 
-	output, err := Marshal(v, format.String())
+	dst, err := jsoncolor.MarshalWithFormatter(data, f)
 	if err != nil {
-		return fmt.Errorf("unable to marshal %w ", err)
+		return fmt.Errorf("unable to display output with error %w", err)
 	}
 
-	fmt.Print(string(output))
+	fmt.Println(string(dst))
 
 	return nil
+}
+
+func displayTerminal(data any) error {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+
+	err := enc.Encode(data)
+	if err != nil {
+		return fmt.Errorf("unable to encode output with error %w", err)
+	}
+
+	return nil
+}
+
+func outputNonTerminal(data any) error {
+	result, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("unable to marshal json with error %w", err)
+	}
+
+	fmt.Println(string(result))
+
+	return nil
+}
+
+// Display will decorate the output if possible.  Otherwise, will print out the standard JSON.
+func Display(data any) error {
+	if json.IsColorTerminal(os.Stdout) {
+		return displayColorTerminal(data)
+	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
+		return displayTerminal(data)
+	}
+
+	return outputNonTerminal(data)
 }

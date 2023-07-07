@@ -1,7 +1,10 @@
 package model
 
 import (
+	"reflect"
 	"testing"
+
+	openfga "github.com/openfga/go-sdk"
 )
 
 func TestValidateCmdWithArgs(t *testing.T) {
@@ -20,39 +23,54 @@ func TestValidate(t *testing.T) {
 		Name           string
 		Input          string
 		IsValid        bool
-		ExpectedOutput string
+		ExpectedOutput validationResult
 	}
 
 	tests := []validationTest{
 		{
-			Name:           "missing schema version",
-			Input:          "{",
-			IsValid:        false,
-			ExpectedOutput: `{"is_valid":false,"error":"unable to parse json input"}`,
+			Name:    "missing schema version",
+			Input:   "{",
+			IsValid: false,
+			ExpectedOutput: validationResult{
+				IsValid: false,
+				Error:   openfga.PtrString("unable to parse json input"),
+			},
 		},
 		{
-			Name:           "missing schema version",
-			Input:          `{"id":"abcde","schema_version":"1.1"}`,
-			IsValid:        false,
-			ExpectedOutput: `{"id":"abcde","is_valid":false,"error":"unable to parse id: invalid ulid format"}`,
+			Name:    "missing schema version",
+			Input:   `{"id":"abcde","schema_version":"1.1"}`,
+			IsValid: false,
+			ExpectedOutput: validationResult{
+				ID:      "abcde",
+				IsValid: false,
+				Error:   openfga.PtrString("unable to parse id: invalid ulid format"),
+			},
 		},
 		{
-			Name:           "missing schema version",
-			Input:          "{}",
-			IsValid:        false,
-			ExpectedOutput: `{"is_valid":false,"error":"invalid schema version"}`,
+			Name:    "missing schema version",
+			Input:   "{}",
+			IsValid: false,
+			ExpectedOutput: validationResult{
+				IsValid: false,
+				Error:   openfga.PtrString("invalid schema version"),
+			},
 		},
 		{
-			Name:           "invalid schema version",
-			Input:          `{"schema_version":"1.0"}`,
-			IsValid:        false,
-			ExpectedOutput: `{"is_valid":false,"error":"invalid schema version"}`,
+			Name:    "invalid schema version",
+			Input:   `{"schema_version":"1.0"}`,
+			IsValid: false,
+			ExpectedOutput: validationResult{
+				IsValid: false,
+				Error:   openfga.PtrString("invalid schema version"),
+			},
 		},
 		{
-			Name:           "only schema",
-			Input:          `{"schema_version":"1.1"}`,
-			IsValid:        true,
-			ExpectedOutput: `{"is_valid":true}`,
+			Name:    "only schema",
+			Input:   `{"schema_version":"1.1"}`,
+			IsValid: true,
+			ExpectedOutput: validationResult{
+				IsValid: true,
+			},
 		},
 	}
 
@@ -62,12 +80,9 @@ func TestValidate(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			output, err := validate(test.Input)
-			if err != nil {
-				t.Fatalf("%v", err)
-			}
+			output := validate(test.Input)
 
-			if output != test.ExpectedOutput {
+			if !reflect.DeepEqual(output, test.ExpectedOutput) {
 				t.Fatalf("Expect output %v actual %v", test.ExpectedOutput, output)
 			}
 		})

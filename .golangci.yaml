@@ -37,6 +37,9 @@ linters-settings:
           - github.com/openfga/cli
           - github.com/openfga/go-sdk
           - github.com/openfga/openfga
+          - github.com/mattn/go-isatty
+          - github.com/neilotoole/jsoncolor
+          - github.com/nwidger/jsoncolor
           - go.buf.build/openfga/go/openfga/api
           - github.com/oklog/ulid/v2
           - google.golang.org/protobuf/encoding/protojson

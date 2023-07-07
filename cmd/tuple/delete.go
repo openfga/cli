@@ -18,9 +18,9 @@ package tuple
 import (
 	"context"
 	"fmt"
-	"os"
 
 	cmdutils "github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
@@ -30,12 +30,11 @@ var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete Relationship Tuples",
 	Args:  cobra.ExactArgs(3), //nolint:gomnd
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			fmt.Printf("Failed to initialize FGA Client due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 		body := &client.ClientDeleteTuplesBody{
 			client.ClientTupleKey{
@@ -47,11 +46,10 @@ var deleteCmd = &cobra.Command{
 		options := &client.ClientWriteOptions{}
 		_, err = fgaClient.DeleteTuples(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
-			fmt.Printf("Failed to delete tuples due to %v", err)
-			os.Exit(1)
+			return fmt.Errorf("failed to delete tuples due to %w", err)
 		}
 
-		fmt.Print("{}")
+		return output.Display(output.EmptyStruct{}) //nolint:wrapcheck
 	},
 }
 

@@ -89,14 +89,11 @@ var changesCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(cmd, *response) //nolint:wrapcheck
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	changesCmd.Flags().String("type", "", "Type to restrict the changes by.")
 	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
-
-	outputFormat := output.StandardJSON
-	changesCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 }

@@ -61,7 +61,7 @@ var writeCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(cmd, *response) //nolint:wrapcheck
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 

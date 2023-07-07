@@ -17,11 +17,10 @@ package model
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/oklog/ulid/v2"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/openfga/pkg/typesystem"
 	"github.com/spf13/cobra"
 	pb "go.buf.build/openfga/go/openfga/api/openfga/v1"
@@ -35,7 +34,7 @@ type validationResult struct {
 	Error     *string    `json:"error,omitempty"`
 }
 
-func innerValidate(inputModel string) validationResult {
+func validate(inputModel string) validationResult {
 	model := &pb.AuthorizationModel{}
 	output := validationResult{
 		IsValid: true,
@@ -75,30 +74,15 @@ func innerValidate(inputModel string) validationResult {
 	return output
 }
 
-func validate(inputModel string) (string, error) {
-	output := innerValidate(inputModel)
-
-	outputJSON, err := json.Marshal(output)
-	if err != nil {
-		return "", fmt.Errorf("error marshalling output to JSON: %w", err)
-	}
-
-	return string(outputJSON), nil
-}
-
 // validateCmd represents the validate command.
 var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validates an authorization model",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		output, err := validate(args[0])
-		if err != nil {
-			return fmt.Errorf("error calling validate: %w", err)
-		}
-		fmt.Println(output)
+		response := validate(args[0])
 
-		return nil
+		return output.Display(response) //nolint:wrapcheck
 	},
 }
 

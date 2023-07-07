@@ -77,13 +77,10 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(cmd, *response) //nolint:wrapcheck
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	listCmd.Flags().Int("max-pages", MaxStoresPagesLength, "Max number of pages to get.")
-
-	outputFormat := output.StandardJSON
-	listCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 }

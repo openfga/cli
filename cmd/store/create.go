@@ -54,15 +54,12 @@ var createCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(cmd, *response) //nolint:wrapcheck
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
-
-	outputFormat := output.StandardJSON
-	createCmd.PersistentFlags().Var(&outputFormat, output.FlagName, output.FlagMessage)
 
 	err := createCmd.MarkFlagRequired("name")
 	if err != nil {

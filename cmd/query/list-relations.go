@@ -110,7 +110,7 @@ var listRelationsCmd = &cobra.Command{
 			return fmt.Errorf("error listing relations: %w", err)
 		}
 
-		return output.Display(cmd, *response) //nolint:wrapcheck
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 
