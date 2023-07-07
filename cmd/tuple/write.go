@@ -13,59 +13,45 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package models
+package tuple
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func write(fgaClient client.SdkClient, text string) (string, error) {
-	body := &client.ClientWriteAuthorizationModelRequest{}
-
-	err := json.Unmarshal([]byte(text), &body)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse model due to %w", err)
-	}
-
-	model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
-	if err != nil {
-		return "", fmt.Errorf("failed to write model due to %w", err)
-	}
-
-	modelJSON, err := json.Marshal(model)
-	if err != nil {
-		return "", fmt.Errorf("failed to write model due to %w", err)
-	}
-
-	return string(modelJSON), nil
-}
-
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
 	Use:   "write",
-	Short: "Write Authorization Model",
-	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Short: "Create Relationship Tuples",
+	Args:  cobra.ExactArgs(3), //nolint:gomnd
+	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
-
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+			fmt.Printf("Failed to initialize FGA Client due to %v", err)
+			os.Exit(1)
 		}
-
-		output, err := write(fgaClient, args[0])
+		body := &client.ClientWriteTuplesBody{
+			client.ClientTupleKey{
+				User:     args[0],
+				Relation: args[1],
+				Object:   args[2],
+			},
+		}
+		options := &client.ClientWriteOptions{}
+		_, err = fgaClient.WriteTuples(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
-			return err
+			fmt.Printf("Failed to write tuples due to %v", err)
+			os.Exit(1)
 		}
-		fmt.Print(output)
 
-		return nil
+		fmt.Print("{}")
 	},
 }
 

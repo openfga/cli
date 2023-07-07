@@ -17,17 +17,17 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Commands](#commands)
-    - [Stores](#stores)
+    - [Store](#store)
       - [List All Stores](#list-stores)
       - [Create a Store](#create-store)
       - [Get a Store](#get-store)
       - [Delete a Store](#delete-store)
-    - [Authorization Models](#authorization-models)
+    - [Authorization Model](#authorization-model)
       - [Read Authorization Models](#read-authorization-models)
       - [Write Authorization Model](#write-authorization-model)
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
-    - [Relationship Tuples](#relationship-tuples)
+    - [Relationship Tuple](#relationship-tuple)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
       - [Read Relationship Tuples](#read-relationship-tuples)
       - [Create Relationship Tuples](#create-relationship-tuples)
@@ -103,24 +103,24 @@ For any command that interacts with an OpenFGA server, these configuration value
 
 ### Commands
 
-#### Stores
-| Description                     | command  | parameters   | example                                                   |
-|---------------------------------|----------|--------------|-----------------------------------------------------------|
-| [Create a Store](#create-store) | `create` | `--name`     | `fga stores create --name="FGA Demo Store"`               |
-| [List Stores](#list-stores)     | `list`   |              | `fga stores list`                                         |
-| [Get a Store](#get-store)       | `get`    | `--store-id` | `fga stores get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
-| [Delete a Store](#delete-store) | `delete` | `--store-id` | `fga stores delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
+#### Store
+| Description                     | command  | parameters   | example                                                  |
+|---------------------------------|----------|--------------|----------------------------------------------------------|
+| [Create a Store](#create-store) | `create` | `--name`     | `fga store create --name="FGA Demo Store"`               |
+| [List Stores](#list-stores)     | `list`   |              | `fga store list`                                         |
+| [Get a Store](#get-store)       | `get`    | `--store-id` | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
+| [Delete a Store](#delete-store) | `delete` | `--store-id` | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
 
 ##### Create Store
 
 ###### Command
-fga stores **create**
+fga store **create**
 
 ###### Parameters
 * `--name`: Specifies the name of the store to be created
 
 ###### Example
-`fga stores create --name "FGA Demo Store"`
+`fga store create --name "FGA Demo Store"`
 
 ###### JSON Response
 ```json
@@ -135,13 +135,13 @@ fga stores **create**
 ##### List Stores
 
 ###### Command
-fga stores **list**
+fga store **list**
 
 ###### Parameters
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
-`fga stores list`
+`fga store list`
 
 ###### JSON Response
 ```json
@@ -159,13 +159,13 @@ fga stores **list**
 ##### Get Store
 
 ###### Command
-fga stores **get**
+fga store **get**
 
 ###### Parameters
 * `--store-id`: Specifies the store id to get
 
 ###### Example
-`fga stores get --store-id=01H0H015178Y2V4CX10C2KGHF4`
+`fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json
@@ -180,40 +180,40 @@ fga stores **get**
 ##### Delete Store
 
 ###### Command
-fga stores **delete**
+fga store **delete**
 
 ###### Parameters
 * `--store-id`: Specifies the store id to delete
 
 ###### Example
-`fga stores delete --store-id=01H0H015178Y2V4CX10C2KGHF4`
+`fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json
 {}
 ```
 
-#### Authorization Models
+#### Authorization Model
 
-* `models`
+* `model`
 
 | Description                                                             | command | parameters                 | example                                                                                                     |
 |-------------------------------------------------------------------------|---------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga models list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                     |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
-| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                |
+| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                      |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
+| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                 |
 
 ##### Read Authorization Models 
 
 ###### Command
-fga models **list**
+fga model **list**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
-`fga models list --store-id=01H0H015178Y2V4CX10C2KGHF4`
+`fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json5
@@ -232,13 +232,13 @@ fga models **list**
 ##### Write Authorization Model 
 
 ###### Command
-fga models **write**
+fga model **write**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
 
 ###### Example
-`fga models write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
+`fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
 
 ###### JSON Response
 ```json5
@@ -255,14 +255,14 @@ fga models **write**
 ##### Read a Single Authorization Model 
 
 ###### Command
-fga models **get**
+fga model **get**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id
 
 ###### Example
-`fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`
+`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`
 
 ###### JSON Response
 ```json5
@@ -281,13 +281,13 @@ fga models **get**
 If `model-id` is not specified when using the `get` command, the latest authorization model will be returned.
 
 ###### Command
-fga models **get**
+fga model **get**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
 
 ###### Example
-`fga models get --store-id=01H0H015178Y2V4CX10C2KGHF4 
+`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 
 
 ###### JSON Response
 ```json5
@@ -301,22 +301,22 @@ fga models **get**
 }
 ```
 
-#### Relationship Tuples
+#### Relationship Tuple
 
-* `tuples`
+* `tuple`
 
-| Description                                                                       | command   | parameters                 | example                                                                                                     |
-|-----------------------------------------------------------------------------------|-----------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` | `fga tuples write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
-| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` | `fga tuples delete --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                   |
-| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id` | `fga tuples read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`               |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id` | `fga tuples changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`            |
-| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id` | `fga tuples import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`             |
+| Description                                                                       | command   | parameters                 | example                                                                                                 |
+|-----------------------------------------------------------------------------------|-----------|----------------------------|---------------------------------------------------------------------------------------------------------|
+| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` | `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
+| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` | `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                |
+| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id` | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`            |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id` | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`         |
+| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`          |
 
 ##### Write Relationship Tuples
 
 ###### Command
-fga tuples **write** <user> <relation> <object> --store-id=<store-id>
+fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 
 ###### Parameters
 * `<user>`: User
@@ -326,7 +326,7 @@ fga tuples **write** <user> <relation> <object> --store-id=<store-id>
 * `--model-id`: Specifies the model id to target (optional)
 
 ###### Example
-`fga tuples write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+`fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -336,7 +336,7 @@ fga tuples **write** <user> <relation> <object> --store-id=<store-id>
 ##### Delete Relationship Tuples
 
 ###### Command
-fga tuples **delete** <user> <relation> <object> --store-id=<store-id>
+fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 
 ###### Parameters
 * `<user>`: User
@@ -345,7 +345,7 @@ fga tuples **delete** <user> <relation> <object> --store-id=<store-id>
 * `--store-id`: Specifies the store id
 
 ###### Example
-`fga tuples delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+`fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -355,7 +355,7 @@ fga tuples **delete** <user> <relation> <object> --store-id=<store-id>
 ##### Read Relationship Tuples
 
 ###### Command
-fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  --store-id=<store-id>
+fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  --store-id=<store-id>
 
 ###### Parameters
 * `--store-id`: Specifies the store id
@@ -364,7 +364,7 @@ fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>] 
 * `--object`: Object
 
 ###### Example
-`fga tuples read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
+`fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
 
 ###### JSON Response
 ```json5
@@ -385,7 +385,7 @@ fga tuples **read** [--user=<user>] [--relation=<relation>] [--object=<object>] 
 ##### Read Relationship Tuple Changes (Watch)
 
 ###### Command
-fga tuples **changes** --type <type> --store-id=<store-id>
+fga tuple **changes** --type <type> --store-id=<store-id>
 
 ###### Parameters
 * `--store-id`: Specifies the store id
@@ -393,7 +393,7 @@ fga tuples **changes** --type <type> --store-id=<store-id>
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
-`fga tuples changes --store-id=01H0H015178Y2V4CX10C2KGHF4 document`
+`fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 document`
 
 ###### JSON Response
 ```json5

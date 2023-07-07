@@ -13,22 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package stores
+package tuple
 
 import (
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/openfga/cli/lib/cmd-utils"
+	cmdutils "github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Delete store",
-	Long:  ``,
+	Short: "Delete Relationship Tuples",
+	Args:  cobra.ExactArgs(3), //nolint:gomnd
 	Run: func(cmd *cobra.Command, args []string) {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -36,21 +37,23 @@ var deleteCmd = &cobra.Command{
 			fmt.Printf("Failed to initialize FGA Client due to %v", err)
 			os.Exit(1)
 		}
-		_, err = fgaClient.DeleteStore(context.Background()).Execute()
+		body := &client.ClientDeleteTuplesBody{
+			client.ClientTupleKey{
+				User:     args[0],
+				Relation: args[1],
+				Object:   args[2],
+			},
+		}
+		options := &client.ClientWriteOptions{}
+		_, err = fgaClient.DeleteTuples(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
-			fmt.Printf("Failed to delete store %v due to %v", clientConfig.StoreID, err)
+			fmt.Printf("Failed to delete tuples due to %v", err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("{}")
+		fmt.Print("{}")
 	},
 }
 
 func init() {
-	deleteCmd.Flags().String("store-id", "", "Store ID")
-	err := deleteCmd.MarkFlagRequired("store-id")
-	if err != nil { //nolint:wsl
-		fmt.Print(err)
-		os.Exit(1)
-	}
 }

@@ -19,10 +19,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openfga/cli/cmd/models"
+	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/cmd/query"
-	"github.com/openfga/cli/cmd/stores"
-	"github.com/openfga/cli/cmd/tuples"
+	"github.com/openfga/cli/cmd/store"
+	"github.com/openfga/cli/cmd/tuple"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -64,9 +64,9 @@ func init() {
 		"client-secret",
 	)
 
-	rootCmd.AddCommand(stores.StoresCmd)
-	rootCmd.AddCommand(models.ModelsCmd)
-	rootCmd.AddCommand(tuples.TupleCmd)
+	rootCmd.AddCommand(store.StoresCmd)
+	rootCmd.AddCommand(model.ModelsCmd)
+	rootCmd.AddCommand(tuple.TupleCmd)
 	rootCmd.AddCommand(query.QueryCmd)
 }
 

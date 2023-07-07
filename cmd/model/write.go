@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package models
+package model
 
 import (
 	"context"
@@ -21,45 +21,36 @@ import (
 	"fmt"
 
 	"github.com/openfga/cli/lib/cmd-utils"
-	"github.com/openfga/cli/lib/fga"
-	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (string, error) {
-	authorizationModelID := clientConfig.AuthorizationModelID
+func write(fgaClient client.SdkClient, text string) (string, error) {
+	body := &client.ClientWriteAuthorizationModelRequest{}
 
-	var err error
-
-	var model *openfga.ReadAuthorizationModelResponse
-
-	if authorizationModelID != "" {
-		options := client.ClientReadAuthorizationModelOptions{
-			AuthorizationModelId: openfga.PtrString(authorizationModelID),
-		}
-		model, err = fgaClient.ReadAuthorizationModel(context.Background()).Options(options).Execute()
-	} else {
-		options := client.ClientReadLatestAuthorizationModelOptions{}
-		model, err = fgaClient.ReadLatestAuthorizationModel(context.Background()).Options(options).Execute()
+	err := json.Unmarshal([]byte(text), &body)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse model due to %w", err)
 	}
 
+	model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
+		return "", fmt.Errorf("failed to write model due to %w", err)
 	}
 
 	modelJSON, err := json.Marshal(model)
 	if err != nil {
-		return "", fmt.Errorf("failed to get model due to %w", err)
+		return "", fmt.Errorf("failed to write model due to %w", err)
 	}
 
 	return string(modelJSON), nil
 }
 
-// getCmd represents the get command.
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Read a Single Authorization Model",
+// writeCmd represents the write command.
+var writeCmd = &cobra.Command{
+	Use:   "write",
+	Short: "Write Authorization Model",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -67,11 +58,11 @@ var getCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
-		output, err := getModel(clientConfig, fgaClient)
+
+		output, err := write(fgaClient, args[0])
 		if err != nil {
 			return err
 		}
-
 		fmt.Print(output)
 
 		return nil
@@ -79,5 +70,4 @@ var getCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.Flags().String("model-id", "", "Authorization Model ID")
 }

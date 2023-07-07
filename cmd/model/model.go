@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package tuples
+package model
 
 import (
 	"fmt"
@@ -22,20 +22,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TupleCmd represents the tuple command.
-var TupleCmd = &cobra.Command{
-	Use:   "tuples",
-	Short: "Interact with Relationship Tuples in a store.",
+// ModelsCmd represents the store command.
+var ModelsCmd = &cobra.Command{
+	Use:   "model",
+	Short: "Write, Read and List authorization models in a store",
 }
 
 func init() {
-	TupleCmd.AddCommand(writeCmd)
-	TupleCmd.AddCommand(deleteCmd)
-	TupleCmd.AddCommand(readCmd)
-	TupleCmd.AddCommand(changesCmd)
+	ModelsCmd.AddCommand(writeCmd)
+	ModelsCmd.AddCommand(listCmd)
+	ModelsCmd.AddCommand(getCmd)
 
-	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
-	err := TupleCmd.MarkPersistentFlagRequired("store-id")
+	ModelsCmd.PersistentFlags().String("store-id", "", "Store ID")
+	err := ModelsCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
 		fmt.Print(err)
 		os.Exit(1)
