@@ -22,19 +22,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ModelsCmd represents the store command.
-var ModelsCmd = &cobra.Command{
+// ModelCmd represents the store command.
+var ModelCmd = &cobra.Command{
 	Use:   "model",
 	Short: "Write, Read and List authorization models in a store",
 }
 
 func init() {
-	ModelsCmd.AddCommand(writeCmd)
-	ModelsCmd.AddCommand(listCmd)
-	ModelsCmd.AddCommand(getCmd)
+	ModelCmd.AddCommand(writeCmd)
+	ModelCmd.AddCommand(listCmd)
+	ModelCmd.AddCommand(getCmd)
 
-	ModelsCmd.PersistentFlags().String("store-id", "", "Store ID")
-	err := ModelsCmd.MarkPersistentFlagRequired("store-id")
+	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
+	err := ModelCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
 		fmt.Print(err)
 		os.Exit(1)

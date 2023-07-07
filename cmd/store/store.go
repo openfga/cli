@@ -19,15 +19,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// StoresCmd represents the store command.
-var StoresCmd = &cobra.Command{
+// StoreCmd represents the store command.
+var StoreCmd = &cobra.Command{
 	Use:   "store",
 	Short: "Create, Get, Delete and List OpenFGA Stores",
 }
 
 func init() {
-	StoresCmd.AddCommand(createCmd)
-	StoresCmd.AddCommand(listCmd)
-	StoresCmd.AddCommand(getCmd)
-	StoresCmd.AddCommand(deleteCmd)
+	StoreCmd.AddCommand(createCmd)
+	StoreCmd.AddCommand(listCmd)
+	StoreCmd.AddCommand(getCmd)
+	StoreCmd.AddCommand(deleteCmd)
 }

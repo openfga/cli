@@ -17,17 +17,17 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Commands](#commands)
-    - [Store](#store)
+    - [Stores](#stores)
       - [List All Stores](#list-stores)
       - [Create a Store](#create-store)
       - [Get a Store](#get-store)
       - [Delete a Store](#delete-store)
-    - [Authorization Model](#authorization-model)
+    - [Authorization Models](#authorization-models)
       - [Read Authorization Models](#read-authorization-models)
       - [Write Authorization Model](#write-authorization-model)
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
-    - [Relationship Tuple](#relationship-tuple)
+    - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
       - [Read Relationship Tuples](#read-relationship-tuples)
       - [Create Relationship Tuples](#create-relationship-tuples)
@@ -103,7 +103,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 
 ### Commands
 
-#### Store
+#### Stores
 | Description                     | command  | parameters   | example                                                  |
 |---------------------------------|----------|--------------|----------------------------------------------------------|
 | [Create a Store](#create-store) | `create` | `--name`     | `fga store create --name="FGA Demo Store"`               |
@@ -193,7 +193,7 @@ fga store **delete**
 {}
 ```
 
-#### Authorization Model
+#### Authorization Models
 
 * `model`
 
@@ -301,7 +301,7 @@ fga model **get**
 }
 ```
 
-#### Relationship Tuple
+#### Relationship Tuples
 
 * `tuple`
 
