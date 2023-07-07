@@ -93,14 +93,16 @@ Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go
 
 For any command that interacts with an OpenFGA server, these configuration values can be passed (where applicable)
 
-| Name           | Flag                 | CLI                    |
-|----------------|----------------------|------------------------|
-| Server Url     | `--server-url`       | `FGA_SERVER_URL`       |
-| Shared Secret  | `--api-token`        | `FGA_API_TOKEN`        |
-| Client ID      | `--client-id`        | `FGA_CLIENT_ID`        |
-| Client Secret  | `--client-secret`    | `FGA_CLIENT_SECRET`    |
-| Token Issuer   | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` |
-| Token Audience | `--api-audience`     | `FGA_API_AUDIENCE`     |
+| Name                   | Flag                 | CLI                    |
+|------------------------|----------------------|------------------------|
+| Server Url             | `--server-url`       | `FGA_SERVER_URL`       |
+| Shared Secret          | `--api-token`        | `FGA_API_TOKEN`        |
+| Client ID              | `--client-id`        | `FGA_CLIENT_ID`        |
+| Client Secret          | `--client-secret`    | `FGA_CLIENT_SECRET`    |
+| Token Issuer           | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` |
+| Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     |
+| Store ID               | `--store-id`         | `FGA_STORE_ID`         |
+| Authorization Model ID | `--model-id`         | `FGA_MODEL_ID`         |
 
 ### Commands
 

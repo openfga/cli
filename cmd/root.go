@@ -18,11 +18,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/cmd/query"
 	"github.com/openfga/cli/cmd/store"
 	"github.com/openfga/cli/cmd/tuple"
+	cmdutils "github.com/openfga/cli/lib/cmd-utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -72,9 +74,11 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	viperInstance := viper.New()
+
 	if cfgFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viperInstance.SetConfigFile(cfgFile)
 	} else {
 		// Find config directory.
 		configDir, err := os.UserConfigDir()
@@ -84,17 +88,27 @@ func initConfig() {
 		homeDir, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".fga" (without extension).
-		viper.AddConfigPath(homeDir)
-		viper.AddConfigPath(configDir + "/" + "fga")
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".fga")
+		// Search for .fga.yaml in:
+		// 1- XDG_CONFIG/User Config Directory
+		// 2- fga directory under User Config Directory
+		// 3- Home directory
+		viperInstance.AddConfigPath(configDir)
+		viperInstance.AddConfigPath(configDir + "/" + "fga")
+		viperInstance.AddConfigPath(homeDir)
+		viperInstance.SetConfigType("yml")
+		viperInstance.SetConfigType("yaml")
+		viperInstance.SetConfigName(".fga")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	if err := viperInstance.ReadInConfig(); err == nil {
+		fmt.Fprintln(os.Stderr, "Using config file:", viperInstance.ConfigFileUsed())
 	}
+
+	viperInstance.SetEnvPrefix("FGA")
+	viperInstance.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+
+	viperInstance.AutomaticEnv() // read in environment variables that match
+
+	cmdutils.BindViperToFlags(rootCmd, viperInstance)
 }
