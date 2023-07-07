@@ -32,10 +32,12 @@ func init() {
 	ModelCmd.AddCommand(writeCmd)
 	ModelCmd.AddCommand(listCmd)
 	ModelCmd.AddCommand(getCmd)
+	ModelCmd.AddCommand(validateCmd)
 
 	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
+
 	err := ModelCmd.MarkPersistentFlagRequired("store-id")
-	if err != nil { //nolint:wsl
+	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}

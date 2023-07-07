@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/go-sdk/client"
@@ -70,4 +71,10 @@ var writeCmd = &cobra.Command{
 }
 
 func init() {
+	writeCmd.Flags().String("store-id", "", "Store ID")
+
+	if err := writeCmd.MarkFlagRequired("store-id"); err != nil {
+		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
+		os.Exit(1)
+	}
 }
