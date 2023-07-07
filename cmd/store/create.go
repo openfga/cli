@@ -17,29 +17,24 @@ package store
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func create(fgaClient client.SdkClient, storeName string) (string, error) {
+func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateStoreResponse, error) {
 	body := client.ClientCreateStoreRequest{Name: storeName}
 
 	store, err := fgaClient.CreateStore(context.Background()).Body(body).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to create store %v due to %w", storeName, err)
+		return nil, fmt.Errorf("failed to create store %v due to %w", storeName, err)
 	}
 
-	storeJSON, err := json.Marshal(store)
-	if err != nil {
-		return "", fmt.Errorf("store %v created, but failed to be printed due to %w", *store.Id, err)
-	}
-
-	return string(storeJSON), nil
+	return store, nil
 }
 
 // createCmd represents the store create command.
@@ -54,20 +49,20 @@ var createCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 		storeName, _ := cmd.Flags().GetString("name")
-		output, err := create(fgaClient, storeName)
+		response, err := create(fgaClient, storeName)
 		if err != nil {
 			return err
 		}
-		fmt.Print(output)
 
-		return nil
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
+
 	err := createCmd.MarkFlagRequired("name")
-	if err != nil { //nolint:wsl
+	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}

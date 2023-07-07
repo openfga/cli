@@ -36,7 +36,7 @@ func init() {
 
 	QueryCmd.PersistentFlags().String("store-id", "", "Store ID")
 	QueryCmd.PersistentFlags().String("model-id", "", "Model ID")
-	QueryCmd.PersistentFlags().StringArray("contextual-tuple", []string{}, `Contextual Tuple, format: "user relation object"`) //nolint:lll
+	QueryCmd.PersistentFlags().StringArray("contextual-tuple", []string{}, `Contextual Tuple, output: "user relation object"`) //nolint:lll
 
 	err := QueryCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil {

@@ -70,8 +70,7 @@ func TestGetSuccess(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"created_at\":\"2009-11-10T23:00:00Z\",\"id\":\"12345\",\"name\":\"foo\",\"updated_at\":\"2009-11-10T23:00:00Z\"}" //nolint:lll
-	if output != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+	if *output != expectedResponse {
+		t.Errorf("Expected output %v actual %v", expectedResponse, *output)
 	}
 }

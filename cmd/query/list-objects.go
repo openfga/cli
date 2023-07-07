@@ -17,10 +17,10 @@ package query
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ func listObjects(
 	relation string,
 	objectType string,
 	contextualTuples []client.ClientTupleKey,
-) (string, error) {
+) (*client.ClientListObjectsResponse, error) {
 	body := &client.ClientListObjectsRequest{
 		User:             user,
 		Relation:         relation,
@@ -43,15 +43,10 @@ func listObjects(
 
 	response, err := fgaClient.ListObjects(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to list objects due to %w", err)
+		return nil, fmt.Errorf("failed to list objects due to %w", err)
 	}
 
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		return "", fmt.Errorf("failed to list objects due to %w", err)
-	}
-
-	return string(responseJSON), nil
+	return response, nil
 }
 
 // listObjectsCmd represents the listObjects command.
@@ -73,14 +68,12 @@ var listObjectsCmd = &cobra.Command{
 			return fmt.Errorf("error parsing contextual tuples for listObjects: %w", err)
 		}
 
-		output, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples)
+		response, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples)
 		if err != nil {
 			return fmt.Errorf("error listing objects: %w", err)
 		}
 
-		fmt.Print(output)
-
-		return nil
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 

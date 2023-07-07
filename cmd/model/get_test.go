@@ -44,8 +44,8 @@ func TestGetModelNoAuthModelID(t *testing.T) {
 	output, err := getModel(clientConfig, mockFgaClient)
 	if err != nil {
 		t.Fatalf("%v", err)
-	} else if output != modelJSON {
-		t.Fatalf("Expect output %v actual %v", modelJSON, output)
+	} else if *output != expectedResponse {
+		t.Fatalf("Expect output %v actual %v", modelJSON, *output)
 	}
 }
 
@@ -82,8 +82,8 @@ func TestGetModelAuthModelID(t *testing.T) {
 	output, err := getModel(clientConfig, mockFgaClient)
 	if err != nil {
 		t.Fatalf("%v", err)
-	} else if output != modelJSON {
-		t.Fatalf("Expect output %v actual %v", modelJSON, output)
+	} else if *output != expectedResponse {
+		t.Fatalf("Expect output %v actual %v", modelJSON, *output)
 	}
 }
 

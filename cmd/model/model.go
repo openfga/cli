@@ -33,7 +33,6 @@ func init() {
 	ModelCmd.AddCommand(listCmd)
 	ModelCmd.AddCommand(getCmd)
 	ModelCmd.AddCommand(validateCmd)
-
 	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
 
 	err := ModelCmd.MarkPersistentFlagRequired("store-id")

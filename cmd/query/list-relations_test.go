@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -181,8 +182,7 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"relations\":[\"viewer\"]}"
-	if output != expectedOutput {
-		t.Errorf("Expect output %v actual %v", expectedOutput, output)
+	if !reflect.DeepEqual(*output, expectedListRelationsResponse) {
+		t.Errorf("Expect output %v actual %v", expectedListRelationsResponse, *output)
 	}
 }

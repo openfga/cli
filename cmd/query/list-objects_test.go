@@ -89,8 +89,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"objects\":[\"doc:doc1\",\"doc:doc2\"]}"
-	if output != expectedOutput {
-		t.Errorf("Expect %v but actual %v", expectedOutput, output)
+	if *output != expectedResponse {
+		t.Errorf("Expect %v but actual %v", expectedResponse, *output)
 	}
 }

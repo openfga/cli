@@ -4,6 +4,8 @@ go 1.20
 
 require (
 	github.com/golang/mock v1.6.0
+	github.com/mattn/go-isatty v0.0.19
+	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/go-sdk v0.2.3-0.20230706193033-786d614eebbd
 	github.com/openfga/openfga v1.2.0
@@ -14,6 +16,7 @@ require (
 )
 
 require (
+	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -23,6 +26,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/karlseguin/ccache/v3 v3.0.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/spf13/afero v1.9.5 // indirect

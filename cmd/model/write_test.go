@@ -75,7 +75,7 @@ func TestWriteModel(t *testing.T) {
 
 	mockExecute := mockclient.NewMockSdkClientWriteAuthorizationModelRequestInterface(mockCtrl)
 
-	const modelID = "01GXSB8YR785C4FYS3C0RTG7C2"
+	modelID := "01GXSB8YR785C4FYS3C0RTG7C2"
 	response := client.ClientWriteAuthorizationModelResponse{
 		AuthorizationModelId: openfga.PtrString(modelID),
 	}
@@ -91,8 +91,7 @@ func TestWriteModel(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedOutput := "{\"authorization_model_id\":\"" + modelID + "\"}"
-	if output != expectedOutput {
-		t.Fatalf("Expected output %v actual %v", expectedOutput, output)
+	if *output != response {
+		t.Fatalf("Expected output %v actual %v", response, *output)
 	}
 }

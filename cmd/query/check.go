@@ -17,10 +17,10 @@ package query
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +31,7 @@ func check(
 	relation string,
 	object string,
 	contextualTuples []client.ClientTupleKey,
-) (string, error) {
+) (*client.ClientCheckResponse, error) {
 	body := &client.ClientCheckRequest{
 		User:             user,
 		Relation:         relation,
@@ -42,15 +42,10 @@ func check(
 
 	response, err := fgaClient.Check(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to check due to %w", err)
+		return nil, fmt.Errorf("failed to check due to %w", err)
 	}
 
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		return "", fmt.Errorf("failed to check due to %w", err)
-	}
-
-	return string(responseJSON), nil
+	return response, nil
 }
 
 // checkCmd represents the check command.
@@ -71,13 +66,12 @@ var checkCmd = &cobra.Command{
 			return fmt.Errorf("error parsing contextual tuples for check: %w", err)
 		}
 
-		output, err := check(fgaClient, args[0], args[1], args[2], contextualTuples)
+		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples)
 		if err != nil {
 			return fmt.Errorf("error calling check: %w", err)
 		}
-		fmt.Print(output)
 
-		return nil
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 

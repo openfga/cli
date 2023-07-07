@@ -22,29 +22,25 @@ import (
 	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/lib/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func write(fgaClient client.SdkClient, text string) (string, error) {
+func write(fgaClient client.SdkClient, text string) (*client.ClientWriteAuthorizationModelResponse, error) {
 	body := &client.ClientWriteAuthorizationModelRequest{}
 
 	err := json.Unmarshal([]byte(text), &body)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse model due to %w", err)
+		return nil, fmt.Errorf("failed to parse model due to %w", err)
 	}
 
 	model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
 	if err != nil {
-		return "", fmt.Errorf("failed to write model due to %w", err)
+		return nil, fmt.Errorf("failed to write model due to %w", err)
 	}
 
-	modelJSON, err := json.Marshal(model)
-	if err != nil {
-		return "", fmt.Errorf("failed to write model due to %w", err)
-	}
-
-	return string(modelJSON), nil
+	return model, nil
 }
 
 // writeCmd represents the write command.
@@ -60,13 +56,12 @@ var writeCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		output, err := write(fgaClient, args[0])
+		response, err := write(fgaClient, args[0])
 		if err != nil {
 			return err
 		}
-		fmt.Print(output)
 
-		return nil
+		return output.Display(*response) //nolint:wrapcheck
 	},
 }
 

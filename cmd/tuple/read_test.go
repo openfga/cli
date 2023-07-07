@@ -2,6 +2,7 @@ package tuple
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -90,7 +91,13 @@ func TestReadEmpty(t *testing.T) {
 	}
 
 	expectedOutput := "{\"tuples\":[]}"
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
@@ -147,7 +154,13 @@ func TestReadSinglePage(t *testing.T) {
 	}
 
 	expectedOutput := "{\"tuples\":[{\"key\":{\"object\":\"document:doc1\",\"relation\":\"reader\",\"user\":\"user:user1\"},\"timestamp\":\"2009-11-10T23:00:00Z\"}]}" //nolint:lll
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
@@ -243,7 +256,13 @@ func TestReadMultiPages(t *testing.T) {
 	}
 
 	expectedOutput := `{"tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T22:00:00Z"},{"key":{"object":"document:doc2","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
@@ -300,7 +319,13 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 	}
 
 	expectedOutput := "{\"tuples\":[{\"key\":{\"object\":\"document:doc1\",\"relation\":\"reader\",\"user\":\"user:user1\"},\"timestamp\":\"2009-11-10T23:00:00Z\"}]}" //nolint:lll
-	if output != expectedOutput {
+
+	outputTxt, err := json.Marshal(output)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, output)
 	}
 }
