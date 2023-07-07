@@ -27,6 +27,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Write Authorization Model](#write-authorization-model)
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
+      - [Validate an Authorization Model](#validate-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
       - [Read Relationship Tuples](#read-relationship-tuples)
@@ -299,6 +300,34 @@ fga model **get**
       // { ... }
     ],
 }
+```
+
+##### Validate an Authorization Model
+
+###### Command
+fga model **validate**
+
+###### Parameters
+
+###### Example
+`fga model validate '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`
+
+###### JSON Response
+* Valid model with an ID
+```json5
+{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true}
+```
+* Valid model without an ID
+```json5
+{"is_valid":true}
+```
+* Invalid model with an ID
+```json5
+{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version"}
+```
+* Invalid model without an ID
+```json5
+{"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid"}
 ```
 
 #### Relationship Tuples

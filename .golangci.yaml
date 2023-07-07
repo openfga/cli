@@ -36,6 +36,10 @@ linters-settings:
           - github.com/spf13/viper
           - github.com/openfga/cli
           - github.com/openfga/go-sdk
+          - github.com/openfga/openfga
+          - go.buf.build/openfga/go/openfga/api
+          - github.com/oklog/ulid/v2
+          - google.golang.org/protobuf/encoding/protojson
       test:
         files:
           - "$test"

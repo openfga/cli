@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/cli/lib/fga"
@@ -58,8 +59,9 @@ func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (string
 
 // getCmd represents the get command.
 var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Read a Single Authorization Model",
+	Use:              "get",
+	Short:            "Read a Single Authorization Model",
+	TraverseChildren: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -80,4 +82,10 @@ var getCmd = &cobra.Command{
 
 func init() {
 	getCmd.Flags().String("model-id", "", "Authorization Model ID")
+	getCmd.Flags().String("store-id", "", "Store ID")
+
+	if err := getCmd.MarkFlagRequired("store-id"); err != nil {
+		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/get", err)
+		os.Exit(1)
+	}
 }

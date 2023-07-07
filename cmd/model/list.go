@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	openfga "github.com/openfga/go-sdk"
@@ -92,4 +93,10 @@ var listCmd = &cobra.Command{
 
 func init() {
 	listCmd.Flags().Int("max-pages", MaxModelsPagesLength, "Max number of pages to get.")
+	listCmd.Flags().String("store-id", "", "Store ID")
+
+	if err := listCmd.MarkFlagRequired("store-id"); err != nil {
+		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/list", err)
+		os.Exit(1)
+	}
 }
