@@ -1,11 +1,11 @@
 package output
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"github.com/mattn/go-isatty"
-	json "github.com/neilotoole/jsoncolor"
 	"github.com/nwidger/jsoncolor"
 )
 
@@ -26,18 +26,6 @@ func displayColorTerminal(data any) error {
 	return nil
 }
 
-func displayTerminal(data any) error {
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-
-	err := enc.Encode(data)
-	if err != nil {
-		return fmt.Errorf("unable to encode output with error %w", err)
-	}
-
-	return nil
-}
-
 func outputNonTerminal(data any) error {
 	result, err := json.Marshal(data)
 	if err != nil {
@@ -51,10 +39,8 @@ func outputNonTerminal(data any) error {
 
 // Display will decorate the output if possible.  Otherwise, will print out the standard JSON.
 func Display(data any) error {
-	if json.IsColorTerminal(os.Stdout) {
+	if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		return displayColorTerminal(data)
-	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		return displayTerminal(data)
 	}
 
 	return outputNonTerminal(data)
