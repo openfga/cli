@@ -17,7 +17,7 @@ func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.Client
 			if len(tuple) != 3 { //nolint:gomnd
 				return contextualTuples,
 					clierrors.ValidationError("ParseContextualTuplesInner", "Failed to parse contextual tuples, "+ //nolint:wrapcheck
-						"they must be of the output\"user relation object\" ")
+						"they must be of the format\"user relation object\" ")
 			}
 
 			contextualTuples = append(contextualTuples, client.ClientTupleKey{
