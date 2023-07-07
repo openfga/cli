@@ -16,9 +16,6 @@ limitations under the License.
 package model
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
@@ -34,10 +31,4 @@ func init() {
 	ModelCmd.AddCommand(getCmd)
 	ModelCmd.AddCommand(validateCmd)
 	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
-
-	err := ModelCmd.MarkPersistentFlagRequired("store-id")
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(1)
-	}
 }

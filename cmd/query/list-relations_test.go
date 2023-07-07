@@ -33,10 +33,11 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
+	relations := []string{}
 	contextualTuples := []client.ClientTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
+	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
 
 	if err == nil {
 		t.Error("Expect error but there is none")
@@ -61,10 +62,11 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 		AuthorizationModelID: "01GXSA8YR785C4FYS3C0RTG7B1",
 	}
 
+	relations := []string{}
 	contextualTuples := []client.ClientTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
+	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
 
 	if err == nil {
 		t.Error("Expect error but there is none")
@@ -103,6 +105,7 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
+	relations := []string{}
 	contextualTuples := []client.ClientTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
@@ -120,7 +123,7 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
+	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -160,6 +163,7 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
+	relations := []string{}
 	contextualTuples := []client.ClientTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
@@ -177,7 +181,57 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", contextualTuples)
+	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(*output, expectedListRelationsResponse) {
+		t.Errorf("Expect output %v actual %v", expectedListRelationsResponse, *output)
+	}
+}
+
+func TestListRelationsMultipleRelations(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	// after reading the latest auth model, expect to call list relations but failure
+
+	mockListRelationsExecute := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
+
+	expectedListRelationsResponse := client.ClientListRelationsResponse{
+		Relations: []string{"viewer"},
+	}
+
+	mockListRelationsExecute.EXPECT().Execute().Return(&expectedListRelationsResponse, nil)
+
+	mockListRelationsRequest := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
+	listRelationsOptions := client.ClientListRelationsOptions{}
+	mockListRelationsRequest.EXPECT().Options(listRelationsOptions).Return(mockListRelationsExecute)
+
+	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
+
+	relations := []string{"viewer", "editor"}
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
+	body := client.ClientListRelationsRequest{
+		User:             "user:foo",
+		Relations:        []string{"viewer", "editor"},
+		Object:           "doc:doc1",
+		ContextualTuples: &contextualTuples,
+	}
+	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
+	gomock.InOrder(
+		mockFgaClient.EXPECT().ListRelations(context.Background()).Return(mockBody),
+	)
+
+	var clientConfig fga.ClientConfig
+
+	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
 	if err != nil {
 		t.Error(err)
 	}

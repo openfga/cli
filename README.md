@@ -506,14 +506,13 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 
 ###### Example
-`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap`
+`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`
 
 ###### JSON Response
 ```json5
 {
     "relations": [
-      "can_view",
-      "can_edit"
+      "can_view"
     ],
 }
 ```
