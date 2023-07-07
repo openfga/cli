@@ -533,10 +533,21 @@ fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<mode
 ###### JSON Response
 ```json5
 {
-    "relations": [
-      "can_view",
-      "can_edit"
-    ],
+  "tree": {
+    "root": {
+      "name": "repo:openfga/openfga#reader",
+      "union": {
+        "nodes": [{
+          "leaf": {
+            "users": {
+              "users": ["user:anne"]
+            }
+          },
+          "name": "repo:openfga/openfga#reader"
+        }]
+      }
+    }
+  }
 }
 ```
 
