@@ -16,7 +16,7 @@ func displayColorTerminal(data any) error {
 	// create custom formatter
 	f := jsoncolor.NewFormatter()
 
-	dst, err := jsoncolor.MarshalWithFormatter(data, f)
+	dst, err := jsoncolor.MarshalIndentWithFormatter(data, "", "  ", f)
 	if err != nil {
 		return fmt.Errorf("unable to display output with error %w", err)
 	}
