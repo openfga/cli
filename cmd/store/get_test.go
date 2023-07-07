@@ -1,4 +1,4 @@
-package stores
+package store
 
 import (
 	"context"
@@ -7,52 +7,50 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/openfga/cli/lib/fga"
 	mock_client "github.com/openfga/cli/mocks"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 )
 
-var errMockCreate = errors.New("mock error")
+var errMockGet = errors.New("mock error")
 
-func TestCreateError(t *testing.T) {
+func TestGetError(t *testing.T) {
 	t.Parallel()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
-	mockExecute := mock_client.NewMockSdkClientCreateStoreRequestInterface(mockCtrl)
+	mockExecute := mock_client.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
 
-	var expectedResponse client.ClientCreateStoreResponse
+	var expectedResponse client.ClientGetStoreResponse
 
-	mockExecute.EXPECT().Execute().Return(&expectedResponse, errMockCreate)
+	mockExecute.EXPECT().Execute().Return(&expectedResponse, errMockGet)
 
-	mockBody := mock_client.NewMockSdkClientCreateStoreRequestInterface(mockCtrl)
+	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
 
-	body := client.ClientCreateStoreRequest{
-		Name: "foo",
+	clientConfig := fga.ClientConfig{
+		StoreID: "12345",
 	}
-	mockBody.EXPECT().Body(body).Return(mockExecute)
 
-	mockFgaClient.EXPECT().CreateStore(context.Background()).Return(mockBody)
-
-	_, err := create(mockFgaClient, "foo")
+	_, err := getStore(clientConfig, mockFgaClient)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
 }
 
-func TestCreateSuccess(t *testing.T) {
+func TestGetSuccess(t *testing.T) {
 	t.Parallel()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
-	mockExecute := mock_client.NewMockSdkClientCreateStoreRequestInterface(mockCtrl)
+	mockExecute := mock_client.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
 	expectedTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
-	expectedResponse := client.ClientCreateStoreResponse{
+	expectedResponse := client.ClientGetStoreResponse{
 		Id:        openfga.PtrString("12345"),
 		Name:      openfga.PtrString("foo"),
 		CreatedAt: &expectedTime,
@@ -61,16 +59,13 @@ func TestCreateSuccess(t *testing.T) {
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
 
-	mockBody := mock_client.NewMockSdkClientCreateStoreRequestInterface(mockCtrl)
+	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
 
-	body := client.ClientCreateStoreRequest{
-		Name: "foo",
+	clientConfig := fga.ClientConfig{
+		StoreID: "12345",
 	}
-	mockBody.EXPECT().Body(body).Return(mockExecute)
 
-	mockFgaClient.EXPECT().CreateStore(context.Background()).Return(mockBody)
-
-	output, err := create(mockFgaClient, "foo")
+	output, err := getStore(clientConfig, mockFgaClient)
 	if err != nil {
 		t.Error(err)
 	}

@@ -13,21 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package stores
+package store
 
 import (
 	"github.com/spf13/cobra"
 )
 
-// StoresCmd represents the store command.
-var StoresCmd = &cobra.Command{
-	Use:   "stores",
+// StoreCmd represents the store command.
+var StoreCmd = &cobra.Command{
+	Use:   "store",
 	Short: "Create, Get, Delete and List OpenFGA Stores",
 }
 
 func init() {
-	StoresCmd.AddCommand(createCmd)
-	StoresCmd.AddCommand(listCmd)
-	StoresCmd.AddCommand(getCmd)
-	StoresCmd.AddCommand(deleteCmd)
+	StoreCmd.AddCommand(createCmd)
+	StoreCmd.AddCommand(listCmd)
+	StoreCmd.AddCommand(getCmd)
+	StoreCmd.AddCommand(deleteCmd)
 }

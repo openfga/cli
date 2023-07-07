@@ -13,47 +13,61 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package stores
+package model
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/openfga/cli/lib/cmd-utils"
 	"github.com/openfga/cli/lib/fga"
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func getStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (string, error) {
-	store, err := fgaClient.GetStore(context.Background()).Execute()
-	if err != nil {
-		return "", fmt.Errorf("failed to get store %v due to %w", clientConfig.StoreID, err)
+func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (string, error) {
+	authorizationModelID := clientConfig.AuthorizationModelID
+
+	var err error
+
+	var model *openfga.ReadAuthorizationModelResponse
+
+	if authorizationModelID != "" {
+		options := client.ClientReadAuthorizationModelOptions{
+			AuthorizationModelId: openfga.PtrString(authorizationModelID),
+		}
+		model, err = fgaClient.ReadAuthorizationModel(context.Background()).Options(options).Execute()
+	} else {
+		options := client.ClientReadLatestAuthorizationModelOptions{}
+		model, err = fgaClient.ReadLatestAuthorizationModel(context.Background()).Options(options).Execute()
 	}
 
-	storeJSON, err := json.Marshal(store)
 	if err != nil {
-		return "", fmt.Errorf("failed to get store due to %w", err)
+		return "", fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
 	}
 
-	return string(storeJSON), nil
+	modelJSON, err := json.Marshal(model)
+	if err != nil {
+		return "", fmt.Errorf("failed to get model due to %w", err)
+	}
+
+	return string(modelJSON), nil
 }
 
 // getCmd represents the get command.
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Get store",
-	Long:  ``,
+	Short: "Read a Single Authorization Model",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
-
-		output, err := getStore(clientConfig, fgaClient)
+		output, err := getModel(clientConfig, fgaClient)
 		if err != nil {
 			return err
 		}
@@ -65,10 +79,5 @@ var getCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.Flags().String("store-id", "", "Store ID")
-	err := getCmd.MarkFlagRequired("store-id")
-	if err != nil { //nolint:wsl
-		fmt.Print(err)
-		os.Exit(1)
-	}
+	getCmd.Flags().String("model-id", "", "Authorization Model ID")
 }
