@@ -83,6 +83,13 @@ func listRelations(clientConfig fga.ClientConfig,
 		}
 
 		relations = *relationsForType
+
+		if len(relations) < 1 {
+			// there is still no relations.  This means for the model, the corresponding object's type has no relations
+			return &client.ClientListRelationsResponse{
+				Relations: []string{},
+			}, nil
+		}
 	}
 
 	body := &client.ClientListRelationsRequest{
