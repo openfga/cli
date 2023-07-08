@@ -27,9 +27,10 @@ import (
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete store",
-	Long:  ``,
+	Use:     "delete",
+	Short:   "Delete store",
+	Long:    ``,
+	Example: "fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

@@ -27,9 +27,10 @@ import (
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete Relationship Tuples",
-	Args:  cobra.ExactArgs(3), //nolint:gomnd
+	Use:     "delete",
+	Short:   "Delete Relationship Tuples",
+	Args:    cobra.ExactArgs(3), //nolint:gomnd
+	Example: "fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

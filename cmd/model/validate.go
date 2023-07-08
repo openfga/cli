@@ -76,9 +76,10 @@ func validate(inputModel string) validationResult {
 
 // validateCmd represents the validate command.
 var validateCmd = &cobra.Command{
-	Use:   "validate",
-	Short: "Validates an authorization model",
-	Args:  cobra.ExactArgs(1),
+	Use:     "validate",
+	Short:   "Validates an authorization model",
+	Args:    cobra.ExactArgs(1),
+	Example: `fga model validate '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		response := validate(args[0])
 

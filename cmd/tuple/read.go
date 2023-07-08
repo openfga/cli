@@ -74,8 +74,9 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 
 // readCmd represents the read command.
 var readCmd = &cobra.Command{
-	Use:   "read",
-	Short: "Read Relationship Tuples",
+	Use:     "read",
+	Short:   "Read Relationship Tuples",
+	Example: "fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap", //nolint:lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
