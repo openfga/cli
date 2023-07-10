@@ -67,6 +67,7 @@ func init() {
 		"client-secret",
 	)
 
+	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(store.StoreCmd)
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)
