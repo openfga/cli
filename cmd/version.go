@@ -10,8 +10,8 @@ import (
 // versionCmd is the entrypoint for the `fga version“ command.
 var versionCmd *cobra.Command = &cobra.Command{
 	Use:   "version",
-	Short: "Reports the OpenFGA CLI version",
-	Long:  "Reports the OpenFGA CLI version.",
+	Short: "Reports the FGA CLI version",
+	Long:  "Reports the FGA CLI version.",
 	RunE:  version,
 	Args:  cobra.NoArgs,
 }
