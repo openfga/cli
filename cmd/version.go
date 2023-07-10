@@ -18,5 +18,6 @@ var versionCmd *cobra.Command = &cobra.Command{
 
 func version(_ *cobra.Command, _ []string) error {
 	log.Printf("version `%s` build from `%s` on `%s` ", build.Version, build.Commit, build.Date)
+
 	return nil
 }
