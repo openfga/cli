@@ -67,6 +67,7 @@ func init() {
 		"client-secret",
 	)
 
+	rootCmd.Version = versionStr
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(store.StoreCmd)
 	rootCmd.AddCommand(model.ModelCmd)
