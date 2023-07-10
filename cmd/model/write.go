@@ -45,9 +45,10 @@ func write(fgaClient client.SdkClient, text string) (*client.ClientWriteAuthoriz
 
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
-	Use:   "write",
-	Short: "Write Authorization Model",
-	Args:  cobra.ExactArgs(1),
+	Use:     "write",
+	Short:   "Write Authorization Model",
+	Args:    cobra.ExactArgs(1),
+	Example: `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`, //nolint:lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

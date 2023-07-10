@@ -51,10 +51,11 @@ func listObjects(
 
 // listObjectsCmd represents the listObjects command.
 var listObjectsCmd = &cobra.Command{
-	Use:   "list-objects",
-	Short: "List Objects",
-	Long:  "List the relations a user has with an object.",
-	Args:  cobra.ExactArgs(3), //nolint:gomnd
+	Use:     "list-objects",
+	Short:   "List Objects",
+	Long:    "List the relations a user has with an object.",
+	Args:    cobra.ExactArgs(3),                                                                                                                                                                                            //nolint:gomnd,lll
+	Example: `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`, //nolint:lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

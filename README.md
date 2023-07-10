@@ -290,7 +290,7 @@ fga model **get**
 * `--store-id`: Specifies the store id
 
 ###### Example
-`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 
+`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json5
@@ -424,7 +424,7 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 
 ###### Example
-`fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 document`
+`fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document`
 
 ###### JSON Response
 ```json5

@@ -38,9 +38,10 @@ func getStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*clien
 
 // getCmd represents the get command.
 var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get store",
-	Long:  ``,
+	Use:     "get",
+	Short:   "Get store",
+	Long:    ``,
+	Example: "fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
