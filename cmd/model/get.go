@@ -66,6 +66,7 @@ var getCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		response, err := getModel(clientConfig, fgaClient)
 		if err != nil {
 			return err

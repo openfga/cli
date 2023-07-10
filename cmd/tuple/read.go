@@ -90,7 +90,7 @@ var readCmd = &cobra.Command{
 
 		maxPages, _ := cmd.Flags().GetInt("max-pages")
 		if err != nil {
-			return fmt.Errorf("failed to read tuples due to %w", err)
+			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
 
 		response, err := read(fgaClient, user, relation, object, maxPages)

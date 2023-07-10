@@ -76,7 +76,7 @@ var changesCmd = &cobra.Command{
 
 		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
-			return fmt.Errorf("failed to get tuple changes due to %w", err)
+			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
 
 		selectedType, err := cmd.Flags().GetString("type")
