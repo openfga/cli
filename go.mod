@@ -7,9 +7,10 @@ require (
 	github.com/mattn/go-isatty v0.0.19
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/go-sdk v0.2.3-0.20230706193033-786d614eebbd
+	github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d
 	github.com/openfga/openfga v1.2.0
 	github.com/spf13/cobra v1.7.0
+	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
 	go.buf.build/openfga/go/openfga/api v1.2.58
 	google.golang.org/protobuf v1.31.0
@@ -32,7 +33,6 @@ require (
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	go.buf.build/openfga/go/envoyproxy/protoc-gen-validate v1.2.8 // indirect
 	go.buf.build/openfga/go/grpc-ecosystem/grpc-gateway v1.2.51 // indirect

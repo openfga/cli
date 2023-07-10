@@ -233,8 +233,8 @@ github.com/nwidger/jsoncolor v0.3.2 h1:rVJJlwAWDJShnbTYOQ5RM7yTA20INyKXlJ/fg4JMh
 github.com/nwidger/jsoncolor v0.3.2/go.mod h1:Cs34umxLbJvgBMnVNVqhji9BhoT/N/KinHqZptQ7cf4=
 github.com/oklog/ulid/v2 v2.1.0 h1:+9lhoxAP56we25tyYETBBY1YLA2SaoLvUFgrP2miPJU=
 github.com/oklog/ulid/v2 v2.1.0/go.mod h1:rcEKHmBBKfef9DhnvX7y1HZBYxjXb0cP5ExxNsTT1QQ=
-github.com/openfga/go-sdk v0.2.3-0.20230706193033-786d614eebbd h1:T/gza+TXR9Ld9FQIOzZhitmFQ+k7k6F8fUFG8NtrWBc=
-github.com/openfga/go-sdk v0.2.3-0.20230706193033-786d614eebbd/go.mod h1:ZB13O8GilPc0ITWssOszgxmz6CnIe8PQLZqbqAnx2IY=
+github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d h1:xK4EfSnsB+U8zLyZ05h8V9omL6LF6Xh763bQphghuLk=
+github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d/go.mod h1:ZB13O8GilPc0ITWssOszgxmz6CnIe8PQLZqbqAnx2IY=
 github.com/openfga/openfga v1.2.0 h1:7UAcw6OF69j/L5kmeTyqGRXXPwbycDHn4iyHIuxke1Y=
 github.com/openfga/openfga v1.2.0/go.mod h1:Nv/8zVfVCJCSpJhM8cf3RzZn88WXX0SaAxCMSIY5C1g=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
