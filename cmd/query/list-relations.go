@@ -105,6 +105,10 @@ func listRelations(clientConfig fga.ClientConfig,
 		return nil, fmt.Errorf("failed to list relations due to %w", err)
 	}
 
+	if response.Relations == nil {
+		response.Relations = []string{}
+	}
+
 	return response, nil
 }
 
