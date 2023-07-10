@@ -129,6 +129,46 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 	}
 }
 
+func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
+
+	var expectedResponse client.ClientReadAuthorizationModelResponse
+
+	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"},{"relations":{},"type":"user"}]}}` //nolint:all
+	if err := json.Unmarshal([]byte(modelJSON), &expectedResponse); err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
+	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockExecute)
+
+	relations := []string{}
+	contextualTuples := []client.ClientTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
+
+	var clientConfig fga.ClientConfig
+
+	expectedListRelationsResponse := client.ClientListRelationsResponse{
+		Relations: []string{},
+	}
+
+	response, err := listRelations(clientConfig, mockFgaClient, "doc:doc1", "user:foo", relations, contextualTuples)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(*response, expectedListRelationsResponse) {
+		t.Errorf("Expect response %v actual %v", expectedListRelationsResponse, *response)
+	}
+}
+
 func TestListRelationsLatestAuthModelList(t *testing.T) {
 	t.Parallel()
 
