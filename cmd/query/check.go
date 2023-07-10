@@ -68,7 +68,7 @@ var checkCmd = &cobra.Command{
 
 		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples)
 		if err != nil {
-			return fmt.Errorf("error calling check: %w", err)
+			return fmt.Errorf("failed to check due to %w", err)
 		}
 
 		return output.Display(*response) //nolint:wrapcheck

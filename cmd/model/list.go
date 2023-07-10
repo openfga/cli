@@ -73,10 +73,12 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to intialized FGA client due to %w", err)
 		}
+
 		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
-			return fmt.Errorf("failed to list models due to %w", err)
+			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
+
 		response, err := listModels(fgaClient, maxPages)
 		if err != nil {
 			return err

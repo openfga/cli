@@ -131,7 +131,7 @@ var listRelationsCmd = &cobra.Command{
 
 		response, err := listRelations(clientConfig, fgaClient, args[0], args[1], relations, contextualTuples)
 		if err != nil {
-			return fmt.Errorf("error listing relations: %w", err)
+			return fmt.Errorf("failed to list relations due to %w", err)
 		}
 
 		return output.Display(*response) //nolint:wrapcheck
