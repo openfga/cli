@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var versionStr = fmt.Sprintf("version `%s` build from `%s` on `%s` ", build.Version, build.Commit, build.Date)
+var versionStr = fmt.Sprintf("`%s` (commit: `%s`, date: `%s`)", build.Version, build.Commit, build.Date)
 
 // versionCmd is the entrypoint for the `fga version“ command.
 var versionCmd *cobra.Command = &cobra.Command{
@@ -15,7 +15,7 @@ var versionCmd *cobra.Command = &cobra.Command{
 	Short: "Reports the FGA CLI version",
 	Long:  "Reports the FGA CLI version.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println(versionStr)
+		fmt.Printf("fga version %s\n", versionStr)
 
 		return nil
 	},
