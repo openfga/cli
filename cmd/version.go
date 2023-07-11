@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var versionStr = fmt.Sprintf("`%s` (commit: `%s`, date: `%s`)", build.Version, build.Commit, build.Date)
+var versionStr = fmt.Sprintf("v`%s` (commit: `%s`, date: `%s`)", build.Version, build.Commit, build.Date)
 
 // versionCmd is the entrypoint for the `fga version“ command.
 var versionCmd *cobra.Command = &cobra.Command{
