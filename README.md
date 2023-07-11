@@ -200,11 +200,11 @@ fga store **delete**
 
 * `model`
 
-| Description                                                             | command | parameters                 | example                                                                                                     |
-|-------------------------------------------------------------------------|---------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                      |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
-| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                 |
+| Description                                                             | command | parameters                 | example                                                                                     |
+|-------------------------------------------------------------------------|---------|----------------------------|---------------------------------------------------------------------------------------------|
+| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`                   |
+| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 
 ##### Read Authorization Models 
 
@@ -239,19 +239,16 @@ fga model **write**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
+* `--file`: Specifies the file containing the model in JSON format
 
 ###### Example
-`fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
 
 ###### JSON Response
 ```json5
 {
-    "schema_version": "1.1",
-    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
-    "type_definitions": [
-      {"type": "user"},
-      // { ... }
-    ],
+  "authorization_model_id":"01GXSA8YR785C4FYS3C0RTG7B1"
 }
 ```
 
