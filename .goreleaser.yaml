@@ -12,7 +12,7 @@ builds:
       - darwin
     ldflags:
       - "-s -w"
-      - "-X github.com/openfga/cli/internal/build.Version=v{{ .Version }}"
+      - "-X github.com/openfga/cli/internal/build.Version={{ .Version }}"
       - "-X github.com/openfga/cli/internal/build.Commit={{.Commit}}"
       - "-X github.com/openfga/cli/internal/build.Date={{.Date}}"
 

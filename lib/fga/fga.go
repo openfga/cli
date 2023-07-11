@@ -3,12 +3,13 @@ package fga
 import (
 	"net/url"
 
+	"github.com/openfga/cli/internal/build"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
 )
 
-const userAgent = "openfga-cli/0.0.1"
+const userAgent = "openfga-cli/" + build.Version
 
 type ClientConfig struct {
 	ServerURL            string `json:"server_url,omitempty"`
