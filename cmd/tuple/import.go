@@ -102,16 +102,19 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		fileName, _ := cmd.Flags().GetString("file")
+		fileName, err := cmd.Flags().GetString("file")
+		if err != nil {
+			return fmt.Errorf("failed to parse file name due to %w", err)
+		}
 
-		maxTuplesPerWrite, _ := cmd.Flags().GetInt("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 		if err != nil {
 			return fmt.Errorf("failed to parse max tuples per write due to %w", err)
 		}
 
-		maxParallelRequests, _ := cmd.Flags().GetInt("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
 		if err != nil {
-			return fmt.Errorf("failed to parse max tuples per write due to %w", err)
+			return fmt.Errorf("failed to parse parallel requests due to %w", err)
 		}
 
 		tuples := []client.ClientTupleKey{}
@@ -136,7 +139,7 @@ var importCmd = &cobra.Command{
 }
 
 func init() {
-	importCmd.Flags().String("file", "", "Tuples File")
+	importCmd.Flags().String("file", "", "Tuples file")
 	importCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	importCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 }
