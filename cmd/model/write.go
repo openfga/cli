@@ -47,8 +47,8 @@ func write(fgaClient client.SdkClient, text string) (*client.ClientWriteAuthoriz
 var writeCmd = &cobra.Command{
 	Use:     "write",
 	Short:   "Write Authorization Model",
-	Args:    cobra.ExactArgs(1),
-	Example: `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`, //nolint:lll
+	Args:    cobra.MaximumNArgs(1),
+	Example: `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -57,7 +57,26 @@ var writeCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		response, err := write(fgaClient, args[0])
+		fileName, err := cmd.Flags().GetString("file")
+		if err != nil {
+			return fmt.Errorf("failed to parse file name due to %w", err)
+		}
+
+		var inputModel string
+		if fileName != "" {
+			file, err := os.ReadFile(fileName)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
+			}
+			inputModel = string(file)
+		} else {
+			if len(args) == 0 || args[0] == "-" {
+				return cmd.Help() //nolint:wrapcheck
+			}
+			inputModel = args[0]
+		}
+
+		response, err := write(fgaClient, inputModel)
 		if err != nil {
 			return err
 		}
@@ -68,6 +87,7 @@ var writeCmd = &cobra.Command{
 
 func init() {
 	writeCmd.Flags().String("store-id", "", "Store ID")
+	writeCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON format")
 
 	if err := writeCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
