@@ -57,7 +57,45 @@ OpenFGA is designed to make it easy for application builders to model their perm
 - [Google's Zanzibar Paper (2019)](https://research.google/pubs/pub48190/)
 
 ## Installation
-:TODO:
+
+### Brew
+```shell
+brew install openfga/tap/fga
+```
+
+### Linux (deb, rpm and apk) packages
+Download the .deb, .rpm or .apk packages from the [releases page](https://github.com/openfga/cli/releases).
+
+Debian:
+```shell
+sudo apt install ./fga_<version>_linux_<arch>.deb
+```
+
+Fedora:
+```shell
+sudo dnf install ./fga_<version>_linux_<arch>.rpm
+```
+
+Alpine Linux:
+```shell
+sudo apk add --allow-untrusted ./fga_<version>_linux_<arch>.apk
+```
+
+### Docker
+```shell
+docker pull openfga/cli; docker run -it openfga/cli
+```
+
+### Go
+
+> note that the command will be named `cli`
+
+```shell
+go install github.com/openfga/cli@latest
+```
+
+### Manually
+Download the pre-compiled binaries from the [releases page](https://github.com/openfga/cli/releases).
 
 ## Building from Source
 
