@@ -61,7 +61,7 @@ func listStores(fgaClient client.SdkClient, maxPages int) (*openfga.ListStoresRe
 // listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "List stores",
+	Short:   "List Stores",
 	Long:    `Get a list of stores.`,
 	Example: "fga store list",
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -94,7 +94,7 @@ var importCmd = &cobra.Command{
 	Use:   "import",
 	Short: "Import Relationship Tuples",
 	Long: "Imports Relationship Tuples to the store. " +
-		"This will write the tuples in chunks and at the end will report the tuple chunks that failed",
+		"This will write the tuples in chunks and at the end will report the tuple chunks that failed.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

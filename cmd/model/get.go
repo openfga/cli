@@ -59,6 +59,7 @@ func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*openf
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Short:   "Read a Single Authorization Model",
+	Long:    "Read an authorization model, pass in an empty model ID to get latest.",
 	Example: `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
