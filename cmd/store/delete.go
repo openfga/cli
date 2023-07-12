@@ -22,6 +22,7 @@ import (
 	"os"
 
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/confirmation"
 	"github.com/openfga/cli/internal/output"
 	"github.com/spf13/cobra"
 )
@@ -34,6 +35,25 @@ var deleteCmd = &cobra.Command{
 	Example: "fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+		// First, confirm whether this is intended
+		force, err := cmd.Flags().GetBool("force")
+		if err != nil {
+			return fmt.Errorf("failed to parse force flag due to %w", err)
+		}
+		if !force {
+			confirmation, err := confirmation.AskForConfirmation("Are you sure you want to delete the store:")
+			if err != nil {
+				return fmt.Errorf("prompt failed due to %w", err)
+			}
+			if !confirmation {
+				type returnMessage struct {
+					Message string
+				}
+
+				return output.Display(returnMessage{Message: "Delete store cancelled"}) //nolint:wrapcheck
+			}
+		}
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
@@ -49,8 +69,10 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.Flags().String("store-id", "", "Store ID")
+	deleteCmd.Flags().Bool("force", false, "Force delete without confirmation")
+
 	err := deleteCmd.MarkFlagRequired("store-id")
-	if err != nil { //nolint:wsl
+	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}
