@@ -39,11 +39,9 @@ func askForConfirmation(ioReader *bufio.Reader, question string) (bool, error) {
 
 		trimmedString := strings.ToLower(strings.TrimSpace(s))
 		switch trimmedString {
-		case "":
-			return false, nil
 		case "y", "yes":
 			return true, nil
-		case "n", "no":
+		case "n", "no", "":
 			return false, nil
 		}
 	}

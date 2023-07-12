@@ -38,10 +38,10 @@ var deleteCmd = &cobra.Command{
 		// First, confirm whether this is intended
 		force, err := cmd.Flags().GetBool("force")
 		if err != nil {
-			return fmt.Errorf("failed to obtain force flag %w", err)
+			return fmt.Errorf("failed to parse force flag due to %w", err)
 		}
 		if !force {
-			confirmation, err := confirmation.AskForConfirmation("Confirm you want to delete store:")
+			confirmation, err := confirmation.AskForConfirmation("Are you sure you want to delete the store:")
 			if err != nil {
 				return fmt.Errorf("prompt failed due to %w", err)
 			}
