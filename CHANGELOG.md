@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.0-beta2
+
+### [0.1.0-beta2](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta2) (2023-07-12)
+- Fix brew build
+- Add command completions
+- Add package builds for Linux
+- Change brew and archive file names to fga
+
 ## v0.1.0-beta1
 
 ### [0.1.0-beta1](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta1) (2023-07-12)
