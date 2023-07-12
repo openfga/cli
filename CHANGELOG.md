@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.0-beta1
+
+### [0.1.0-beta1](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta1) (2023-07-12)
+- Fix Release Pipeline
+
 ## v0.1.0-beta
 
 ### [0.1.0-beta](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta) (2023-07-11)
