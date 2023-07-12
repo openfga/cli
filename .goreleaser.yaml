@@ -1,4 +1,10 @@
-project_name: openfga-cli
+project_name: fga
+
+before:
+  hooks:
+    - go mod tidy
+    - ./scripts/completions.sh
+    - ./scripts/manpages.sh
 
 builds:
   -
@@ -33,6 +39,11 @@ dockers:
     use: buildx
     build_flag_templates:
       - "--platform=linux/amd64"
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
 
   - goos: linux
     goarch: arm64
@@ -108,7 +119,7 @@ docker_signs:
     - "--yes" # needed on cosign 2.0.0+
 
 brews:
-  - tap:
+  - repository:
       owner: openfga
       name: homebrew-tap
       pull_request:
@@ -129,22 +140,92 @@ brews:
       - name: git
     install: |
       bin.install "fga"
-      bash_completion.install "completions/fga.bash" => "goreleaser"
-      zsh_completion.install "completions/fga.zsh" => "_goreleaser"
+      bash_completion.install "completions/fga.bash" => "fga"
+      zsh_completion.install "completions/fga.zsh" => "_fga"
       fish_completion.install "completions/fga.fish"
+      man1.install "manpages/fga.1.gz"
     test: |
       system "#{bin}/fga version"
 
+aurs:
+  - package: |-
+      # bin
+      install -Dm755 "./fga" "${pkgdir}/usr/bin/fga"
+      # license
+      install -Dm644 "./LICENSE.md" "${pkgdir}/usr/share/licenses/fga/LICENSE"
+      # completions
+      mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"
+      mkdir -p "${pkgdir}/usr/share/zsh/site-functions/"
+      mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
+      install -Dm644 "./completions/fga.bash" "${pkgdir}/usr/share/bash-completion/completions/fga"
+      install -Dm644 "./completions/fga.zsh" "${pkgdir}/usr/share/zsh/site-functions/_fga"
+      install -Dm644 "./completions/fga.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/fga.fish"
+      # manpages
+      install -Dm644 "./manpages/fga.1.gz" "${pkgdir}/usr/share/man/man1/fga.1.gz"
+
+nfpms:
+  - package_name: fga
+    vendor: OpenFGA
+    homepage: https://openfga.dev/
+    maintainer: 'OpenFGA <contact@openfga.dev>'
+    description: |-
+      A cross-platform CLI to interact with an OpenFGA server.
+    license: Apache 2.0
+    formats:
+      - apk
+      - deb
+      - rpm
+      - termux.deb
+      - archlinux
+    provides:
+      - fga
+    suggests:
+      - jq
+    bindir: /usr/bin
+    contents:
+      - src: ./completions/fga.bash
+        dst: /usr/share/bash-completion/completions/fga
+        file_info:
+          mode: 0644
+      - src: ./completions/fga.fish
+        dst: /usr/share/fish/vendor_completions.d/fga.fish
+        file_info:
+          mode: 0644
+      - src: ./completions/fga.zsh
+        dst:  /usr/share/zsh/vendor-completions/_fga
+        file_info:
+          mode: 0644
+      - src: ./manpages/fga.1.gz
+        dst: /usr/share/man/man1/fga.1.gz
+        file_info:
+          mode: 0644
+
+archives:
+  - files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+      - completions/*
+      - manpages/*
+
 checksum:
   name_template: 'checksums.txt'
+  extra_files:
+    - glob: README.md
+    - glob: LICENSE
+    - glob: CHANGELOG.md
+    - glob: completions/*
+    - glob: manpages/*
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
+
+report_sizes: true
 
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore'
+      - '^chore' # chore commits
+      - '^release' # release commits
+      - '(#\d*)$' # merge commits
