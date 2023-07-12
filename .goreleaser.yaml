@@ -107,11 +107,6 @@ docker_signs:
     - '${artifact}'
     - "--yes" # needed on cosign 2.0.0+
 
-archives:
-  - rlcp: true
-    files:
-      - assets
-
 checksum:
   name_template: 'checksums.txt'
 
@@ -124,3 +119,4 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^chore'
