@@ -51,10 +51,11 @@ func check(
 
 // checkCmd represents the check command.
 var checkCmd = &cobra.Command{
-	Use:   "check",
-	Short: "Check",
-	Long:  "Check if a user has a particular relation with an object. E.g. \"check user:anne can_view document:roadmap\"",
-	Args:  cobra.ExactArgs(3), //nolint:gomnd
+	Use:     "check",
+	Short:   "Check",
+	Long:    "Check if a user has a particular relation with an object.",
+	Example: `fga check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap`,
+	Args:    cobra.ExactArgs(3), //nolint:gomnd
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils2.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

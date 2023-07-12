@@ -41,8 +41,8 @@ func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateS
 // createCmd represents the store create command.
 var createCmd = &cobra.Command{
 	Use:     "create",
-	Short:   "Create and initialize a store.",
-	Long:    ``,
+	Short:   "Create Store",
+	Long:    "Create an OpenFGA store.",
 	Example: `fga store create --name "FGA Demo Store"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)

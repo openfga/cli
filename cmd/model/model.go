@@ -24,7 +24,8 @@ import (
 // ModelCmd represents the store command.
 var ModelCmd = &cobra.Command{
 	Use:   "model",
-	Short: "Write, Read and List authorization models in a store",
+	Short: "Interact with Authorization Models",
+	Long:  "Write, read, list and validate authorization models.",
 }
 
 func init() {

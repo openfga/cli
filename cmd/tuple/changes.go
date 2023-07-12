@@ -67,6 +67,7 @@ func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) 
 var changesCmd = &cobra.Command{
 	Use:     "changes",
 	Short:   "Read Relationship Tuple Changes (Watch)",
+	Long:    "Get a list of relationship tuple changes (Writes and Deletes) across time.",
 	Example: "fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)

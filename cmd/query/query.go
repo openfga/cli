@@ -27,7 +27,8 @@ import (
 // QueryCmd represents the query command.
 var QueryCmd = &cobra.Command{
 	Use:   "query",
-	Short: "Query a store.",
+	Short: "Run Queries",
+	Long:  "Run queries (Check, ListObjects, ListRelations, Expand) that are evaluated according to a particular model.",
 }
 
 func init() {

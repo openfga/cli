@@ -67,6 +67,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthoriz
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "Read Authorization Models",
+	Long:    "List authorization models in a store.",
 	Example: "fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
