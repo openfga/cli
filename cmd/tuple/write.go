@@ -13,14 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package tuple
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/openfga/cli/lib/cmd-utils"
-	"github.com/openfga/cli/lib/output"
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )

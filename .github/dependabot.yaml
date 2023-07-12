@@ -4,15 +4,15 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      groups:
-       dependencies:
-          patterns:
-            - "*"
+    groups:
+     dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      groups:
-       dependencies:
-          patterns:
-            - "*"
+    groups:
+     dependencies:
+        patterns:
+          - "*"

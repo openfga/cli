@@ -72,7 +72,7 @@ Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go
 2. Then use the build command:
 
    ```bash
-   go build -o ./fga main.go
+   go build -o ./dist/fga main.go
    ```
 
    or if you have `make` installed, just run:
@@ -84,7 +84,7 @@ Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go
 3. Run the OpenFGA CLI with:
 
    ```bash
-   ./fga 
+   ./dist/fga
    ```
 
 ## Usage

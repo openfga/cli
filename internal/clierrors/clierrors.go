@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package build provides build information that is linked into the application. Other
-// packages within this project can use this information in logs etc..
-package build
+// Package clierrors contains errors used throughout this package
+package clierrors
 
-const (
-	// Version is the build version of the app (e.g. 0.1.0).
-	Version = "dev"
-
-	// Commit is the sha of the git commit the app was built against.
-	Commit = "none"
-
-	// Date is the date when the app was built.
-	Date = "unknown"
+import (
+	"errors"
+	"fmt"
 )
+
+var ErrValidation = errors.New("validation error")
+
+func ValidationError(op string, details string) error {
+	return fmt.Errorf("%w - %s: %s", ErrValidation, op, details)
+}

@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package cmd
 package cmd
 
 import (
@@ -24,7 +26,7 @@ import (
 	"github.com/openfga/cli/cmd/query"
 	"github.com/openfga/cli/cmd/store"
 	"github.com/openfga/cli/cmd/tuple"
-	cmdutils "github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

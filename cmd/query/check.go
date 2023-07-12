@@ -13,14 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package query
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/openfga/cli/lib/cmd-utils"
-	"github.com/openfga/cli/lib/output"
+	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
@@ -55,13 +56,13 @@ var checkCmd = &cobra.Command{
 	Long:  "Check if a user has a particular relation with an object. E.g. \"check user:anne can_view document:roadmap\"",
 	Args:  cobra.ExactArgs(3), //nolint:gomnd
 	RunE: func(cmd *cobra.Command, args []string) error {
-		clientConfig := cmdutils.GetClientConfig(cmd)
+		clientConfig := cmdutils2.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
+		contextualTuples, err := cmdutils2.ParseContextualTuples(cmd)
 		if err != nil {
 			return fmt.Errorf("error parsing contextual tuples for check: %w", err)
 		}
