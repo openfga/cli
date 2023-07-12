@@ -107,6 +107,34 @@ docker_signs:
     - '${artifact}'
     - "--yes" # needed on cosign 2.0.0+
 
+brews:
+  - tap:
+      owner: openfga
+      name: homebrew-tap
+      pull_request:
+        enabled: true
+    homepage: "https://openfga.dev/"
+    description: "A cross-platform CLI to interact with an OpenFGA server."
+    license: "Apache-2.0"
+    folder: "Formula"
+    url_template: "https://github.com/openfga/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    download_strategy: CurlDownloadStrategy
+
+    # update the head formula on each release
+    custom_block: |
+      head "https://github.com/openfga/cli.git", :branch => "main"
+    dependencies:
+      - name: go
+        type: optional
+      - name: git
+    install: |
+      bin.install "fga"
+      bash_completion.install "completions/fga.bash" => "goreleaser"
+      zsh_completion.install "completions/fga.zsh" => "_goreleaser"
+      fish_completion.install "completions/fga.fish"
+    test: |
+      system "#{bin}/fga version"
+
 checksum:
   name_template: 'checksums.txt'
 
