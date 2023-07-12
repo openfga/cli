@@ -18,7 +18,7 @@ limitations under the License.
 // packages within this project can use this information in logs etc..
 package build
 
-const (
+var (
 	// Version is the build version of the app (e.g. 0.1.0).
 	Version = "dev"
 
