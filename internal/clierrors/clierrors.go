@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package clierrors contains errors used throught this package
+// Package clierrors contains errors used throughout this package
 package clierrors
 
 import (
