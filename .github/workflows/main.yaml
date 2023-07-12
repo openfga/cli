@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   lint:
+    name: Lints
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -27,6 +28,7 @@ jobs:
         version: latest
 
   audit:
+    name: Security Audits
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -42,6 +44,7 @@ jobs:
       run: make audit
 
   test:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -69,6 +72,8 @@ jobs:
         uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 #2.0.0
 
   test-go-releaser:
+    name: Test Release Process
+    if: startsWith(github.ref, 'refs/tags/v') != true
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -110,7 +115,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [lint,audit,test]
+    needs: [lint,audit,test,shellcheck]
     permissions:
       contents: write
       packages: write # publish a new github release
