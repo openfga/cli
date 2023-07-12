@@ -12,7 +12,7 @@ builds:
       - darwin
     ldflags:
       - "-s -w"
-      - "-X github.com/openfga/cli/internal/build.Version=v{{ .Version }}"
+      - "-X github.com/openfga/cli/internal/build.Version={{ .Version }}"
       - "-X github.com/openfga/cli/internal/build.Commit={{.Commit}}"
       - "-X github.com/openfga/cli/internal/build.Date={{.Date}}"
 
@@ -135,11 +135,6 @@ brews:
     test: |
       system "#{bin}/fga version"
 
-archives:
-  - rlcp: true
-    files:
-      - assets
-
 checksum:
   name_template: 'checksums.txt'
 
@@ -152,3 +147,4 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^chore'

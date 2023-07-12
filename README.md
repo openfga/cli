@@ -200,11 +200,11 @@ fga store **delete**
 
 * `model`
 
-| Description                                                             | command | parameters                 | example                                                                                                     |
-|-------------------------------------------------------------------------|---------|----------------------------|-------------------------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                      |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`               | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
-| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                 |
+| Description                                                             | command | parameters                 | example                                                                                     |
+|-------------------------------------------------------------------------|---------|----------------------------|---------------------------------------------------------------------------------------------|
+| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`                   |
+| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 
 ##### Read Authorization Models 
 
@@ -239,19 +239,16 @@ fga model **write**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
+* `--file`: Specifies the file containing the model in JSON format
 
 ###### Example
-`fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
 
 ###### JSON Response
 ```json5
 {
-    "schema_version": "1.1",
-    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
-    "type_definitions": [
-      {"type": "user"},
-      // { ... }
-    ],
+  "authorization_model_id":"01GXSA8YR785C4FYS3C0RTG7B1"
 }
 ```
 
@@ -336,13 +333,13 @@ fga model **validate**
 
 * `tuple`
 
-| Description                                                                       | command   | parameters                 | example                                                                                                 |
-|-----------------------------------------------------------------------------------|-----------|----------------------------|---------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` | `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'` |
-| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` | `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                |
-| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id` | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`            |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id` | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`         |
-| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`          |
+| Description                                                                       | command   | parameters                           | example                                                                                                           |
+|-----------------------------------------------------------------------------------|-----------|--------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id`           | `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"schema_version":"1.1","type_definitions":[...]}'`       |
+| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
+| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id`           | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                      |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id`           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                   |
+| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file=tuples.json` |
 
 ##### Write Relationship Tuples
 
@@ -438,6 +435,69 @@ fga tuple **changes** --type <type> --store-id=<store-id>
         "relation": "can_view",
         "user": "user:anne"
       }
+    }
+  ]
+}
+```
+
+##### Import Relationship Tuples
+
+###### Command
+fga tuple **import** --store-id=<store-id> [--model-id=<model-id>] --file=<filename> [--max-tuples-per-write=<num>] [--max-parallel-requests=<num>]
+
+###### Parameters
+* `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
+* `--file`: Specifies the file name, `yaml` and `json` files are supported
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=20)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+
+File format should be:
+In YAML:
+```yaml
+- user: user:anne
+  relation: can_view
+  object: document:roadmap
+- user: user:beth
+  relation: can_view
+  object: document:roadmap
+```
+
+In JSON:
+
+```json
+[{
+  "user": "user:anne",
+  "relation": "can_view",
+  "object": "document:roadmap"
+}, {
+  "user": "user:beth",
+  "relation": "can_view",
+  "object": "document:roadmap"
+}]
+```
+
+###### Example
+`fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
+
+###### JSON Response
+```json5
+{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+  "failed": [
+    {
+      "tuple_key": {
+        "object":"document:roadmap",
+        "relation":"writer",
+        "user":"carl"
+      },
+      "reason":"Write validation error ..."
     }
   ]
 }
