@@ -7,26 +7,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/openfga/cli/internal/authorizationmodel"
 	mockclient "github.com/openfga/cli/internal/mocks"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 )
 
 var errMockWrite = errors.New("mock error")
-
-func TestWriteInvalidModel(t *testing.T) {
-	t.Parallel()
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
-	modelString := "{bad_json"
-
-	_, err := write(mockFgaClient, modelString)
-	if err == nil {
-		t.Fatalf("Expect error but there is none")
-	}
-}
 
 func TestWriteModelFail(t *testing.T) {
 	t.Parallel()
@@ -51,7 +38,14 @@ func TestWriteModelFail(t *testing.T) {
 
 	mockFgaClient.EXPECT().WriteAuthorizationModel(context.Background()).Return(mockRequest)
 
-	_, err = write(mockFgaClient, modelJSONTxt)
+	model := authorizationmodel.AuthzModel{}
+	err = model.ReadFromJSONString(modelJSONTxt)
+
+	if err != nil {
+		return
+	}
+
+	_, err = Write(mockFgaClient, model)
 	if err == nil {
 		t.Fatalf("Expect error but there is none")
 	}
@@ -86,7 +80,14 @@ func TestWriteModel(t *testing.T) {
 
 	mockFgaClient.EXPECT().WriteAuthorizationModel(context.Background()).Return(mockRequest)
 
-	output, err := write(mockFgaClient, modelJSONTxt)
+	model := authorizationmodel.AuthzModel{}
+
+	err = model.ReadFromJSONString(modelJSONTxt)
+	if err != nil {
+		return
+	}
+
+	output, err := Write(mockFgaClient, model)
 	if err != nil {
 		t.Fatal(err)
 	}

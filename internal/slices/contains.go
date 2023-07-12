@@ -14,21 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package clierrors contains errors used throughout this package
-package clierrors
+package slices
 
-import (
-	"errors"
-	"fmt"
-)
+// Contains returns whether a string is in a list of strings
+// Similar to slices.Contains from golang.org/x/exp/slices
+// https://cs.opensource.google/go/x/exp/+/515e97eb:slices/slices.go;l=116
+func Contains(itemArray []string, lookingFor string) bool {
+	for _, item := range itemArray {
+		if item == lookingFor {
+			return true
+		}
+	}
 
-var (
-	ErrValidation                 = errors.New("validation error")
-	ErrInvalidFormat              = errors.New("invalid format")
-	ErrStoreNotFound              = errors.New("store not found")
-	ErrAuthorizationModelNotFound = errors.New("authorization model not found")
-)
-
-func ValidationError(op string, details string) error {
-	return fmt.Errorf("%w - %s: %s", ErrValidation, op, details)
+	return false
 }

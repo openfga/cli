@@ -10,6 +10,7 @@ require (
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d
+	github.com/openfga/language/pkg/go v0.0.0-20230720235004-169b7fcddf7e
 	github.com/openfga/openfga v1.2.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
@@ -20,6 +21,7 @@ require (
 )
 
 require (
+	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
@@ -44,7 +46,7 @@ require (
 	go.opentelemetry.io/otel v1.16.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
-	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // indirect
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

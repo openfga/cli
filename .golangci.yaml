@@ -33,16 +33,17 @@ linters-settings:
         allow:
           - $gostd
           - github.com/mattn/go-isatty
+          - github.com/muesli/mango-cobra
+          - github.com/muesli/roff
           - github.com/nwidger/jsoncolor
           - github.com/oklog/ulid/v2
           - github.com/openfga/cli
           - github.com/openfga/go-sdk
+          - github.com/openfga/language
           - github.com/openfga/openfga
           - github.com/spf13/cobra
           - github.com/spf13/pflag
           - github.com/spf13/viper
-          - github.com/muesli/mango-cobra
-          - github.com/muesli/roff
           - go.buf.build/openfga/go/openfga/api
           - google.golang.org/protobuf/encoding/protojson
           - gopkg.in/yaml.v3
@@ -52,9 +53,10 @@ linters-settings:
         allow:
           - $gostd
           - github.com/golang/mock/gomock
-          - github.com/stretchr
           - github.com/openfga/cli
           - github.com/openfga/go-sdk
+          - github.com/openfga/openfga
+          - github.com/stretchr
 
   tagliatelle:
     case:

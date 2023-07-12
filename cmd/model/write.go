@@ -18,22 +18,24 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
 
-func write(fgaClient client.SdkClient, text string) (*client.ClientWriteAuthorizationModelResponse, error) {
-	body := &client.ClientWriteAuthorizationModelRequest{}
-
-	err := json.Unmarshal([]byte(text), &body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse model due to %w", err)
+func Write(
+	fgaClient client.SdkClient,
+	inputModel authorizationmodel.AuthzModel,
+) (*client.ClientWriteAuthorizationModelResponse, error) {
+	body := &client.ClientWriteAuthorizationModelRequest{
+		SchemaVersion:   inputModel.GetSchemaVersion(),
+		TypeDefinitions: inputModel.GetTypeDefinitions(),
 	}
 
 	model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(*body).Execute()
@@ -60,26 +62,31 @@ fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"ty
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		fileName, err := cmd.Flags().GetString("file")
-		if err != nil {
-			return fmt.Errorf("failed to parse file name due to %w", err)
-		}
-
 		var inputModel string
-		if fileName != "" {
-			file, err := os.ReadFile(fileName)
-			if err != nil {
-				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
-			}
-			inputModel = string(file)
-		} else {
-			if len(args) == 0 || args[0] == "-" {
-				return cmd.Help() //nolint:wrapcheck
-			}
-			inputModel = args[0]
+		if err := authorizationmodel.ReadFromInputFileOrArg(
+			cmd,
+			args,
+			"file",
+			false,
+			&inputModel,
+			openfga.PtrString(""),
+			&writeInputFormat); err != nil {
+			return err //nolint:wrapcheck
 		}
 
-		response, err := write(fgaClient, inputModel)
+		authModel := authorizationmodel.AuthzModel{}
+
+		if writeInputFormat == authorizationmodel.ModelFormatJSON {
+			err = authModel.ReadFromJSONString(inputModel)
+		} else {
+			err = authModel.ReadFromDSLString(inputModel)
+		}
+
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
+		response, err := Write(fgaClient, authModel)
 		if err != nil {
 			return err
 		}
@@ -88,9 +95,12 @@ fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"ty
 	},
 }
 
+var writeInputFormat = authorizationmodel.ModelFormatDefault
+
 func init() {
 	writeCmd.Flags().String("store-id", "", "Store ID")
-	writeCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON format")
+	writeCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
+	writeCmd.Flags().Var(&writeInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
 
 	if err := writeCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)

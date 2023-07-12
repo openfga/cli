@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
@@ -52,6 +54,15 @@ func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*openf
 		return nil, fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
 	}
 
+	if model.AuthorizationModel == nil {
+		// If there is no model, try to get the store
+		if _, err := fgaClient.GetStore(context.Background()).Execute(); err != nil {
+			return nil, fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
+		}
+
+		return nil, fmt.Errorf("%w", clierrors.ErrAuthorizationModelNotFound)
+	}
+
 	return model, nil
 }
 
@@ -74,13 +85,36 @@ var getCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		authModel := authorizationmodel.AuthzModel{}
+		authModel.Set(*response.AuthorizationModel)
+
+		fields, err := cmd.Flags().GetStringArray("field")
+		if err != nil {
+			return fmt.Errorf("failed to parse field array flag due to %w", err)
+		}
+
+		if getOutputFormat == authorizationmodel.ModelFormatJSON {
+			return output.Display(authModel.DisplayAsJSON(fields)) //nolint:wrapcheck
+		}
+
+		dslModel, err := authModel.DisplayAsDSL(fields)
+		if err != nil {
+			return fmt.Errorf("failed to display model due to %w", err)
+		}
+
+		fmt.Printf("%v", *dslModel)
+
+		return nil
 	},
 }
+
+var getOutputFormat = authorizationmodel.ModelFormatFGA
 
 func init() {
 	getCmd.Flags().String("model-id", "", "Authorization Model ID")
 	getCmd.Flags().String("store-id", "", "Store ID")
+	getCmd.Flags().StringArray("field", []string{"model"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
+	getCmd.Flags().Var(&getOutputFormat, "format", `Authorization model output format. Can be "fga" or "json"`)
 
 	if err := getCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/get", err)
