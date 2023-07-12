@@ -18,7 +18,6 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
       with:
-        go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
         check-latest: true
         go-version: '>=1.20.6'
@@ -35,7 +34,6 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
       with:
-        go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
         check-latest: true
         go-version: '>=1.20.6'
@@ -52,7 +50,6 @@ jobs:
 
     - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
       with:
-        go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
         check-latest: true
         go-version: '>=1.20.6'
@@ -62,6 +59,53 @@ jobs:
 
     - name: Run unit test
       run: make test
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 #2.0.0
+
+  test-go-releaser:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      with:
+        cache-dependency-path: './go.sum'
+        check-latest: true
+        go-version: '>=1.20.6'
+
+    - name: Extract Version from Tag
+      id: tag_name
+      run: |
+        echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Checkout
+      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      with:
+        cache-dependency-path: './go.sum'
+        check-latest: true
+        go-version: '>=1.20.6'
+
+    - uses: anchore/sbom-action/download-syft@422cb34a0f8b599678c41b21163ea6088edb2624 # v0.14.1
+
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@336e29918d653399e599bfca99fadc1d7ffbc9f7 # v4.3.0
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release --clean --config .goreleaser.yaml --snapshot --skip-sign --skip-publish --skip-announce
 
   release:
     runs-on: ubuntu-latest
@@ -86,7 +130,6 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
         with:
-          go-version-file: './go.mod'
           cache-dependency-path: './go.sum'
           check-latest: true
           go-version: '>=1.20.6'

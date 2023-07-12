@@ -71,6 +71,7 @@ func init() {
 
 	rootCmd.Version = versionStr
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(manCmd)
 	rootCmd.AddCommand(store.StoreCmd)
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)

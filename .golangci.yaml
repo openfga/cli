@@ -41,6 +41,8 @@ linters-settings:
           - github.com/spf13/cobra
           - github.com/spf13/pflag
           - github.com/spf13/viper
+          - github.com/muesli/mango-cobra
+          - github.com/muesli/roff
           - go.buf.build/openfga/go/openfga/api
           - google.golang.org/protobuf/encoding/protojson
           - gopkg.in/yaml.v3
