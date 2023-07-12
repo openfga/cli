@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/oklog/ulid/v2"
-	"github.com/openfga/cli/lib/output"
+	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/openfga/pkg/typesystem"
 	"github.com/spf13/cobra"
 	pb "go.buf.build/openfga/go/openfga/api/openfga/v1"

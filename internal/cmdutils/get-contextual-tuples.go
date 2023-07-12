@@ -3,7 +3,7 @@ package cmdutils
 import (
 	"strings"
 
-	"github.com/openfga/cli/lib/clierrors"
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )

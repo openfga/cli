@@ -3,7 +3,7 @@ package cmdutils_test
 import (
 	"testing"
 
-	cmdutils "github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/go-sdk/client"
 )
 

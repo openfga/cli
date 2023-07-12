@@ -1,16 +1,17 @@
 BINARY_NAME=fga
+BUILD_FOLDER=dist
 
 all: build
 
 build:
-	go build -o ${BINARY_NAME} main.go
+	go build -o ${BUILD_FOLDER}/${BINARY_NAME} main.go
  
 run: build
-	./${BINARY_NAME}
+	./${BUILD_FOLDER}/${BINARY_NAME}
  
 clean:
 	go clean
-	rm -f ${BINARY_NAME}
+	rm -f ${BUILD_FOLDER}
 
 test:
 	go test -race \

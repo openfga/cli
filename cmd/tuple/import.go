@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"os"
 
-	cmdutils "github.com/openfga/cli/lib/cmd-utils"
-	"github.com/openfga/cli/lib/output"
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"

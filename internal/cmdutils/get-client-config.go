@@ -1,7 +1,7 @@
 package cmdutils
 
 import (
-	"github.com/openfga/cli/lib/fga"
+	"github.com/openfga/cli/internal/fga"
 	"github.com/spf13/cobra"
 )
 

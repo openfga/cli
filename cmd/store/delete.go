@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openfga/cli/lib/cmd-utils"
-	"github.com/openfga/cli/lib/output"
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 	"github.com/spf13/cobra"
 )
 

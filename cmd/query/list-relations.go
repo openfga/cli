@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/openfga/cli/lib/cmd-utils"
-	"github.com/openfga/cli/lib/fga"
-	"github.com/openfga/cli/lib/output"
+	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/fga"
+	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -120,13 +120,13 @@ var listRelationsCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(2),                                                                                              //nolint:gomnd,lll
 	Example: `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`, //nolint:lll
 	RunE: func(cmd *cobra.Command, args []string) error {
-		clientConfig := cmdutils.GetClientConfig(cmd)
+		clientConfig := cmdutils2.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
+		contextualTuples, err := cmdutils2.ParseContextualTuples(cmd)
 		if err != nil {
 			return fmt.Errorf("error parsing contextual tuples for listRelations: %w", err)
 		}

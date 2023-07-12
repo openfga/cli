@@ -24,7 +24,7 @@ import (
 	"github.com/openfga/cli/cmd/query"
 	"github.com/openfga/cli/cmd/store"
 	"github.com/openfga/cli/cmd/tuple"
-	cmdutils "github.com/openfga/cli/lib/cmd-utils"
+	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
