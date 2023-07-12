@@ -26,7 +26,7 @@ import (
 	"github.com/openfga/go-sdk/credentials"
 )
 
-const userAgent = "openfga-cli/" + build.Version
+var userAgent = "openfga-cli/" + build.Version
 
 type ClientConfig struct {
 	ServerURL            string `json:"server_url,omitempty"`
