@@ -131,16 +131,25 @@ Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go
 
 For any command that interacts with an OpenFGA server, these configuration values can be passed (where applicable)
 
-| Name                   | Flag                 | CLI                    |
-|------------------------|----------------------|------------------------|
-| Server Url             | `--server-url`       | `FGA_SERVER_URL`       |
-| Shared Secret          | `--api-token`        | `FGA_API_TOKEN`        |
-| Client ID              | `--client-id`        | `FGA_CLIENT_ID`        |
-| Client Secret          | `--client-secret`    | `FGA_CLIENT_SECRET`    |
-| Token Issuer           | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` |
-| Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     |
-| Store ID               | `--store-id`         | `FGA_STORE_ID`         |
-| Authorization Model ID | `--model-id`         | `FGA_MODEL_ID`         |
+| Name                   | Flag                 | CLI                    | ~/.fga.yaml        |
+|------------------------|----------------------|------------------------|--------------------|
+| Server Url             | `--server-url`       | `FGA_SERVER_URL`       | `server-url`       |
+| Shared Secret          | `--api-token`        | `FGA_API_TOKEN`        | `api-token`        |
+| Client ID              | `--client-id`        | `FGA_CLIENT_ID`        | `client-id`        |
+| Client Secret          | `--client-secret`    | `FGA_CLIENT_SECRET`    | `client-secret`    |
+| Token Issuer           | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` | `api-token-issuer` |
+| Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     | `api-audience`     |
+| Store ID               | `--store-id`         | `FGA_STORE_ID`         | `store-id`         |
+| Authorization Model ID | `--model-id`         | `FGA_MODEL_ID`         | `model-id`         |
+
+If you are authenticating with a shared secret, you should specify the API Token value. If you are authenticating using OAuth, you should specify the Client ID, Client Secret, API Audience and Token Issuer. For example:
+
+```
+client-id: 4Zb..UYjaHreLKOJuU8
+client-secret: J3...2pBwiauD
+api-audience: https://api.us1.fga.dev/
+api-token-issuer: fga.us.auth0.com
+```
 
 ### Commands
 
