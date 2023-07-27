@@ -122,8 +122,6 @@ brews:
   - repository:
       owner: openfga
       name: homebrew-tap
-      pull_request:
-        enabled: true
     homepage: "https://openfga.dev/"
     description: "A cross-platform CLI to interact with an OpenFGA server."
     license: "Apache-2.0"
