@@ -128,7 +128,7 @@ brews:
     folder: "Formula"
     url_template: "https://github.com/openfga/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     download_strategy: CurlDownloadStrategy
-
+    skip_upload: "auto"
     # update the head formula on each release
     custom_block: |
       head "https://github.com/openfga/cli.git", :branch => "main"
