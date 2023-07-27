@@ -29,10 +29,10 @@ import (
 )
 
 // MaxTuplesPerWrite Limit the tuples in a single batch.
-var MaxTuplesPerWrite = 20
+var MaxTuplesPerWrite = 1
 
 // MaxParallelRequests Limit the parallel writes to the API.
-var MaxParallelRequests = 4
+var MaxParallelRequests = 10
 
 type failedWriteResponse struct {
 	TupleKey client.ClientTupleKey `json:"tuple_key"`
