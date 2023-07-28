@@ -29,9 +29,10 @@ import (
 var transformCmd = &cobra.Command{
 	Use:   "transform",
 	Short: "Transforms an authorization model",
-	Example: `fga model transform --file=model.json --from-json
+	Example: `fga model transform --file=model.json --input-format json
 fga model transform --file=model.fga
-fga model transform '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]} --from-json'`,
+fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"user"}] }' --input-format json`,
+
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
@@ -46,18 +47,13 @@ fga model transform '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]
 			return err //nolint:wrapcheck
 		}
 
-		fields, err := cmd.Flags().GetStringArray("field")
-		if err != nil {
-			return fmt.Errorf("failed to parse field array flag due to %w", err)
-		}
-
 		authModel := authorizationmodel.AuthzModel{}
 		if transformInputFormat == authorizationmodel.ModelFormatJSON {
 			if err := authModel.ReadFromJSONString(inputModel); err != nil {
 				return err //nolint:wrapcheck
 			}
 
-			dslModel, err := authModel.DisplayAsDSL(fields)
+			dslModel, err := authModel.DisplayAsDSL([]string{"model"})
 			if err != nil {
 				return fmt.Errorf("failed to transform model due to %w", err)
 			}
@@ -70,7 +66,7 @@ fga model transform '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]
 			return err //nolint:wrapcheck
 		}
 
-		return output.Display(authModel.DisplayAsJSON(fields)) //nolint:wrapcheck
+		return output.Display(authModel.DisplayAsJSON([]string{"model"})) //nolint:wrapcheck
 	},
 }
 
@@ -78,6 +74,5 @@ var transformInputFormat = authorizationmodel.ModelFormatFGA
 
 func init() {
 	transformCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
-	transformCmd.Flags().Var(&transformInputFormat, "input-format", `Authorization model input format. Can be "fga" or "json"`)                  //nolint:lll
-	transformCmd.Flags().StringArray("field", []string{"id", "created_at", "model"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
+	transformCmd.Flags().Var(&transformInputFormat, "input-format", `Authorization model input format. Can be "fga" or "json"`) //nolint:lll
 }
