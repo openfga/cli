@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
@@ -86,13 +87,27 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		fields, err := cmd.Flags().GetStringArray("field")
+		if err != nil {
+			return fmt.Errorf("failed to parse field array flag due to %w", err)
+		}
+
+		models := authorizationmodel.AuthzModelList{}
+		authzModels := *response.AuthorizationModels
+		for index := 0; index < len(authzModels); index++ {
+			authModel := authorizationmodel.AuthzModel{}
+			authModel.Set(authzModels[index])
+			models.AuthorizationModels = append(models.AuthorizationModels, authModel.DisplayAsJSON(fields))
+		}
+
+		return output.Display(models) //nolint:wrapcheck
 	},
 }
 
 func init() {
 	listCmd.Flags().Int("max-pages", MaxModelsPagesLength, "Max number of pages to get.")
 	listCmd.Flags().String("store-id", "", "Store ID")
+	listCmd.Flags().StringArray("field", []string{"id", "created_at"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
 
 	if err := listCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/list", err)

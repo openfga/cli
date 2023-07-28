@@ -14,21 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package clierrors contains errors used throughout this package
-package clierrors
-
-import (
-	"errors"
-	"fmt"
-)
-
-var (
-	ErrValidation                 = errors.New("validation error")
-	ErrInvalidFormat              = errors.New("invalid format")
-	ErrStoreNotFound              = errors.New("store not found")
-	ErrAuthorizationModelNotFound = errors.New("authorization model not found")
-)
-
-func ValidationError(op string, details string) error {
-	return fmt.Errorf("%w - %s: %s", ErrValidation, op, details)
-}
+// Package slices contains some functionality to make working with slices easier
+package slices

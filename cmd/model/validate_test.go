@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	openfga "github.com/openfga/go-sdk"
 )
 
@@ -80,7 +81,12 @@ func TestValidate(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 
-			output := validate(test.Input)
+			model := authorizationmodel.AuthzModel{}
+			err := model.ReadFromJSONString(test.Input)
+			if err != nil {
+				return
+			}
+			output := validate(model)
 
 			if !reflect.DeepEqual(output, test.ExpectedOutput) {
 				t.Fatalf("Expect output %v actual %v", test.ExpectedOutput, output)

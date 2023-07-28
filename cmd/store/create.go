@@ -19,13 +19,20 @@ package store
 import (
 	"context"
 	"fmt"
-	"os"
 
+	"github.com/openfga/cli/cmd/model"
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 )
+
+type CreateStoreAndModelResponse struct {
+	Store client.ClientCreateStoreResponse              `json:"store"`
+	Model *client.ClientWriteAuthorizationModelResponse `json:"model,omitempty"`
+}
 
 func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateStoreResponse, error) {
 	body := client.ClientCreateStoreRequest{Name: storeName}
@@ -38,6 +45,54 @@ func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateS
 	return store, nil
 }
 
+func createStoreWithModel(
+	clientConfig fga.ClientConfig,
+	storeName string,
+	inputModel string,
+	inputFormat authorizationmodel.ModelFormat,
+) (*CreateStoreAndModelResponse, error) {
+	fgaClient, err := clientConfig.GetFgaClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
+	}
+
+	response := CreateStoreAndModelResponse{}
+
+	if storeName == "" {
+		return nil, fmt.Errorf(`required flag(s) "name" not set`) //nolint:goerr113
+	}
+
+	createStoreResponse, err := create(fgaClient, storeName)
+	if err != nil {
+		return nil, err
+	}
+
+	response.Store = *createStoreResponse
+	fgaClient.SetStoreId(*response.Store.Id)
+
+	if inputModel != "" {
+		authModel := authorizationmodel.AuthzModel{}
+		if inputFormat == authorizationmodel.ModelFormatJSON {
+			err = authModel.ReadFromJSONString(inputModel)
+		} else {
+			err = authModel.ReadFromDSLString(inputModel)
+		}
+
+		if err != nil {
+			return nil, err //nolint:wrapcheck
+		}
+
+		createAuthZModelResponse, err := model.Write(fgaClient, authModel)
+		if err != nil {
+			return nil, err //nolint:wrapcheck
+		}
+
+		response.Model = createAuthZModelResponse
+	}
+
+	return &response, nil
+}
+
 // createCmd represents the store create command.
 var createCmd = &cobra.Command{
 	Use:     "create",
@@ -46,26 +101,33 @@ var createCmd = &cobra.Command{
 	Example: `fga store create --name "FGA Demo Store"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
-		fgaClient, err := clientConfig.GetFgaClient()
-		if err != nil {
-			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
-		}
 		storeName, _ := cmd.Flags().GetString("name")
-		response, err := create(fgaClient, storeName)
+
+		var inputModel string
+		if err := authorizationmodel.ReadFromInputFileOrArg(
+			cmd,
+			args,
+			"model",
+			true,
+			&inputModel,
+			&storeName,
+			&createModelInputFormat); err != nil {
+			return err //nolint:wrapcheck
+		}
+
+		response, err := createStoreWithModel(clientConfig, storeName, inputModel, createModelInputFormat)
 		if err != nil {
 			return err
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		return output.Display(response) //nolint:wrapcheck
 	},
 }
 
+var createModelInputFormat = authorizationmodel.ModelFormatDefault
+
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
-
-	err := createCmd.MarkFlagRequired("name")
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(1)
-	}
+	createCmd.Flags().String("model", "", "Authorization Model File Name")
+	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
 }
