@@ -29,7 +29,7 @@ import (
 var transformCmd = &cobra.Command{
 	Use:   "transform",
 	Short: "Transforms an authorization model",
-	Example: `fga model transform --file=model.json --input-format json
+	Example: `fga model transform --file=model.json
 fga model transform --file=model.fga
 fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"user"}] }' --input-format json`,
 
