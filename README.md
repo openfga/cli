@@ -167,7 +167,9 @@ api-token-issuer: fga.us.auth0.com
 fga store **create**
 
 ###### Parameters
-* `--name`: Specifies the name of the store to be created
+* `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name. 
+* `--model`: File with the authorization model. Can be in JSON or OpenFGA format (optional).
+* `--format` : Authorization model input format. Can be "fga" or "json" (optional, defaults to the model file extension if present).
 
 ###### Example
 `fga store create --name "FGA Demo Store"`
@@ -180,6 +182,29 @@ fga store **create**
     "created_at": "2023-05-19T16:10:07.637585677Z",
     "updated_at": "2023-05-19T16:10:07.637585677Z"
 }
+```
+
+`fga store create --model Model.fga`
+
+###### JSON Response
+```json
+{
+  "store": {
+    "id":"01H6H9CNQRP2TVCFR7899XGNY8",
+    "name":"Model",
+    "created_at":"2023-07-29T16:58:28.984402Z",
+    "updated_at":"2023-07-29T16:58:28.984402Z"
+  },
+  "model": {
+    "authorization_model_id":"01H6H9CNQV36Y9WS1RJGRN8D06"
+  }
+}
+```
+
+To automatically set the created store id as an environment variable that will then be used by the CLI, you can use the following command:
+
+```bash
+export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
 ```
 
 ##### List Stores
@@ -250,10 +275,12 @@ fga store **delete**
 | Description                                                             | command | parameters                 | example                                                                                     |
 |-------------------------------------------------------------------------|---------|----------------------------|---------------------------------------------------------------------------------------------|
 | [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`                   |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`                   |
 | [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 
 ##### Read Authorization Models 
+
+List all authorization models for a store, in descending order by creation date. The first model in the list is the latest one.
 
 ###### Command
 fga model **list**
@@ -261,22 +288,25 @@ fga model **list**
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--max-pages`: Max number of pages to retrieve (default: 20)
+* `--field`: Fields to display. Choices are: id, created_at and model. Default are id, created_at.
 
 ###### Example
 `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
 ```json5
-[{
-    "schema_version": "1.1",
-    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
-    "type_definitions": [
-      {"type": "user"},
-      // { ... }
-    ],
-},
-// { ... }
-]
+{
+  "authorization_models": [
+    {
+      "id":"01H6H9XH1G5Q6DK6PFMGDZNH9S",
+      "created_at":"2023-07-29T17:07:41Z"
+    },
+    {
+      "id":"01H6H9PPR6C3P45R75X55ZFP46",
+      "created_at":"2023-07-29T17:03:57Z"
+    }
+  ]
+}
 ```
 
 ##### Write Authorization Model 
@@ -286,11 +316,12 @@ fga model **write**
 
 ###### Parameters
 * `--store-id`: Specifies the store id
-* `--file`: Specifies the file containing the model in JSON format
+* `--file`: File containing the authorization model.
+* `--format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
 
 ###### Example
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json`
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}'`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}' --format json`
 
 ###### JSON Response
 ```json5
@@ -307,20 +338,22 @@ fga model **get**
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id
+* `--format`: Authorization model output format. Can be "fga" or "json" (default fga).
+* `--field`: Fields to display, choices are: `id`, `created_at` and `model`. Default is `model`.
 
 ###### Example
 `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`
 
 ###### JSON Response
-```json5
-{
-    "schema_version": "1.1",
-    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
-    "type_definitions": [
-      {"type": "user"},
-      // { ... }
-    ],
-}
+```python
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define can_view: [user]
 ```
 
 ##### Read the Latest Authorization Model 
@@ -337,15 +370,15 @@ fga model **get**
 `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
 ###### JSON Response
-```json5
-{
-    "schema_version": "1.1",
-    "id": "01GXSA8YR785C4FYS3C0RTG7B1",
-    "type_definitions": [
-      {"type": "user"},
-      // { ... }
-    ],
-}
+```python
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define can_view: [user]
 ```
 
 ##### Validate an Authorization Model
@@ -496,7 +529,7 @@ fga tuple **import** --store-id=<store-id> [--model-id=<model-id>] --file=<filen
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--file`: Specifies the file name, `yaml` and `json` files are supported
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=20)
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 
 File format should be:
