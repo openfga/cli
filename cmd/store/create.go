@@ -95,10 +95,15 @@ func createStoreWithModel(
 
 // createCmd represents the store create command.
 var createCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Create Store",
-	Long:    "Create an OpenFGA store.",
-	Example: `fga store create --name "FGA Demo Store"`,
+	Use:   "create",
+	Short: "Create Store",
+	Long:  "Create an OpenFGA store.",
+	Example: `fga store create --name "FGA Demo Store" 
+
+To set the created store id as an environment variable that will be used by the CLI, you can use the following command:
+
+export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
+	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
