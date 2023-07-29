@@ -43,7 +43,7 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 			false,
 			&inputModel,
 			openfga.PtrString(""),
-			&writeInputFormat); err != nil {
+			&transformInputFormat); err != nil {
 			return err //nolint:wrapcheck
 		}
 
@@ -70,7 +70,7 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 	},
 }
 
-var transformInputFormat = authorizationmodel.ModelFormatFGA
+var transformInputFormat = authorizationmodel.ModelFormatDefault
 
 func init() {
 	transformCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
