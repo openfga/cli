@@ -28,6 +28,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
       - [Validate an Authorization Model](#validate-an-authorization-model)
+      - [Transform an Authorization Model](#transform-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
       - [Read Relationship Tuples](#read-relationship-tuples)
@@ -277,6 +278,9 @@ fga store **delete**
 | [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
 | [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`                   |
 | [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
+| [Validate an Authorization Model](#validate-an-authorization-model) | `validate`   | `--file`, `--format` | `fga model validate --file model.fga` |
+| [Transform an Authorization Model](#transform-an-authorization-model) | `transform`   | `--file`, `--input-format` | `fga model transform --file model.json` |
+
 
 ##### Read Authorization Models 
 
@@ -387,9 +391,11 @@ type document
 fga model **validate**
 
 ###### Parameters
+* `--file`: File containing the authorization model.
+* `--format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
 
 ###### Example
-`fga model validate '{"schema_version":"1.1,"type_definitions":[{"type":"user"}]}'`
+`fga model validate --file model.json`
 
 ###### JSON Response
 * Valid model with an ID
@@ -407,6 +413,30 @@ fga model **validate**
 * Invalid model without an ID
 ```json5
 {"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid"}
+```
+
+##### Transform an Authorization Model
+
+###### Command
+fga model **transform** 
+
+###### Parameters
+* `--file`: File containing the authorization model
+* `--input-format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
+
+###### Example
+`fga model transform --file model.json`
+
+###### Response
+```python
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define can_view: [user]
 ```
 
 #### Relationship Tuples
