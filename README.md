@@ -427,7 +427,7 @@ fga model **transform**
 ###### Example
 `fga model transform --file model.json`
 
-###### JSON Response
+###### Response
 ```python
 model
   schema 1.1
