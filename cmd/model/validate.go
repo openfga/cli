@@ -91,7 +91,7 @@ var validateCmd = &cobra.Command{
 	Use:     "validate",
 	Short:   "Validate Authorization Model",
 	Long:    "Validates that an authorization model is valid.",
-	Example: `fga model validate -file model.json`,
+	Example: `fga model validate --file model.json`,
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
