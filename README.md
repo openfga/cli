@@ -27,7 +27,6 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Write Authorization Model](#write-authorization-model)
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
-      - [Validate an Authorization Model](#validate-an-authorization-model)
       - [Transform an Authorization Model](#transform-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
@@ -278,7 +277,6 @@ fga store **delete**
 | [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
 | [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`                   |
 | [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
-| [Validate an Authorization Model](#validate-an-authorization-model) | `validate`   | `--file`, `--format` | `fga model validate --file model.fga` |
 | [Transform an Authorization Model](#transform-an-authorization-model) | `transform`   | `--file`, `--input-format` | `fga model transform --file model.json` |
 
 
@@ -383,36 +381,6 @@ type user
 type document
   relations
     define can_view: [user]
-```
-
-##### Validate an Authorization Model
-
-###### Command
-fga model **validate**
-
-###### Parameters
-* `--file`: File containing the authorization model.
-* `--format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
-
-###### Example
-`fga model validate --file model.json`
-
-###### JSON Response
-* Valid model with an ID
-```json5
-{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true}
-```
-* Valid model without an ID
-```json5
-{"is_valid":true}
-```
-* Invalid model with an ID
-```json5
-{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version"}
-```
-* Invalid model without an ID
-```json5
-{"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid"}
 ```
 
 ##### Transform an Authorization Model
