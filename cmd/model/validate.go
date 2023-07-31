@@ -20,13 +20,13 @@ import (
 	"context"
 	"time"
 
+	pb "buf.build/gen/go/openfga/api/protocolbuffers/go/openfga/v1"
 	"github.com/oklog/ulid/v2"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/openfga/pkg/typesystem"
 	"github.com/spf13/cobra"
-	pb "go.buf.build/openfga/go/openfga/api/openfga/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
