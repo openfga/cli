@@ -123,7 +123,10 @@ func (model *AuthzModel) ReadFromJSONString(jsonString string) error {
 }
 
 func (model *AuthzModel) ReadFromDSLString(dslString string) error {
-	parsedAuthModel := language.TransformDslToJSON(dslString)
+	parsedAuthModel, err := language.TransformDslToJSON(dslString)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
 
 	bytes, err := protojson.Marshal(parsedAuthModel)
 	if err != nil {
@@ -222,7 +225,7 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 			return nil, fmt.Errorf("unable to unmarshal model json string due to: %w", err)
 		}
 
-		dslModel += fmt.Sprintf("%v\n", language.TransformJSONToDSL(&modelPb))
+		dslModel += fmt.Sprintf("%v\n", language.TransformJSONProtoToDSL(&modelPb))
 	}
 
 	return &dslModel, nil
