@@ -174,7 +174,7 @@ fga store **create**
 ###### Example
 `fga store create --name "FGA Demo Store"`
 
-###### JSON Response
+###### Response
 ```json
 {
     "id": "01H0H015178Y2V4CX10C2KGHF4",
@@ -186,7 +186,7 @@ fga store **create**
 
 `fga store create --model Model.fga`
 
-###### JSON Response
+###### Response
 ```json
 {
   "store": {
@@ -218,7 +218,7 @@ fga store **list**
 ###### Example
 `fga store list`
 
-###### JSON Response
+###### Response
 ```json
 {
   "stores": [{
@@ -242,7 +242,7 @@ fga store **get**
 ###### Example
 `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
-###### JSON Response
+###### Response
 ```json
 {
     "id": "01H0H015178Y2V4CX10C2KGHF4",
@@ -263,7 +263,7 @@ fga store **delete**
 ###### Example
 `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
-###### JSON Response
+###### Response
 ```json
 {}
 ```
@@ -295,7 +295,7 @@ fga model **list**
 ###### Example
 `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
-###### JSON Response
+###### Response
 ```json5
 {
   "authorization_models": [
@@ -325,7 +325,7 @@ fga model **write**
 * `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`
 * `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}' --format json`
 
-###### JSON Response
+###### Response
 ```json5
 {
   "authorization_model_id":"01GXSA8YR785C4FYS3C0RTG7B1"
@@ -346,7 +346,7 @@ fga model **get**
 ###### Example
 `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`
 
-###### JSON Response
+###### Response
 ```python
 model
   schema 1.1
@@ -371,7 +371,7 @@ fga model **get**
 ###### Example
 `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
-###### JSON Response
+###### Response
 ```python
 model
   schema 1.1
@@ -434,7 +434,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 ###### Example
 `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
-###### JSON Response
+###### Response
 ```json5
 {}
 ```
@@ -453,7 +453,7 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 ###### Example
 `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
-###### JSON Response
+###### Response
 ```json5
 {}
 ```
@@ -472,7 +472,7 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 ###### Example
 `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
 
-###### JSON Response
+###### Response
 ```json5
 {
   "tuples": [
@@ -501,7 +501,7 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 ###### Example
 `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document`
 
-###### JSON Response
+###### Response
 ```json5
 {
   "changes": [
@@ -558,7 +558,7 @@ In JSON:
 ###### Example
 `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
 
-###### JSON Response
+###### Response
 ```json5
 {
   "successful": [
@@ -605,7 +605,7 @@ fga query **check** <user> <relation> <object> [--contextual-tuple "<user> <rela
 ###### Example
 `fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
 
-###### JSON Response
+###### Response
 ```json5
 {
     "allowed": true,
@@ -625,7 +625,7 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple "
 ###### Example
 `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
 
-###### JSON Response
+###### Response
 ```json5
 {
     "objects": [
@@ -648,7 +648,7 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 ###### Example
 `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`
 
-###### JSON Response
+###### Response
 ```json5
 {
     "relations": [
@@ -669,7 +669,7 @@ fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<mode
 ###### Example
 `fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`
 
-###### JSON Response
+###### Response
 ```json5
 {
   "tree": {
