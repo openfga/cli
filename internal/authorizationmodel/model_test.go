@@ -5,13 +5,13 @@ import (
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 	openfga "github.com/openfga/go-sdk"
-	"github.com/openfga/openfga/pkg/typesystem"
 )
 
 const (
-	modelID        = "01GVKXGDCV2SMG6TRE9NMBQ2VG"
-	typeName       = "user"
-	modelCreatedAt = "2023-03-16 00:35:51 +0000 UTC"
+	modelID          = "01GVKXGDCV2SMG6TRE9NMBQ2VG"
+	typeName         = "user"
+	modelCreatedAt   = "2023-03-16 00:35:51 +0000 UTC"
+	SchemaVersion1_1 = "1.1"
 )
 
 func TestReadingInvalidModelFromInvalidJSON(t *testing.T) {
@@ -39,8 +39,8 @@ func TestReadingValidModelFromJSON(t *testing.T) {
 		t.Errorf("Got error when reading a valid model %v", err)
 	}
 
-	if model.GetSchemaVersion() != typesystem.SchemaVersion1_1 {
-		t.Errorf("Expected %v to equal %v", model.GetSchemaVersion(), typesystem.SchemaVersion1_1)
+	if model.GetSchemaVersion() != SchemaVersion1_1 {
+		t.Errorf("Expected %v to equal %v", model.GetSchemaVersion(), SchemaVersion1_1)
 	}
 
 	if model.GetID() != modelID {
@@ -68,8 +68,8 @@ type user
 		t.Errorf("Got error when parsing a valid model %v", err)
 	}
 
-	if model.GetSchemaVersion() != typesystem.SchemaVersion1_1 {
-		t.Errorf("Expected %v to equal %v", model.GetSchemaVersion(), typesystem.SchemaVersion1_1)
+	if model.GetSchemaVersion() != SchemaVersion1_1 {
+		t.Errorf("Expected %v to equal %v", model.GetSchemaVersion(), SchemaVersion1_1)
 	}
 
 	if model.GetTypeDefinitions()[0].GetType() != typeName {
@@ -84,14 +84,14 @@ func TestDisplayAsJsonWithFields(t *testing.T) {
 		Type: typeName,
 	}}
 	model := authorizationmodel.AuthzModel{
-		SchemaVersion:   openfga.PtrString(typesystem.SchemaVersion1_1),
+		SchemaVersion:   openfga.PtrString(SchemaVersion1_1),
 		ID:              openfga.PtrString(modelID),
 		TypeDefinitions: &typeDefs,
 	}
 
 	jsonModel1 := model.DisplayAsJSON([]string{"model", "id", "created_at"})
-	if jsonModel1.GetSchemaVersion() != typesystem.SchemaVersion1_1 {
-		t.Errorf("Expected %v to equal %v", jsonModel1.GetSchemaVersion(), typesystem.SchemaVersion1_1)
+	if jsonModel1.GetSchemaVersion() != SchemaVersion1_1 {
+		t.Errorf("Expected %v to equal %v", jsonModel1.GetSchemaVersion(), SchemaVersion1_1)
 	}
 
 	if jsonModel1.GetID() != modelID {

@@ -32,7 +32,6 @@ func init() {
 	ModelCmd.AddCommand(writeCmd)
 	ModelCmd.AddCommand(listCmd)
 	ModelCmd.AddCommand(getCmd)
-	ModelCmd.AddCommand(validateCmd)
 	ModelCmd.AddCommand(transformCmd)
 	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
 }
