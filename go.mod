@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/golang/mock v1.6.0
 	github.com/mattn/go-isatty v0.0.19
+	github.com/moby/moby v24.0.5+incompatible
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/moby/moby/pkg/namesgenerator"
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
@@ -57,10 +58,6 @@ func createStoreWithModel(
 	}
 
 	response := CreateStoreAndModelResponse{}
-
-	if storeName == "" {
-		return nil, fmt.Errorf(`required flag(s) "name" not set`) //nolint:goerr113
-	}
 
 	createStoreResponse, err := create(fgaClient, storeName)
 	if err != nil {
@@ -107,6 +104,10 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
+
+		if storeName == "" {
+			storeName = namesgenerator.GetRandomName(0)
+		}
 
 		var inputModel string
 		if err := authorizationmodel.ReadFromInputFileOrArg(
