@@ -39,6 +39,7 @@ func init() {
 	TupleCmd.AddCommand(importCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
+	TupleCmd.PersistentFlags().String("model-id", "", "Model ID")
 	err := TupleCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
 		fmt.Print(err)
