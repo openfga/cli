@@ -3,7 +3,7 @@ module github.com/openfga/cli
 go 1.20
 
 require (
-	buf.build/gen/go/openfga/api/protocolbuffers/go v1.31.0-20230717171250-faa56cb1c8d1.1
+	buf.build/gen/go/openfga/api/protocolbuffers/go v1.31.0-20230801152118-8e3dffda6e23.1
 	github.com/golang/mock v1.6.0
 	github.com/mattn/go-isatty v0.0.19
 	github.com/muesli/mango-cobra v1.2.0
