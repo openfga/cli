@@ -72,11 +72,16 @@ func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
 		return nil, err //nolint:wrapcheck
 	}
 
+	var authorizationModelID *string
+	if c.AuthorizationModelID != "" {
+		authorizationModelID = openfga.PtrString(c.AuthorizationModelID)
+	}
+
 	return &client.ClientConfiguration{
 		ApiScheme:            apiURIParts.Scheme,
 		ApiHost:              apiURIParts.Host,
 		StoreId:              c.StoreID,
-		AuthorizationModelId: openfga.PtrString(c.AuthorizationModelID),
+		AuthorizationModelId: authorizationModelID,
 		Credentials:          c.getCredentials(),
 		UserAgent:            userAgent,
 	}, nil
