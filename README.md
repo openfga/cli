@@ -275,7 +275,7 @@ fga store **delete**
 | Description                                                             | command | parameters                 | example                                                                                     |
 |-------------------------------------------------------------------------|---------|----------------------------|---------------------------------------------------------------------------------------------|
 | [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`                   |
+| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                   |
 | [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 | [Transform an Authorization Model](#transform-an-authorization-model) | `transform`   | `--file`, `--input-format` | `fga model transform --file model.json` |
 
@@ -322,7 +322,7 @@ fga model **write**
 * `--format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
 
 ###### Example
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`
 * `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}' --format json`
 
 ###### Response
@@ -417,7 +417,7 @@ type document
 | [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
 | [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id`           | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                      |
 | [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id`           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                   |
-| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file=tuples.json` |
+| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json` |
 
 ##### Write Relationship Tuples
 
@@ -521,7 +521,7 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 ##### Import Relationship Tuples
 
 ###### Command
-fga tuple **import** --store-id=<store-id> [--model-id=<model-id>] --file=<filename> [--max-tuples-per-write=<num>] [--max-parallel-requests=<num>]
+fga tuple **import** --store-id=<store-id> [--model-id=<model-id>] --file <filename> [--max-tuples-per-write=<num>] [--max-parallel-requests=<num>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
