@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.0-beta4
+
+### [0.1.0-beta4](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta3...v0.1.0-beta4) (2023-08-09)
+
+Fixed:
+- Accept model ID for tuple import & write (c53da0589302fda17146c84bb29917ac4b72de8d)
+- Empty model ID now considered not set (fe804e6cd936089b6919814d781effe995504627)
+
 ## v0.1.0-beta3
 
 ### [0.1.0-beta3](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta2...v0.1.0-beta3) (2023-08-01)
