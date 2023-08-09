@@ -140,6 +140,7 @@ var importCmd = &cobra.Command{
 }
 
 func init() {
+	importCmd.Flags().String("model-id", "", "Model ID")
 	importCmd.Flags().String("file", "", "Tuples file")
 	importCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	importCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll

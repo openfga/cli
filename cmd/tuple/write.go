@@ -57,4 +57,5 @@ var writeCmd = &cobra.Command{
 }
 
 func init() {
+	writeCmd.Flags().String("model-id", "", "Model ID")
 }
