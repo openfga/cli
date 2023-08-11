@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"time"
 
-	pb "buf.build/gen/go/openfga/api/protocolbuffers/go/openfga/v1"
 	"github.com/oklog/ulid/v2"
+	pb "github.com/openfga/api/proto/openfga/v1"
 	"github.com/openfga/cli/internal/slices"
 	openfga "github.com/openfga/go-sdk"
 	language "github.com/openfga/language/pkg/go/transformer"
