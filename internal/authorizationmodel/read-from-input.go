@@ -74,7 +74,7 @@ func ReadFromInputFileOrArg( //nolint:cyclop
 	return nil
 }
 
-func ReadFromInputFile( //nolint:
+func ReadFromInputFile(
 	fileName string,
 	format *ModelFormat,
 ) (*string, error) {

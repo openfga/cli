@@ -69,7 +69,7 @@ var testCmd = &cobra.Command{
 
 			writtenModel, err := Write(fgaClient, authModel)
 			if err != nil {
-				return err //nolint:wrapcheck
+				return err
 			}
 
 			modelID = writtenModel.AuthorizationModelId
