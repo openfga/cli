@@ -1,0 +1,46 @@
+---
+- name: "folder-document-access"
+  description: ""
+  tuples:
+    - user: user:anne
+      relation: owner
+      object: folder:product
+    - user: folder:product
+      relation: parent
+      object: folder:product-2021
+    - user: user:beth
+      relation: viewer
+      object: folder:product-2021
+  check:
+    - user: user:anne
+      object: folder:product-2021
+      assertions:
+        can_view: true
+        can_write: true
+        can_share: true
+    - user: user:beth
+      object: folder:product-2021
+      assertions:
+        can_view: true
+        can_write: false
+        can_share: false
+  list-objects:
+    - user: user:anne
+      type: folder
+      assertions:
+        can_view:
+          - folder:product
+          - folder:product-2021
+        can_write:
+          - folder:product
+          - folder:product-2021
+        can_share:
+          - folder:product
+          - folder:product-2021
+    - user: user:beth
+      type: folder
+      assertions:
+        can_view:
+          - folder:product-2021
+        can_write: []
+        can_share: []
