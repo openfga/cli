@@ -146,6 +146,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 If you are authenticating with a shared secret, you should specify the API Token value. If you are authenticating using OAuth, you should specify the Client ID, Client Secret, API Audience and Token Issuer. For example:
 
 ```
+# Note: This example is for Auth0 FGA
 server-url: https://api.us1.fga.dev
 client-id: 4Zb..UYjaHreLKOJuU8
 client-secret: J3...2pBwiauD
