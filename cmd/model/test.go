@@ -42,40 +42,6 @@ var testCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		modelFileName, err := cmd.Flags().GetString("file")
-		if err != nil {
-			return fmt.Errorf("failed to parse file name due to %w", err)
-		}
-
-		var modelID *string
-		if modelFileName != "" {
-			inputModel, err := authorizationmodel.ReadFromInputFile(
-				modelFileName,
-				&testInputFormat)
-			if err != nil {
-				return err //nolint:wrapcheck
-			}
-
-			authModel := authorizationmodel.AuthzModel{}
-
-			if writeInputFormat == authorizationmodel.ModelFormatJSON {
-				err = authModel.ReadFromJSONString(*inputModel)
-			} else {
-				err = authModel.ReadFromDSLString(*inputModel)
-			}
-
-			if err != nil {
-				return err //nolint:wrapcheck
-			}
-
-			writtenModel, err := Write(fgaClient, authModel)
-			if err != nil {
-				return err
-			}
-
-			modelID = writtenModel.AuthorizationModelId
-		}
-
 		testsFileName, err := cmd.Flags().GetString("tests")
 		if err != nil {
 			return err //nolint:wrapcheck
@@ -91,7 +57,7 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		results := authorizationmodel.RunTests(fgaClient, tests, modelID)
+		results := authorizationmodel.RunTests(fgaClient, tests)
 
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
@@ -114,17 +80,10 @@ var testCmd = &cobra.Command{
 	},
 }
 
-var testInputFormat = authorizationmodel.ModelFormatDefault
-
 func init() {
 	testCmd.Flags().String("store-id", "", "Store ID")
 	testCmd.Flags().String("model-id", "", "Model ID")
-	testCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
-	testCmd.Flags().Var(&testInputFormat, "input-format", `Authorization model input format. Can be "fga" or "json"`)
 	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
-
-	testCmd.MarkFlagsMutuallyExclusive("model-id", "file")
-	testCmd.MarkFlagsMutuallyExclusive("model-id", "input-format")
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 
 	if err := testCmd.MarkFlagRequired("store-id"); err != nil {

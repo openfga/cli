@@ -183,11 +183,9 @@ func RunSingleCheckTest(
 	fgaClient *client.OpenFgaClient,
 	checkRequest client.ClientCheckRequest,
 	expectation bool,
-	modelID *string,
 ) ModelTestCheckSingleResult {
 	response, err := fgaClient.Check(context.Background()).
 		Body(checkRequest).
-		Options(client.ClientCheckOptions{AuthorizationModelId: modelID}).
 		Execute()
 
 	result := ModelTestCheckSingleResult{
@@ -208,7 +206,6 @@ func RunCheckTest(
 	fgaClient *client.OpenFgaClient,
 	checkTest ModelTestCheck,
 	tuples []client.ClientTupleKey,
-	modelID *string,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
 
@@ -221,7 +218,6 @@ func RunCheckTest(
 				ContextualTuples: &tuples,
 			},
 			expectation,
-			modelID,
 		)
 		results = append(results, result)
 	}
@@ -233,11 +229,9 @@ func RunSingleListObjectsTest(
 	fgaClient *client.OpenFgaClient,
 	listObjectsRequest client.ClientListObjectsRequest,
 	expectation []string,
-	modelID *string,
 ) ModelTestListObjectsSingleResult {
 	response, err := fgaClient.ListObjects(context.Background()).
 		Body(listObjectsRequest).
-		Options(client.ClientListObjectsOptions{AuthorizationModelId: modelID}).
 		Execute()
 
 	result := ModelTestListObjectsSingleResult{
@@ -258,7 +252,6 @@ func RunListObjectsTest(
 	fgaClient *client.OpenFgaClient,
 	listObjectsTest ModelTestListObjects,
 	tuples []client.ClientTupleKey,
-	modelID *string,
 ) []ModelTestListObjectsSingleResult {
 	results := []ModelTestListObjectsSingleResult{}
 
@@ -271,7 +264,6 @@ func RunListObjectsTest(
 				ContextualTuples: &tuples,
 			},
 			expectation,
-			modelID,
 		)
 		results = append(results, result)
 	}
@@ -279,18 +271,18 @@ func RunListObjectsTest(
 	return results
 }
 
-func RunTest(fgaClient *client.OpenFgaClient, test ModelTest, modelID *string) TestResult {
+func RunTest(fgaClient *client.OpenFgaClient, test ModelTest) TestResult {
 	checkResults := []ModelTestCheckSingleResult{}
 
 	for index := 0; index < len(test.Check); index++ {
-		results := RunCheckTest(fgaClient, test.Check[index], test.Tuples, modelID)
+		results := RunCheckTest(fgaClient, test.Check[index], test.Tuples)
 		checkResults = append(checkResults, results...)
 	}
 
 	listObjectResults := []ModelTestListObjectsSingleResult{}
 
 	for index := 0; index < len(test.ListObjects); index++ {
-		results := RunListObjectsTest(fgaClient, test.ListObjects[index], test.Tuples, modelID)
+		results := RunListObjectsTest(fgaClient, test.ListObjects[index], test.Tuples)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
@@ -302,11 +294,11 @@ func RunTest(fgaClient *client.OpenFgaClient, test ModelTest, modelID *string) T
 	}
 }
 
-func RunTests(fgaClient *client.OpenFgaClient, tests []ModelTest, modelID *string) []TestResult {
+func RunTests(fgaClient *client.OpenFgaClient, tests []ModelTest) []TestResult {
 	results := []TestResult{}
 
 	for index := 0; index < len(tests); index++ {
-		result := RunTest(fgaClient, tests[index], modelID)
+		result := RunTest(fgaClient, tests[index])
 		results = append(results, result)
 	}
 

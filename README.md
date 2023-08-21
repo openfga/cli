@@ -28,7 +28,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
       - [Validate an Authorization Model](#validate-an-authorization-model)
-      - [Run tests on an Authorization Model](#run-tests-on-an-authorization-model)
+      - [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model)
       - [Transform an Authorization Model](#transform-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
@@ -277,14 +277,14 @@ fga store **delete**
 
 * `model`
 
-| Description                                                                 | command     | parameters                            | example                                                                                     |
-|-----------------------------------------------------------------------------|-------------|---------------------------------------|---------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                     | `list`      | `--store-id`                          | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
-| [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`                | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
-| [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id`            | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
-| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`                  | `fga model validate --file model.fga`                                                       |
-| [Run tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--file`, `--input-format` | `fga model test --file model.fga --tests tests.fga.yaml`                                    |
-| [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format`            | `fga model transform --file model.json`                                                     |
+| Description                                                                 | command     | parameters                 | example                                                                                     |
+|-----------------------------------------------------------------------------|-------------|----------------------------|---------------------------------------------------------------------------------------------|
+| [Read Authorization Models](#read-authorization-models)                     | `list`      | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
+| [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
+| [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
+| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
+| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests tests.fga.yaml`                                                     |
+| [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
 
 ##### Read Authorization Models 
@@ -420,7 +420,7 @@ fga model **validate**
 {"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid"}
 ```
 
-##### Run tests on an Authorization Model
+##### Run Tests on an Authorization Model
 
 Given a model, and a set of tests (tuples, check and list objects requests, and expected results) report back on any tests that do not return the same results as expected.
 
@@ -429,9 +429,8 @@ fga model **test**
 
 ###### Parameters
 
-* `--tests`: Name of the tests file. Must be in yaml format (see below),
-* `--file`: File containing the authorization model. (optional) [WARNING: If given a model file, this will write it to the store and it will become the latest model.]
-* `--input-format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
+* `--tests`: Name of the tests file. Must be in yaml format (see below)
+* `--verbose`: Outputs the results in JSON
 
 <details>
 <summary>The format of the test file</summary>
@@ -478,7 +477,7 @@ fga model **test**
 </details>
 
 ###### Example
-`fga model test --file model.fga --tests tests.fga.yaml`
+`fga model test --tests tests.fga.yaml`
 
 ###### Response
 * Passing test
