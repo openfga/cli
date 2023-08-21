@@ -19,6 +19,7 @@ package model
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
@@ -92,7 +93,24 @@ var testCmd = &cobra.Command{
 
 		results := authorizationmodel.RunTests(fgaClient, tests, modelID)
 
-		return output.Display(results) //nolint:wrapcheck
+		verbose, err := cmd.Flags().GetBool("verbose")
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
+		if verbose {
+			return output.Display(results) //nolint:wrapcheck
+		}
+
+		friendlyResults := []string{}
+
+		for index := 0; index < len(results); index++ {
+			friendlyResults = append(friendlyResults, results[index].FriendlyDisplay())
+		}
+
+		fmt.Printf("%v", strings.Join(friendlyResults, "\n---\n"))
+
+		return nil
 	},
 }
 
@@ -100,9 +118,14 @@ var testInputFormat = authorizationmodel.ModelFormatDefault
 
 func init() {
 	testCmd.Flags().String("store-id", "", "Store ID")
+	testCmd.Flags().String("model-id", "", "Model ID")
 	testCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
-	testCmd.Flags().Var(&testInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
+	testCmd.Flags().Var(&testInputFormat, "input-format", `Authorization model input format. Can be "fga" or "json"`)
 	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
+
+	testCmd.MarkFlagsMutuallyExclusive("model-id", "file")
+	testCmd.MarkFlagsMutuallyExclusive("model-id", "input-format")
+	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 
 	if err := testCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)

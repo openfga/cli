@@ -28,6 +28,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
       - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
       - [Validate an Authorization Model](#validate-an-authorization-model)
+      - [Run tests on an Authorization Model](#run-tests-on-an-authorization-model)
       - [Transform an Authorization Model](#transform-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
@@ -276,13 +277,14 @@ fga store **delete**
 
 * `model`
 
-| Description                                                             | command | parameters                 | example                                                                                     |
-|-------------------------------------------------------------------------|---------|----------------------------|---------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                 | `list`  | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
-| [Write Authorization Model ](#write-authorization-model)                | `write` | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                   |
-| [Read a Single Authorization Model](#read-a-single-authorization-model) | `get`   | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
-| [Validate an Authorization Model](#validate-an-authorization-model) | `validate`   | `--file`, `--format` | `fga model validate --file model.fga` |
-| [Transform an Authorization Model](#transform-an-authorization-model) | `transform`   | `--file`, `--input-format` | `fga model transform --file model.json` |
+| Description                                                                 | command     | parameters                            | example                                                                                     |
+|-----------------------------------------------------------------------------|-------------|---------------------------------------|---------------------------------------------------------------------------------------------|
+| [Read Authorization Models](#read-authorization-models)                     | `list`      | `--store-id`                          | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
+| [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`                | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
+| [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id`            | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
+| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`                  | `fga model validate --file model.fga`                                                       |
+| [Run tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--file`, `--input-format` | `fga model test --file model.fga --tests tests.fga.yaml`                                    |
+| [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format`            | `fga model transform --file model.json`                                                     |
 
 
 ##### Read Authorization Models 
@@ -416,6 +418,79 @@ fga model **validate**
 * Invalid model without an ID
 ```json5
 {"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid"}
+```
+
+##### Run tests on an Authorization Model
+
+Given a model, and a set of tests (tuples, check and list objects requests, and expected results) report back on any tests that do not return the same results as expected.
+
+###### Command
+fga model **test**
+
+###### Parameters
+
+* `--tests`: Name of the tests file. Must be in yaml format (see below),
+* `--file`: File containing the authorization model. (optional) [WARNING: If given a model file, this will write it to the store and it will become the latest model.]
+* `--input-format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
+
+<details>
+<summary>The format of the test file</summary>
+
+```yaml
+---
+- name: some-test
+  description: testing that the model works
+  tuples:
+    - user: user:anne
+      relation: owner
+      object: folder:product
+  check:
+    - user: user:anne
+      object: folder:product-2021
+      assertions:
+        # a set of expected results for each relation
+        can_view: true
+        can_write: false
+        can_share: false
+  list-objects:
+    - user: user:anne
+      type: folder
+      assertions:
+        # a set of expected results for each relation
+        can_view:
+          - folder:product
+          - folder:product-2021
+        can_write:
+          - folder:product
+          - folder:product-2021
+        can_share:
+          - folder:product
+          - folder:product-2021
+    - user: user:beth
+      type: folder
+      assertions:
+        # a set of expected results for each relation
+        can_view:
+          - folder:product-2021
+        can_write: []
+        can_share: []
+```
+</details>
+
+###### Example
+`fga model test --file model.fga --tests tests.fga.yaml`
+
+###### Response
+* Passing test
+```shell
+(PASSING) test-name: Checks (2/2 passing) | ListObjects (0/0 passing)
+```
+* Failing Test
+```shell
+(FAILING) test-name: Checks (1/2 passing) | ListObjects (1/1 passing)
+✓ Check(user=user:anne,relation=can_write,object=folder:product-2021)
+ⅹ Check(user=user:anne,relation=can_share,object=folder:product-2021): expected=true, got=false, error=<nil>
+✓ ListObjects(user=user:anne,relation=can_write,type=folder)
 ```
 
 ##### Transform an Authorization Model
