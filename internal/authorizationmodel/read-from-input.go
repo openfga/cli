@@ -73,3 +73,26 @@ func ReadFromInputFileOrArg( //nolint:cyclop
 
 	return nil
 }
+
+func ReadFromInputFile(
+	fileName string,
+	format *ModelFormat,
+) (*string, error) {
+	file, err := os.ReadFile(fileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file %s due to %w", fileName, err)
+	}
+
+	model := string(file)
+
+	// if the input format is set as the default, set it from the file extension (and default to fga)
+	if *format == ModelFormatDefault {
+		if strings.HasSuffix(fileName, "json") {
+			*format = ModelFormatJSON
+		} else {
+			*format = ModelFormatFGA
+		}
+	}
+
+	return &model, nil
+}
