@@ -196,8 +196,8 @@ github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d h1:xK4EfSnsB+U8zL
 github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d/go.mod h1:ZB13O8GilPc0ITWssOszgxmz6CnIe8PQLZqbqAnx2IY=
 github.com/openfga/language/pkg/go v0.0.0-20230821160040-100f9026153d h1:O5u7J1vtNPiJBvplluESNbA75ImkK8Ev6LEbt2u8MY0=
 github.com/openfga/language/pkg/go v0.0.0-20230821160040-100f9026153d/go.mod h1:gU/4rU1D6bUxYkb4FofkwcmFaavpd2h3U2+x2qAeUnY=
-github.com/openfga/openfga v1.3.1-0.20230810204353-968f851732b3 h1:u1FIhLfKYWvjW8X13sX22FsIV1FtfAQ3NjBkjzyc/sE=
-github.com/openfga/openfga v1.3.1-0.20230810204353-968f851732b3/go.mod h1:goi9FQglKuWRdiqkgEIV2newgRi5dmcJH669Mpy+h1o=
+github.com/openfga/openfga v1.3.1 h1:mcsPUQbv97iCqrzOqGZV+Y1g8kzSKdz5qW8d+xMroF8=
+github.com/openfga/openfga v1.3.1/go.mod h1:S6I+CD5VeZf6yHRDqZRkOgmKswmVFim6jMvtYzih2Fs=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.0.9 h1:uH2qQXheeefCCkuBBSLi7jCiSmj3VRh2+Goq2N7Xxu0=
 github.com/pelletier/go-toml/v2 v2.0.9/go.mod h1:tJU2Z3ZkXwnxa4DPO899bsyIoywizdUvyaeZurnPPDc=
