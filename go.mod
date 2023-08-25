@@ -1,6 +1,6 @@
 module github.com/openfga/cli
 
-go 1.20
+go 1.21
 
 require (
 	github.com/golang/mock v1.6.0
@@ -11,8 +11,8 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20230801154117-db20ad164368
 	github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d
-	github.com/openfga/language/pkg/go v0.0.0-20230821160040-100f9026153d
-	github.com/openfga/openfga v1.3.1-0.20230810204353-968f851732b3
+	github.com/openfga/language/pkg/go v0.0.0-20230823153854-0351dba7a7a3
+	github.com/openfga/openfga v1.3.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
@@ -28,7 +28,7 @@ require (
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -52,9 +52,9 @@ require (
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
-	google.golang.org/genproto v0.0.0-20230815205213-6bfd019c3878 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230815205213-6bfd019c3878 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230815205213-6bfd019c3878 // indirect
+	google.golang.org/genproto v0.0.0-20230822172742-b8732ec3820d // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/grpc v1.57.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
