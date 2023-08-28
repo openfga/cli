@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.1.0-beta5
+
+### [0.1.0-beta5](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta4...v0.1.0-beta5) (2023-08-28)
+
+Added:
+- Add [`model test`](https://github.com/openfga/cli?tab=readme-ov-file#run-tests-on-an-authorization-model) (https://github.com/openfga/cli/pull/131)
+- Re-add [`model validate`](https://github.com/openfga/cli?tab=readme-ov-file#validate-an-authorization-model) (https://github.com/openfga/cli/pull/117)
+
+Fixes:
+- Upgrade dependencies, fixes a few issues in parsing
+
 ## v0.1.0-beta4
 
 ### [0.1.0-beta4](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta3...v0.1.0-beta4) (2023-08-09)
