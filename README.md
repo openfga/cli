@@ -432,8 +432,7 @@ fga model **test**
 * `--tests`: Name of the tests file. Must be in yaml format (see below)
 * `--verbose`: Outputs the results in JSON
 
-<details>
-<summary>The format of the test file</summary>
+The test file should have the following format:
 
 ```yaml
 ---
@@ -474,7 +473,6 @@ fga model **test**
         can_write: []
         can_share: []
 ```
-</details>
 
 ###### Example
 `fga model test --tests tests.fga.yaml`
