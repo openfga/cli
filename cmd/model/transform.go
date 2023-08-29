@@ -48,11 +48,11 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 		}
 
 		authModel := authorizationmodel.AuthzModel{}
-		if transformInputFormat == authorizationmodel.ModelFormatJSON {
-			if err := authModel.ReadFromJSONString(inputModel); err != nil {
-				return err //nolint:wrapcheck
-			}
+		if err := authModel.ReadModelFromString(inputModel, transformInputFormat); err != nil {
+			return err //nolint:wrapcheck
+		}
 
+		if transformInputFormat == authorizationmodel.ModelFormatJSON {
 			dslModel, err := authModel.DisplayAsDSL([]string{"model"})
 			if err != nil {
 				return fmt.Errorf("failed to transform model due to %w", err)

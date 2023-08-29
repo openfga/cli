@@ -152,14 +152,38 @@ func (model *AuthzModel) ReadFromDSLString(dslString string) error {
 		return fmt.Errorf("failed to transform due to %w", err)
 	}
 
-	jsonAuthModel := &openfga.AuthorizationModel{}
+	jsonAuthModel := openfga.AuthorizationModel{}
 
-	err = json.Unmarshal(bytes, jsonAuthModel)
+	err = json.Unmarshal(bytes, &jsonAuthModel)
 	if err != nil {
 		return fmt.Errorf("failed to transform due to %w", err)
 	}
 
-	model.Set(*jsonAuthModel)
+	model.Set(jsonAuthModel)
+
+	return nil
+}
+
+func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) error {
+	if input == "" {
+		return nil
+	}
+
+	switch format {
+	case ModelFormatJSON:
+		if err := model.ReadFromJSONString(input); err != nil {
+			return err
+		}
+
+		return nil
+	case ModelFormatFGA:
+	case ModelFormatDefault:
+		if err := model.ReadFromDSLString(input); err != nil {
+			return err
+		}
+
+		return nil
+	}
 
 	return nil
 }

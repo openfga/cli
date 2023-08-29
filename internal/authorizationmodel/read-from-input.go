@@ -26,7 +26,36 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ReadFromInputFileOrArg( //nolint:cyclop
+func ReadFromFile(
+	fileName string,
+	input *string,
+	format *ModelFormat,
+	storeName *string,
+) error {
+	file, err := os.ReadFile(fileName)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s due to %w", fileName, err)
+	}
+
+	*input = string(file)
+
+	// if the input format is set as the default, set it from the file extension (and default to fga)
+	if *format == ModelFormatDefault {
+		if strings.HasSuffix(fileName, "json") {
+			*format = ModelFormatJSON
+		} else {
+			*format = ModelFormatFGA
+		}
+	}
+
+	if *storeName == "" {
+		*storeName = strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
+	}
+
+	return nil
+}
+
+func ReadFromInputFileOrArg(
 	cmd *cobra.Command,
 	args []string,
 	fileNameArg string,
@@ -42,24 +71,8 @@ func ReadFromInputFileOrArg( //nolint:cyclop
 
 	switch {
 	case fileName != "":
-		file, err := os.ReadFile(fileName)
-		if err != nil {
-			return fmt.Errorf("failed to read file %s due to %w", fileName, err)
-		}
-
-		*input = string(file)
-
-		// if the input format is set as the default, set it from the file extension (and default to fga)
-		if *format == ModelFormatDefault {
-			if strings.HasSuffix(fileName, "json") {
-				*format = ModelFormatJSON
-			} else {
-				*format = ModelFormatFGA
-			}
-		}
-
-		if *storeName == "" {
-			*storeName = strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
+		if err = ReadFromFile(fileName, input, format, storeName); err != nil {
+			return err
 		}
 	case len(args) > 0 && args[0] != "-":
 		*input = args[0]
