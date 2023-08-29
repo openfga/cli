@@ -81,6 +81,25 @@ func (model *AuthzModel) GetTypeDefinitions() []openfga.TypeDefinition {
 	return *model.TypeDefinitions
 }
 
+func (model *AuthzModel) GetProtoModel() *pb.AuthorizationModel {
+	if model == nil {
+		return nil
+	}
+
+	var pbModel pb.AuthorizationModel
+
+	jsonModel, err := model.GetAsJSONString()
+	if err != nil {
+		return nil
+	}
+
+	if err = protojson.Unmarshal([]byte(*jsonModel), &pbModel); err != nil {
+		return nil
+	}
+
+	return &pbModel
+}
+
 func (model *AuthzModel) GetCreatedAt() *time.Time {
 	if model == nil {
 		return nil

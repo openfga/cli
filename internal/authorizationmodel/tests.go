@@ -3,9 +3,14 @@ package authorizationmodel
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 
+	"github.com/oklog/ulid/v2"
+	pb "github.com/openfga/api/proto/openfga/v1"
 	"github.com/openfga/go-sdk/client"
+	"github.com/openfga/openfga/pkg/server"
+	"github.com/openfga/openfga/pkg/storage/memory"
 )
 
 func checkStringArraysEqual(array1 []string, array2 []string) bool {
@@ -174,19 +179,169 @@ type ModelTestListObjects struct {
 type ModelTest struct {
 	Name        string                  `json:"name"`
 	Description string                  `json:"description"`
+	Model       string                  `json:"model"`
 	Tuples      []client.ClientTupleKey `json:"tuples"`
 	Check       []ModelTestCheck        `json:"check"`
 	ListObjects []ModelTestListObjects  `json:"list_objects" yaml:"list-objects"` //nolint:tagliatelle
 }
 
-func RunSingleCheckTest(
+type ModelTestOptions struct {
+	StoreID *string
+	ModelID *string
+	Remote  bool
+}
+
+func RunSingleLocalCheckTest(
+	fgaServer *server.Server,
+	checkRequest *pb.CheckRequest,
+	tuples []client.ClientTupleKey,
+	expectation bool,
+) ModelTestCheckSingleResult {
+	res, err := fgaServer.Check(context.Background(), checkRequest)
+
+	result := ModelTestCheckSingleResult{
+		Request: client.ClientCheckRequest{
+			User:             checkRequest.GetTupleKey().GetUser(),
+			Relation:         checkRequest.GetTupleKey().GetRelation(),
+			Object:           checkRequest.GetTupleKey().GetObject(),
+			ContextualTuples: &tuples,
+		},
+		Expected: expectation,
+		Error:    err,
+	}
+
+	if err == nil && res != nil {
+		result.Got = &res.Allowed
+		result.TestResult = result.IsPassing()
+	}
+
+	return result
+}
+
+func RunLocalCheckTest(
+	fgaServer *server.Server,
+	checkTest ModelTestCheck,
+	tuples []client.ClientTupleKey,
+	options ModelTestOptions,
+) []ModelTestCheckSingleResult {
+	results := []ModelTestCheckSingleResult{}
+
+	for relation, expectation := range checkTest.Assertions {
+		result := RunSingleLocalCheckTest(
+			fgaServer,
+			&pb.CheckRequest{
+				StoreId:              *options.StoreID,
+				AuthorizationModelId: *options.ModelID,
+				TupleKey: &pb.TupleKey{
+					User:     checkTest.User,
+					Relation: relation,
+					Object:   checkTest.Object,
+				},
+			},
+			tuples,
+			expectation,
+		)
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func RunSingleLocalListObjectsTest(
+	fgaServer *server.Server,
+	listObjectsRequest *pb.ListObjectsRequest,
+	tuples []client.ClientTupleKey,
+	expectation []string,
+) ModelTestListObjectsSingleResult {
+	response, err := fgaServer.ListObjects(context.Background(), listObjectsRequest)
+
+	result := ModelTestListObjectsSingleResult{
+		Request: client.ClientListObjectsRequest{
+			User:             listObjectsRequest.GetUser(),
+			Relation:         listObjectsRequest.GetRelation(),
+			Type:             listObjectsRequest.GetType(),
+			ContextualTuples: &tuples,
+		},
+		Expected: expectation,
+		Error:    err,
+	}
+
+	if response != nil {
+		result.Got = &response.Objects
+		result.TestResult = result.IsPassing()
+	}
+
+	return result
+}
+
+func RunLocalListObjectsTest(
+	fgaServer *server.Server,
+	listObjectsTest ModelTestListObjects,
+	tuples []client.ClientTupleKey,
+	options ModelTestOptions,
+) []ModelTestListObjectsSingleResult {
+	results := []ModelTestListObjectsSingleResult{}
+
+	for relation, expectation := range listObjectsTest.Assertions {
+		result := RunSingleLocalListObjectsTest(fgaServer,
+			&pb.ListObjectsRequest{
+				StoreId:              *options.StoreID,
+				AuthorizationModelId: *options.ModelID,
+				User:                 listObjectsTest.User,
+				Type:                 listObjectsTest.Type,
+				Relation:             relation,
+			},
+			tuples,
+			expectation,
+		)
+		results = append(results, result)
+	}
+
+	return results
+}
+
+func RunLocalTest(
+	fgaServer *server.Server,
+	test ModelTest,
+	model *AuthzModel,
+) (TestResult, error) {
+	checkResults := []ModelTestCheckSingleResult{}
+	listObjectResults := []ModelTestListObjectsSingleResult{}
+
+	storeID, modelID, err := initLocalStore(fgaServer, model.GetProtoModel(), test)
+	if err != nil {
+		return TestResult{}, err
+	}
+
+	testOptions := ModelTestOptions{
+		StoreID: storeID,
+		ModelID: modelID,
+	}
+
+	for index := 0; index < len(test.Check); index++ {
+		results := RunLocalCheckTest(fgaServer, test.Check[index], test.Tuples, testOptions)
+		checkResults = append(checkResults, results...)
+	}
+
+	for index := 0; index < len(test.ListObjects); index++ {
+		results := RunLocalListObjectsTest(fgaServer, test.ListObjects[index], test.Tuples, testOptions)
+		listObjectResults = append(listObjectResults, results...)
+	}
+
+	return TestResult{
+		Name:               test.Name,
+		Description:        test.Description,
+		CheckResults:       checkResults,
+		ListObjectsResults: listObjectResults,
+	}, nil
+}
+
+func RunSingleRemoteCheckTest(
 	fgaClient *client.OpenFgaClient,
 	checkRequest client.ClientCheckRequest,
 	expectation bool,
 ) ModelTestCheckSingleResult {
-	response, err := fgaClient.Check(context.Background()).
-		Body(checkRequest).
-		Execute()
+	res, err := fgaClient.Check(context.Background()).Body(checkRequest).Execute()
 
 	result := ModelTestCheckSingleResult{
 		Request:  checkRequest,
@@ -194,15 +349,15 @@ func RunSingleCheckTest(
 		Error:    err,
 	}
 
-	if response != nil {
-		result.Got = response.Allowed
+	if err == nil && res != nil {
+		result.Got = res.Allowed
 		result.TestResult = result.IsPassing()
 	}
 
 	return result
 }
 
-func RunCheckTest(
+func RunRemoteCheckTest(
 	fgaClient *client.OpenFgaClient,
 	checkTest ModelTestCheck,
 	tuples []client.ClientTupleKey,
@@ -210,7 +365,8 @@ func RunCheckTest(
 	results := []ModelTestCheckSingleResult{}
 
 	for relation, expectation := range checkTest.Assertions {
-		result := RunSingleCheckTest(fgaClient,
+		result := RunSingleRemoteCheckTest(
+			fgaClient,
 			client.ClientCheckRequest{
 				User:             checkTest.User,
 				Relation:         relation,
@@ -225,14 +381,12 @@ func RunCheckTest(
 	return results
 }
 
-func RunSingleListObjectsTest(
+func RunSingleRemoteListObjectsTest(
 	fgaClient *client.OpenFgaClient,
 	listObjectsRequest client.ClientListObjectsRequest,
 	expectation []string,
 ) ModelTestListObjectsSingleResult {
-	response, err := fgaClient.ListObjects(context.Background()).
-		Body(listObjectsRequest).
-		Execute()
+	response, err := fgaClient.ListObjects(context.Background()).Body(listObjectsRequest).Execute()
 
 	result := ModelTestListObjectsSingleResult{
 		Request:  listObjectsRequest,
@@ -248,7 +402,7 @@ func RunSingleListObjectsTest(
 	return result
 }
 
-func RunListObjectsTest(
+func RunRemoteListObjectsTest(
 	fgaClient *client.OpenFgaClient,
 	listObjectsTest ModelTestListObjects,
 	tuples []client.ClientTupleKey,
@@ -256,7 +410,7 @@ func RunListObjectsTest(
 	results := []ModelTestListObjectsSingleResult{}
 
 	for relation, expectation := range listObjectsTest.Assertions {
-		result := RunSingleListObjectsTest(fgaClient,
+		result := RunSingleRemoteListObjectsTest(fgaClient,
 			client.ClientListObjectsRequest{
 				User:             listObjectsTest.User,
 				Type:             listObjectsTest.Type,
@@ -271,18 +425,18 @@ func RunListObjectsTest(
 	return results
 }
 
-func RunTest(fgaClient *client.OpenFgaClient, test ModelTest) TestResult {
+func RunRemoteTest(fgaClient *client.OpenFgaClient, test ModelTest) TestResult {
 	checkResults := []ModelTestCheckSingleResult{}
 
 	for index := 0; index < len(test.Check); index++ {
-		results := RunCheckTest(fgaClient, test.Check[index], test.Tuples)
+		results := RunRemoteCheckTest(fgaClient, test.Check[index], test.Tuples)
 		checkResults = append(checkResults, results...)
 	}
 
 	listObjectResults := []ModelTestListObjectsSingleResult{}
 
 	for index := 0; index < len(test.ListObjects); index++ {
-		results := RunListObjectsTest(fgaClient, test.ListObjects[index], test.Tuples)
+		results := RunRemoteListObjectsTest(fgaClient, test.ListObjects[index], test.Tuples)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
@@ -294,13 +448,142 @@ func RunTest(fgaClient *client.OpenFgaClient, test ModelTest) TestResult {
 	}
 }
 
-func RunTests(fgaClient *client.OpenFgaClient, tests []ModelTest) []TestResult {
-	results := []TestResult{}
+const writeMaxChunkSize = 40
 
-	for index := 0; index < len(tests); index++ {
-		result := RunTest(fgaClient, tests[index])
-		results = append(results, result)
+func initLocalStore(
+	fgaServer *server.Server,
+	model *pb.AuthorizationModel,
+	test ModelTest,
+) (*string, *string, error) {
+	var modelID *string
+
+	storeID := ulid.Make().String()
+	tuples := []*pb.TupleKey{}
+
+	for index := 0; index < len(test.Tuples); index++ {
+		tuple := test.Tuples[index]
+		tpl := pb.TupleKey{
+			User:     tuple.User,
+			Relation: tuple.Relation,
+			Object:   tuple.Object,
+		}
+		tuples = append(tuples, &tpl)
 	}
 
-	return results
+	var authModelWriteReq *pb.WriteAuthorizationModelRequest
+
+	if test.Model != "" {
+		authModel := AuthzModel{}
+		if err := authModel.ReadFromDSLString(test.Model); err != nil {
+			return nil, nil, err
+		}
+
+		protoModel := authModel.GetProtoModel()
+		authModelWriteReq = &pb.WriteAuthorizationModelRequest{
+			StoreId:         storeID,
+			TypeDefinitions: protoModel.GetTypeDefinitions(),
+			SchemaVersion:   protoModel.GetSchemaVersion(),
+		}
+	} else if model != nil {
+		authModelWriteReq = &pb.WriteAuthorizationModelRequest{
+			StoreId:         storeID,
+			TypeDefinitions: model.GetTypeDefinitions(),
+			SchemaVersion:   model.GetSchemaVersion(),
+		}
+	}
+
+	if authModelWriteReq != nil {
+		writtenModel, err := fgaServer.WriteAuthorizationModel(context.Background(), authModelWriteReq)
+		if err != nil {
+			return nil, nil, err //nolint:wrapcheck
+		}
+
+		modelID = &writtenModel.AuthorizationModelId
+	}
+
+	tuplesLength := len(tuples)
+	if tuplesLength > 0 {
+		for i := 0; i < tuplesLength; i += writeMaxChunkSize {
+			end := int(math.Min(float64(i+writeMaxChunkSize), float64(tuplesLength)))
+			writeChunk := (tuples)[i:end]
+
+			_, err := fgaServer.Write(context.Background(), &pb.WriteRequest{
+				StoreId: storeID,
+				Writes:  &pb.TupleKeys{TupleKeys: writeChunk},
+			})
+			if err != nil {
+				return nil, nil, err //nolint:wrapcheck
+			}
+		}
+	}
+
+	return &storeID, modelID, nil
+}
+
+func readAuthzModel(modelFileName string, testInputFormat ModelFormat) (*AuthzModel, error) {
+	if modelFileName == "" {
+		return nil, nil //nolint:nilnil
+	}
+
+	inputModel, err := ReadFromInputFile(
+		modelFileName,
+		&testInputFormat)
+	if err != nil {
+		return nil, err
+	}
+
+	authModel := AuthzModel{}
+
+	if testInputFormat == ModelFormatJSON {
+		err = authModel.ReadFromJSONString(*inputModel)
+	} else {
+		err = authModel.ReadFromDSLString(*inputModel)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &authModel, nil
+}
+
+func RunTests(
+	fgaClient *client.OpenFgaClient,
+	tests []ModelTest,
+	modelFileName string,
+	testInputFormat ModelFormat,
+	remote bool,
+) ([]TestResult, error) {
+	results := []TestResult{}
+
+	if !remote {
+		model, err := readAuthzModel(modelFileName, testInputFormat)
+		if err != nil {
+			return results, err
+		}
+
+		ds := memory.New()
+
+		fgaServer, err := server.NewServerWithOpts(server.WithDatastore(ds))
+		if err != nil {
+			return results, err //nolint:wrapcheck
+		}
+
+		for index := 0; index < len(tests); index++ {
+			result, err := RunLocalTest(fgaServer, tests[index], model)
+			if err != nil {
+				return results, err
+			}
+
+			results = append(results, result)
+		}
+	} else {
+		for index := 0; index < len(tests); index++ {
+			result := RunRemoteTest(fgaClient, tests[index])
+
+			results = append(results, result)
+		}
+	}
+
+	return results, nil
 }

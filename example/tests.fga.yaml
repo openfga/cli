@@ -1,6 +1,20 @@
 ---
 - name: "folder-document-access"
   description: ""
+  model: |
+    model
+      schema 1.1
+    type user
+    type folder
+      relations
+        define parent: [folder]
+        define owner: [user]
+        define parent_owner: owner from parent or parent_owner from parent
+        define viewer: [user] or owner
+        define can_share: owner
+        define can_write: owner or parent_owner
+        define can_view: viewer
+
   tuples:
     - user: user:anne
       relation: owner
@@ -44,3 +58,236 @@
           - folder:product-2021
         can_write: []
         can_share: []
+
+- name: "Complex Test"
+  model: | #complex model
+    model
+      schema 1.1
+    type user
+    type folder
+      relations
+        define parent: [folder]
+        define owner: [group]
+        define folder_reader: [user, group#member] or folder_reader from owner or folder_reader from parent
+        define blocked: [user, user:*, group#member] or nblocked from parent
+        define unblocked: [user, group#member]
+        define nblocked: blocked but not unblocked
+        define allowed: [user, user:*, group#member] or allowed from parent
+        define super_allowed: [user, group#member] or super_allowed from parent
+        define reader: folder_reader and allowed and super_allowed
+        define can_read: reader but not nblocked
+    type group
+      relations
+        define parent: [group]
+        define allowed: [user, group#member] or allowed from parent
+        define super_allowed: [user, group#super_allowed]
+        define blocked: [user, group#member] or blocked from parent
+        define og_member: [user] or member from parent
+        define allowed_member: og_member and allowed and super_allowed
+        define member: allowed_member but not blocked
+        define folder_reader: [group#member] or folder_reader from parent
+  tuples:
+    - user: user:anne
+      relation: og_member
+      object: group:marketing
+    - user: user:anne
+      relation: allowed
+      object: group:marketing
+    - user: user:anne
+      relation: super_allowed
+      object: group:marketing
+    - user: user:beth
+      relation: og_member
+      object: group:marketing
+    - user: user:beth
+      relation: allowed
+      object: group:marketing
+    - user: user:beth
+      relation: super_allowed
+      object: group:marketing
+    - user: user:carl
+      relation: og_member
+      object: group:marketing
+    - user: user:carl
+      relation: allowed
+      object: group:marketing
+    - user: user:dan
+      relation: og_member
+      object: group:marketing
+    - user: user:dan
+      relation: allowed
+      object: group:marketing
+    - user: user:dan
+      relation: super_allowed
+      object: group:marketing
+    - user: user:dan
+      relation: blocked
+      object: group:marketing
+    - user: user:emily
+      relation: og_member
+      object: group:marketing
+    - user: user:emily
+      relation: allowed
+      object: group:marketing
+    - user: user:emily
+      relation: super_allowed
+      object: group:marketing
+    - user: user:gabriel
+      relation: og_member
+      object: group:marketing
+    - user: user:gabriel
+      relation: allowed
+      object: group:marketing
+    - user: user:gabriel
+      relation: super_allowed
+      object: group:marketing
+    - user: user:harriette
+      relation: og_member
+      object: group:marketing
+    - user: user:harriette
+      relation: allowed
+      object: group:marketing
+    - user: user:harriette
+      relation: super_allowed
+      object: group:marketing
+    - user: user:gabriel
+      relation: og_member
+      object: group:admin
+    - user: user:gabriel
+      relation: allowed
+      object: group:admin
+    - user: user:gabriel
+      relation: super_allowed
+      object: group:admin
+    - user: group:marketing#member
+      relation: folder_reader
+      object: group:marketing
+    - user: group:marketing
+      relation: parent
+      object: group:digitalmktg
+    - user: group:marketing#super_allowed
+      relation: super_allowed
+      object: group:digitalmktg
+    - user: group:digitalmktg
+      relation: owner
+      object: folder:1
+    - user: folder:1
+      relation: parent
+      object: folder:2
+    - user: folder:2
+      relation: parent
+      object: folder:3
+    - user: folder:3
+      relation: parent
+      object: folder:4
+    - user: folder:4
+      relation: parent
+      object: folder:5
+    - user: group:marketing#member
+      relation: allowed
+      object: folder:1
+    - user: group:marketing#member
+      relation: super_allowed
+      object: folder:1
+    - user: user:beth
+      relation: blocked
+      object: folder:2
+    - user: user:emily
+      relation: blocked
+      object: folder:1
+    - user: user:emily
+      relation: unblocked
+      object: folder:2
+    - user: user:gabriel
+      relation: blocked
+      object: folder:1
+    - user: user:harriette
+      relation: unblocked
+      object: folder:5
+    - user: user:*
+      relation: blocked
+      object: folder:4
+    - user: user:*
+      relation: allowed
+      object: folder:4
+    - user: group:admin#member
+      relation: unblocked
+      object: folder:2
+  check:
+    - user: user:anne
+      object: folder:3
+      assertions:
+        can_read: true
+    - user: user:beth
+      object: folder:3
+      assertions:
+        can_read: false
+    - user: user:carl
+      object: folder:3
+      assertions:
+        can_read: false
+    - user: user:dan
+      object: folder:3
+      assertions:
+        can_read: false
+    - user: user:emily
+      object: folder:3
+      assertions:
+        can_read: true
+    - user: user:frida
+      object: folder:3
+      assertions:
+        can_read: false
+    - user: user:gabriel
+      object: folder:3
+      assertions:
+        can_read: true
+    - user: user:harriette
+      object: folder:3
+      assertions:
+        can_read: true
+  list-objects:
+    - user: user:anne
+      type: folder
+      assertions:
+        can_read:
+          - folder:1
+          - folder:2
+          - folder:3
+    - user: user:beth
+      type: folder
+      assertions:
+        can_read:
+          - folder:1
+    - user: user:carl
+      type: folder
+      assertions:
+        can_read: []
+    - user: user:dan
+      type: folder
+      assertions:
+        can_read: []
+    - user: user:emily
+      type: folder
+      assertions:
+        can_read:
+          - folder:2
+          - folder:3
+    - user: user:frida
+      type: folder
+      assertions:
+        can_read: []
+    - user: user:gabriel
+      type: folder
+      assertions:
+        can_read:
+          - folder:2
+          - folder:3
+    - user: user:harriette
+      type: folder
+      assertions:
+        can_read:
+          - folder:1
+          - folder:2
+          - folder:3
+          - folder:5

@@ -57,11 +57,30 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		results := authorizationmodel.RunTests(fgaClient, tests)
-
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
 			return err //nolint:wrapcheck
+		}
+
+		remote, err := cmd.Flags().GetBool("remote")
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
+		modelFileName, err := cmd.Flags().GetString("file")
+		if err != nil {
+			return fmt.Errorf("failed to parse file name due to %w", err)
+		}
+
+		results, err := authorizationmodel.RunTests(
+			fgaClient,
+			tests,
+			modelFileName,
+			testInputFormat,
+			remote,
+		)
+		if err != nil {
+			return fmt.Errorf("error running tests due to %w", err)
 		}
 
 		if verbose {
@@ -80,16 +99,19 @@ var testCmd = &cobra.Command{
 	},
 }
 
+var testInputFormat = authorizationmodel.ModelFormatDefault
+
 func init() {
 	testCmd.Flags().String("store-id", "", "Store ID")
 	testCmd.Flags().String("model-id", "", "Model ID")
+	testCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
+	testCmd.Flags().Var(&testInputFormat, "input-format", `Authorization model input format. Can be "fga" or "json"`)
 	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
+	testCmd.Flags().Bool("remote", false, "Whether to run the tests on a remote OpenFGA instance")
 
-	if err := testCmd.MarkFlagRequired("store-id"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
-		os.Exit(1)
-	}
+	testCmd.MarkFlagsMutuallyExclusive("model-id", "file", "remote")
+	testCmd.MarkFlagsMutuallyExclusive("model-id", "input-format", "remote")
 
 	if err := testCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
