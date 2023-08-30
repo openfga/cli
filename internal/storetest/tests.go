@@ -18,33 +18,14 @@ func RunTest(
 	test ModelTest,
 	globalTuples []client.ClientTupleKey,
 	model *authorizationmodel.AuthzModel,
-	basePath string,
 ) (TestResult, error) {
-	format, err := test.LoadModel(basePath)
-	if err != nil {
-		return TestResult{}, err
-	}
-
-	var authModel *authorizationmodel.AuthzModel
-
-	if test.Model != "" {
-		m := authorizationmodel.AuthzModel{}
-		if err := m.ReadModelFromString(test.Model, format); err != nil {
-			return TestResult{}, err //nolint:wrapcheck
-		}
-
-		authModel = &m
-	} else if model != nil {
-		authModel = model
-	}
-
 	testTuples := append(append([]client.ClientTupleKey{}, globalTuples...), test.Tuples...)
 
-	if authModel == nil {
+	if model == nil {
 		return RunRemoteTest(fgaClient, test, testTuples), nil
 	}
 
-	return RunLocalTest(fgaServer, test, testTuples, authModel)
+	return RunLocalTest(fgaServer, test, testTuples, model)
 }
 
 func RunTests(
@@ -66,7 +47,6 @@ func RunTests(
 			storeData.Tests[index],
 			storeData.Tuples,
 			authModel,
-			basePath,
 		)
 		if err != nil {
 			return results, err

@@ -127,7 +127,7 @@ func RunLocalTest(
 	checkResults := []ModelTestCheckSingleResult{}
 	listObjectResults := []ModelTestListObjectsSingleResult{}
 
-	storeID, modelID, err := initLocalStore(fgaServer, model.GetProtoModel(), test, tuples)
+	storeID, modelID, err := initLocalStore(fgaServer, model.GetProtoModel(), tuples)
 	if err != nil {
 		return TestResult{}, err
 	}

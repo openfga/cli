@@ -39,40 +39,9 @@ type ModelTestListObjects struct {
 type ModelTest struct {
 	Name        string                  `json:"name"         yaml:"name"`
 	Description string                  `json:"description"  yaml:"description"`
-	Model       string                  `json:"model"        yaml:"model"`
-	ModelFile   string                  `json:"model_file"   yaml:"model-file"` //nolint:tagliatelle
 	Tuples      []client.ClientTupleKey `json:"tuples"       yaml:"tuples"`
 	Check       []ModelTestCheck        `json:"check"        yaml:"check"`
 	ListObjects []ModelTestListObjects  `json:"list_objects" yaml:"list-objects"` //nolint:tagliatelle
-}
-
-func (test *ModelTest) LoadModel(basePath string) (authorizationmodel.ModelFormat, error) {
-	format := authorizationmodel.ModelFormatDefault
-
-	if test.Model != "" {
-		return format, nil
-	}
-
-	if test.ModelFile == "" {
-		return format, nil
-	}
-
-	var inputModel string
-
-	storeName := ""
-	if err := authorizationmodel.ReadFromFile(
-		path.Join(basePath, test.ModelFile),
-		&inputModel,
-		&format,
-		&storeName); err != nil {
-		return format, err //nolint:wrapcheck
-	}
-
-	if inputModel != "" {
-		test.Model = inputModel
-	}
-
-	return format, nil
 }
 
 type StoreData struct {
@@ -109,33 +78,4 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 	}
 
 	return format, nil
-}
-
-type TestLocalityCount struct {
-	Remote int
-	Local  int
-}
-
-func (storeData *StoreData) GetTestLocalityCount() TestLocalityCount {
-	counts := TestLocalityCount{
-		Remote: 0,
-		Local:  0,
-	}
-
-	if storeData.Model != "" || storeData.ModelFile != "" {
-		counts.Local = len(storeData.Tests)
-
-		return counts
-	}
-
-	for index := 0; index < len(storeData.Tests); index++ {
-		test := storeData.Tests[index]
-		if test.Model != "" || test.ModelFile != "" {
-			counts.Local++
-		} else {
-			counts.Remote++
-		}
-	}
-
-	return counts
 }

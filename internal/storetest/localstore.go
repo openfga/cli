@@ -2,13 +2,14 @@ package storetest
 
 import (
 	"context"
+	"math"
+
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 	"github.com/openfga/openfga/pkg/storage/memory"
-	"math"
 )
 
 const writeMaxChunkSize = 40
@@ -16,7 +17,6 @@ const writeMaxChunkSize = 40
 func initLocalStore(
 	fgaServer *server.Server,
 	model *pb.AuthorizationModel,
-	test ModelTest,
 	testTuples []client.ClientTupleKey,
 ) (*string, *string, error) {
 	var modelID *string
@@ -26,19 +26,7 @@ func initLocalStore(
 
 	var authModelWriteReq *pb.WriteAuthorizationModelRequest
 
-	if test.Model != "" {
-		authModel := authorizationmodel.AuthzModel{}
-		if err := authModel.ReadFromDSLString(test.Model); err != nil {
-			return nil, nil, err //nolint:wrapcheck
-		}
-
-		protoModel := authModel.GetProtoModel()
-		authModelWriteReq = &pb.WriteAuthorizationModelRequest{
-			StoreId:         storeID,
-			TypeDefinitions: protoModel.GetTypeDefinitions(),
-			SchemaVersion:   protoModel.GetSchemaVersion(),
-		}
-	} else if model != nil {
+	if model != nil {
 		authModelWriteReq = &pb.WriteAuthorizationModelRequest{
 			StoreId:         storeID,
 			TypeDefinitions: model.GetTypeDefinitions(),
@@ -82,21 +70,20 @@ func getLocalServerAndModel(
 
 	var authModel *authorizationmodel.AuthzModel
 
-	testLocalityCounts := storeData.GetTestLocalityCount()
-	if testLocalityCounts.Local == 0 {
+	format, err := storeData.LoadModel(basePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if storeData.Model == "" {
 		return fgaServer, authModel, nil
 	}
 
 	// If we have at least one local test, initialize the local server
 	datastore := memory.New()
 
-	format, err := storeData.LoadModel(basePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	fgaServer, err = server.NewServerWithOpts(server.WithDatastore(datastore))
-	if err != nil || storeData.Model == "" {
+	if err != nil {
 		return nil, nil, err //nolint:wrapcheck
 	}
 
