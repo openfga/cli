@@ -432,46 +432,81 @@ fga model **test**
 * `--tests`: Name of the tests file. Must be in yaml format (see below)
 * `--verbose`: Outputs the results in JSON
 
-The test file should have the following format:
+If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
+
+The tests file should be in yaml and have the following format:
 
 ```yaml
 ---
-- name: some-test
-  description: testing that the model works
-  tuples:
-    - user: user:anne
-      relation: owner
-      object: folder:product
-  check:
-    - user: user:anne
-      object: folder:product-2021
-      assertions:
-        # a set of expected results for each relation
-        can_view: true
-        can_write: false
-        can_share: false
-  list-objects:
-    - user: user:anne
-      type: folder
-      assertions:
-        # a set of expected results for each relation
-        can_view:
-          - folder:product
-          - folder:product-2021
-        can_write:
-          - folder:product
-          - folder:product-2021
-        can_share:
-          - folder:product
-          - folder:product-2021
-    - user: user:beth
-      type: folder
-      assertions:
-        # a set of expected results for each relation
-        can_view:
-          - folder:product-2021
-        can_write: []
-        can_share: []
+name: Store Name # store name, optional
+model-file: ./model.fga # a global model that would apply to all tests, optional
+# model can be used instead of model-file, optional
+#model: |
+#  model
+#    schema 1.1
+#  type user
+#  ...
+tuples: # global tuples that would apply to all tests, optional
+  - user: folder:1
+    relation: parent
+    object: folder:2
+tests: # required
+  - name: test-1
+    description: testing that the model works # optional
+    tuples:
+      - user: user:anne
+        relation: owner
+        object: folder:1
+    check: # a set of checks to run
+      - user: user:anne
+        object: folder:1
+        assertions:
+          # a set of expected results for each relation
+          can_view: true
+          can_write: true
+          can_share: false
+    list-objects: # a set of list objects to run
+      - user: user:anne
+        type: folder
+        assertions:
+          # a set of expected results for each relation
+          can_view:
+            - folder:1
+            - folder:2
+          can_write:
+            - folder:1
+            - folder:2
+          can_share: []
+  - name: test-2
+    description: another test with a model override
+    # model-file: ./another-model.fga # referencing another file, optional
+    model: |
+      model
+        schema 1.1
+      type user
+      type folder
+        relations
+          define owner: [user] or owner
+          define parent: [folder]
+          define can_view: owner
+    tuples:
+      - user: user:anne
+        relation: owner
+        object: folder:1
+    check:
+      - user: user:anne
+        object: folder:1
+        assertions:
+          # a set of expected results for each relation
+          can_view: true
+    list-objects:
+      - user: user:anne
+        type: folder
+        assertions:
+          # a set of expected results for each relation
+          can_view:
+            - folder:1
+            - folder:2
 ```
 
 ###### Example

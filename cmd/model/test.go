@@ -34,7 +34,7 @@ var testCmd = &cobra.Command{
 	Use:     "test",
 	Short:   "Test an Authorization Model",
 	Long:    "Run a set of tests against a particular Authorization Model.",
-	Example: `fga model test --file model.fga --tests tests.fga.yaml`,
+	Example: `fga model test --tests tests.fga.yaml`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
