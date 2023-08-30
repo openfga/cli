@@ -35,6 +35,11 @@ func initLocalStore(
 	}
 
 	if authModelWriteReq != nil {
+		err := authModelWriteReq.ValidateAll()
+		if err != nil {
+			return nil, nil, err //nolint:wrapcheck
+		}
+
 		writtenModel, err := fgaServer.WriteAuthorizationModel(context.Background(), authModelWriteReq)
 		if err != nil {
 			return nil, nil, err //nolint:wrapcheck
@@ -49,10 +54,17 @@ func initLocalStore(
 			end := int(math.Min(float64(i+writeMaxChunkSize), float64(tuplesLength)))
 			writeChunk := (tuples)[i:end]
 
-			_, err := fgaServer.Write(context.Background(), &pb.WriteRequest{
+			writeRequest := &pb.WriteRequest{
 				StoreId: storeID,
 				Writes:  &pb.TupleKeys{TupleKeys: writeChunk},
-			})
+			}
+
+			err := writeRequest.ValidateAll()
+			if err != nil {
+				return nil, nil, err //nolint:wrapcheck
+			}
+
+			_, err = fgaServer.Write(context.Background(), writeRequest)
 			if err != nil {
 				return nil, nil, err //nolint:wrapcheck
 			}

@@ -15,8 +15,6 @@ func RunSingleLocalCheckTest(
 	tuples []client.ClientTupleKey,
 	expectation bool,
 ) ModelTestCheckSingleResult {
-	res, err := fgaServer.Check(context.Background(), checkRequest)
-
 	result := ModelTestCheckSingleResult{
 		Request: client.ClientCheckRequest{
 			User:             checkRequest.GetTupleKey().GetUser(),
@@ -25,10 +23,23 @@ func RunSingleLocalCheckTest(
 			ContextualTuples: &tuples,
 		},
 		Expected: expectation,
-		Error:    err,
 	}
 
-	if err == nil && res != nil {
+	err := checkRequest.ValidateAll()
+	if err != nil {
+		result.Error = err
+
+		return result
+	}
+
+	res, err := fgaServer.Check(context.Background(), checkRequest)
+	if err != nil {
+		result.Error = err
+
+		return result
+	}
+
+	if res != nil {
 		result.Got = &res.Allowed
 		result.TestResult = result.IsPassing()
 	}
