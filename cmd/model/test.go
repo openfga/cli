@@ -48,13 +48,16 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		testFileContents, err := os.ReadFile(testsFileName)
+		var storeData storetest.StoreData
+
+		testFile, err := os.Open(testsFileName)
 		if err != nil {
 			return fmt.Errorf("failed to read file %s due to %w", testsFileName, err)
 		}
-
-		var storeData storetest.StoreData
-		if err := yaml.Unmarshal(testFileContents, &storeData); err != nil {
+		decoder := yaml.NewDecoder(testFile)
+		decoder.KnownFields(true)
+		err = decoder.Decode(&storeData)
+		if err != nil {
 			return fmt.Errorf("failed to unmarshal file %s due to %w", testsFileName, err)
 		}
 
