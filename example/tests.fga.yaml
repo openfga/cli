@@ -1,4 +1,3 @@
----
 name: FolderBox # store name
 model-file: ./model.fga # a global model that would apply to all tests
 # model can be used instead of model_file
@@ -68,5 +67,3 @@ tests:
             - folder:product-2021Q1
           can_write: []
           can_share: []
-
-  - name: "Complex Test"
