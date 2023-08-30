@@ -25,13 +25,6 @@ func RunSingleLocalCheckTest(
 		Expected: expectation,
 	}
 
-	err := checkRequest.ValidateAll()
-	if err != nil {
-		result.Error = err
-
-		return result
-	}
-
 	res, err := fgaServer.Check(context.Background(), checkRequest)
 	if err != nil {
 		result.Error = err
