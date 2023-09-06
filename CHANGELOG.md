@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.0-beta6
+
+### [0.1.0-beta6](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta5...v0.1.0-beta6) (2023-09-06)
+
+Changed:
+- [`model test`](https://github.com/openfga/cli?tab=readme-ov-file#run-tests-on-an-authorization-model) now runs test in a built in FGA instance (https://github.com/openfga/cli/pull/142)
+
+BREAKING: The structure of the test file has changed, it is now `list_objects` instead of `list-objects`
+
 ## v0.1.0-beta5
 
 ### [0.1.0-beta5](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta4...v0.1.0-beta5) (2023-08-28)
