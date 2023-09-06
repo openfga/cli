@@ -19,11 +19,12 @@ package model
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/storetest"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -33,7 +34,7 @@ var testCmd = &cobra.Command{
 	Use:     "test",
 	Short:   "Test an Authorization Model",
 	Long:    "Run a set of tests against a particular Authorization Model.",
-	Example: `fga model test --file model.fga --tests tests.fga.yaml`,
+	Example: `fga model test --tests tests.fga.yaml`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -47,21 +48,31 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		testFileContents, err := os.ReadFile(testsFileName)
+		var storeData storetest.StoreData
+
+		testFile, err := os.Open(testsFileName)
 		if err != nil {
 			return fmt.Errorf("failed to read file %s due to %w", testsFileName, err)
 		}
-
-		var tests []authorizationmodel.ModelTest
-		if err := yaml.Unmarshal(testFileContents, &tests); err != nil {
-			return err //nolint:wrapcheck
+		decoder := yaml.NewDecoder(testFile)
+		decoder.KnownFields(true)
+		err = decoder.Decode(&storeData)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal file %s due to %w", testsFileName, err)
 		}
-
-		results := authorizationmodel.RunTests(fgaClient, tests)
 
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
 			return err //nolint:wrapcheck
+		}
+
+		results, err := storetest.RunTests(
+			fgaClient,
+			storeData,
+			path.Dir(testsFileName),
+		)
+		if err != nil {
+			return fmt.Errorf("error running tests due to %w", err)
 		}
 
 		if verbose {
@@ -85,11 +96,6 @@ func init() {
 	testCmd.Flags().String("model-id", "", "Model ID")
 	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
-
-	if err := testCmd.MarkFlagRequired("store-id"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
-		os.Exit(1)
-	}
 
 	if err := testCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
