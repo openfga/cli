@@ -1,5 +1,5 @@
 name: FolderBox # store name
-model-file: ./model.fga # a global model that would apply to all tests
+model_file: ./model.fga # a global model that would apply to all tests
 # model can be used instead of model_file
 #model: |
 #  model
@@ -45,7 +45,7 @@ tests:
           can_view: true
           can_write: true
           can_share: false
-    list-objects: # Each check test is made of: a user, an object type and the expected result for one or more relations
+    list_objects: # Each check test is made of: a user, an object type and the expected result for one or more relations
       - user: user:anne
         type: folder
         assertions:

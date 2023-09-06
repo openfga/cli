@@ -41,13 +41,13 @@ type ModelTest struct {
 	Description string                  `json:"description"  yaml:"description"`
 	Tuples      []client.ClientTupleKey `json:"tuples"       yaml:"tuples"`
 	Check       []ModelTestCheck        `json:"check"        yaml:"check"`
-	ListObjects []ModelTestListObjects  `json:"list_objects" yaml:"list-objects"` //nolint:tagliatelle
+	ListObjects []ModelTestListObjects  `json:"list_objects" yaml:"list_objects"` //nolint:tagliatelle
 }
 
 type StoreData struct {
 	Name      string                  `json:"name"       yaml:"name"`
 	Model     string                  `json:"model"      yaml:"model"`
-	ModelFile string                  `json:"model_file" yaml:"model-file"` //nolint:tagliatelle
+	ModelFile string                  `json:"model_file" yaml:"model_file"` //nolint:tagliatelle
 	Tuples    []client.ClientTupleKey `json:"tuples"     yaml:"tuples"`
 	Tests     []ModelTest             `json:"tests"      yaml:"tests"`
 }

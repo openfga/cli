@@ -439,7 +439,7 @@ The tests file should be in yaml and have the following format:
 ```yaml
 ---
 name: Store Name # store name, optional
-# model-file: ./model.fga # a global model that would apply to all tests, optional
+# model_file: ./model.fga # a global model that would apply to all tests, optional
 # model can be used instead of model-file, optional
 model: |
   model
@@ -469,7 +469,7 @@ tests: # required
           can_view: true
           can_write: true
           can_share: false
-    list-objects: # a set of list objects to run
+    list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
         assertions:
@@ -493,7 +493,7 @@ tests: # required
         assertions:
           # a set of expected results for each relation
           can_view: true
-    list-objects:
+    list_objects:
       - user: user:anne
         type: folder
         assertions:
