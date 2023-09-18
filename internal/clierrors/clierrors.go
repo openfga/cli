@@ -27,6 +27,7 @@ var (
 	ErrInvalidFormat              = errors.New("invalid format")
 	ErrStoreNotFound              = errors.New("store not found")
 	ErrAuthorizationModelNotFound = errors.New("authorization model not found")
+	ErrModelInputMissing          = errors.New("model input not provided")
 )
 
 func ValidationError(op string, details string) error {
