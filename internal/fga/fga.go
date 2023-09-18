@@ -29,7 +29,7 @@ import (
 var userAgent = "openfga-cli/" + build.Version
 
 type ClientConfig struct {
-	ServerURL            string `json:"server_url,omitempty"`
+	ServerURL            string `json:"api_url,omitempty"` //nolint:tagliatelle
 	StoreID              string `json:"store_id,omitempty"`
 	AuthorizationModelID string `json:"authorization_model_id,omitempty"`
 	APIToken             string `json:"api_token,omitempty"`
