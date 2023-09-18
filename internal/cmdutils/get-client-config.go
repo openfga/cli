@@ -17,12 +17,24 @@ limitations under the License.
 package cmdutils
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/openfga/cli/internal/fga"
 	"github.com/spf13/cobra"
 )
 
 func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
-	serverURL, _ := cmd.Flags().GetString("server-url")
+	apiURL, _ := cmd.Flags().GetString("api-url")
+	if !cmd.Flags().Changed("api-url") && cmd.Flags().Changed("server-url") {
+		apiURL, _ = cmd.Flags().GetString("server-url")
+		_, _ = fmt.Fprintf(
+			os.Stderr,
+			"Using 'server-url' value of '%s'. Note that 'server-url' has been deprecated in favour of 'api-url' and may be removed in subsequent releases.\n", //nolint:lll
+			apiURL,
+		)
+	}
+
 	storeID, _ := cmd.Flags().GetString("store-id")
 	authorizationModelID, _ := cmd.Flags().GetString("model-id")
 	apiToken, _ := cmd.Flags().GetString("api-token")
@@ -32,7 +44,7 @@ func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
 	clientCredentialsClientSecret, _ := cmd.Flags().GetString("client-secret")
 
 	return fga.ClientConfig{
-		ServerURL:            serverURL,
+		ServerURL:            apiURL,
 		StoreID:              storeID,
 		AuthorizationModelID: authorizationModelID,
 		APIToken:             apiToken,

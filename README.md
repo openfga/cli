@@ -135,7 +135,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 
 | Name                   | Flag                 | CLI                    | ~/.fga.yaml        |
 |------------------------|----------------------|------------------------|--------------------|
-| Server Url             | `--server-url`       | `FGA_SERVER_URL`       | `server-url`       |
+| API Url                | `--api-url`          | `FGA_API_URL`          | `api-url`          |
 | Shared Secret          | `--api-token`        | `FGA_API_TOKEN`        | `api-token`        |
 | Client ID              | `--client-id`        | `FGA_CLIENT_ID`        | `client-id`        |
 | Client Secret          | `--client-secret`    | `FGA_CLIENT_SECRET`    | `client-secret`    |
@@ -148,7 +148,7 @@ If you are authenticating with a shared secret, you should specify the API Token
 
 ```
 # Note: This example is for Auth0 FGA
-server-url: https://api.us1.fga.dev
+api-url: https://api.us1.fga.dev
 client-id: 4Zb..UYjaHreLKOJuU8
 client-secret: J3...2pBwiauD
 api-audience: https://api.us1.fga.dev/
