@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.0
+
+### [0.1.0](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta6...v0.1.0) (2023-09-18)
+
+Changed:
+- The config `server-url` has been changed to `api-url` to be consistent with the upcoming SDK changes
+  `server-url` is still accepted but is considered deprecated and may be removed in future releases.
+  If present, `api-url` will take precedence over `server-url`.
+
+Fixed:
+- The core language is now able to better handle extraneous spaces, and panics should be heavily reduced
+
 ## v0.1.0-beta6
 
 ### [0.1.0-beta6](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta5...v0.1.0-beta6) (2023-09-06)
