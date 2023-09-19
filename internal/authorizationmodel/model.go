@@ -268,7 +268,12 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 			return nil, fmt.Errorf("unable to unmarshal model json string due to: %w", err)
 		}
 
-		dslModel += fmt.Sprintf("%v\n", language.TransformJSONProtoToDSL(&modelPb))
+		transformedJSON, err := language.TransformJSONProtoToDSL(&modelPb)
+		if err != nil {
+			return nil, fmt.Errorf("error transforming from JSON due to: %w", err)
+		}
+
+		dslModel += fmt.Sprintf("%v\n", transformedJSON)
 	}
 
 	return &dslModel, nil
