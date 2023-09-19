@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/spf13/cobra"
 )
 
@@ -71,9 +72,7 @@ func ReadFromInputFileOrArg(
 
 	switch {
 	case fileName != "":
-		if err = ReadFromFile(fileName, input, format, storeName); err != nil {
-			return err
-		}
+		return ReadFromFile(fileName, input, format, storeName)
 	case len(args) > 0 && args[0] != "-":
 		*input = args[0]
 		// if the input format is set as the default, set it from the file extension (and default to fga)
@@ -81,7 +80,9 @@ func ReadFromInputFileOrArg(
 			*format = ModelFormatFGA
 		}
 	case !isOptional:
-		return cmd.Help() //nolint:wrapcheck
+		_ = cmd.Help() // print out the help message so users know what the command expects
+
+		return fmt.Errorf("%w", clierrors.ErrModelInputMissing)
 	}
 
 	return nil
