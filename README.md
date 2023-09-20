@@ -553,7 +553,7 @@ type document
 | [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
 | [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id`           | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                      |
 | [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id`           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                   |
-| [Import Relationship Tuples](#import-relationship-tuplesl)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json` |
+| [Import Relationship Tuples](#import-relationship-tuples)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json` |
 
 ##### Write Relationship Tuples
 
@@ -622,6 +622,13 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
     }
   ]
 }
+```
+
+If you want to transform this output in a way that can be then imported using the `fga tuple import` you can run
+
+```
+fga tuple read | jq '[.tuples[] | { user: .key.user, relation: .key.relation, object: .key.object }]' > tuples.json
+fga tuple import --file tuples.json
 ```
 
 ##### Read Relationship Tuple Changes (Watch)
