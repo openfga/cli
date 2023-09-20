@@ -627,7 +627,8 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 If you want to transform this output in a way that can be then imported using the `fga tuple import` you can run
 
 ```
-fga tuple read | jq '[.tuples[] | { user: .key.user, relation: .key.relation, object: .key.object }]'
+fga tuple read | jq '[.tuples[] | { user: .key.user, relation: .key.relation, object: .key.object }]' > tuples.json
+fga tuple import --file tuples.json
 ```
 
 ##### Read Relationship Tuple Changes (Watch)
