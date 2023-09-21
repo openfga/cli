@@ -142,7 +142,7 @@ func (model *AuthzModel) ReadFromJSONString(jsonString string) error {
 }
 
 func (model *AuthzModel) ReadFromDSLString(dslString string) error {
-	parsedAuthModel, err := language.TransformDslToJSON(dslString)
+	parsedAuthModel, err := language.TransformDSLToJSON(dslString)
 	if err != nil {
 		return fmt.Errorf("failed to transform due to %w", err)
 	}
