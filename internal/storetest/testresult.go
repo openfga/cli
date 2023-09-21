@@ -2,6 +2,7 @@ package storetest
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/openfga/cli/internal/comparison"
 	"github.com/openfga/go-sdk/client"
@@ -38,6 +39,23 @@ type TestResult struct {
 	ListObjectsResults []ModelTestListObjectsSingleResult `json:"list_objects_results"`
 }
 
+// IsPassing - indicates whether a Test has succeeded completely or has any failing parts.
+func (result TestResult) IsPassing() bool {
+	for index := 0; index < len(result.CheckResults); index++ {
+		if !result.CheckResults[index].IsPassing() {
+			return false
+		}
+	}
+
+	for index := 0; index < len(result.ListObjectsResults); index++ {
+		if !result.ListObjectsResults[index].IsPassing() {
+			return false
+		}
+	}
+
+	return true
+}
+
 //nolint:cyclop
 func (result TestResult) FriendlyDisplay() string {
 	totalCheckCount := len(result.CheckResults)
@@ -51,7 +69,7 @@ func (result TestResult) FriendlyDisplay() string {
 		for index := 0; index < totalCheckCount; index++ {
 			checkResult := result.CheckResults[index]
 
-			if result.CheckResults[index].IsPassing() {
+			if checkResult.IsPassing() {
 				checkResultsOutput = fmt.Sprintf(
 					"%s\n✓ Check(user=%s,relation=%s,object=%s)",
 					checkResultsOutput,
@@ -85,7 +103,7 @@ func (result TestResult) FriendlyDisplay() string {
 		for index := 0; index < totalListObjectsCount; index++ {
 			listObjectsResult := result.ListObjectsResults[index]
 
-			if result.ListObjectsResults[index].IsPassing() {
+			if listObjectsResult.IsPassing() {
 				listObjectsResultsOutput = fmt.Sprintf(
 					"%s\n✓ ListObjects(user=%s,relation=%s,type=%s)",
 					listObjectsResultsOutput,
@@ -139,4 +157,29 @@ func (result TestResult) FriendlyDisplay() string {
 	}
 
 	return output
+}
+
+type TestResults struct {
+	Results []TestResult `json:"results"`
+}
+
+// IsPassing - indicates whether a Test Suite has succeeded completely or has any failing tests.
+func (test TestResults) IsPassing() bool {
+	for index := 0; index < len(test.Results); index++ {
+		if !test.Results[index].IsPassing() {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (test TestResults) FriendlyDisplay() string {
+	friendlyResults := []string{}
+
+	for index := 0; index < len(test.Results); index++ {
+		friendlyResults = append(friendlyResults, test.Results[index].FriendlyDisplay())
+	}
+
+	return fmt.Sprintf("%v", strings.Join(friendlyResults, "\n---\n"))
 }

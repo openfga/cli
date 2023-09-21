@@ -32,12 +32,12 @@ func RunTests(
 	fgaClient *client.OpenFgaClient,
 	storeData StoreData,
 	basePath string,
-) ([]TestResult, error) {
-	results := []TestResult{}
+) (TestResults, error) {
+	test := TestResults{}
 
 	fgaServer, authModel, err := getLocalServerAndModel(storeData, basePath)
 	if err != nil {
-		return results, err
+		return test, err
 	}
 
 	for index := 0; index < len(storeData.Tests); index++ {
@@ -49,11 +49,11 @@ func RunTests(
 			authModel,
 		)
 		if err != nil {
-			return results, err
+			return test, err
 		}
 
-		results = append(results, result)
+		test.Results = append(test.Results, result)
 	}
 
-	return results, nil
+	return test, nil
 }
