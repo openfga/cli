@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
@@ -66,7 +65,7 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		results, err := storetest.RunTests(
+		test, err := storetest.RunTests(
 			fgaClient,
 			storeData,
 			path.Dir(testsFileName),
@@ -75,17 +74,24 @@ var testCmd = &cobra.Command{
 			return fmt.Errorf("error running tests due to %w", err)
 		}
 
+		passing := test.IsPassing()
+
 		if verbose {
-			return output.Display(results) //nolint:wrapcheck
+			err = output.Display(test.Results)
+			if err != nil {
+				return fmt.Errorf("error displaying test results due to %w", err)
+			}
+
+			if !passing {
+				os.Exit(1)
+			}
 		}
 
-		friendlyResults := []string{}
+		fmt.Println(test.FriendlyDisplay())
 
-		for index := 0; index < len(results); index++ {
-			friendlyResults = append(friendlyResults, results[index].FriendlyDisplay())
+		if !passing {
+			os.Exit(1)
 		}
-
-		fmt.Printf("%v", strings.Join(friendlyResults, "\n---\n"))
 
 		return nil
 	},
