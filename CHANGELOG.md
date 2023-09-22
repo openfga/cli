@@ -1,8 +1,15 @@
 # Changelog
 
+## v0.1.1
+
+### [0.1.1](https://github.com/openfga/cli/compare/v0.1.0...v0.1.1) (2023-09-22)
+
+Fixed:
+- Running `fga model test` now correctly exists with error code one if any test fails (https://github.com/openfga/cli/pull/157)
+
 ## v0.1.0
 
-### [0.1.0](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta6...v0.1.0) (2023-09-18)
+### [0.1.0](https://github.com/openfga/cli/compare/v0.1.0-beta6...v0.1.0) (2023-09-18)
 
 Changed:
 - The config `server-url` has been changed to `api-url` to be consistent with the upcoming SDK changes
@@ -14,7 +21,7 @@ Fixed:
 
 ## v0.1.0-beta6
 
-### [0.1.0-beta6](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta5...v0.1.0-beta6) (2023-09-06)
+### [0.1.0-beta6](https://github.com/openfga/cli/compare/v0.1.0-beta6...v0.1.0) (2023-09-06)
 
 Changed:
 - [`model test`](https://github.com/openfga/cli?tab=readme-ov-file#run-tests-on-an-authorization-model) now runs test in a built in FGA instance (https://github.com/openfga/cli/pull/142)
@@ -23,7 +30,7 @@ BREAKING: The structure of the test file has changed, it is now `list_objects` i
 
 ## v0.1.0-beta5
 
-### [0.1.0-beta5](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta4...v0.1.0-beta5) (2023-08-28)
+### [0.1.0-beta5](https://github.com/openfga/cli/compare/v0.1.0-beta4...v0.1.0-beta5) (2023-08-28)
 
 Added:
 - Add [`model test`](https://github.com/openfga/cli?tab=readme-ov-file#run-tests-on-an-authorization-model) (https://github.com/openfga/cli/pull/131)
@@ -34,7 +41,7 @@ Fixes:
 
 ## v0.1.0-beta4
 
-### [0.1.0-beta4](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta3...v0.1.0-beta4) (2023-08-09)
+### [0.1.0-beta4](https://github.com/openfga/cli/compare/v0.1.0-beta3...v0.1.0-beta4) (2023-08-09)
 
 Fixed:
 - Accept model ID for tuple import & write (c53da0589302fda17146c84bb29917ac4b72de8d)
@@ -42,7 +49,7 @@ Fixed:
 
 ## v0.1.0-beta3
 
-### [0.1.0-beta3](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta2...v0.1.0-beta3) (2023-08-01)
+### [0.1.0-beta3](https://github.com/openfga/cli/compare/v0.1.0-beta2...v0.1.0-beta3) (2023-08-01)
 
 Breaking:
 - In model commands, default input/output is now the FGA DSL format (8dfc6976a16828e249da5a1bdb506e6627c0ced0)
@@ -62,7 +69,7 @@ Fixed:
 
 ## v0.1.0-beta2
 
-### [0.1.0-beta2](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta1...v0.1.0-beta2) (2023-07-12)
+### [0.1.0-beta2](https://github.com/openfga/cli/compare/v0.1.0-beta1...v0.1.0-beta2) (2023-07-12)
 - Fix brew build
 - Add command completions
 - Add package builds for Linux
@@ -70,7 +77,7 @@ Fixed:
 
 ## v0.1.0-beta1
 
-### [0.1.0-beta1](https://github.com/openfga/go-sdk/releases/tag/v0.1.0-beta...v0.1.0-beta1) (2023-07-12)
+### [0.1.0-beta1](https://github.com/openfga/cli/compare/v0.1.0-beta...v0.1.0-beta1) (2023-07-12)
 - Fix Release Pipeline
 
 ## v0.1.0-beta
