@@ -594,6 +594,12 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 {}
 ```
 
+If you want to delete all the tuples in a store, you can use the following code:
+
+```
+fga tuple read | jq -r '.tuples[] | "fga tuple delete \(.key.user) \(.key.relation) \(.key.object)"' | xargs -0 bash -c
+```
+
 ##### Read Relationship Tuples
 
 ###### Command
