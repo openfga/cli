@@ -18,7 +18,9 @@ package tuple
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
@@ -32,12 +34,37 @@ var writeCmd = &cobra.Command{
 	Short:   "Create Relationship Tuples",
 	Long:    "Add relationship tuples to the store.",
 	Example: "fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap",
-	Args:    cobra.ExactArgs(3), //nolint:gomnd
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 3 && cmd.Flags().Changed("file") == false {
+			return fmt.Errorf("you need to specify either 3 arguments or a file")
+		}
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		}
+
+		fileName, err := cmd.Flags().GetString("file")
+		if err != nil {
+			return fmt.Errorf("failed to parse file name due to %w", err)
+		}
+		if fileName != "" {
+			tuples := []client.ClientTupleKey{}
+
+			data, err := os.ReadFile(fileName)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
+			}
+
+			err = json.Unmarshal(data, &tuples)
+			if err != nil {
+				return fmt.Errorf("failed to parse input tuples due to %w", err)
+			}
+			err = writeTuples(fgaClient, tuples)
+			if err != nil {
+				return err
+			}
+			return output.Display(output.EmptyStruct{}) //nolint:wrapcheck
 		}
 		body := &client.ClientWriteTuplesBody{
 			client.ClientTupleKey{
@@ -56,6 +83,15 @@ var writeCmd = &cobra.Command{
 	},
 }
 
+func writeTuples(fgaClient *client.OpenFgaClient, tuples []client.ClientTupleKey) error {
+	_, err := fgaClient.WriteTuples(context.Background()).Body(tuples).Execute()
+	if err != nil {
+		return fmt.Errorf("failed to write tuples due to %w", err)
+	}
+	return nil
+}
+
 func init() {
 	writeCmd.Flags().String("model-id", "", "Model ID")
+	writeCmd.Flags().String("file", "", "Tuples file")
 }

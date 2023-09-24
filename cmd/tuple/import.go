@@ -91,8 +91,9 @@ func importTuples(
 
 // importCmd represents the import command.
 var importCmd = &cobra.Command{
-	Use:   "import",
-	Short: "Import Relationship Tuples",
+	Use:        "import",
+	Short:      "Import Relationship Tuples",
+	Deprecated: "Use the write command with the flag --file instead.",
 	Long: "Imports Relationship Tuples to the store. " +
 		"This will write the tuples in chunks and at the end will report the tuple chunks that failed.",
 	RunE: func(cmd *cobra.Command, args []string) error {
