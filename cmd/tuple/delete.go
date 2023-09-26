@@ -18,12 +18,12 @@ package tuple
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 	"os"
 )
 
@@ -54,15 +54,31 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
 
-			err = json.Unmarshal(data, &tuples)
+			err = yaml.Unmarshal(data, &tuples)
 			if err != nil {
 				return fmt.Errorf("failed to parse input tuples due to %w", err)
 			}
-			err = deleteTuples(fgaClient, tuples)
+
+			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+			if err != nil {
+				return fmt.Errorf("failed to parse max tuples per write due to %w", err)
+			}
+
+			maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+			if err != nil {
+				return fmt.Errorf("failed to parse parallel requests due to %w", err)
+			}
+
+			deleteRequest := client.ClientWriteRequest{
+				Deletes: &tuples,
+				Writes:  &[]client.ClientTupleKey{},
+			}
+			response, err := importTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
 			if err != nil {
 				return err
 			}
-			return output.Display(output.EmptyStruct{}) //nolint:wrapcheck
+
+			return output.Display(*response) //nolint:wrapcheck
 		}
 		body := &client.ClientDeleteTuplesBody{
 			client.ClientTupleKey{
@@ -81,14 +97,9 @@ var deleteCmd = &cobra.Command{
 	},
 }
 
-func deleteTuples(fgaClient *client.OpenFgaClient, tuples []client.ClientTupleKey) error {
-	_, err := fgaClient.DeleteTuples(context.Background()).Body(tuples).Execute()
-	if err != nil {
-		return fmt.Errorf("failed to delete tuples due to %w", err)
-	}
-	return nil
-}
-
 func init() {
 	deleteCmd.Flags().String("file", "", "Tuples file")
+	deleteCmd.Flags().String("model-id", "", "Model ID")
+	deleteCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
+	deleteCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 }
