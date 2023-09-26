@@ -1,6 +1,6 @@
 module github.com/openfga/cli
 
-go 1.21
+go 1.21.1
 
 require (
 	github.com/golang/mock v1.6.0
@@ -11,8 +11,8 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20230829001212-d0942ea5a226
 	github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d
-	github.com/openfga/language/pkg/go v0.0.0-20230921191054-4a7ee653d5d9
-	github.com/openfga/openfga v1.3.2-0.20230907180924-c6d73f81ca2b
+	github.com/openfga/language/pkg/go v0.0.0-20230925124357-c01ae5391b8b
+	github.com/openfga/openfga v1.3.2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.16.0
@@ -32,6 +32,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
