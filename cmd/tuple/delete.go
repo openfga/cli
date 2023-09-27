@@ -19,24 +19,23 @@ package tuple
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
 	Use:     "delete",
 	Short:   "Delete Relationship Tuples",
+	Args:    ExactArgsOrFlag(3, "file"), //nolint:gomnd
 	Long:    "Delete relationship tuples from the store.",
 	Example: "fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 3 && cmd.Flags().Changed("file") == false {
-			return fmt.Errorf("you need to specify either 3 arguments or a file")
-		}
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
@@ -102,4 +101,14 @@ func init() {
 	deleteCmd.Flags().String("model-id", "", "Model ID")
 	deleteCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	deleteCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+}
+
+func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if len(args) != n && !cmd.Flags().Changed(flag) {
+			return fmt.Errorf("at least %d arg(s) are required OR the flag --%s", n, flag) //nolint:goerr113
+		}
+
+		return nil
+	}
 }

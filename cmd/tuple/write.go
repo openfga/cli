@@ -19,13 +19,13 @@ package tuple
 import (
 	"context"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // writeCmd represents the write command.
@@ -33,11 +33,9 @@ var writeCmd = &cobra.Command{
 	Use:     "write",
 	Short:   "Create Relationship Tuples",
 	Long:    "Add relationship tuples to the store.",
+	Args:    ExactArgsOrFlag(3, "file"), //nolint:gomnd
 	Example: "fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 3 && cmd.Flags().Changed("file") == false {
-			return fmt.Errorf("you need to specify either 3 arguments or a file")
-		}
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
@@ -79,6 +77,7 @@ var writeCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+
 			return output.Display(*response) //nolint:wrapcheck
 		}
 		body := &client.ClientWriteTuplesBody{
