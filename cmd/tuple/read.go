@@ -30,8 +30,13 @@ import (
 // MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
 var MaxReadPagesLength = 20
 
+type readResponse struct {
+	complete *openfga.ReadResponse
+	simple   []openfga.TupleKey
+}
+
 func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
-	*openfga.ReadResponse, error,
+	*readResponse, error,
 ) {
 	body := &client.ClientReadRequest{}
 	if user != "" {
@@ -47,7 +52,6 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 	}
 
 	tuples := make([]openfga.Tuple, 0)
-
 	continuationToken := ""
 	pageIndex := 0
 	options := client.ClientReadOptions{}
@@ -70,7 +74,14 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 		continuationToken = *response.ContinuationToken
 	}
 
-	return &openfga.ReadResponse{Tuples: &tuples}, nil
+	justKeys := make([]openfga.TupleKey, 0)
+	for _, tuple := range tuples {
+		justKeys = append(justKeys, *tuple.Key)
+	}
+
+	res := readResponse{complete: &openfga.ReadResponse{Tuples: &tuples}, simple: justKeys}
+
+	return &res, nil
 }
 
 // readCmd represents the read command.
@@ -101,7 +112,12 @@ var readCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		simpleJSON, _ := cmd.Flags().GetBool("simple-json")
+		if simpleJSON {
+			return output.Display(response.simple) //nolint:wrapcheck
+		}
+
+		return output.Display(*response.complete) //nolint:wrapcheck
 	},
 }
 
@@ -110,4 +126,5 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
+	readCmd.Flags().Bool("simple-json", false, "Output simpler JSON version. (It can be used by write and delete commands)") //nolint:lll
 }

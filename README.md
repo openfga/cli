@@ -656,7 +656,7 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 If you want to delete all the tuples in a store, you can use the following code:
 
 ```
-fga tuple read | jq '[.tuples[] | { user: .key.user, relation: .key.relation, object: .key.object }]' > tuples.json
+fga tuple read --simple-json > tuples.json
 fga tuple delete --file tuples.json
 ```
 
@@ -670,6 +670,8 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 * `--user`: User
 * `--relation`: Relation
 * `--object`: Object
+* `--max-pages`: Max number of pages to get. (default 20)
+* `--simple-json`: Output simpler JSON version. (It can be used by write and delete commands)
 
 ###### Example
 `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
@@ -689,11 +691,22 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
   ]
 }
 ```
+###### Response (--simple-json)
+```json5
+[
+  {
+    "object": "document:roadmap",
+    "relation": "can_view",
+    "user": "user:anne"
+  }
+]
+```
+
 
 If you want to transform this output in a way that can be then imported using the `fga tuple import` you can run
 
 ```
-fga tuple read | jq '[.tuples[] | { user: .key.user, relation: .key.relation, object: .key.object }]' > tuples.json
+fga tuple read --simple-json > tuples.json
 fga tuple import --file tuples.json
 ```
 
