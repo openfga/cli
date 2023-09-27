@@ -566,13 +566,42 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `<object>`: Object
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
+* `--file`: Specifies the file name, `yaml` and `json` files are supported
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 
-###### Example
+###### Example (with arguments)
 `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
 ###### Response
 ```json5
 {}
+```
+
+###### Example (with file)
+`fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
+
+###### Response
+```json5
+{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+  "failed": [
+    {
+      "tuple_key": {
+        "object":"document:roadmap",
+        "relation":"writer",
+        "user":"carl"
+      },
+      "reason":"Write validation error ..."
+    }
+  ]
+}
 ```
 
 ##### Delete Relationship Tuples
@@ -585,8 +614,12 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 * `<relation>`: Relation
 * `<object>`: Object
 * `--store-id`: Specifies the store id
+* `--model-id`: Specifies the model id to target (optional)
+* `--file`: Specifies the file name, `yaml` and `json` files are supported
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 
-###### Example
+###### Example (with arguments)
 `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 
 ###### Response
@@ -594,10 +627,37 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 {}
 ```
 
+###### Example (with file)
+`fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
+
+###### Response
+```json5
+{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+  "failed": [
+    {
+      "tuple_key": {
+        "object":"document:roadmap",
+        "relation":"writer",
+        "user":"carl"
+      },
+      "reason":"Write validation error ..."
+    }
+  ]
+}
+```
+
 If you want to delete all the tuples in a store, you can use the following code:
 
 ```
-fga tuple read | jq -r '.tuples[] | "fga tuple delete \(.key.user) \(.key.relation) \(.key.object)"' | xargs -0 bash -c
+fga tuple read | jq '[.tuples[] | { user: .key.user, relation: .key.relation, object: .key.object }]' > tuples.json
+fga tuple delete --file tuples.json
 ```
 
 ##### Read Relationship Tuples

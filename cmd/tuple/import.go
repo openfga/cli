@@ -44,9 +44,14 @@ type importResponse struct {
 	Failed     []failedWriteResponse   `json:"failed"`
 }
 
+// importTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
+// either writes or deletes.
+// It returns a pointer to an importResponse and an error.
+// The importResponse contains the tuples that were successfully imported and the tuples that failed to be imported.
+// Deletes and writes are put together in the same importResponse.
 func importTuples(
 	fgaClient client.SdkClient,
-	tuples []client.ClientTupleKey,
+	body client.ClientWriteRequest,
 	maxTuplesPerWrite int,
 	maxParallelRequests int,
 ) (*importResponse, error) {
@@ -58,22 +63,29 @@ func importTuples(
 		},
 	}
 
-	deletes := []client.ClientTupleKey{}
-	body := &client.ClientWriteRequest{
-		Writes:  &tuples,
-		Deletes: &deletes,
-	}
-
-	response, err := fgaClient.Write(context.Background()).Body(*body).Options(options).Execute()
+	response, err := fgaClient.Write(context.Background()).Body(body).Options(options).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to import tuples due to %w", err)
 	}
 
-	successfulWrites := []client.ClientTupleKey{}
-	failedWrites := []failedWriteResponse{}
+	successfulWrites, failedWrites := processWrites(response.Writes)
+	successfulDeletes, failedDeletes := processWrites(response.Deletes)
 
-	for index := 0; index < len(response.Writes); index++ {
-		write := response.Writes[index]
+	result := importResponse{
+		Successful: append(successfulWrites, successfulDeletes...),
+		Failed:     append(failedWrites, failedDeletes...),
+	}
+
+	return &result, nil
+}
+
+func processWrites(writes []client.ClientWriteSingleResponse) ([]client.ClientTupleKey, []failedWriteResponse) {
+	var (
+		successfulWrites []client.ClientTupleKey
+		failedWrites     []failedWriteResponse
+	)
+
+	for _, write := range writes {
 		if write.Status == client.SUCCESS {
 			successfulWrites = append(successfulWrites, write.TupleKey)
 		} else {
@@ -84,15 +96,14 @@ func importTuples(
 		}
 	}
 
-	result := importResponse{Successful: successfulWrites, Failed: failedWrites}
-
-	return &result, nil
+	return successfulWrites, failedWrites
 }
 
 // importCmd represents the import command.
 var importCmd = &cobra.Command{
-	Use:   "import",
-	Short: "Import Relationship Tuples",
+	Use:        "import",
+	Short:      "Import Relationship Tuples",
+	Deprecated: "use the write/delete command with the flag --file instead",
 	Long: "Imports Relationship Tuples to the store. " +
 		"This will write the tuples in chunks and at the end will report the tuple chunks that failed.",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -130,7 +141,12 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse input tuples due to %w", err)
 		}
 
-		result, err := importTuples(fgaClient, tuples, maxTuplesPerWrite, maxParallelRequests)
+		writeRequest := client.ClientWriteRequest{
+			Writes:  &tuples,
+			Deletes: &[]client.ClientTupleKey{},
+		}
+
+		result, err := importTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 		if err != nil {
 			return err
 		}
