@@ -7,62 +7,62 @@ import (
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func RunSingleLocalCheckTest(
 	fgaServer *server.Server,
 	checkRequest *pb.CheckRequest,
-	tuples []client.ClientTupleKey,
-	expectation bool,
-) ModelTestCheckSingleResult {
-	result := ModelTestCheckSingleResult{
-		Request: client.ClientCheckRequest{
-			User:             checkRequest.GetTupleKey().GetUser(),
-			Relation:         checkRequest.GetTupleKey().GetRelation(),
-			Object:           checkRequest.GetTupleKey().GetObject(),
-			ContextualTuples: &tuples,
-		},
-		Expected: expectation,
-	}
-
-	res, err := fgaServer.Check(context.Background(), checkRequest)
-	if err != nil {
-		result.Error = err
-
-		return result
-	}
-
-	if res != nil {
-		result.Got = &res.Allowed
-		result.TestResult = result.IsPassing()
-	}
-
-	return result
+) (*pb.CheckResponse, error) {
+	return fgaServer.Check(context.Background(), checkRequest)
 }
 
 func RunLocalCheckTest(
 	fgaServer *server.Server,
 	checkTest ModelTestCheck,
-	tuples []client.ClientTupleKey,
+	tuples []client.ClientWriteRequestTupleKey,
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
 
 	for relation, expectation := range checkTest.Assertions {
-		result := RunSingleLocalCheckTest(
-			fgaServer,
-			&pb.CheckRequest{
-				StoreId:              *options.StoreID,
-				AuthorizationModelId: *options.ModelID,
-				TupleKey: &pb.TupleKey{
-					User:     checkTest.User,
-					Relation: relation,
-					Object:   checkTest.Object,
-				},
+		result := ModelTestCheckSingleResult{
+			Request: client.ClientCheckRequest{
+				User:             checkTest.User,
+				Relation:         relation,
+				Object:           checkTest.Object,
+				ContextualTuples: tuples,
+				Context:          checkTest.Context,
 			},
-			tuples,
-			expectation,
-		)
+			Expected: expectation,
+		}
+
+		ctx, err := structpb.NewStruct(checkTest.Context)
+		if err != nil {
+			result.Error = err
+		} else {
+			response, err := RunSingleLocalCheckTest(fgaServer,
+				&pb.CheckRequest{
+					StoreId:              *options.StoreID,
+					AuthorizationModelId: *options.ModelID,
+					TupleKey: &pb.CheckRequestTupleKey{
+						User:     checkTest.User,
+						Relation: relation,
+						Object:   checkTest.Object,
+					},
+					Context: ctx,
+				},
+			)
+			if err != nil {
+				result.Error = err
+			}
+
+			if response != nil {
+				result.Got = &response.Allowed
+				result.TestResult = result.IsPassing()
+			}
+		}
+
 		results = append(results, result)
 	}
 
@@ -72,50 +72,54 @@ func RunLocalCheckTest(
 func RunSingleLocalListObjectsTest(
 	fgaServer *server.Server,
 	listObjectsRequest *pb.ListObjectsRequest,
-	tuples []client.ClientTupleKey,
-	expectation []string,
-) ModelTestListObjectsSingleResult {
-	response, err := fgaServer.ListObjects(context.Background(), listObjectsRequest)
-
-	result := ModelTestListObjectsSingleResult{
-		Request: client.ClientListObjectsRequest{
-			User:             listObjectsRequest.GetUser(),
-			Relation:         listObjectsRequest.GetRelation(),
-			Type:             listObjectsRequest.GetType(),
-			ContextualTuples: &tuples,
-		},
-		Expected: expectation,
-		Error:    err,
-	}
-
-	if response != nil {
-		result.Got = &response.Objects
-		result.TestResult = result.IsPassing()
-	}
-
-	return result
+) (*pb.ListObjectsResponse, error) {
+	return fgaServer.ListObjects(context.Background(), listObjectsRequest)
 }
 
 func RunLocalListObjectsTest(
 	fgaServer *server.Server,
 	listObjectsTest ModelTestListObjects,
-	tuples []client.ClientTupleKey,
+	tuples []client.ClientWriteRequestTupleKey,
 	options ModelTestOptions,
 ) []ModelTestListObjectsSingleResult {
 	results := []ModelTestListObjectsSingleResult{}
 
 	for relation, expectation := range listObjectsTest.Assertions {
-		result := RunSingleLocalListObjectsTest(fgaServer,
-			&pb.ListObjectsRequest{
-				StoreId:              *options.StoreID,
-				AuthorizationModelId: *options.ModelID,
-				User:                 listObjectsTest.User,
-				Type:                 listObjectsTest.Type,
-				Relation:             relation,
+		result := ModelTestListObjectsSingleResult{
+			Request: client.ClientListObjectsRequest{
+				User:             listObjectsTest.User,
+				Relation:         relation,
+				Type:             listObjectsTest.Type,
+				ContextualTuples: tuples,
+				Context:          listObjectsTest.Context,
 			},
-			tuples,
-			expectation,
-		)
+			Expected: expectation,
+		}
+
+		ctx, err := structpb.NewStruct(listObjectsTest.Context)
+		if err != nil {
+			result.Error = err
+		} else {
+			response, err := RunSingleLocalListObjectsTest(fgaServer,
+				&pb.ListObjectsRequest{
+					StoreId:              *options.StoreID,
+					AuthorizationModelId: *options.ModelID,
+					User:                 listObjectsTest.User,
+					Type:                 listObjectsTest.Type,
+					Relation:             relation,
+					Context:              ctx,
+				},
+			)
+			if err != nil {
+				result.Error = err
+			}
+
+			if response != nil {
+				result.Got = &response.Objects
+				result.TestResult = result.IsPassing()
+			}
+		}
+
 		results = append(results, result)
 	}
 
@@ -125,7 +129,7 @@ func RunLocalListObjectsTest(
 func RunLocalTest(
 	fgaServer *server.Server,
 	test ModelTest,
-	tuples []client.ClientTupleKey,
+	tuples []client.ClientWriteRequestTupleKey,
 	model *authorizationmodel.AuthzModel,
 ) (TestResult, error) {
 	checkResults := []ModelTestCheckSingleResult{}

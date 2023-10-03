@@ -31,7 +31,7 @@ func TestCheckWithError(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 
 	mockBody := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 
@@ -39,7 +39,7 @@ func TestCheckWithError(t *testing.T) {
 		User:             "user:foo",
 		Relation:         "writer",
 		Object:           "doc:doc1",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
@@ -75,14 +75,14 @@ func TestCheckWithNoError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)
 
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientCheckRequest{
 		User:             "user:foo",
 		Relation:         "writer",
 		Object:           "doc:doc1",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 

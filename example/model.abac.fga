@@ -1,0 +1,12 @@
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define viewer: [user with non_expired_grant_and_valid_ip]
+
+condition non_expired_grant_and_valid_ip(current_timestamp: timestamp, grant_timestamp: timestamp, grant_duration: duration, user_ip: ipaddress, cidr: string) {
+    (current_timestamp < grant_timestamp + grant_duration) && user_ip.in_cidr(cidr)
+}

@@ -31,13 +31,13 @@ func check(
 	user string,
 	relation string,
 	object string,
-	contextualTuples []client.ClientTupleKey,
+	contextualTuples []client.ClientContextualTupleKey,
 ) (*client.ClientCheckResponse, error) {
 	body := &client.ClientCheckRequest{
 		User:             user,
 		Relation:         relation,
 		Object:           object,
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	options := &client.ClientCheckOptions{}
 

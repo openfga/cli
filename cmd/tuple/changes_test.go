@@ -108,9 +108,9 @@ func TestReadChangesSinglePage(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
 	tupleKey := openfga.TupleKey{
-		Object:   openfga.PtrString("document:doc1"),
-		Relation: openfga.PtrString("reader"),
-		User:     openfga.PtrString("user:user1"),
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
 	}
 
 	operation := openfga.WRITE
@@ -174,9 +174,9 @@ func TestReadChangesMultiPages(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
 	tupleKey1 := openfga.TupleKey{
-		Object:   openfga.PtrString("document:doc1"),
-		Relation: openfga.PtrString("reader"),
-		User:     openfga.PtrString("user:user1"),
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
 	}
 
 	operation1 := openfga.WRITE
@@ -272,9 +272,9 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
 	tupleKey := openfga.TupleKey{
-		Object:   openfga.PtrString("document:doc1"),
-		Relation: openfga.PtrString("reader"),
-		User:     openfga.PtrString("user:user1"),
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
 	}
 
 	operation := openfga.WRITE

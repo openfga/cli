@@ -31,14 +31,14 @@ func TestListObjectsWithError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListObjectsRequest{
 		User:             "user:foo",
 		Relation:         "writer",
 		Type:             "doc",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
@@ -71,14 +71,14 @@ func TestListObjectsWithNoError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListObjectsRequest{
 		User:             "user:foo",
 		Relation:         "writer",
 		Type:             "doc",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 

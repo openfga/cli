@@ -121,16 +121,17 @@ func TestReadSinglePage(t *testing.T) {
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key1 := openfga.NewTupleKey()
-	key1.Object = openfga.PtrString("document:doc1")
-	key1.Relation = openfga.PtrString("reader")
-	key1.User = openfga.PtrString("user:user1")
+	key1 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
+	}
 
 	changesTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	tuples := []openfga.Tuple{
 		{
-			Key:       key1,
+			Key:       &key1,
 			Timestamp: &changesTime,
 		},
 	}
@@ -196,16 +197,16 @@ func TestReadMultiPages(t *testing.T) {
 
 	mockExecute1 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key1 := openfga.NewTupleKey()
-	key1.Object = openfga.PtrString("document:doc1")
-	key1.Relation = openfga.PtrString("reader")
-	key1.User = openfga.PtrString("user:user1")
-
+	key1 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
+	}
 	changesTime1 := time.Date(2009, time.November, 10, 22, 0, 0, 0, time.UTC)
 
 	tuples1 := []openfga.Tuple{
 		{
-			Key:       key1,
+			Key:       &key1,
 			Timestamp: &changesTime1,
 		},
 	}
@@ -216,16 +217,17 @@ func TestReadMultiPages(t *testing.T) {
 
 	mockExecute2 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key2 := openfga.NewTupleKey()
-	key2.Object = openfga.PtrString("document:doc2")
-	key2.Relation = openfga.PtrString("reader")
-	key2.User = openfga.PtrString("user:user1")
+	key2 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc2",
+	}
 
 	changesTime2 := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	tuples2 := []openfga.Tuple{
 		{
-			Key:       key2,
+			Key:       &key2,
 			Timestamp: &changesTime2,
 		},
 	}
@@ -306,16 +308,17 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key1 := openfga.NewTupleKey()
-	key1.Object = openfga.PtrString("document:doc1")
-	key1.Relation = openfga.PtrString("reader")
-	key1.User = openfga.PtrString("user:user1")
+	key1 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
+	}
 
 	changesTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	tuples := []openfga.Tuple{
 		{
-			Key:       key1,
+			Key:       &key1,
 			Timestamp: &changesTime,
 		},
 	}

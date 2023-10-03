@@ -35,13 +35,13 @@ var MaxTuplesPerWrite = 1
 var MaxParallelRequests = 10
 
 type failedWriteResponse struct {
-	TupleKey client.ClientTupleKey `json:"tuple_key"`
-	Reason   string                `json:"reason"`
+	TupleKey client.ClientWriteRequestTupleKey `json:"tuple_key"`
+	Reason   string                            `json:"reason"`
 }
 
 type importResponse struct {
-	Successful []client.ClientTupleKey `json:"successful"`
-	Failed     []failedWriteResponse   `json:"failed"`
+	Successful []client.ClientWriteRequestTupleKey `json:"successful"`
+	Failed     []failedWriteResponse               `json:"failed"`
 }
 
 // importTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
@@ -79,9 +79,9 @@ func importTuples(
 	return &result, nil
 }
 
-func processWrites(writes []client.ClientWriteSingleResponse) ([]client.ClientTupleKey, []failedWriteResponse) {
+func processWrites(writes []client.ClientWriteSingleResponse) ([]client.ClientWriteRequestTupleKey, []failedWriteResponse) {
 	var (
-		successfulWrites []client.ClientTupleKey
+		successfulWrites []client.ClientWriteRequestTupleKey
 		failedWrites     []failedWriteResponse
 	)
 
@@ -129,7 +129,7 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse parallel requests due to %w", err)
 		}
 
-		tuples := []client.ClientTupleKey{}
+		tuples := []client.ClientWriteRequestTupleKey{}
 
 		data, err := os.ReadFile(fileName)
 		if err != nil {
@@ -142,8 +142,7 @@ var importCmd = &cobra.Command{
 		}
 
 		writeRequest := client.ClientWriteRequest{
-			Writes:  &tuples,
-			Deletes: &[]client.ClientTupleKey{},
+			Writes: tuples,
 		}
 
 		result, err := importTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)

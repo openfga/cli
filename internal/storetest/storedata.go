@@ -25,31 +25,33 @@ import (
 )
 
 type ModelTestCheck struct {
-	User       string          `json:"user"       yaml:"user"`
-	Object     string          `json:"object"     yaml:"object"`
-	Assertions map[string]bool `json:"assertions" yaml:"assertions"`
+	User       string                 `json:"user"       yaml:"user"`
+	Object     string                 `json:"object"     yaml:"object"`
+	Context    map[string]interface{} `json:"context"  yaml:"context"`
+	Assertions map[string]bool        `json:"assertions" yaml:"assertions"`
 }
 
 type ModelTestListObjects struct {
-	User       string              `json:"user"       yaml:"user"`
-	Type       string              `json:"type"       yaml:"type"`
-	Assertions map[string][]string `json:"assertions" yaml:"assertions"`
+	User       string                 `json:"user"       yaml:"user"`
+	Type       string                 `json:"type"       yaml:"type"`
+	Context    map[string]interface{} `json:"context"  yaml:"context"`
+	Assertions map[string][]string    `json:"assertions" yaml:"assertions"`
 }
 
 type ModelTest struct {
-	Name        string                  `json:"name"         yaml:"name"`
-	Description string                  `json:"description"  yaml:"description"`
-	Tuples      []client.ClientTupleKey `json:"tuples"       yaml:"tuples"`
-	Check       []ModelTestCheck        `json:"check"        yaml:"check"`
-	ListObjects []ModelTestListObjects  `json:"list_objects" yaml:"list_objects"` //nolint:tagliatelle
+	Name        string                              `json:"name"         yaml:"name"`
+	Description string                              `json:"description"  yaml:"description"`
+	Tuples      []client.ClientWriteRequestTupleKey `json:"tuples"       yaml:"tuples"`
+	Check       []ModelTestCheck                    `json:"check"        yaml:"check"`
+	ListObjects []ModelTestListObjects              `json:"list_objects" yaml:"list_objects"` //nolint:tagliatelle
 }
 
 type StoreData struct {
-	Name      string                  `json:"name"       yaml:"name"`
-	Model     string                  `json:"model"      yaml:"model"`
-	ModelFile string                  `json:"model_file" yaml:"model_file"` //nolint:tagliatelle
-	Tuples    []client.ClientTupleKey `json:"tuples"     yaml:"tuples"`
-	Tests     []ModelTest             `json:"tests"      yaml:"tests"`
+	Name      string                              `json:"name"       yaml:"name"`
+	Model     string                              `json:"model"      yaml:"model"`
+	ModelFile string                              `json:"model_file" yaml:"model_file"` //nolint:tagliatelle
+	Tuples    []client.ClientWriteRequestTupleKey `json:"tuples"     yaml:"tuples"`
+	Tests     []ModelTest                         `json:"tests"      yaml:"tests"`
 }
 
 func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.ModelFormat, error) {

@@ -5,12 +5,12 @@ import (
 	"github.com/openfga/go-sdk/client"
 )
 
-func convertClientTupleKeysToProtoTupleKeys(tuples []client.ClientTupleKey) []*pb.TupleKey {
-	pbTuples := []*pb.TupleKey{}
+func convertClientTupleKeysToProtoTupleKeys(tuples []client.ClientWriteRequestTupleKey) []*pb.WriteRequestTupleKey {
+	pbTuples := []*pb.WriteRequestTupleKey{}
 
 	for index := 0; index < len(tuples); index++ {
 		tuple := tuples[index]
-		tpl := pb.TupleKey{
+		tpl := pb.WriteRequestTupleKey{
 			User:     tuple.User,
 			Relation: tuple.Relation,
 			Object:   tuple.Object,

@@ -75,7 +75,7 @@ func listRelations(clientConfig fga.ClientConfig,
 	user string,
 	object string,
 	relations []string,
-	contextualTuples []client.ClientTupleKey,
+	contextualTuples []client.ClientContextualTupleKey,
 ) (*client.ClientListRelationsResponse, error) {
 	if len(relations) < 1 {
 		relationsForType, err := getRelationsForType(clientConfig, fgaClient, object)
@@ -97,7 +97,7 @@ func listRelations(clientConfig fga.ClientConfig,
 		User:             user,
 		Object:           object,
 		Relations:        relations,
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	options := &client.ClientListRelationsOptions{}
 
