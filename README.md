@@ -447,9 +447,12 @@ model: |
   type user
   type folder
     relations
-      define owner: [user] or owner
+      define owner: [user] 
       define parent: [folder]
-      define can_view: owner
+      define can_view: owner or can_view from parent
+      define can_write: owner or can_write from parent
+      define can_share: owner
+
 tuples: # global tuples that would apply to all tests, optional
   - user: folder:1
     relation: parent
@@ -480,7 +483,6 @@ tests: # required
           can_write:
             - folder:1
             - folder:2
-          can_share: []
   - name: test-2
     description: another test
     tuples:
@@ -507,16 +509,14 @@ tests: # required
 `fga model test --tests tests.fga.yaml`
 
 ###### Response
-* Passing test
+
 ```shell
-(PASSING) test-name: Checks (2/2 passing) | ListObjects (0/0 passing)
-```
-* Failing Test
-```shell
-(FAILING) test-name: Checks (1/2 passing) | ListObjects (1/1 passing)
-✓ Check(user=user:anne,relation=can_write,object=folder:product-2021)
-ⅹ Check(user=user:anne,relation=can_share,object=folder:product-2021): expected=true, got=false, error=<nil>
-✓ ListObjects(user=user:anne,relation=can_write,type=folder)
+(FAILING) test-1: Checks (2/3 passing) | ListObjects (2/2 passing)
+✓ Check(user=user:anne,relation=can_write,object=folder:1)
+ⅹ Check(user=user:anne,relation=can_share,object=folder:1): expected=false, got=true, error=<nil>
+✓ Check(user=user:anne,relation=can_view,object=folder:1)
+---
+(PASSING) test-2: Checks (1/1 passing) | ListObjects (1/1 passing)
 ```
 
 ##### Transform an Authorization Model
