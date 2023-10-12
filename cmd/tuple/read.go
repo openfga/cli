@@ -112,8 +112,8 @@ var readCmd = &cobra.Command{
 			return err
 		}
 
-		simpleJSON, _ := cmd.Flags().GetBool("simple-json")
-		if simpleJSON {
+		simpleOutput, _ := cmd.Flags().GetBool("simple-output")
+		if simpleOutput {
 			return output.Display(response.simple) //nolint:wrapcheck
 		}
 
@@ -126,5 +126,5 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
-	readCmd.Flags().Bool("simple-json", false, "Output simpler JSON version. (It can be used by write and delete commands)") //nolint:lll
+	readCmd.Flags().Bool("simple-output", false, "Output simpler JSON version. (It can be used by write and delete commands)") //nolint:lll
 }
