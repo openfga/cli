@@ -656,7 +656,7 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 If you want to delete all the tuples in a store, you can use the following code:
 
 ```
-fga tuple read --simple-output > tuples.json
+fga tuple read --simple-output --max-pages=0 > tuples.json
 fga tuple delete --file tuples.json
 ```
 
