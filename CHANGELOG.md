@@ -4,7 +4,7 @@
 
 ### [0.1.2](https://github.com/openfga/cli/compare/v0.1.1...v0.1.2) (2023-10-12)
 
-Added:
+Changed:
 - tuple write/delete cmd accepts file; deprecate tuple import (openfga/cli#165) (@gabrielbussolo)
 - read now returns all pages when `--max-pages` is set to `0` (openfga/cli#174)
 - read accepts a `--simple-output` flag to output the tuples directly (openfga/cli#168) (@gabrielbussolo)
@@ -14,9 +14,6 @@ Added:
   fga tuple read --simple-output --max-pages 0 > tuples.json
   fga tuple import --file tuples.json
   ```
-
-Fixed:
-- Running `fga model test` now correctly exists with error code one if any test fails (https://github.com/openfga/cli/pull/157)
 
 ## v0.1.1
 
