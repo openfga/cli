@@ -35,22 +35,9 @@ type readResponse struct {
 	simple   []openfga.TupleKey
 }
 
-func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
-	*readResponse, error,
+func baseRead(fgaClient client.SdkClient, body *client.ClientReadRequest, maxPages int) (
+	*openfga.ReadResponse, error,
 ) {
-	body := &client.ClientReadRequest{}
-	if user != "" {
-		body.User = &user
-	}
-
-	if relation != "" {
-		body.Relation = &relation
-	}
-
-	if object != "" {
-		body.Object = &object
-	}
-
 	tuples := make([]openfga.Tuple, 0)
 	continuationToken := ""
 	pageIndex := 0
@@ -67,19 +54,45 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 		tuples = append(tuples, *response.Tuples...)
 		pageIndex++
 
-		if response.ContinuationToken == nil || *response.ContinuationToken == "" || pageIndex >= maxPages {
+		if response.ContinuationToken == nil ||
+			*response.ContinuationToken == "" ||
+			(maxPages != 0 && pageIndex >= maxPages) {
 			break
 		}
 
 		continuationToken = *response.ContinuationToken
 	}
 
+	return &openfga.ReadResponse{Tuples: &tuples}, nil
+}
+
+func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
+	*readResponse, error,
+) {
+	body := &client.ClientReadRequest{}
+	if user != "" {
+		body.User = &user
+	}
+
+	if relation != "" {
+		body.Relation = &relation
+	}
+
+	if object != "" {
+		body.Object = &object
+	}
+
+	response, err := baseRead(fgaClient, body, maxPages)
+	if err != nil {
+		return nil, err
+	}
+
 	justKeys := make([]openfga.TupleKey, 0)
-	for _, tuple := range tuples {
+	for _, tuple := range response.GetTuples() {
 		justKeys = append(justKeys, *tuple.Key)
 	}
 
-	res := readResponse{complete: &openfga.ReadResponse{Tuples: &tuples}, simple: justKeys}
+	res := readResponse{complete: &openfga.ReadResponse{Tuples: response.Tuples}, simple: justKeys}
 
 	return &res, nil
 }
@@ -112,8 +125,8 @@ var readCmd = &cobra.Command{
 			return err
 		}
 
-		simpleJSON, _ := cmd.Flags().GetBool("simple-json")
-		if simpleJSON {
+		simpleOutput, _ := cmd.Flags().GetBool("simple-output")
+		if simpleOutput {
 			return output.Display(response.simple) //nolint:wrapcheck
 		}
 
@@ -125,6 +138,6 @@ func init() {
 	readCmd.Flags().String("user", "", "User")
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
-	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
-	readCmd.Flags().Bool("simple-json", false, "Output simpler JSON version. (It can be used by write and delete commands)") //nolint:lll
+	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get. Set to 0 to get all pages.")
+	readCmd.Flags().Bool("simple-output", false, "Output simpler JSON version. (It can be used by write and delete commands)") //nolint:lll
 }

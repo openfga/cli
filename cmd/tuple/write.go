@@ -30,11 +30,14 @@ import (
 
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
-	Use:     "write",
-	Short:   "Create Relationship Tuples",
-	Long:    "Add relationship tuples to the store.",
-	Args:    ExactArgsOrFlag(3, "file"), //nolint:gomnd
-	Example: "fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap",
+	Use:   "write",
+	Short: "Create Relationship Tuples",
+	Long:  "Add relationship tuples to the store.",
+	Args:  ExactArgsOrFlag(3, "file"), //nolint:gomnd
+	Example: `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
+fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
+fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
