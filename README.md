@@ -706,7 +706,7 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 If you want to transform this output in a way that can be then imported using the `fga tuple import` you can run
 
 ```
-fga tuple read --simple-output > tuples.json
+fga tuple read --simple-output --max-pages 0 > tuples.json
 fga tuple import --file tuples.json
 ```
 

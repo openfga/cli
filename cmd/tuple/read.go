@@ -67,7 +67,7 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 		tuples = append(tuples, *response.Tuples...)
 		pageIndex++
 
-		if response.ContinuationToken == nil || *response.ContinuationToken == "" || pageIndex >= maxPages {
+		if response.ContinuationToken == nil || *response.ContinuationToken == "" || (maxPages != 0 && pageIndex >= maxPages) {
 			break
 		}
 
@@ -126,5 +126,7 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get.")
+
+	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get. Set to 0 to get all pages.")
 	readCmd.Flags().Bool("simple-output", false, "Output simpler JSON version. (It can be used by write and delete commands)") //nolint:lll
 }
