@@ -22,14 +22,14 @@ func convertClientTupleKeysToProtoTupleKeys(
 		}
 
 		if tuple.Condition != nil {
-			conditionContext, err := structpb.NewStruct(*tuple.Condition.Context)
+			conditionContext, err := structpb.NewStruct(tuple.Condition.GetContext())
 			if err != nil {
 				return nil, fmt.Errorf("failed to construct a proto struct: %w", err)
 			}
 
 			tpl.Condition = &pb.RelationshipCondition{
-				ConditionName: tuple.Condition.ConditionName,
-				Context:       conditionContext,
+				Name:    tuple.Condition.Name,
+				Context: conditionContext,
 			}
 		}
 

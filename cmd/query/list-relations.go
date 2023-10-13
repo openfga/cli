@@ -52,7 +52,7 @@ func getRelationsForType(
 		authorizationModel = *response.AuthorizationModel
 	}
 
-	typeDefs := *(authorizationModel.TypeDefinitions)
+	typeDefs := authorizationModel.TypeDefinitions
 	objectType := strings.Split(object, ":")[0]
 	relations := []string{}
 

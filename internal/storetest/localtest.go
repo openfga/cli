@@ -115,7 +115,7 @@ func RunLocalListObjectsTest(
 			}
 
 			if response != nil {
-				result.Got = &response.Objects
+				result.Got = response.Objects
 				result.TestResult = result.IsPassing()
 			}
 		}

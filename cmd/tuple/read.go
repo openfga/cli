@@ -51,19 +51,18 @@ func baseRead(fgaClient client.SdkClient, body *client.ClientReadRequest, maxPag
 			return nil, fmt.Errorf("failed to read tuples due to %w", err)
 		}
 
-		tuples = append(tuples, *response.Tuples...)
+		tuples = append(tuples, response.Tuples...)
 		pageIndex++
 
-		if response.ContinuationToken == nil ||
-			*response.ContinuationToken == "" ||
+		if response.ContinuationToken == "" ||
 			(maxPages != 0 && pageIndex >= maxPages) {
 			break
 		}
 
-		continuationToken = *response.ContinuationToken
+		continuationToken = response.ContinuationToken
 	}
 
-	return &openfga.ReadResponse{Tuples: &tuples}, nil
+	return &openfga.ReadResponse{Tuples: tuples}, nil
 }
 
 func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
@@ -89,7 +88,7 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 
 	justKeys := make([]openfga.TupleKey, 0)
 	for _, tuple := range response.GetTuples() {
-		justKeys = append(justKeys, *tuple.Key)
+		justKeys = append(justKeys, tuple.Key)
 	}
 
 	res := readResponse{complete: &openfga.ReadResponse{Tuples: response.Tuples}, simple: justKeys}

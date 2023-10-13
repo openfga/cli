@@ -23,13 +23,13 @@ func (result ModelTestCheckSingleResult) IsPassing() bool {
 type ModelTestListObjectsSingleResult struct {
 	Request    client.ClientListObjectsRequest `json:"request"`
 	Expected   []string                        `json:"expected"`
-	Got        *[]string                       `json:"got"`
+	Got        []string                        `json:"got"`
 	Error      error                           `json:"error"`
 	TestResult bool                            `json:"test_result"`
 }
 
 func (result ModelTestListObjectsSingleResult) IsPassing() bool {
-	return result.Error == nil && result.Got != nil && comparison.CheckStringArraysEqual(*result.Got, result.Expected)
+	return result.Error == nil && result.Got != nil && comparison.CheckStringArraysEqual(result.Got, result.Expected)
 }
 
 type TestResult struct {
@@ -116,7 +116,7 @@ func (result TestResult) FriendlyDisplay() string {
 
 				got := "N/A"
 				if listObjectsResult.Got != nil {
-					got = fmt.Sprintf("%s", *listObjectsResult.Got)
+					got = fmt.Sprintf("%s", listObjectsResult.Got)
 				}
 
 				listObjectsResultsOutput = fmt.Sprintf(

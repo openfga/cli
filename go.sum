@@ -257,8 +257,8 @@ github.com/openfga/go-sdk v0.2.4-0.20231013173622-d6dd1795e56a h1:6ey7Dj36f/Cd+N
 github.com/openfga/go-sdk v0.2.4-0.20231013173622-d6dd1795e56a/go.mod h1:2k8hL4VJ46GXUGbnQ1QOrcZWcP1kKATLPeqVnuLzgIE=
 github.com/openfga/language/pkg/go v0.0.0-20231013233104-92107c49ccec h1:FS1MLeLnB0SdZbjQxqI6TNd00Wp2jYzKir5KANXBtK8=
 github.com/openfga/language/pkg/go v0.0.0-20231013233104-92107c49ccec/go.mod h1:pOuwHFMZPe4fGUGx6FYgqvgXt4ReIjYgyCQoFmFvSsg=
-github.com/openfga/openfga v1.3.3-0.20230929174559-2b8f9aad233a h1:t50ADCyg7KHfIOqtzNc3sLuB/BevJ7sYJovMnhrqSUc=
-github.com/openfga/openfga v1.3.3-0.20230929174559-2b8f9aad233a/go.mod h1:M0eNBl3qV2IfxyHjMb4d8ffttbdBWYlq6+l0zk7WvOc=
+github.com/openfga/openfga v1.3.4-0.20231013234451-907694b1dd65 h1:RE2TKfLZTZtUYcX+odIQawUOzApa352vuZocmeBYlx4=
+github.com/openfga/openfga v1.3.4-0.20231013234451-907694b1dd65/go.mod h1:DjVV0SM0jgIAybGUOydhaw/dVAJiRPG2EF8nQ+HzbFw=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=
@@ -270,8 +270,8 @@ github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qR
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/pressly/goose/v3 v3.15.1-0.20230914132807-53f25a777917 h1:G5GGFMSYzmbwSicZfCQfwHpY3mIg5ZP+PG/vMc0PkW0=
-github.com/pressly/goose/v3 v3.15.1-0.20230914132807-53f25a777917/go.mod h1:yXPvHSUBFO4hQCmidy0fjTCWGmNwmRfv9/3IyV36kHk=
+github.com/pressly/goose/v3 v3.15.0 h1:6tY5aDqFknY6VZkorFGgZtWygodZQxfmmEF4rqyJW9k=
+github.com/pressly/goose/v3 v3.15.0/go.mod h1:LlIo3zGccjb/YUgG+Svdb9Er14vefRdlDI7URCDrwYo=
 github.com/prometheus/client_golang v1.17.0 h1:rl2sfwZMtSthVU752MqfjQozy7blglC+1SOtjMAMh+Q=
 github.com/prometheus/client_golang v1.17.0/go.mod h1:VeL+gMmOAxkS2IqfCq0ZmHSL+LjWfWDUmp1mBz9JgUY=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=

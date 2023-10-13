@@ -66,7 +66,7 @@ func RunSingleRemoteListObjectsTest(
 	}
 
 	if response != nil {
-		result.Got = response.Objects
+		result.Got = response.GetObjects()
 		result.TestResult = result.IsPassing()
 	}
 
