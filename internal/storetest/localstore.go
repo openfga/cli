@@ -22,7 +22,11 @@ func initLocalStore(
 	var modelID *string
 
 	storeID := ulid.Make().String()
-	tuples := convertClientTupleKeysToProtoTupleKeys(testTuples)
+
+	tuples, err := convertClientTupleKeysToProtoTupleKeys(testTuples)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	var authModelWriteReq *pb.WriteAuthorizationModelRequest
 
@@ -31,6 +35,7 @@ func initLocalStore(
 			StoreId:         storeID,
 			TypeDefinitions: model.GetTypeDefinitions(),
 			SchemaVersion:   model.GetSchemaVersion(),
+			Conditions:      model.GetConditions(),
 		}
 	}
 

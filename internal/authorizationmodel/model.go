@@ -45,10 +45,11 @@ type AuthzModelList struct {
 }
 
 type AuthzModel struct {
-	ID              *string                   `json:"id,omitempty"`
-	CreatedAt       *time.Time                `json:"created_at,omitempty"`
-	SchemaVersion   *string                   `json:"schema_version,omitempty"`
-	TypeDefinitions *[]openfga.TypeDefinition `json:"type_definitions,omitempty"`
+	ID              *string                       `json:"id,omitempty"`
+	CreatedAt       *time.Time                    `json:"created_at,omitempty"`
+	SchemaVersion   *string                       `json:"schema_version,omitempty"`
+	TypeDefinitions *[]openfga.TypeDefinition     `json:"type_definitions,omitempty"`
+	Conditions      map[string]*openfga.Condition `json:"conditions,omitempty"`
 }
 
 func (model *AuthzModel) GetID() string {
@@ -125,6 +126,16 @@ func (model *AuthzModel) Set(authzModel openfga.AuthorizationModel) {
 
 	if model.ID != nil {
 		model.setCreatedAt()
+	}
+
+	conditions := authzModel.GetConditions()
+	if len(conditions) > 0 {
+		model.Conditions = make(map[string]*openfga.Condition, len(conditions))
+
+		for k, v := range conditions {
+			condition := v
+			model.Conditions[k] = &condition
+		}
 	}
 }
 
