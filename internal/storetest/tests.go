@@ -16,10 +16,10 @@ func RunTest(
 	fgaClient *client.OpenFgaClient,
 	fgaServer *server.Server,
 	test ModelTest,
-	globalTuples []client.ClientWriteRequestTupleKey,
+	globalTuples []client.ClientContextualTupleKey,
 	model *authorizationmodel.AuthzModel,
 ) (TestResult, error) {
-	testTuples := append(append([]client.ClientWriteRequestTupleKey{}, globalTuples...), test.Tuples...)
+	testTuples := append(append([]client.ClientContextualTupleKey{}, globalTuples...), test.Tuples...)
 
 	if model == nil {
 		return RunRemoteTest(fgaClient, test, testTuples), nil

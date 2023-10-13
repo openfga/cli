@@ -30,7 +30,7 @@ func RunSingleRemoteCheckTest(
 func RunRemoteCheckTest(
 	fgaClient *client.OpenFgaClient,
 	checkTest ModelTestCheck,
-	tuples []client.ClientWriteRequestTupleKey,
+	tuples []client.ClientContextualTupleKey,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
 
@@ -76,7 +76,7 @@ func RunSingleRemoteListObjectsTest(
 func RunRemoteListObjectsTest(
 	fgaClient *client.OpenFgaClient,
 	listObjectsTest ModelTestListObjects,
-	tuples []client.ClientWriteRequestTupleKey,
+	tuples []client.ClientContextualTupleKey,
 ) []ModelTestListObjectsSingleResult {
 	results := []ModelTestListObjectsSingleResult{}
 
@@ -97,7 +97,7 @@ func RunRemoteListObjectsTest(
 	return results
 }
 
-func RunRemoteTest(fgaClient *client.OpenFgaClient, test ModelTest, testTuples []client.ClientWriteRequestTupleKey) TestResult {
+func RunRemoteTest(fgaClient *client.OpenFgaClient, test ModelTest, testTuples []client.ClientContextualTupleKey) TestResult {
 	checkResults := []ModelTestCheckSingleResult{}
 
 	for index := 0; index < len(test.Check); index++ {

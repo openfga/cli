@@ -20,7 +20,7 @@ func RunSingleLocalCheckTest(
 func RunLocalCheckTest(
 	fgaServer *server.Server,
 	checkTest ModelTestCheck,
-	tuples []client.ClientWriteRequestTupleKey,
+	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
@@ -79,7 +79,7 @@ func RunSingleLocalListObjectsTest(
 func RunLocalListObjectsTest(
 	fgaServer *server.Server,
 	listObjectsTest ModelTestListObjects,
-	tuples []client.ClientWriteRequestTupleKey,
+	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestListObjectsSingleResult {
 	results := []ModelTestListObjectsSingleResult{}
@@ -129,7 +129,7 @@ func RunLocalListObjectsTest(
 func RunLocalTest(
 	fgaServer *server.Server,
 	test ModelTest,
-	tuples []client.ClientWriteRequestTupleKey,
+	tuples []client.ClientContextualTupleKey,
 	model *authorizationmodel.AuthzModel,
 ) (TestResult, error) {
 	checkResults := []ModelTestCheckSingleResult{}

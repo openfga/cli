@@ -5,7 +5,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 )
 
-func convertClientTupleKeysToProtoTupleKeys(tuples []client.ClientWriteRequestTupleKey) []*pb.WriteRequestTupleKey {
+func convertClientTupleKeysToProtoTupleKeys(tuples []client.ClientContextualTupleKey) []*pb.WriteRequestTupleKey {
 	pbTuples := []*pb.WriteRequestTupleKey{}
 
 	for index := 0; index < len(tuples); index++ {
