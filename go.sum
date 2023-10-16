@@ -196,8 +196,8 @@ github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a h1:bbPeKD0xmW/
 github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
 github.com/jackc/pgx/v5 v5.4.3 h1:cxFyXhxlvAifxnkKKdlxv8XqUf59tDlYjnV5YYfsJJY=
 github.com/jackc/pgx/v5 v5.4.3/go.mod h1:Ig06C2Vu0t5qXC60W8sqIthScaEnFvojjj9dSljmHRA=
-github.com/jarcoal/httpmock v1.3.0 h1:2RJ8GP0IIaWwcC9Fp2BmVi8Kog3v2Hn7VXM3fTd+nuc=
-github.com/jarcoal/httpmock v1.3.0/go.mod h1:3yb8rc4BI7TCBhFY8ng0gjuLKJNquuDNiPaZjnENuYg=
+github.com/jarcoal/httpmock v1.3.1 h1:iUx3whfZWVf3jT01hQTO/Eo5sAYtB2/rqaUuOtpInww=
+github.com/jarcoal/httpmock v1.3.1/go.mod h1:3yb8rc4BI7TCBhFY8ng0gjuLKJNquuDNiPaZjnENuYg=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/karlseguin/ccache/v3 v3.0.3 h1:cz+3tSdTrovp00xHPP3Y6ca/YuSl5kchhYG83wUPYN0=
@@ -249,8 +249,8 @@ github.com/opencontainers/image-spec v1.1.0-rc4 h1:oOxKUJWnFC4YGHCCMNql1x4YaDfYB
 github.com/opencontainers/image-spec v1.1.0-rc4/go.mod h1:X4pATf0uXsnn3g5aiGIsVnJBR4mxhKzfwmvK/B2NTm8=
 github.com/openfga/api/proto v0.0.0-20230829001212-d0942ea5a226 h1:LxHG9uy+ZE/wcMk+olBpygZ/ru9bB34qNZWhBWorzck=
 github.com/openfga/api/proto v0.0.0-20230829001212-d0942ea5a226/go.mod h1:/edBiulCLBxFw+Q1wfWyURo/grVjueLo6JWFPHHFTos=
-github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d h1:xK4EfSnsB+U8zLyZ05h8V9omL6LF6Xh763bQphghuLk=
-github.com/openfga/go-sdk v0.2.3-0.20230710203920-f6922b2d8c6d/go.mod h1:ZB13O8GilPc0ITWssOszgxmz6CnIe8PQLZqbqAnx2IY=
+github.com/openfga/go-sdk v0.2.3 h1:VPCouXbUP+vtGREbLu8BIuzFiA1kBDQ6tnunFTxtLzc=
+github.com/openfga/go-sdk v0.2.3/go.mod h1:2k8hL4VJ46GXUGbnQ1QOrcZWcP1kKATLPeqVnuLzgIE=
 github.com/openfga/language/pkg/go v0.0.0-20231012032128-c194a92a51dd h1:Z4aHyLs1sHjGkCZnYs9uIr0TjriOYsDtOnAURE8seg4=
 github.com/openfga/language/pkg/go v0.0.0-20231012032128-c194a92a51dd/go.mod h1:dP/HNwWWaSvvkwSrnknWD1rh8e+KHB7J5Jd4DUc8lUg=
 github.com/openfga/openfga v1.3.3 h1:3y+inm6uUlnru/IQSeL/5YdY+JiJvwOA4sFQEfWf2vw=
