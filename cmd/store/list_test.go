@@ -53,8 +53,8 @@ func TestListStoresEmpty(t *testing.T) {
 	var stores []openfga.Store
 
 	response := openfga.ListStoresResponse{
-		Stores:            &stores,
-		ContinuationToken: openfga.PtrString(""),
+		Stores:            stores,
+		ContinuationToken: "",
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
@@ -95,16 +95,16 @@ func TestListStoresSinglePage(t *testing.T) {
 
 	stores := []openfga.Store{
 		{
-			Id:        openfga.PtrString("12345"),
-			Name:      openfga.PtrString("foo"),
-			CreatedAt: &expectedTime,
-			UpdatedAt: &expectedTime,
+			Id:        "12345",
+			Name:      "foo",
+			CreatedAt: expectedTime,
+			UpdatedAt: expectedTime,
 		},
 	}
 
 	response := openfga.ListStoresResponse{
-		Stores:            &stores,
-		ContinuationToken: openfga.PtrString(""),
+		Stores:            stores,
+		ContinuationToken: "",
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
@@ -148,16 +148,16 @@ func TestListStoresMultiPage(t *testing.T) {
 
 	stores1 := []openfga.Store{
 		{
-			Id:        openfga.PtrString("abcde"),
-			Name:      openfga.PtrString("moo"),
-			CreatedAt: &expectedTime1,
-			UpdatedAt: &expectedTime1,
+			Id:        "abcde",
+			Name:      "moo",
+			CreatedAt: expectedTime1,
+			UpdatedAt: expectedTime1,
 		},
 	}
 
 	response1 := openfga.ListStoresResponse{
-		Stores:            &stores1,
-		ContinuationToken: openfga.PtrString(continuationToken),
+		Stores:            stores1,
+		ContinuationToken: continuationToken,
 	}
 
 	mockExecute2 := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)
@@ -166,16 +166,16 @@ func TestListStoresMultiPage(t *testing.T) {
 
 	stores2 := []openfga.Store{
 		{
-			Id:        openfga.PtrString("12345"),
-			Name:      openfga.PtrString("foo"),
-			CreatedAt: &expectedTime2,
-			UpdatedAt: &expectedTime2,
+			Id:        "12345",
+			Name:      "foo",
+			CreatedAt: expectedTime2,
+			UpdatedAt: expectedTime2,
 		},
 	}
 
 	response2 := openfga.ListStoresResponse{
-		Stores:            &stores2,
-		ContinuationToken: openfga.PtrString(""),
+		Stores:            stores2,
+		ContinuationToken: "",
 	}
 	gomock.InOrder(
 		mockExecute1.EXPECT().Execute().Return(&response1, nil),
@@ -232,16 +232,16 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 
 	stores1 := []openfga.Store{
 		{
-			Id:        openfga.PtrString("abcde"),
-			Name:      openfga.PtrString("moo"),
-			CreatedAt: &expectedTime1,
-			UpdatedAt: &expectedTime1,
+			Id:        "abcde",
+			Name:      "moo",
+			CreatedAt: expectedTime1,
+			UpdatedAt: expectedTime1,
 		},
 	}
 
 	response1 := openfga.ListStoresResponse{
-		Stores:            &stores1,
-		ContinuationToken: openfga.PtrString(continuationToken),
+		Stores:            stores1,
+		ContinuationToken: continuationToken,
 	}
 
 	mockExecute1.EXPECT().Execute().Return(&response1, nil)

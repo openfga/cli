@@ -28,7 +28,7 @@ func TestListModelsEmpty(t *testing.T) {
 	var models []openfga.AuthorizationModel
 
 	response := openfga.ReadAuthorizationModelsResponse{
-		AuthorizationModels: &models,
+		AuthorizationModels: models,
 		ContinuationToken:   openfga.PtrString(""),
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -101,7 +101,7 @@ func TestListModelsSinglePage(t *testing.T) {
 	}
 
 	response := openfga.ReadAuthorizationModelsResponse{
-		AuthorizationModels: &models,
+		AuthorizationModels: models,
 		ContinuationToken:   openfga.PtrString(""),
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -149,7 +149,7 @@ func TestListModelsMultiPage(t *testing.T) {
 	}
 	continuationToken1 := openfga.PtrString("abcdef")
 	response1 := openfga.ReadAuthorizationModelsResponse{
-		AuthorizationModels: &models1,
+		AuthorizationModels: models1,
 		ContinuationToken:   continuationToken1,
 	}
 
@@ -172,7 +172,7 @@ func TestListModelsMultiPage(t *testing.T) {
 	}
 	emptyToken := ""
 	response2 := openfga.ReadAuthorizationModelsResponse{
-		AuthorizationModels: &models2,
+		AuthorizationModels: models2,
 		ContinuationToken:   &emptyToken,
 	}
 
@@ -231,7 +231,7 @@ func TestListModelsMultiPageMaxPage(t *testing.T) {
 	}
 	continuationToken1 := openfga.PtrString("abcdef")
 	response1 := openfga.ReadAuthorizationModelsResponse{
-		AuthorizationModels: &models1,
+		AuthorizationModels: models1,
 		ContinuationToken:   continuationToken1,
 	}
 

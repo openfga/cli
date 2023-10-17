@@ -62,8 +62,8 @@ func TestReadEmpty(t *testing.T) {
 
 	var tuples []openfga.Tuple
 	response := openfga.ReadResponse{
-		Tuples:            &tuples,
-		ContinuationToken: openfga.PtrString(""),
+		Tuples:            tuples,
+		ContinuationToken: "",
 	}
 
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -131,13 +131,13 @@ func TestReadSinglePage(t *testing.T) {
 
 	tuples := []openfga.Tuple{
 		{
-			Key:       &key1,
-			Timestamp: &changesTime,
+			Key:       key1,
+			Timestamp: changesTime,
 		},
 	}
 	response := openfga.ReadResponse{
-		Tuples:            &tuples,
-		ContinuationToken: openfga.PtrString(""),
+		Tuples:            tuples,
+		ContinuationToken: "",
 	}
 
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -206,13 +206,13 @@ func TestReadMultiPages(t *testing.T) {
 
 	tuples1 := []openfga.Tuple{
 		{
-			Key:       &key1,
-			Timestamp: &changesTime1,
+			Key:       key1,
+			Timestamp: changesTime1,
 		},
 	}
 	response1 := openfga.ReadResponse{
-		Tuples:            &tuples1,
-		ContinuationToken: openfga.PtrString(continuationToken),
+		Tuples:            tuples1,
+		ContinuationToken: continuationToken,
 	}
 
 	mockExecute2 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
@@ -227,13 +227,13 @@ func TestReadMultiPages(t *testing.T) {
 
 	tuples2 := []openfga.Tuple{
 		{
-			Key:       &key2,
-			Timestamp: &changesTime2,
+			Key:       key2,
+			Timestamp: changesTime2,
 		},
 	}
 	response2 := openfga.ReadResponse{
-		Tuples:            &tuples2,
-		ContinuationToken: openfga.PtrString(""),
+		Tuples:            tuples2,
+		ContinuationToken: "",
 	}
 
 	gomock.InOrder(
@@ -318,13 +318,13 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	tuples := []openfga.Tuple{
 		{
-			Key:       &key1,
-			Timestamp: &changesTime,
+			Key:       key1,
+			Timestamp: changesTime,
 		},
 	}
 	response := openfga.ReadResponse{
-		Tuples:            &tuples,
-		ContinuationToken: openfga.PtrString("ABCDEFG"),
+		Tuples:            tuples,
+		ContinuationToken: "ABCDEFG",
 	}
 
 	mockExecute.EXPECT().Execute().Return(&response, nil)

@@ -60,7 +60,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
 	expectedResponse := client.ClientListObjectsResponse{
-		Objects: &[]string{"doc:doc1", "doc:doc2"},
+		Objects: []string{"doc:doc1", "doc:doc2"},
 	}
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
@@ -89,7 +89,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if *output != expectedResponse {
+	if output != &expectedResponse {
 		t.Errorf("Expect %v but actual %v", expectedResponse, *output)
 	}
 }
