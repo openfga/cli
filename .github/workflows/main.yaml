@@ -13,6 +13,9 @@ on:
 permissions:
   contents: read
 
+env:
+  GO_VERSION: '>=1.21.3'
+
 jobs:
   lint:
     name: Lints
@@ -25,7 +28,7 @@ jobs:
       with:
         cache-dependency-path: './go.sum'
         check-latest: true
-        go-version: '>=1.21.0'
+        go-version: ${{ env.GO_VERSION }}
     - name: golangci-lint
       uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
       with:
@@ -42,7 +45,7 @@ jobs:
       with:
         cache-dependency-path: './go.sum'
         check-latest: true
-        go-version: '>=1.21.0'
+        go-version: ${{ env.GO_VERSION }}
 
     - name: Run govulncheck
       run: make audit
@@ -59,7 +62,7 @@ jobs:
       with:
         cache-dependency-path: './go.sum'
         check-latest: true
-        go-version: '>=1.21.0'
+        go-version: ${{ env.GO_VERSION }}
 
     - name: Build
       run: make build
@@ -87,7 +90,7 @@ jobs:
       with:
         cache-dependency-path: './go.sum'
         check-latest: true
-        go-version: '>=1.21.0'
+        go-version: ${{ env.GO_VERSION }}
 
     - name: Extract Version from Tag
       id: tag_name
@@ -105,7 +108,7 @@ jobs:
       with:
         cache-dependency-path: './go.sum'
         check-latest: true
-        go-version: '>=1.21.0'
+        go-version: ${{ env.GO_VERSION }}
 
     - uses: anchore/sbom-action/download-syft@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # v0.14.3
 
@@ -141,7 +144,7 @@ jobs:
         with:
           cache-dependency-path: './go.sum'
           check-latest: true
-          go-version: '>=1.21.0'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Login to Docker Hub
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
