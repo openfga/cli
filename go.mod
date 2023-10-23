@@ -1,10 +1,9 @@
 module github.com/openfga/cli
 
 go 1.21.1
-
 require (
 	github.com/golang/mock v1.6.0
-	github.com/mattn/go-isatty v0.0.19
+	github.com/mattn/go-isatty v0.0.20
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
@@ -12,7 +11,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20230829001212-d0942ea5a226
 	github.com/openfga/go-sdk v0.2.3
 	github.com/openfga/language/pkg/go v0.0.0-20231012032128-c194a92a51dd
-	github.com/openfga/openfga v1.3.3
+	github.com/openfga/openfga v1.3.4
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.17.0
