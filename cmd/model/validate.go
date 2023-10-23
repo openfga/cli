@@ -61,10 +61,10 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 		return output
 	}
 
-	if model.Id != "" {
-		output.ID = model.Id
+	if model.GetId() != "" {
+		output.ID = model.GetId()
 
-		modelID, err := ulid.Parse(model.Id)
+		modelID, err := ulid.Parse(output.ID)
 		if err != nil {
 			output.IsValid = false
 			errorString := "unable to parse id: invalid ulid format"
