@@ -238,6 +238,7 @@ func (model *AuthzModel) DisplayAsJSON(fields []string) AuthzModel {
 	if slices.Contains(fields, "model") {
 		newModel.SchemaVersion = model.SchemaVersion
 		newModel.TypeDefinitions = model.TypeDefinitions
+		newModel.Conditions = model.Conditions
 	}
 
 	return newModel
