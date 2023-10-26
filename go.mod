@@ -1,6 +1,6 @@
 module github.com/openfga/cli
 
-go 1.21.1
+go 1.21.3
 
 require (
 	github.com/golang/mock v1.6.0
@@ -9,10 +9,10 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20231013151311-0fc80192d14c
+	github.com/openfga/api/proto v0.0.0-20231013152440-fb9e0a84ee12
 	github.com/openfga/go-sdk v0.2.4-0.20231013173622-d6dd1795e56a
-	github.com/openfga/language/pkg/go v0.0.0-20231024224110-d25b3592e69f
-	github.com/openfga/openfga v1.3.4-0.20231013234451-907694b1dd65
+	github.com/openfga/language/pkg/go v0.0.0-20231026200902-6e91eb1b9497
+	github.com/openfga/openfga v1.3.5-0.20231026195302-9a2bc9e3ac86
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.17.0
@@ -40,7 +40,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/karlseguin/ccache/v3 v3.0.3 // indirect
+	github.com/karlseguin/ccache/v3 v3.0.5 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -76,6 +76,6 @@ require (
 	google.golang.org/genproto v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
-	google.golang.org/grpc v1.58.2 // indirect
+	google.golang.org/grpc v1.59.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
