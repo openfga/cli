@@ -71,8 +71,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/docker/distribution v2.8.2+incompatible h1:T3de5rq0dB1j30rp0sA2rER+m322EBzniBPB6ZIzuh8=
 github.com/docker/distribution v2.8.2+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
-github.com/docker/docker v24.0.6+incompatible h1:hceabKCtUgDqPu+qm0NgsaXf28Ljf4/pWFL7xjWWDgE=
-github.com/docker/docker v24.0.6+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
+github.com/docker/docker v24.0.7+incompatible h1:Wo6l37AuwP3JaMnZa226lzVXGA3F9Ig1seQen0cKYlM=
+github.com/docker/docker v24.0.7+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/go-connections v0.4.0 h1:El9xVISelRB7BuFusrZozjnkIM5YnzCViNKohAFqRJQ=
 github.com/docker/go-connections v0.4.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
 github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
@@ -257,8 +257,8 @@ github.com/openfga/go-sdk v0.2.4-0.20231013173622-d6dd1795e56a h1:6ey7Dj36f/Cd+N
 github.com/openfga/go-sdk v0.2.4-0.20231013173622-d6dd1795e56a/go.mod h1:2k8hL4VJ46GXUGbnQ1QOrcZWcP1kKATLPeqVnuLzgIE=
 github.com/openfga/language/pkg/go v0.0.0-20231026200902-6e91eb1b9497 h1:AWb+aVV5ME68uJcBNPJIcSKyDf5IdRJsIQTHcPZry8c=
 github.com/openfga/language/pkg/go v0.0.0-20231026200902-6e91eb1b9497/go.mod h1:j8EagVXkHCGWv9X/JAg+UqonctuXHHf5THv8s5Jtw7U=
-github.com/openfga/openfga v1.3.5-0.20231026195302-9a2bc9e3ac86 h1:pQVnYsVrlTP6idELpjJ2qaS/cdP3A5rXEVknhgq3jVI=
-github.com/openfga/openfga v1.3.5-0.20231026195302-9a2bc9e3ac86/go.mod h1:Q8/XlKyIjAHHjKrPWIIGF+JsxY/+HUOrAPKCYy71eko=
+github.com/openfga/openfga v1.3.6-0.20231031191207-f211089a2e40 h1:EtPCRQwStS+ZBEATkT7BixkjHzVuGnDqFjKkLH8dCvU=
+github.com/openfga/openfga v1.3.6-0.20231031191207-f211089a2e40/go.mod h1:ItBKIYuoPKj46L7nJqTSe8i8CmqbJ0A5nfkB8JWnltM=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=
