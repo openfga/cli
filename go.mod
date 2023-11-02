@@ -10,9 +10,9 @@ require (
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20231013152440-fb9e0a84ee12
-	github.com/openfga/go-sdk v0.2.4-0.20231013173622-d6dd1795e56a
-	github.com/openfga/language/pkg/go v0.0.0-20231026200902-6e91eb1b9497
-	github.com/openfga/openfga v1.3.6-0.20231031191207-f211089a2e40
+	github.com/openfga/go-sdk v0.3.0-beta.1
+	github.com/openfga/language/pkg/go v0.0.0-20231102180705-17bcbf138cb9
+	github.com/openfga/openfga v1.3.6-0.20231102003128-759dd1bc0d94
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.17.0

@@ -25,17 +25,17 @@ import (
 )
 
 type ModelTestCheck struct {
-	User       string                 `json:"user"       yaml:"user"`
-	Object     string                 `json:"object"     yaml:"object"`
-	Context    map[string]interface{} `json:"context"  yaml:"context"`
-	Assertions map[string]bool        `json:"assertions" yaml:"assertions"`
+	User       string                  `json:"user"       yaml:"user"`
+	Object     string                  `json:"object"     yaml:"object"`
+	Context    *map[string]interface{} `json:"context"  yaml:"context"`
+	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
 }
 
 type ModelTestListObjects struct {
-	User       string                 `json:"user"       yaml:"user"`
-	Type       string                 `json:"type"       yaml:"type"`
-	Context    map[string]interface{} `json:"context"  yaml:"context"`
-	Assertions map[string][]string    `json:"assertions" yaml:"assertions"`
+	User       string                  `json:"user"       yaml:"user"`
+	Type       string                  `json:"type"       yaml:"type"`
+	Context    *map[string]interface{} `json:"context"  yaml:"context"`
+	Assertions map[string][]string     `json:"assertions" yaml:"assertions"`
 }
 
 type ModelTest struct {
