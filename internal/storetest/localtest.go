@@ -37,7 +37,15 @@ func RunLocalCheckTest(
 			Expected: expectation,
 		}
 
-		ctx, err := structpb.NewStruct(*checkTest.Context)
+		var (
+			ctx *structpb.Struct
+			err error
+		)
+
+		if checkTest.Context != nil {
+			ctx, err = structpb.NewStruct(*checkTest.Context)
+		}
+
 		if err != nil {
 			result.Error = err
 		} else {
@@ -96,7 +104,15 @@ func RunLocalListObjectsTest(
 			Expected: expectation,
 		}
 
-		ctx, err := structpb.NewStruct(*listObjectsTest.Context)
+		var (
+			ctx *structpb.Struct
+			err error
+		)
+
+		if listObjectsTest.Context != nil {
+			ctx, err = structpb.NewStruct(*listObjectsTest.Context)
+		}
+
 		if err != nil {
 			result.Error = err
 		} else {
