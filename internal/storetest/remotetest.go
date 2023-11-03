@@ -97,7 +97,11 @@ func RunRemoteListObjectsTest(
 	return results
 }
 
-func RunRemoteTest(fgaClient *client.OpenFgaClient, test ModelTest, testTuples []client.ClientContextualTupleKey) TestResult {
+func RunRemoteTest(
+	fgaClient *client.OpenFgaClient,
+	test ModelTest,
+	testTuples []client.ClientContextualTupleKey,
+) TestResult {
 	checkResults := []ModelTestCheckSingleResult{}
 
 	for index := 0; index < len(test.Check); index++ {

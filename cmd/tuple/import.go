@@ -79,7 +79,9 @@ func importTuples(
 	return &result, nil
 }
 
-func processWrites(writes []client.ClientWriteSingleResponse) ([]client.ClientWriteRequestTupleKey, []failedWriteResponse) {
+func processWrites(
+	writes []client.ClientWriteSingleResponse,
+) ([]client.ClientWriteRequestTupleKey, []failedWriteResponse) {
 	var (
 		successfulWrites []client.ClientWriteRequestTupleKey
 		failedWrites     []failedWriteResponse

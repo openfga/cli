@@ -2,6 +2,7 @@ package storetest
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/openfga/cli/internal/comparison"
@@ -82,7 +83,7 @@ func (result TestResult) FriendlyDisplay() string {
 
 				got := "N/A"
 				if checkResult.Got != nil {
-					got = fmt.Sprintf("%t", *checkResult.Got)
+					got = strconv.FormatBool(*checkResult.Got)
 				}
 
 				checkResultsOutput = fmt.Sprintf(
@@ -181,5 +182,5 @@ func (test TestResults) FriendlyDisplay() string {
 		friendlyResults = append(friendlyResults, test.Results[index].FriendlyDisplay())
 	}
 
-	return fmt.Sprintf("%v", strings.Join(friendlyResults, "\n---\n"))
+	return strings.Join(friendlyResults, "\n---\n")
 }

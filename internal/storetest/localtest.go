@@ -14,7 +14,7 @@ func RunSingleLocalCheckTest(
 	fgaServer *server.Server,
 	checkRequest *pb.CheckRequest,
 ) (*pb.CheckResponse, error) {
-	return fgaServer.Check(context.Background(), checkRequest)
+	return fgaServer.Check(context.Background(), checkRequest) //nolint:wrapcheck
 }
 
 func RunLocalCheckTest(
@@ -81,7 +81,7 @@ func RunSingleLocalListObjectsTest(
 	fgaServer *server.Server,
 	listObjectsRequest *pb.ListObjectsRequest,
 ) (*pb.ListObjectsResponse, error) {
-	return fgaServer.ListObjects(context.Background(), listObjectsRequest)
+	return fgaServer.ListObjects(context.Background(), listObjectsRequest) //nolint:wrapcheck
 }
 
 func RunLocalListObjectsTest(
@@ -131,7 +131,7 @@ func RunLocalListObjectsTest(
 			}
 
 			if response != nil {
-				result.Got = response.Objects
+				result.Got = response.GetObjects()
 				result.TestResult = result.IsPassing()
 			}
 		}
