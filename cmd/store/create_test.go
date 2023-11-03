@@ -8,7 +8,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/openfga/cli/internal/mocks"
-	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 )
 
@@ -53,10 +52,10 @@ func TestCreateSuccess(t *testing.T) {
 	expectedTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	expectedResponse := client.ClientCreateStoreResponse{
-		Id:        openfga.PtrString("12345"),
-		Name:      openfga.PtrString("foo"),
-		CreatedAt: &expectedTime,
-		UpdatedAt: &expectedTime,
+		Id:        "12345",
+		Name:      "foo",
+		CreatedAt: expectedTime,
+		UpdatedAt: expectedTime,
 	}
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)

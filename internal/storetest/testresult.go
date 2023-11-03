@@ -24,13 +24,13 @@ func (result ModelTestCheckSingleResult) IsPassing() bool {
 type ModelTestListObjectsSingleResult struct {
 	Request    client.ClientListObjectsRequest `json:"request"`
 	Expected   []string                        `json:"expected"`
-	Got        *[]string                       `json:"got"`
+	Got        []string                        `json:"got"`
 	Error      error                           `json:"error"`
 	TestResult bool                            `json:"test_result"`
 }
 
 func (result ModelTestListObjectsSingleResult) IsPassing() bool {
-	return result.Error == nil && result.Got != nil && comparison.CheckStringArraysEqual(*result.Got, result.Expected)
+	return result.Error == nil && result.Got != nil && comparison.CheckStringArraysEqual(result.Got, result.Expected)
 }
 
 type TestResult struct {
@@ -72,11 +72,12 @@ func (result TestResult) FriendlyDisplay() string {
 
 			if checkResult.IsPassing() {
 				checkResultsOutput = fmt.Sprintf(
-					"%s\n✓ Check(user=%s,relation=%s,object=%s)",
+					"%s\n✓ Check(user=%s,relation=%s,object=%s, context=%v)",
 					checkResultsOutput,
 					checkResult.Request.User,
 					checkResult.Request.Relation,
 					checkResult.Request.Object,
+					checkResult.Request.Context,
 				)
 			} else {
 				failedCheckCount++
@@ -87,11 +88,12 @@ func (result TestResult) FriendlyDisplay() string {
 				}
 
 				checkResultsOutput = fmt.Sprintf(
-					"%s\nⅹ Check(user=%s,relation=%s,object=%s): expected=%t, got=%s, error=%v",
+					"%s\nⅹ Check(user=%s,relation=%s,object=%s, context=%v): expected=%t, got=%s, error=%v",
 					checkResultsOutput,
 					checkResult.Request.User,
 					checkResult.Request.Relation,
 					checkResult.Request.Object,
+					checkResult.Request.Context,
 					checkResult.Expected,
 					got,
 					checkResult.Error,
@@ -106,26 +108,28 @@ func (result TestResult) FriendlyDisplay() string {
 
 			if listObjectsResult.IsPassing() {
 				listObjectsResultsOutput = fmt.Sprintf(
-					"%s\n✓ ListObjects(user=%s,relation=%s,type=%s)",
+					"%s\n✓ ListObjects(user=%s,relation=%s,type=%s, context=%v)",
 					listObjectsResultsOutput,
 					listObjectsResult.Request.User,
 					listObjectsResult.Request.Relation,
 					listObjectsResult.Request.Type,
+					listObjectsResult.Request.Context,
 				)
 			} else {
 				failedListObjectsCount++
 
 				got := "N/A"
 				if listObjectsResult.Got != nil {
-					got = fmt.Sprintf("%s", *listObjectsResult.Got)
+					got = fmt.Sprintf("%s", listObjectsResult.Got)
 				}
 
 				listObjectsResultsOutput = fmt.Sprintf(
-					"%s\nⅹ ListObjects(user=%s,relation=%s,type=%s): expected=%s, got=%s, error=%v",
+					"%s\nⅹ ListObjects(user=%s,relation=%s,type=%s, context=%v): expected=%s, got=%s, error=%v",
 					listObjectsResultsOutput,
 					listObjectsResult.Request.User,
 					listObjectsResult.Request.Relation,
 					listObjectsResult.Request.Type,
+					listObjectsResult.Request.Context,
 					listObjectsResult.Expected,
 					got,
 					listObjectsResult.Error,

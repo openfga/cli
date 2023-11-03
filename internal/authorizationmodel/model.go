@@ -45,10 +45,11 @@ type AuthzModelList struct {
 }
 
 type AuthzModel struct {
-	ID              *string                   `json:"id,omitempty"`
-	CreatedAt       *time.Time                `json:"created_at,omitempty"`
-	SchemaVersion   *string                   `json:"schema_version,omitempty"`
-	TypeDefinitions *[]openfga.TypeDefinition `json:"type_definitions,omitempty"`
+	ID              *string                       `json:"id,omitempty"`
+	CreatedAt       *time.Time                    `json:"created_at,omitempty"`
+	SchemaVersion   *string                       `json:"schema_version,omitempty"`
+	TypeDefinitions *[]openfga.TypeDefinition     `json:"type_definitions,omitempty"`
+	Conditions      map[string]*openfga.Condition `json:"conditions,omitempty"`
 }
 
 func (model *AuthzModel) GetID() string {
@@ -121,10 +122,20 @@ func (model *AuthzModel) GetCreatedAt() *time.Time {
 func (model *AuthzModel) Set(authzModel openfga.AuthorizationModel) {
 	model.ID = authzModel.Id
 	model.SchemaVersion = &authzModel.SchemaVersion
-	model.TypeDefinitions = authzModel.TypeDefinitions
+	model.TypeDefinitions = &authzModel.TypeDefinitions
 
 	if model.ID != nil {
 		model.setCreatedAt()
+	}
+
+	conditions := authzModel.GetConditions()
+	if len(conditions) > 0 {
+		model.Conditions = make(map[string]*openfga.Condition, len(conditions))
+
+		for k, v := range conditions {
+			condition := v
+			model.Conditions[k] = &condition
+		}
 	}
 }
 
@@ -142,7 +153,7 @@ func (model *AuthzModel) ReadFromJSONString(jsonString string) error {
 }
 
 func (model *AuthzModel) ReadFromDSLString(dslString string) error {
-	parsedAuthModel, err := language.TransformDSLToJSON(dslString)
+	parsedAuthModel, err := language.TransformDSLToProto(dslString)
 	if err != nil {
 		return fmt.Errorf("failed to transform due to %w", err)
 	}
@@ -227,6 +238,7 @@ func (model *AuthzModel) DisplayAsJSON(fields []string) AuthzModel {
 	if slices.Contains(fields, "model") {
 		newModel.SchemaVersion = model.SchemaVersion
 		newModel.TypeDefinitions = model.TypeDefinitions
+		newModel.Conditions = model.Conditions
 	}
 
 	return newModel

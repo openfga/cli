@@ -50,7 +50,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthoriz
 			return nil, fmt.Errorf("failed to list models due to %w", err)
 		}
 
-		models = append(models, *response.AuthorizationModels...)
+		models = append(models, response.AuthorizationModels...)
 
 		pageIndex++
 
@@ -61,7 +61,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthoriz
 		continuationToken = *response.ContinuationToken
 	}
 
-	return &openfga.ReadAuthorizationModelsResponse{AuthorizationModels: &models}, nil
+	return &openfga.ReadAuthorizationModelsResponse{AuthorizationModels: models}, nil
 }
 
 // listCmd represents the list command.
@@ -93,7 +93,7 @@ var listCmd = &cobra.Command{
 		}
 
 		models := authorizationmodel.AuthzModelList{}
-		authzModels := *response.AuthorizationModels
+		authzModels := response.AuthorizationModels
 		for index := 0; index < len(authzModels); index++ {
 			authModel := authorizationmodel.AuthzModel{}
 			authModel.Set(authzModels[index])

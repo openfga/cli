@@ -60,7 +60,7 @@ func TestReadChangesEmpty(t *testing.T) {
 
 	changes := []openfga.TupleChange{}
 	response := openfga.ReadChangesResponse{
-		Changes:           &changes,
+		Changes:           changes,
 		ContinuationToken: openfga.PtrString(""),
 	}
 
@@ -108,9 +108,9 @@ func TestReadChangesSinglePage(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
 	tupleKey := openfga.TupleKey{
-		Object:   openfga.PtrString("document:doc1"),
-		Relation: openfga.PtrString("reader"),
-		User:     openfga.PtrString("user:user1"),
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
 	}
 
 	operation := openfga.WRITE
@@ -118,13 +118,13 @@ func TestReadChangesSinglePage(t *testing.T) {
 
 	changes := []openfga.TupleChange{
 		{
-			TupleKey:  &tupleKey,
-			Operation: &operation,
-			Timestamp: &changesTime,
+			TupleKey:  tupleKey,
+			Operation: operation,
+			Timestamp: changesTime,
 		},
 	}
 	response := openfga.ReadChangesResponse{
-		Changes:           &changes,
+		Changes:           changes,
 		ContinuationToken: openfga.PtrString(""),
 	}
 
@@ -174,9 +174,9 @@ func TestReadChangesMultiPages(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
 	tupleKey1 := openfga.TupleKey{
-		Object:   openfga.PtrString("document:doc1"),
-		Relation: openfga.PtrString("reader"),
-		User:     openfga.PtrString("user:user1"),
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
 	}
 
 	operation1 := openfga.WRITE
@@ -184,13 +184,13 @@ func TestReadChangesMultiPages(t *testing.T) {
 
 	changes1 := []openfga.TupleChange{
 		{
-			TupleKey:  &tupleKey1,
-			Operation: &operation1,
-			Timestamp: &changesTime1,
+			TupleKey:  tupleKey1,
+			Operation: operation1,
+			Timestamp: changesTime1,
 		},
 	}
 	response1 := openfga.ReadChangesResponse{
-		Changes:           &changes1,
+		Changes:           changes1,
 		ContinuationToken: openfga.PtrString(continuationToken),
 	}
 
@@ -199,14 +199,14 @@ func TestReadChangesMultiPages(t *testing.T) {
 
 	changes2 := []openfga.TupleChange{
 		{
-			TupleKey:  &tupleKey1,
-			Operation: &operation2,
-			Timestamp: &changesTime2,
+			TupleKey:  tupleKey1,
+			Operation: operation2,
+			Timestamp: changesTime2,
 		},
 	}
 
 	response2 := openfga.ReadChangesResponse{
-		Changes:           &changes2,
+		Changes:           changes2,
 		ContinuationToken: openfga.PtrString(continuationToken),
 	}
 	gomock.InOrder(
@@ -272,9 +272,9 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
 	tupleKey := openfga.TupleKey{
-		Object:   openfga.PtrString("document:doc1"),
-		Relation: openfga.PtrString("reader"),
-		User:     openfga.PtrString("user:user1"),
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
 	}
 
 	operation := openfga.WRITE
@@ -282,13 +282,13 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 
 	changes := []openfga.TupleChange{
 		{
-			TupleKey:  &tupleKey,
-			Operation: &operation,
-			Timestamp: &changesTime,
+			TupleKey:  tupleKey,
+			Operation: operation,
+			Timestamp: changesTime,
 		},
 	}
 	response := openfga.ReadChangesResponse{
-		Changes:           &changes,
+		Changes:           changes,
 		ContinuationToken: openfga.PtrString("01GXSA8YR785C4FYS3C0RTG7B2"),
 	}
 

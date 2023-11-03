@@ -62,8 +62,8 @@ func TestReadEmpty(t *testing.T) {
 
 	var tuples []openfga.Tuple
 	response := openfga.ReadResponse{
-		Tuples:            &tuples,
-		ContinuationToken: openfga.PtrString(""),
+		Tuples:            tuples,
+		ContinuationToken: "",
 	}
 
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -90,7 +90,7 @@ func TestReadEmpty(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"tuples\":[]}"
+	expectedOutput := "{\"continuation_token\":\"\",\"tuples\":[]}"
 	simpleOutput := "[]"
 
 	outputTxt, err := json.Marshal(output.complete)
@@ -99,7 +99,7 @@ func TestReadEmpty(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output.complete)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 
 	simpleTxt, err := json.Marshal(output.simple)
@@ -108,7 +108,7 @@ func TestReadEmpty(t *testing.T) {
 	}
 
 	if string(simpleTxt) != simpleOutput {
-		t.Errorf("Expected output %v actual %v", simpleOutput, output.simple)
+		t.Errorf("Expected output %v actual %v", simpleOutput, string(simpleTxt))
 	}
 }
 
@@ -121,22 +121,23 @@ func TestReadSinglePage(t *testing.T) {
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key1 := openfga.NewTupleKey()
-	key1.Object = openfga.PtrString("document:doc1")
-	key1.Relation = openfga.PtrString("reader")
-	key1.User = openfga.PtrString("user:user1")
+	key1 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
+	}
 
 	changesTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	tuples := []openfga.Tuple{
 		{
 			Key:       key1,
-			Timestamp: &changesTime,
+			Timestamp: changesTime,
 		},
 	}
 	response := openfga.ReadResponse{
-		Tuples:            &tuples,
-		ContinuationToken: openfga.PtrString(""),
+		Tuples:            tuples,
+		ContinuationToken: "",
 	}
 
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -163,8 +164,8 @@ func TestReadSinglePage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`                                                         //nolint:lll
+	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
+	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`                                                                                 //nolint:lll
 
 	outputTxt, err := json.Marshal(output.complete)
 	if err != nil {
@@ -172,7 +173,7 @@ func TestReadSinglePage(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output.complete)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 
 	simpleTxt, err := json.Marshal(output.simple)
@@ -181,7 +182,7 @@ func TestReadSinglePage(t *testing.T) {
 	}
 
 	if string(simpleTxt) != simpleOutput {
-		t.Errorf("Expected output %v actual %v", simpleOutput, output.simple)
+		t.Errorf("Expected output %v actual %v", simpleOutput, string(simpleTxt))
 	}
 }
 
@@ -196,42 +197,43 @@ func TestReadMultiPages(t *testing.T) {
 
 	mockExecute1 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key1 := openfga.NewTupleKey()
-	key1.Object = openfga.PtrString("document:doc1")
-	key1.Relation = openfga.PtrString("reader")
-	key1.User = openfga.PtrString("user:user1")
-
+	key1 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
+	}
 	changesTime1 := time.Date(2009, time.November, 10, 22, 0, 0, 0, time.UTC)
 
 	tuples1 := []openfga.Tuple{
 		{
 			Key:       key1,
-			Timestamp: &changesTime1,
+			Timestamp: changesTime1,
 		},
 	}
 	response1 := openfga.ReadResponse{
-		Tuples:            &tuples1,
-		ContinuationToken: openfga.PtrString(continuationToken),
+		Tuples:            tuples1,
+		ContinuationToken: continuationToken,
 	}
 
 	mockExecute2 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key2 := openfga.NewTupleKey()
-	key2.Object = openfga.PtrString("document:doc2")
-	key2.Relation = openfga.PtrString("reader")
-	key2.User = openfga.PtrString("user:user1")
+	key2 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc2",
+	}
 
 	changesTime2 := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	tuples2 := []openfga.Tuple{
 		{
 			Key:       key2,
-			Timestamp: &changesTime2,
+			Timestamp: changesTime2,
 		},
 	}
 	response2 := openfga.ReadResponse{
-		Tuples:            &tuples2,
-		ContinuationToken: openfga.PtrString(""),
+		Tuples:            tuples2,
+		ContinuationToken: "",
 	}
 
 	gomock.InOrder(
@@ -275,8 +277,8 @@ func TestReadMultiPages(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T22:00:00Z"},{"key":{"object":"document:doc2","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"},{"object":"document:doc2","relation":"reader","user":"user:user1"}]`                                                                                                    //nolint:lll
+	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T22:00:00Z"},{"key":{"object":"document:doc2","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
+	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"},{"object":"document:doc2","relation":"reader","user":"user:user1"}]`                                                                                                                            //nolint:lll
 
 	outputTxt, err := json.Marshal(output.complete)
 	if err != nil {
@@ -284,7 +286,7 @@ func TestReadMultiPages(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output.complete)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 
 	simpleTxt, err := json.Marshal(output.simple)
@@ -293,7 +295,7 @@ func TestReadMultiPages(t *testing.T) {
 	}
 
 	if string(simpleTxt) != simpleOutput {
-		t.Errorf("Expected output %v actual %v", simpleOutput, output.simple)
+		t.Errorf("Expected output %v actual %v", simpleOutput, string(simpleTxt))
 	}
 }
 
@@ -306,22 +308,23 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
-	key1 := openfga.NewTupleKey()
-	key1.Object = openfga.PtrString("document:doc1")
-	key1.Relation = openfga.PtrString("reader")
-	key1.User = openfga.PtrString("user:user1")
+	key1 := openfga.TupleKey{
+		User:     "user:user1",
+		Relation: "reader",
+		Object:   "document:doc1",
+	}
 
 	changesTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	tuples := []openfga.Tuple{
 		{
 			Key:       key1,
-			Timestamp: &changesTime,
+			Timestamp: changesTime,
 		},
 	}
 	response := openfga.ReadResponse{
-		Tuples:            &tuples,
-		ContinuationToken: openfga.PtrString("ABCDEFG"),
+		Tuples:            tuples,
+		ContinuationToken: "ABCDEFG",
 	}
 
 	mockExecute.EXPECT().Execute().Return(&response, nil)
@@ -348,8 +351,8 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`                                                         //nolint:lll
+	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
+	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`                                                                                 //nolint:lll
 
 	outputTxt, err := json.Marshal(output.complete)
 	if err != nil {
@@ -357,7 +360,7 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output.complete)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 
 	simpleTxt, err := json.Marshal(output.simple)
@@ -366,6 +369,6 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 	}
 
 	if string(simpleTxt) != simpleOutput {
-		t.Errorf("Expected output %v actual %v", simpleOutput, output.simple)
+		t.Errorf("Expected output %v actual %v", simpleOutput, string(simpleTxt))
 	}
 }

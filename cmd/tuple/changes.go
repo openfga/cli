@@ -48,7 +48,7 @@ func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) 
 			return nil, fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
-		changes = append(changes, *response.Changes...)
+		changes = append(changes, response.Changes...)
 		pageIndex++
 
 		if response.ContinuationToken == nil ||
@@ -60,7 +60,7 @@ func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) 
 		continuationToken = *response.ContinuationToken
 	}
 
-	return &openfga.ReadChangesResponse{Changes: &changes}, nil
+	return &openfga.ReadChangesResponse{Changes: changes}, nil
 }
 
 // changesCmd represents the changes command.
