@@ -31,14 +31,14 @@ func TestListObjectsWithError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListObjectsRequest{
 		User:             "user:foo",
 		Relation:         "writer",
 		Type:             "doc",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
@@ -60,7 +60,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 	mockExecute := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
 	expectedResponse := client.ClientListObjectsResponse{
-		Objects: &[]string{"doc:doc1", "doc:doc2"},
+		Objects: []string{"doc:doc1", "doc:doc2"},
 	}
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
@@ -71,14 +71,14 @@ func TestListObjectsWithNoError(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
 
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListObjectsRequest{
 		User:             "user:foo",
 		Relation:         "writer",
 		Type:             "doc",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
@@ -89,7 +89,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if *output != expectedResponse {
+	if output != &expectedResponse {
 		t.Errorf("Expect %v but actual %v", expectedResponse, *output)
 	}
 }

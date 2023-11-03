@@ -1,0 +1,65 @@
+name: FolderBox # store name
+model_file: ./model_abac.fga # a global model that would apply to all tests
+# model can be used instead of model_file
+#model: |
+#  model
+#    schema 1.1
+#  type user
+#  ...
+tuples: # global tuples that would apply to all tests
+  - user: user:anne
+    relation: viewer
+    object: document:1
+    condition:
+      name: non_expired_grant_and_valid_ip
+      context:
+        grant_timestamp: "2023-05-03T21:25:20+00:00"
+        grant_duration: 10s
+        cidr: 192.168.0.0/24
+tests:
+  - name: test-1
+    check: # Each check test is made of: a user, an object and the expected result for one or more relations
+      - user: user:anne
+        object: document:1
+        context:
+          current_timestamp: "2023-05-03T21:25:23+00:00"
+          user_ip: "192.168.0.0"
+        assertions:
+          viewer: true # current time is within granted time interval and the user's ip is within the CIDR range
+      - user: user:anne
+        object: document:1
+        context:
+          current_timestamp: "2023-05-03T21:25:31+00:00"
+          user_ip: "192.168.0.0"
+        assertions:
+          viewer: false # current time is not within granted time
+      - user: user:anne
+        object: document:1
+        context:
+          current_timestamp: "2023-05-03T21:25:23+00:00"
+          user_ip: "192.168.1.0"
+        assertions:
+          viewer: false # current time is within granted time interval but the user's ip address is outside the CIDR range
+    list_objects: # Each check test is made of: a user, an object type and the expected result for one or more relations
+      - user: user:anne
+        type: document
+        context:
+          current_timestamp: "2023-05-03T21:25:23+00:00"
+          user_ip: "192.168.0.0"
+        assertions:
+          viewer:
+            - document:1
+      - user: user:anne
+        type: document
+        context:
+          current_timestamp: "2023-05-03T21:25:31+00:00"
+          user_ip: "192.168.0.0"
+        assertions:
+          viewer: []
+      - user: user:anne
+        type: document
+        context:
+          current_timestamp: "2023-05-03T21:25:23+00:00"
+          user_ip: "192.168.1.0"
+        assertions:
+          viewer: []

@@ -9,7 +9,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	mockclient "github.com/openfga/cli/internal/mocks"
-	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 )
 
@@ -71,7 +70,7 @@ func TestWriteModel(t *testing.T) {
 
 	modelID := "01GXSB8YR785C4FYS3C0RTG7C2"
 	response := client.ClientWriteAuthorizationModelResponse{
-		AuthorizationModelId: openfga.PtrString(modelID),
+		AuthorizationModelId: modelID,
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 

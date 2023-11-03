@@ -53,8 +53,8 @@ func TestListStoresEmpty(t *testing.T) {
 	var stores []openfga.Store
 
 	response := openfga.ListStoresResponse{
-		Stores:            &stores,
-		ContinuationToken: openfga.PtrString(""),
+		Stores:            stores,
+		ContinuationToken: "",
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
@@ -70,7 +70,7 @@ func TestListStoresEmpty(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"stores\":[]}"
+	expectedOutput := `{"continuation_token":"","stores":[]}`
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -78,7 +78,7 @@ func TestListStoresEmpty(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 }
 
@@ -95,16 +95,16 @@ func TestListStoresSinglePage(t *testing.T) {
 
 	stores := []openfga.Store{
 		{
-			Id:        openfga.PtrString("12345"),
-			Name:      openfga.PtrString("foo"),
-			CreatedAt: &expectedTime,
-			UpdatedAt: &expectedTime,
+			Id:        "12345",
+			Name:      "foo",
+			CreatedAt: expectedTime,
+			UpdatedAt: expectedTime,
 		},
 	}
 
 	response := openfga.ListStoresResponse{
-		Stores:            &stores,
-		ContinuationToken: openfga.PtrString(""),
+		Stores:            stores,
+		ContinuationToken: "",
 	}
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
@@ -120,7 +120,7 @@ func TestListStoresSinglePage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"stores\":[{\"created_at\":\"2009-11-10T23:00:00Z\",\"id\":\"12345\",\"name\":\"foo\",\"updated_at\":\"2009-11-10T23:00:00Z\"}]}" //nolint:lll
+	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T23:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"12345","name":"foo","updated_at":"2009-11-10T23:00:00Z"}]}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -128,7 +128,7 @@ func TestListStoresSinglePage(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 }
 
@@ -148,16 +148,16 @@ func TestListStoresMultiPage(t *testing.T) {
 
 	stores1 := []openfga.Store{
 		{
-			Id:        openfga.PtrString("abcde"),
-			Name:      openfga.PtrString("moo"),
-			CreatedAt: &expectedTime1,
-			UpdatedAt: &expectedTime1,
+			Id:        "abcde",
+			Name:      "moo",
+			CreatedAt: expectedTime1,
+			UpdatedAt: expectedTime1,
 		},
 	}
 
 	response1 := openfga.ListStoresResponse{
-		Stores:            &stores1,
-		ContinuationToken: openfga.PtrString(continuationToken),
+		Stores:            stores1,
+		ContinuationToken: continuationToken,
 	}
 
 	mockExecute2 := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)
@@ -166,16 +166,16 @@ func TestListStoresMultiPage(t *testing.T) {
 
 	stores2 := []openfga.Store{
 		{
-			Id:        openfga.PtrString("12345"),
-			Name:      openfga.PtrString("foo"),
-			CreatedAt: &expectedTime2,
-			UpdatedAt: &expectedTime2,
+			Id:        "12345",
+			Name:      "foo",
+			CreatedAt: expectedTime2,
+			UpdatedAt: expectedTime2,
 		},
 	}
 
 	response2 := openfga.ListStoresResponse{
-		Stores:            &stores2,
-		ContinuationToken: openfga.PtrString(""),
+		Stores:            stores2,
+		ContinuationToken: "",
 	}
 	gomock.InOrder(
 		mockExecute1.EXPECT().Execute().Return(&response1, nil),
@@ -204,7 +204,7 @@ func TestListStoresMultiPage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"stores\":[{\"created_at\":\"2009-11-10T22:00:00Z\",\"id\":\"abcde\",\"name\":\"moo\",\"updated_at\":\"2009-11-10T22:00:00Z\"},{\"created_at\":\"2009-11-10T23:00:00Z\",\"id\":\"12345\",\"name\":\"foo\",\"updated_at\":\"2009-11-10T23:00:00Z\"}]}" //nolint:lll
+	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T22:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"abcde","name":"moo","updated_at":"2009-11-10T22:00:00Z"},{"created_at":"2009-11-10T23:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"12345","name":"foo","updated_at":"2009-11-10T23:00:00Z"}]}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -212,7 +212,7 @@ func TestListStoresMultiPage(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 }
 
@@ -232,16 +232,16 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 
 	stores1 := []openfga.Store{
 		{
-			Id:        openfga.PtrString("abcde"),
-			Name:      openfga.PtrString("moo"),
-			CreatedAt: &expectedTime1,
-			UpdatedAt: &expectedTime1,
+			Id:        "abcde",
+			Name:      "moo",
+			CreatedAt: expectedTime1,
+			UpdatedAt: expectedTime1,
 		},
 	}
 
 	response1 := openfga.ListStoresResponse{
-		Stores:            &stores1,
-		ContinuationToken: openfga.PtrString(continuationToken),
+		Stores:            stores1,
+		ContinuationToken: continuationToken,
 	}
 
 	mockExecute1.EXPECT().Execute().Return(&response1, nil)
@@ -258,7 +258,7 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := "{\"stores\":[{\"created_at\":\"2009-11-10T22:00:00Z\",\"id\":\"abcde\",\"name\":\"moo\",\"updated_at\":\"2009-11-10T22:00:00Z\"}]}" //nolint:lll
+	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T22:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"abcde","name":"moo","updated_at":"2009-11-10T22:00:00Z"}]}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -266,6 +266,6 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 	}
 
 	if string(outputTxt) != expectedOutput {
-		t.Errorf("Expected output %v actual %v", expectedOutput, output)
+		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
 	}
 }

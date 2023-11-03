@@ -17,12 +17,16 @@ const writeMaxChunkSize = 40
 func initLocalStore(
 	fgaServer *server.Server,
 	model *pb.AuthorizationModel,
-	testTuples []client.ClientTupleKey,
+	testTuples []client.ClientContextualTupleKey,
 ) (*string, *string, error) {
 	var modelID *string
 
 	storeID := ulid.Make().String()
-	tuples := convertClientTupleKeysToProtoTupleKeys(testTuples)
+
+	tuples, err := convertClientTupleKeysToProtoTupleKeys(testTuples)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	var authModelWriteReq *pb.WriteAuthorizationModelRequest
 
@@ -31,6 +35,7 @@ func initLocalStore(
 			StoreId:         storeID,
 			TypeDefinitions: model.GetTypeDefinitions(),
 			SchemaVersion:   model.GetSchemaVersion(),
+			Conditions:      model.GetConditions(),
 		}
 	}
 
@@ -51,7 +56,7 @@ func initLocalStore(
 
 			writeRequest := &pb.WriteRequest{
 				StoreId: storeID,
-				Writes:  &pb.TupleKeys{TupleKeys: writeChunk},
+				Writes:  &pb.WriteRequestTupleKeys{TupleKeys: writeChunk},
 			}
 
 			_, err := fgaServer.Write(context.Background(), writeRequest)

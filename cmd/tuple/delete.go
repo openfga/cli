@@ -46,7 +46,7 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 		if fileName != "" {
-			var tuples []client.ClientTupleKey
+			var tuples []client.ClientWriteRequestTupleKey
 
 			data, err := os.ReadFile(fileName)
 			if err != nil {
@@ -69,8 +69,7 @@ var deleteCmd = &cobra.Command{
 			}
 
 			deleteRequest := client.ClientWriteRequest{
-				Deletes: &tuples,
-				Writes:  &[]client.ClientTupleKey{},
+				Deletes: tuples,
 			}
 			response, err := importTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
 			if err != nil {
@@ -80,7 +79,7 @@ var deleteCmd = &cobra.Command{
 			return output.Display(*response) //nolint:wrapcheck
 		}
 		body := &client.ClientDeleteTuplesBody{
-			client.ClientTupleKey{
+			client.ClientWriteRequestTupleKey{
 				User:     args[0],
 				Relation: args[1],
 				Object:   args[2],

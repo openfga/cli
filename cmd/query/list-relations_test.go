@@ -34,7 +34,7 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 	var clientConfig fga.ClientConfig
 
 	relations := []string{}
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
@@ -63,7 +63,7 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 	}
 
 	relations := []string{}
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples)
@@ -106,14 +106,14 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
 	relations := []string{}
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListRelationsRequest{
 		User:             "user:foo",
 		Relations:        []string{"viewer"},
 		Object:           "doc:doc1",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
@@ -149,7 +149,7 @@ func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
 	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockExecute)
 
 	relations := []string{}
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 
@@ -204,14 +204,14 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
 	relations := []string{}
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListRelationsRequest{
 		User:             "user:foo",
 		Relations:        []string{"viewer"},
 		Object:           "doc:doc1",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
@@ -255,14 +255,14 @@ func TestListRelationsMultipleRelations(t *testing.T) {
 	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
 
 	relations := []string{"viewer", "editor"}
-	contextualTuples := []client.ClientTupleKey{
+	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	body := client.ClientListRelationsRequest{
 		User:             "user:foo",
 		Relations:        []string{"viewer", "editor"},
 		Object:           "doc:doc1",
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(

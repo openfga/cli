@@ -32,13 +32,13 @@ func listObjects(
 	user string,
 	relation string,
 	objectType string,
-	contextualTuples []client.ClientTupleKey,
+	contextualTuples []client.ClientContextualTupleKey,
 ) (*client.ClientListObjectsResponse, error) {
 	body := &client.ClientListObjectsRequest{
 		User:             user,
 		Relation:         relation,
 		Type:             objectType,
-		ContextualTuples: &contextualTuples,
+		ContextualTuples: contextualTuples,
 	}
 	options := &client.ClientListObjectsOptions{}
 

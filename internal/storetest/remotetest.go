@@ -30,7 +30,7 @@ func RunSingleRemoteCheckTest(
 func RunRemoteCheckTest(
 	fgaClient *client.OpenFgaClient,
 	checkTest ModelTestCheck,
-	tuples []client.ClientTupleKey,
+	tuples []client.ClientContextualTupleKey,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
 
@@ -41,7 +41,8 @@ func RunRemoteCheckTest(
 				User:             checkTest.User,
 				Relation:         relation,
 				Object:           checkTest.Object,
-				ContextualTuples: &tuples,
+				Context:          checkTest.Context,
+				ContextualTuples: tuples,
 			},
 			expectation,
 		)
@@ -65,7 +66,7 @@ func RunSingleRemoteListObjectsTest(
 	}
 
 	if response != nil {
-		result.Got = response.Objects
+		result.Got = response.GetObjects()
 		result.TestResult = result.IsPassing()
 	}
 
@@ -75,7 +76,7 @@ func RunSingleRemoteListObjectsTest(
 func RunRemoteListObjectsTest(
 	fgaClient *client.OpenFgaClient,
 	listObjectsTest ModelTestListObjects,
-	tuples []client.ClientTupleKey,
+	tuples []client.ClientContextualTupleKey,
 ) []ModelTestListObjectsSingleResult {
 	results := []ModelTestListObjectsSingleResult{}
 
@@ -85,7 +86,8 @@ func RunRemoteListObjectsTest(
 				User:             listObjectsTest.User,
 				Type:             listObjectsTest.Type,
 				Relation:         relation,
-				ContextualTuples: &tuples,
+				Context:          listObjectsTest.Context,
+				ContextualTuples: tuples,
 			},
 			expectation,
 		)
@@ -95,7 +97,11 @@ func RunRemoteListObjectsTest(
 	return results
 }
 
-func RunRemoteTest(fgaClient *client.OpenFgaClient, test ModelTest, testTuples []client.ClientTupleKey) TestResult {
+func RunRemoteTest(
+	fgaClient *client.OpenFgaClient,
+	test ModelTest,
+	testTuples []client.ClientContextualTupleKey,
+) TestResult {
 	checkResults := []ModelTestCheckSingleResult{}
 
 	for index := 0; index < len(test.Check); index++ {

@@ -45,17 +45,17 @@ func listStores(fgaClient client.SdkClient, maxPages int) (*openfga.ListStoresRe
 			return nil, fmt.Errorf("failed to list stores due to %w", err)
 		}
 
-		stores = append(stores, *response.Stores...)
+		stores = append(stores, response.Stores...)
 		pageIndex++
 
-		if response.ContinuationToken == nil || *response.ContinuationToken == "" || pageIndex >= maxPages {
+		if response.ContinuationToken == "" || pageIndex >= maxPages {
 			break
 		}
 
-		continuationToken = *response.ContinuationToken
+		continuationToken = response.ContinuationToken
 	}
 
-	return &openfga.ListStoresResponse{Stores: &stores}, nil
+	return &openfga.ListStoresResponse{Stores: stores}, nil
 }
 
 // listCmd represents the list command.

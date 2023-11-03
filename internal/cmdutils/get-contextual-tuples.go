@@ -24,8 +24,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.ClientTupleKey, error) {
-	contextualTuples := []client.ClientTupleKey{}
+func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.ClientContextualTupleKey, error) {
+	contextualTuples := []client.ClientContextualTupleKey{}
 
 	if len(contextualTuplesArray) > 0 {
 		for index := 0; index < len(contextualTuplesArray); index++ {
@@ -36,7 +36,7 @@ func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.Client
 						"they must be of the format\"user relation object\" ")
 			}
 
-			contextualTuples = append(contextualTuples, client.ClientTupleKey{
+			contextualTuples = append(contextualTuples, client.ClientContextualTupleKey{
 				User:     tuple[0],
 				Relation: tuple[1],
 				Object:   tuple[2],
@@ -47,7 +47,7 @@ func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.Client
 	return contextualTuples, nil
 }
 
-func ParseContextualTuples(cmd *cobra.Command) ([]client.ClientTupleKey, error) {
+func ParseContextualTuples(cmd *cobra.Command) ([]client.ClientContextualTupleKey, error) {
 	contextualTuplesArray, _ := cmd.Flags().GetStringArray("contextual-tuple")
 
 	return ParseContextualTuplesInner(contextualTuplesArray)
