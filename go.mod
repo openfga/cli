@@ -12,8 +12,8 @@ require (
 	github.com/openfga/api/proto v0.0.0-20231013152440-fb9e0a84ee12
 	github.com/openfga/go-sdk v0.3.0-beta.1
 	github.com/openfga/language/pkg/go v0.0.0-20231103185736-f24a2a7b610b
-	github.com/openfga/openfga v1.3.6-0.20231103215350-a9f5e95a94da
-	github.com/spf13/cobra v1.7.0
+	github.com/openfga/openfga v1.4.0-rc1
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.17.0
 	google.golang.org/protobuf v1.31.0
