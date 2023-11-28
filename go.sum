@@ -252,8 +252,8 @@ github.com/openfga/api/proto v0.0.0-20231122192407-7f9be45ba22c h1:bSGbFXr+knwnw
 github.com/openfga/api/proto v0.0.0-20231122192407-7f9be45ba22c/go.mod h1:VnPzHfrF1fpWUBpssSUs4ZkAxtmZ12Reb8RHBRz7ZLs=
 github.com/openfga/go-sdk v0.3.0-beta.1.0.20231127120042-25b92122948b h1:04yvgA4OMVjJgVc7bIh+5a/l6i6vlUIRBdM4CALrtyc=
 github.com/openfga/go-sdk v0.3.0-beta.1.0.20231127120042-25b92122948b/go.mod h1:RODDM0KHDu3VjhaStH6VbM9mfZl+EGwHmfNQx7v13bY=
-github.com/openfga/language/pkg/go v0.0.0-20231103185736-f24a2a7b610b h1:xxs4MSHKFq4/9ECrGFlwZzVWpHh5JvPnQdg6CW2AYOU=
-github.com/openfga/language/pkg/go v0.0.0-20231103185736-f24a2a7b610b/go.mod h1:JjpOIe80qmEa2IVEVTz+5n01l/ih+RYHQBxrJNz5r14=
+github.com/openfga/language/pkg/go v0.0.0-20231127150605-50a8baa6c11b h1:udOSzYm12pkwH57mTRKYc9WFGMFzY+UHqcILQhOo8s8=
+github.com/openfga/language/pkg/go v0.0.0-20231127150605-50a8baa6c11b/go.mod h1:MFxnWRLpEA7FpVa/ANR6E5kBVSQQobwpE0vtT7rLVL4=
 github.com/openfga/openfga v1.4.0-rc1.0.20231128174922-9d26b1a5f809 h1:WgV4qTkz0pqYdulATJ3s/F2risRKR4vnL6HNn11LMkI=
 github.com/openfga/openfga v1.4.0-rc1.0.20231128174922-9d26b1a5f809/go.mod h1:36ryB6Y9qI2X/e0qzvBB9KvcfrIf5hd3Gpi2O+smtCI=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
@@ -373,8 +373,8 @@ golang.org/x/exp v0.0.0-20191227195350-da58074b4299/go.mod h1:2RIsYlXP63K8oxa1u0
 golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a/go.mod h1:2RIsYlXP63K8oxa1u096TMicItID8zy7Y6sNkU49FU4=
 golang.org/x/exp v0.0.0-20200207192155-f17229e696bd/go.mod h1:J/WKrq2StrnmMY6+EHIKF9dgMWnmCNThgcyBT1FY9mM=
 golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6/go.mod h1:3jZMyOhIsHpP37uCMkUooju7aAi5cS1Q23tOzKc+0MU=
-golang.org/x/exp v0.0.0-20231006140011-7918f672742d h1:jtJma62tbqLibJ5sFQz8bKtEM8rJBtfilJ2qTU199MI=
-golang.org/x/exp v0.0.0-20231006140011-7918f672742d/go.mod h1:ldy0pHrwJyGW56pPQzzkH36rKxoZW1tw7ZJpeKx+hdo=
+golang.org/x/exp v0.0.0-20231108232855-2478ac86f678 h1:mchzmB1XO2pMaKFRqk/+MV3mgGG96aqaPXaMifQU47w=
+golang.org/x/exp v0.0.0-20231108232855-2478ac86f678/go.mod h1:zk2irFbV9DP96SEBUUAy67IdHUaZuSnrz1n472HUCLE=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/image v0.0.0-20190802002840-cff245a6509b/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
@@ -637,8 +637,8 @@ google.golang.org/genproto v0.0.0-20201210142538-e3217bee35cc/go.mod h1:FWY/as6D
 google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/genproto v0.0.0-20210108203827-ffc7fda8c3d7/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/genproto v0.0.0-20210226172003-ab064af71705/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
-google.golang.org/genproto v0.0.0-20231030173426-d783a09b4405 h1:I6WNifs6pF9tNdSob2W24JtyxIYjzFB9qDlpUC76q+U=
-google.golang.org/genproto v0.0.0-20231030173426-d783a09b4405/go.mod h1:3WDQMjmJk36UQhjQ89emUzb1mdaHcPeeAh4SCBKznB4=
+google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17 h1:wpZ8pe2x1Q3f2KyT5f8oP/fa9rHAKgFPr/HZdNuS+PQ=
+google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17/go.mod h1:J7XzRzVy1+IPwWHZUzoD0IccYZIrXILAQpc+Qy9CMhY=
 google.golang.org/genproto/googleapis/api v0.0.0-20231106174013-bbf56f31fb17 h1:JpwMPBpFN3uKhdaekDpiNlImDdkUAyiJ6ez/uxGaUSo=
 google.golang.org/genproto/googleapis/api v0.0.0-20231106174013-bbf56f31fb17/go.mod h1:0xJLfVdJqpAPl8tDg1ujOCGzx6LFLttXT5NhllGOXY4=
 google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 h1:Jyp0Hsi0bmHXG6k9eATXoYtjd6e2UzZ1SCn/wIupY14=
