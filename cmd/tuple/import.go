@@ -40,11 +40,6 @@ type failedWriteResponse struct {
 	Reason   string                `json:"reason"`
 }
 
-type failedDeletedResponse struct {
-	TupleKey client.ClientTupleKey `json:"tuple_key"`
-	Reason   string                `json:"reason"`
-}
-
 type importResponse struct {
 	Successful []client.ClientTupleKey `json:"successful"`
 	Failed     []failedWriteResponse   `json:"failed"`
