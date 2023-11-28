@@ -46,7 +46,7 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 		if fileName != "" {
-			var tuples []client.ClientWriteRequestTupleKey
+			var tuples []client.ClientTupleKeyWithoutCondition
 
 			data, err := os.ReadFile(fileName)
 			if err != nil {
@@ -79,7 +79,7 @@ var deleteCmd = &cobra.Command{
 			return output.Display(*response) //nolint:wrapcheck
 		}
 		body := &client.ClientDeleteTuplesBody{
-			client.ClientWriteRequestTupleKey{
+			client.ClientTupleKeyWithoutCondition{
 				User:     args[0],
 				Relation: args[1],
 				Object:   args[2],
