@@ -60,7 +60,7 @@ fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
 				return fmt.Errorf("failed to parse parallel requests due to %w", err)
 			}
 
-			var tuples []client.ClientWriteRequestTupleKey
+			var tuples []client.ClientTupleKey
 
 			data, err := os.ReadFile(fileName)
 			if err != nil {
@@ -83,7 +83,7 @@ fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
 			return output.Display(*response) //nolint:wrapcheck
 		}
 		body := &client.ClientWriteTuplesBody{
-			client.ClientWriteRequestTupleKey{
+			client.ClientTupleKey{
 				User:     args[0],
 				Relation: args[1],
 				Object:   args[2],

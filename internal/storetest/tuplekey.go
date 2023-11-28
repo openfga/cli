@@ -10,12 +10,12 @@ import (
 
 func convertClientTupleKeysToProtoTupleKeys(
 	tuples []client.ClientContextualTupleKey,
-) ([]*pb.WriteRequestTupleKey, error) {
-	pbTuples := []*pb.WriteRequestTupleKey{}
+) ([]*pb.TupleKey, error) {
+	pbTuples := []*pb.TupleKey{}
 
 	for index := 0; index < len(tuples); index++ {
 		tuple := tuples[index]
-		tpl := pb.WriteRequestTupleKey{
+		tpl := pb.TupleKey{
 			User:     tuple.User,
 			Relation: tuple.Relation,
 			Object:   tuple.Object,

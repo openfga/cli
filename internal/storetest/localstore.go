@@ -56,7 +56,7 @@ func initLocalStore(
 
 			writeRequest := &pb.WriteRequest{
 				StoreId: storeID,
-				Writes:  &pb.WriteRequestTupleKeys{TupleKeys: writeChunk},
+				Writes:  &pb.WriteRequestWrites{TupleKeys: writeChunk},
 			}
 
 			_, err := fgaServer.Write(context.Background(), writeRequest)

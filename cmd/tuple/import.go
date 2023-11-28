@@ -23,6 +23,7 @@ import (
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -35,13 +36,13 @@ var MaxTuplesPerWrite = 1
 var MaxParallelRequests = 10
 
 type failedWriteResponse struct {
-	TupleKey client.ClientWriteRequestTupleKey `json:"tuple_key"`
-	Reason   string                            `json:"reason"`
+	TupleKey client.ClientTupleKey `json:"tuple_key"`
+	Reason   string                `json:"reason"`
 }
 
 type importResponse struct {
-	Successful []client.ClientWriteRequestTupleKey `json:"successful"`
-	Failed     []failedWriteResponse               `json:"failed"`
+	Successful []client.ClientTupleKey `json:"successful"`
+	Failed     []failedWriteResponse   `json:"failed"`
 }
 
 // importTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
@@ -69,7 +70,7 @@ func importTuples(
 	}
 
 	successfulWrites, failedWrites := processWrites(response.Writes)
-	successfulDeletes, failedDeletes := processWrites(response.Deletes)
+	successfulDeletes, failedDeletes := processDeletes(response.Deletes)
 
 	result := importResponse{
 		Successful: append(successfulWrites, successfulDeletes...),
@@ -80,10 +81,10 @@ func importTuples(
 }
 
 func processWrites(
-	writes []client.ClientWriteSingleResponse,
-) ([]client.ClientWriteRequestTupleKey, []failedWriteResponse) {
+	writes []client.ClientWriteRequestWriteResponse,
+) ([]client.ClientTupleKey, []failedWriteResponse) {
 	var (
-		successfulWrites []client.ClientWriteRequestTupleKey
+		successfulWrites []client.ClientTupleKey
 		failedWrites     []failedWriteResponse
 	)
 
@@ -99,6 +100,34 @@ func processWrites(
 	}
 
 	return successfulWrites, failedWrites
+}
+
+func processDeletes(
+	deletes []client.ClientWriteRequestDeleteResponse,
+) ([]client.ClientTupleKey, []failedWriteResponse) {
+	var (
+		successfulDeletes []client.ClientTupleKey
+		failedDeletes     []failedWriteResponse
+	)
+
+	for _, delete := range deletes {
+		deletedTupleKey := openfga.TupleKey{
+			Object:   delete.TupleKey.Object,
+			Relation: delete.TupleKey.Relation,
+			User:     delete.TupleKey.User,
+		}
+
+		if delete.Status == client.SUCCESS {
+			successfulDeletes = append(successfulDeletes, deletedTupleKey)
+		} else {
+			failedDeletes = append(failedDeletes, failedWriteResponse{
+				TupleKey: deletedTupleKey,
+				Reason:   delete.Error.Error(),
+			})
+		}
+	}
+
+	return successfulDeletes, failedDeletes
 }
 
 // importCmd represents the import command.
@@ -131,7 +160,7 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse parallel requests due to %w", err)
 		}
 
-		tuples := []client.ClientWriteRequestTupleKey{}
+		tuples := []client.ClientTupleKey{}
 
 		data, err := os.ReadFile(fileName)
 		if err != nil {
