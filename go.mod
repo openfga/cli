@@ -12,7 +12,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20231208224251-d2c535d32f73
 	github.com/openfga/go-sdk v0.3.0-beta.1.0.20231211020732-3416cf7e4ce8
 	github.com/openfga/language/pkg/go v0.0.0-20231211021145-b54d4bf9b384
-	github.com/openfga/openfga v1.3.11-0.20231208194451-c01b4615f19e
+	github.com/openfga/openfga v1.4.0-rc1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.1
@@ -46,7 +46,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/muesli/mango v0.2.0 // indirect
 	github.com/muesli/mango-pflag v0.1.0 // indirect
-	github.com/natefinch/wrap v0.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/prometheus/client_golang v1.17.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
