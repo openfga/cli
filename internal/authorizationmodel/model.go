@@ -120,7 +120,7 @@ func (model *AuthzModel) GetCreatedAt() *time.Time {
 }
 
 func (model *AuthzModel) Set(authzModel openfga.AuthorizationModel) {
-	model.ID = authzModel.Id
+	model.ID = &authzModel.Id
 	model.SchemaVersion = &authzModel.SchemaVersion
 	model.TypeDefinitions = &authzModel.TypeDefinitions
 

@@ -1,6 +1,6 @@
 module github.com/openfga/cli
 
-go 1.21.4
+go 1.21.5
 
 require (
 	github.com/golang/mock v1.6.0
@@ -9,13 +9,13 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20231201195548-7ad5c05e75ca
-	github.com/openfga/go-sdk v0.3.0-beta.1.0.20231127120042-25b92122948b
-	github.com/openfga/language/pkg/go v0.0.0-20231205215259-92fa8fbddd50
-	github.com/openfga/openfga v1.4.0-rc1.0.20231128174922-9d26b1a5f809
+	github.com/openfga/api/proto v0.0.0-20231208224251-d2c535d32f73
+	github.com/openfga/go-sdk v0.3.0-beta.1.0.20231211020732-3416cf7e4ce8
+	github.com/openfga/language/pkg/go v0.0.0-20231211021145-b54d4bf9b384
+	github.com/openfga/openfga v1.3.11-0.20231208194451-c01b4615f19e
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.17.0
+	github.com/spf13/viper v1.18.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -46,6 +46,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/muesli/mango v0.2.0 // indirect
 	github.com/muesli/mango-pflag v0.1.0 // indirect
+	github.com/natefinch/wrap v0.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/prometheus/client_golang v1.17.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
@@ -67,7 +68,7 @@ require (
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect

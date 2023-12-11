@@ -18,10 +18,7 @@ limitations under the License.
 package fga
 
 import (
-	"net/url"
-
 	"github.com/openfga/cli/internal/build"
-	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
 )
@@ -29,7 +26,7 @@ import (
 var userAgent = "openfga-cli/" + build.Version
 
 type ClientConfig struct {
-	ServerURL            string `json:"api_url,omitempty"` //nolint:tagliatelle
+	ApiUrl               string `json:"api_url,omitempty"` //nolint:revive,stylecheck
 	StoreID              string `json:"store_id,omitempty"`
 	AuthorizationModelID string `json:"authorization_model_id,omitempty"`
 	APIToken             string `json:"api_token,omitempty"`
@@ -66,34 +63,18 @@ func (c ClientConfig) getCredentials() *credentials.Credentials {
 	}
 }
 
-func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
-	apiURIParts, err := url.Parse(c.ServerURL)
-	if err != nil {
-		return nil, err //nolint:wrapcheck
-	}
-
-	var authorizationModelID *string
-	if c.AuthorizationModelID != "" {
-		authorizationModelID = openfga.PtrString(c.AuthorizationModelID)
-	}
-
+func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 	return &client.ClientConfiguration{
-		ApiScheme:            apiURIParts.Scheme,
-		ApiHost:              apiURIParts.Host,
+		ApiUrl:               c.ApiUrl,
 		StoreId:              c.StoreID,
-		AuthorizationModelId: authorizationModelID,
+		AuthorizationModelId: c.AuthorizationModelID,
 		Credentials:          c.getCredentials(),
 		UserAgent:            userAgent,
-	}, nil
+	}
 }
 
 func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
-	config, err := c.getClientConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	fgaClient, err := client.NewSdkClient(config)
+	fgaClient, err := client.NewSdkClient(c.getClientConfig())
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
