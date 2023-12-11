@@ -44,7 +44,7 @@ func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
 	clientCredentialsClientSecret, _ := cmd.Flags().GetString("client-secret")
 
 	return fga.ClientConfig{
-		ServerURL:            apiURL,
+		ApiUrl:               apiURL,
 		StoreID:              storeID,
 		AuthorizationModelID: authorizationModelID,
 		APIToken:             apiToken,
