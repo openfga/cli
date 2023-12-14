@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.1
+
+### [0.2.1](https://github.com/openfga/cli/compare/v0.2.0...v0.2.1) (2023-12-14)
+
+Changed:
+- dependency updates
+  - now using OpenFGA `v1.4.0` with Conditions enabled by default
+  - now using Go SDK `v0.3.0` with support for targeting servers hosted under a custom path e.g. `https://api.fga.example:8080/fga-service1`
+
 ## v0.2.0
 
 ### [0.2.0](https://github.com/openfga/cli/compare/v0.1.2...v0.2.0) (2023-11-03)
