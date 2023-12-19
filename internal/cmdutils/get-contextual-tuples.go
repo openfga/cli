@@ -17,8 +17,10 @@ limitations under the License.
 package cmdutils
 
 import (
+	"fmt"
 	"strings"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -31,16 +33,31 @@ func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.Client
 	if len(contextualTuplesArray) > 0 {
 		for index := 0; index < len(contextualTuplesArray); index++ {
 			tuple := strings.Split(contextualTuplesArray[index], " ")
-			if len(tuple) != 3 { //nolint:gomnd
+			if len(tuple) != 3 && len(tuple) != 4 {
 				return contextualTuples,
-					clierrors.ValidationError("ParseContextualTuplesInner", "Failed to parse contextual tuples, "+ //nolint:wrapcheck
-						"they must be of the format\"user relation object\" ")
+					clierrors.ValidationError( //nolint:wrapcheck
+						"ParseContextualTuplesInner",
+						"Failed to parse contextual tuples, "+
+							"they must be of the format \"user relation object\" or \"user relation object condition\", "+
+							"where condition is a JSON string of the form { name, context }")
+			}
+
+			var condition *openfga.RelationshipCondition
+
+			if len(tuple) == 4 { //nolint:gomnd
+				cond, err := ParseTupleConditionString(tuple[3])
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse condition due to %w", err)
+				}
+
+				condition = cond
 			}
 
 			contextualTuples = append(contextualTuples, client.ClientContextualTupleKey{
-				User:     tuple[0],
-				Relation: tuple[1],
-				Object:   tuple[2],
+				User:      tuple[0],
+				Relation:  tuple[1],
+				Object:    tuple[2],
+				Condition: condition,
 			})
 		}
 	}

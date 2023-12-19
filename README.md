@@ -586,6 +586,8 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `<user>`: User
 * `<relation>`: Relation
 * `<object>`: Object
+* `--condition-name`: Condition name (optional)
+* `--condition-context`: Condition context (optional)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--file`: Specifies the file name, `yaml` and `json` files are supported
@@ -593,7 +595,8 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 
 ###### Example (with arguments)
-`fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
 
 ###### Response
 ```json5
@@ -841,15 +844,18 @@ In JSON:
 ##### Check
 
 ###### Command
-fga query **check** <user> <relation> <object> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **check** <user> <relation> <object> [--condition] [--contextual-tuple "\<user\> \<relation\> \<object\>"]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--contextual-tuple`: Contextual tuples
+* `--contextual-tuple`: Contextual tuples (optional)
+* `--context`: Condition context (optional)
 
 ###### Example
-`fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
+- `fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
+- `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}'`
+
 
 ###### Response
 ```json5
@@ -867,9 +873,11 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple "
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
+* `--context`: Condition context (optional)
 
 ###### Example
-`fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
+- `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
+- `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --context '{"ip_address":"127.0.0.1"}`
 
 ###### Response
 ```json5
@@ -890,9 +898,12 @@ fga query **list-objects** <user> <object> [--relation <relation>]* [--contextua
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
+* `--context`: Condition context (optional)
 
 ###### Example
 `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`
+`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --contextual-tuple "user:anne can_view folder:product"`
+`fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --context '{"ip_address":"127.0.0.1"}`
 
 ###### Response
 ```json5
