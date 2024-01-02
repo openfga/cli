@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	mockclient "github.com/openfga/cli/internal/mocks"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
+
+	mockclient "github.com/openfga/cli/internal/mocks"
 )
 
 var errMockListStores = errors.New("mock error")
@@ -120,7 +121,7 @@ func TestListStoresSinglePage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T23:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"12345","name":"foo","updated_at":"2009-11-10T23:00:00Z"}]}` //nolint:lll
+	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T23:00:00Z","id":"12345","name":"foo","updated_at":"2009-11-10T23:00:00Z"}]}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -204,7 +205,7 @@ func TestListStoresMultiPage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T22:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"abcde","name":"moo","updated_at":"2009-11-10T22:00:00Z"},{"created_at":"2009-11-10T23:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"12345","name":"foo","updated_at":"2009-11-10T23:00:00Z"}]}` //nolint:lll
+	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T22:00:00Z","id":"abcde","name":"moo","updated_at":"2009-11-10T22:00:00Z"},{"created_at":"2009-11-10T23:00:00Z","id":"12345","name":"foo","updated_at":"2009-11-10T23:00:00Z"}]}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -258,7 +259,7 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T22:00:00Z","deleted_at":"0001-01-01T00:00:00Z","id":"abcde","name":"moo","updated_at":"2009-11-10T22:00:00Z"}]}` //nolint:lll
+	expectedOutput := `{"continuation_token":"","stores":[{"created_at":"2009-11-10T22:00:00Z","id":"abcde","name":"moo","updated_at":"2009-11-10T22:00:00Z"}]}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
