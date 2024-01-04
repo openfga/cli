@@ -440,7 +440,7 @@ The tests file should be in yaml and have the following format:
 ---
 name: Store Name # store name, optional
 # model_file: ./model.fga # a global model that would apply to all tests, optional
-# model can be used instead of model-file, optional
+# model can be used instead of model_file, optional
 model: |
   model
     schema 1.1
@@ -453,6 +453,7 @@ model: |
       define can_write: owner or can_write from parent
       define can_share: owner
 
+# tuple_file: ./tuples.yaml # global tuples that would apply to all tests, optional
 tuples: # global tuples that would apply to all tests, optional
   - user: folder:1
     relation: parent
@@ -460,6 +461,7 @@ tuples: # global tuples that would apply to all tests, optional
 tests: # required
   - name: test-1
     description: testing that the model works # optional
+    # tuple_file: ./tuples.json # tuples that would apply per test
     tuples:
       - user: user:anne
         relation: owner

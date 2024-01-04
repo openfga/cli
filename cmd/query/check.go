@@ -20,10 +20,11 @@ import (
 	"context"
 	"fmt"
 
-	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+
+	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 )
 
 func check(

@@ -19,9 +19,10 @@ package cmdutils
 import (
 	"strings"
 
-	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/clierrors"
 )
 
 func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.ClientContextualTupleKey, error) {

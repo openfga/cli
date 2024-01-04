@@ -18,10 +18,18 @@ limitations under the License.
 package storetest
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"os"
 	"path"
 
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
+
+	"gopkg.in/yaml.v3"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 type ModelTestCheck struct {
@@ -42,6 +50,7 @@ type ModelTest struct {
 	Name        string                            `json:"name"         yaml:"name"`
 	Description string                            `json:"description"  yaml:"description"`
 	Tuples      []client.ClientContextualTupleKey `json:"tuples"       yaml:"tuples"`
+	TupleFile   string                            `json:"tuple_file"   yaml:"tuple_file"` //nolint:tagliatelle
 	Check       []ModelTestCheck                  `json:"check"        yaml:"check"`
 	ListObjects []ModelTestListObjects            `json:"list_objects" yaml:"list_objects"` //nolint:tagliatelle
 }
@@ -51,6 +60,7 @@ type StoreData struct {
 	Model     string                            `json:"model"      yaml:"model"`
 	ModelFile string                            `json:"model_file" yaml:"model_file"` //nolint:tagliatelle
 	Tuples    []client.ClientContextualTupleKey `json:"tuples"     yaml:"tuples"`
+	TupleFile string                            `json:"tuple_file" yaml:"tuple_file"` //nolint:tagliatelle
 	Tests     []ModelTest                       `json:"tests"      yaml:"tests"`
 }
 
@@ -80,4 +90,75 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 	}
 
 	return format, nil
+}
+
+func (storeData *StoreData) LoadTuples(basePath string) error {
+	var errs error
+
+	if storeData.TupleFile != "" {
+		tuples, err := readTupleFile(path.Join(basePath, storeData.TupleFile))
+		if err != nil {
+			errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
+		} else {
+			storeData.Tuples = tuples
+		}
+	}
+
+	for index := 0; index < len(storeData.Tests); index++ {
+		test := storeData.Tests[index]
+		if test.TupleFile == "" {
+			continue
+		}
+
+		tuples, err := readTupleFile(path.Join(basePath, test.TupleFile))
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf("failed to process tuple file %s for test %s due to %w", test.TupleFile, test.Name, err),
+			)
+		} else {
+			storeData.Tests[index].Tuples = tuples
+		}
+	}
+
+	if errs != nil {
+		return errors.Join(errors.New("failed to process one or more tuple files"), errs) //nolint:goerr113
+	}
+
+	return nil
+}
+
+func readTupleFile(tuplePath string) ([]client.ClientContextualTupleKey, error) {
+	var tuples []client.ClientContextualTupleKey
+
+	tupleFile, err := os.Open(tuplePath)
+	if err != nil {
+		return nil, err //nolint:wrapcheck
+	}
+	defer tupleFile.Close()
+
+	switch path.Ext(tuplePath) {
+	case ".json":
+		contents, err := io.ReadAll(tupleFile)
+		if err != nil {
+			return nil, err //nolint:wrapcheck
+		}
+
+		err = json.Unmarshal(contents, &tuples)
+		if err != nil {
+			return nil, err //nolint:wrapcheck
+		}
+	case ".yaml", ".yml":
+		decoder := yaml.NewDecoder(tupleFile)
+		decoder.KnownFields(true)
+
+		err = decoder.Decode(&tuples)
+		if err != nil {
+			return nil, err //nolint:wrapcheck
+		}
+	default:
+		return nil, fmt.Errorf("unsupported file format %s", path.Ext(tuplePath)) //nolint:goerr113
+	}
+
+	return tuples, nil
 }

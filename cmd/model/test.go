@@ -21,11 +21,12 @@ import (
 	"os"
 	"path"
 
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 // testCmd represents the test command.

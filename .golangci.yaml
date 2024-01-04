@@ -11,7 +11,6 @@ linters:
     - gochecknoinits
     - forbidigo
     - gochecknoglobals
-    - goimports
     # deprecated
     - exhaustivestruct
     - interfacer
@@ -24,6 +23,7 @@ linters:
     - golint
     - nosnakecase
     - testpackage
+    - gci
 linters-settings:
   depguard:
     rules:
@@ -70,5 +70,5 @@ linters-settings:
     lines: 120
     statements: 80
 
-  skip-dirs:
-    - mocks
+  goimports:
+    local-prefixes: "github.com/openfga/cli"

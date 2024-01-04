@@ -21,12 +21,13 @@ import (
 	"fmt"
 	"strings"
 
-	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/fga"
-	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+
+	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/fga"
+	"github.com/openfga/cli/internal/output"
 )
 
 func getRelationsForType(

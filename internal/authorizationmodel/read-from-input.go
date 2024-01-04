@@ -23,8 +23,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/openfga/cli/internal/clierrors"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/clierrors"
 )
 
 func ReadFromFile(

@@ -20,11 +20,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 )
 
 // MaxStoresPagesLength Limit the pages of stores so that we are not paginating indefinitely.

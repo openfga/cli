@@ -21,11 +21,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openfga/go-sdk/client"
+	"github.com/spf13/cobra"
+
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
-	"github.com/openfga/go-sdk/client"
-	"github.com/spf13/cobra"
 )
 
 func getStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*client.ClientGetStoreResponse, error) {

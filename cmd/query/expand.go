@@ -20,10 +20,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 )
 
 func expand(fgaClient client.SdkClient, relation string, object string) (*client.ClientExpandResponse, error) {

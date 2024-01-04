@@ -1,9 +1,10 @@
 package storetest
 
 import (
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 type ModelTestOptions struct {
@@ -35,7 +36,7 @@ func RunTests(
 ) (TestResults, error) {
 	test := TestResults{}
 
-	fgaServer, authModel, err := getLocalServerAndModel(storeData, basePath)
+	fgaServer, authModel, err := getLocalServerModelAndTuples(&storeData, basePath)
 	if err != nil {
 		return test, err
 	}

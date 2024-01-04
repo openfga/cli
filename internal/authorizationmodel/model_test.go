@@ -3,9 +3,10 @@ package authorizationmodel_test
 import (
 	"testing"
 
-	"github.com/openfga/cli/internal/authorizationmodel"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/openfga/pkg/typesystem"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 const (

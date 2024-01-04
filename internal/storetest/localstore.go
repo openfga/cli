@@ -6,10 +6,11 @@ import (
 
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 	"github.com/openfga/openfga/pkg/storage/memory"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 const writeMaxChunkSize = 40
@@ -69,8 +70,8 @@ func initLocalStore(
 	return &storeID, modelID, nil
 }
 
-func getLocalServerAndModel(
-	storeData StoreData,
+func getLocalServerModelAndTuples(
+	storeData *StoreData,
 	basePath string,
 ) (*server.Server, *authorizationmodel.AuthzModel, error) {
 	var fgaServer *server.Server
@@ -78,6 +79,11 @@ func getLocalServerAndModel(
 	var authModel *authorizationmodel.AuthzModel
 
 	format, err := storeData.LoadModel(basePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = storeData.LoadTuples(basePath)
 	if err != nil {
 		return nil, nil, err
 	}
