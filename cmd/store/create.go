@@ -46,7 +46,7 @@ func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateS
 	return store, nil
 }
 
-func createStoreWithModel(
+func CreateStoreWithModel(
 	clientConfig fga.ClientConfig,
 	storeName string,
 	inputModel string,
@@ -121,7 +121,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 			return err //nolint:wrapcheck
 		}
 
-		response, err := createStoreWithModel(clientConfig, storeName, inputModel, createModelInputFormat)
+		response, err := CreateStoreWithModel(clientConfig, storeName, inputModel, createModelInputFormat)
 		if err != nil {
 			return err
 		}

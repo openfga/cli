@@ -76,7 +76,7 @@ fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
 			writeRequest := client.ClientWriteRequest{
 				Writes: tuples,
 			}
-			response, err := importTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
+			response, err := ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 			if err != nil {
 				return err
 			}

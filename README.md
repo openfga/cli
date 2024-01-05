@@ -20,6 +20,7 @@ A cross-platform CLI to interact with an OpenFGA server
     - [Stores](#stores)
       - [List All Stores](#list-stores)
       - [Create a Store](#create-store)
+      - [Import a Store](#import-store)
       - [Get a Store](#get-store)
       - [Delete a Store](#delete-store)
     - [Authorization Models](#authorization-models)
@@ -162,6 +163,7 @@ store-id: 01H0H015178Y2V4CX10C2KGHF4
 | Description                     | command  | parameters   | example                                                  |
 |---------------------------------|----------|--------------|----------------------------------------------------------|
 | [Create a Store](#create-store) | `create` | `--name`     | `fga store create --name="FGA Demo Store"`               |
+| [Import a Store](#import-store) | `import` | `--file`     | `fga store import --file store.fga.yaml`                 |
 | [List Stores](#list-stores)     | `list`   |              | `fga store list`                                         |
 | [Get a Store](#get-store)       | `get`    | `--store-id` | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
 | [Delete a Store](#delete-store) | `delete` | `--store-id` | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
@@ -210,6 +212,24 @@ To automatically set the created store id as an environment variable that will t
 
 ```bash
 export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
+```
+##### Import Store
+
+###### Command
+fga store **import**
+
+###### Parameters
+* `--file`: File containing the store.
+* `--store-id`: Specifies the store id to import into
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+
+###### Example
+`fga store import --file model.fga.yaml`
+
+###### Response
+```json
+{}
 ```
 
 ##### List Stores

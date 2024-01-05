@@ -22,7 +22,6 @@ import (
 	"path"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
@@ -48,17 +47,9 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		var storeData storetest.StoreData
-
-		testFile, err := os.Open(testsFileName)
+		format, storeData, err := storetest.ReadFromFile(testsFileName, path.Dir(testsFileName))
 		if err != nil {
-			return fmt.Errorf("failed to read file %s due to %w", testsFileName, err)
-		}
-		decoder := yaml.NewDecoder(testFile)
-		decoder.KnownFields(true)
-		err = decoder.Decode(&storeData)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal file %s due to %w", testsFileName, err)
+			return err //nolint:wrapcheck
 		}
 
 		verbose, err := cmd.Flags().GetBool("verbose")
@@ -69,7 +60,7 @@ var testCmd = &cobra.Command{
 		test, err := storetest.RunTests(
 			fgaClient,
 			storeData,
-			path.Dir(testsFileName),
+			format,
 		)
 		if err != nil {
 			return fmt.Errorf("error running tests due to %w", err)

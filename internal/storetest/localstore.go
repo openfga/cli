@@ -72,21 +72,11 @@ func initLocalStore(
 
 func getLocalServerModelAndTuples(
 	storeData *StoreData,
-	basePath string,
+	format authorizationmodel.ModelFormat,
 ) (*server.Server, *authorizationmodel.AuthzModel, error) {
 	var fgaServer *server.Server
 
 	var authModel *authorizationmodel.AuthzModel
-
-	format, err := storeData.LoadModel(basePath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	err = storeData.LoadTuples(basePath)
-	if err != nil {
-		return nil, nil, err
-	}
 
 	if storeData.Model == "" {
 		return fgaServer, authModel, nil
@@ -95,7 +85,7 @@ func getLocalServerModelAndTuples(
 	// If we have at least one local test, initialize the local server
 	datastore := memory.New()
 
-	fgaServer, err = server.NewServerWithOpts(server.WithDatastore(datastore))
+	fgaServer, err := server.NewServerWithOpts(server.WithDatastore(datastore))
 	if err != nil {
 		return nil, nil, err //nolint:wrapcheck
 	}
