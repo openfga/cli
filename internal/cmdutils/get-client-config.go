@@ -20,8 +20,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openfga/cli/internal/fga"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/fga"
 )
 
 func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {

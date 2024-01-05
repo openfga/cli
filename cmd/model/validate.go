@@ -22,12 +22,13 @@ import (
 
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
-	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/openfga/pkg/typesystem"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/output"
 )
 
 type validationResult struct {

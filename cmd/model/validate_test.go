@@ -4,8 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/openfga/cli/internal/authorizationmodel"
 	openfga "github.com/openfga/go-sdk"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 func TestValidateCmdWithArgs(t *testing.T) {

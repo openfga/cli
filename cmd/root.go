@@ -22,13 +22,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/cmd/query"
 	"github.com/openfga/cli/cmd/store"
 	"github.com/openfga/cli/cmd/tuple"
 	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var cfgFile string

@@ -6,10 +6,11 @@ import (
 
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 	"github.com/openfga/openfga/pkg/storage/memory"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 const writeMaxChunkSize = 40

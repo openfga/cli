@@ -20,13 +20,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/openfga/go-sdk/client"
+	"github.com/spf13/cobra"
+
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
-	"github.com/openfga/go-sdk/client"
-	"github.com/spf13/cobra"
 )
 
 type CreateStoreAndModelResponse struct {

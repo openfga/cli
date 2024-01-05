@@ -21,14 +21,15 @@ import (
 	"fmt"
 	"os"
 
+	openfga "github.com/openfga/go-sdk"
+	"github.com/openfga/go-sdk/client"
+	"github.com/spf13/cobra"
+
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
-	openfga "github.com/openfga/go-sdk"
-	"github.com/openfga/go-sdk/client"
-	"github.com/spf13/cobra"
 )
 
 func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*openfga.ReadAuthorizationModelResponse,
