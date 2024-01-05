@@ -23,6 +23,7 @@ linters:
     - golint
     - nosnakecase
     - testpackage
+    - gci
 linters-settings:
   depguard:
     rules:
