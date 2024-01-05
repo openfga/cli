@@ -5,8 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/openfga/cli/internal/comparison"
 	"github.com/openfga/go-sdk/client"
+
+	"github.com/openfga/cli/internal/comparison"
 )
 
 type ModelTestCheckSingleResult struct {

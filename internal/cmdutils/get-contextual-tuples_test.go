@@ -19,8 +19,9 @@ package cmdutils_test
 import (
 	"testing"
 
-	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/go-sdk/client"
+
+	"github.com/openfga/cli/internal/cmdutils"
 )
 
 type tupleTestPassing struct {

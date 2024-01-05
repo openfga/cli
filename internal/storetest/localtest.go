@@ -4,10 +4,11 @@ import (
 	"context"
 
 	pb "github.com/openfga/api/proto/openfga/v1"
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 	"google.golang.org/protobuf/types/known/structpb"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 func RunSingleLocalCheckTest(

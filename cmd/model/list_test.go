@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	mockclient "github.com/openfga/cli/internal/mocks"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
+
+	mockclient "github.com/openfga/cli/internal/mocks"
 )
 
 var errMockList = errors.New("mock error")

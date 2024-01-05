@@ -21,12 +21,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 )
 
 // MaxModelsPagesLength Limit the models so that we are not paginating indefinitely.

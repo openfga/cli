@@ -21,10 +21,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/confirmation"
 	"github.com/openfga/cli/internal/output"
-	"github.com/spf13/cobra"
 )
 
 // deleteCmd represents the delete command.

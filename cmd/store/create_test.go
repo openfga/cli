@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/openfga/cli/internal/mocks"
 	"github.com/openfga/go-sdk/client"
+
+	mock_client "github.com/openfga/cli/internal/mocks"
 )
 
 var errMockCreate = errors.New("mock error")

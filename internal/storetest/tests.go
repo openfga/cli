@@ -1,9 +1,10 @@
 package storetest
 
 import (
-	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 type ModelTestOptions struct {

@@ -21,12 +21,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 )
 
 // MaxTuplesPerWrite Limit the tuples in a single batch.

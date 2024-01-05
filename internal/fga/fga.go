@@ -18,9 +18,10 @@ limitations under the License.
 package fga
 
 import (
-	"github.com/openfga/cli/internal/build"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
+
+	"github.com/openfga/cli/internal/build"
 )
 
 var userAgent = "openfga-cli/" + build.Version

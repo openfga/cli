@@ -20,10 +20,6 @@ $(GO_BIN)/gofumpt:
 	@echo "==> Installing gofumpt within "${GO_BIN}""
 	@go install -v mvdan.cc/gofumpt@latest
 
-$(GO_BIN)/gci:
-	@echo "==> Installing gci within "${GO_BIN}""
-	@go install -v github.com/daixiang0/gci@latest
-
 $(BUILD_DIR)/$(BINARY_NAME):
 	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
 	go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
@@ -62,4 +58,3 @@ audit: $(GO_BIN)/govulncheck
 format: $(GO_BIN)/gofumpt $(GO_BIN)/gci
 	@echo "==> Formatting project files"
 	gofumpt -w .
-	gci write -s standard -s default .

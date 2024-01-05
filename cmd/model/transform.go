@@ -19,10 +19,11 @@ package model
 import (
 	"fmt"
 
-	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/output"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/output"
 )
 
 // transformCmd represents the transform command.

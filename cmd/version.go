@@ -19,8 +19,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/openfga/cli/internal/build"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/build"
 )
 
 var versionStr = fmt.Sprintf("v`%s` (commit: `%s`, date: `%s`)", build.Version, build.Commit, build.Date)
