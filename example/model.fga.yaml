@@ -6,26 +6,28 @@ model_file: ./model.fga # a global model that would apply to all tests
 #    schema 1.1
 #  type user
 #  ...
-tuples: # global tuples that would apply to all tests
-  - user: folder:5
-    relation: parent
-    object: folder:product-2021
-  - user: folder:product-2021
-    relation: parent
-    object: folder:product-2021Q1
+tuple_file: ./model_tuples.yaml  # global tuples that would apply to all tests
+# tuples can also be used instead of tuple_file
+#tuples:
+#   - user: folder:5
+#     relation: parent
+#     object: folder:product-2021
+#   - user: folder:product-2021
+#     relation: parent
+#     object: folder:product-2021Q1
 tests:
   - name: "folder-document-access"
     description: ""
-    tuples: # tuples in tests are appended to the global tuples and do not replace them
-      - user: user:anne
-        relation: owner
-        object: folder:product
-      - user: folder:product
-        relation: parent
-        object: folder:product-2021
-      - user: user:beth
-        relation: viewer
-        object: folder:product-2021
+     # tuples in tests are appended to the global tuples and do not replace them
+    tuple_file: ./folder-document-access_tuples.json
+    # tuples can also be used instead of tuple_file
+    #tuples:
+    #   - user: folder:5
+    #     relation: parent
+    #     object: folder:product-2021
+    #   - user: folder:product-2021
+    #     relation: parent
+    #     object: folder:product-2021Q1
     check: # Each check test is made of: a user, an object and the expected result for one or more relations
       - user: user:anne
         object: folder:product-2021

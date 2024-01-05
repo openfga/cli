@@ -36,7 +36,7 @@ func RunTests(
 ) (TestResults, error) {
 	test := TestResults{}
 
-	fgaServer, authModel, err := getLocalServerAndModel(storeData, basePath)
+	fgaServer, authModel, err := getLocalServerModelAndTuples(&storeData, basePath)
 	if err != nil {
 		return test, err
 	}
