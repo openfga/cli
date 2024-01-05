@@ -70,8 +70,8 @@ func initLocalStore(
 	return &storeID, modelID, nil
 }
 
-func getLocalServerAndModel(
-	storeData StoreData,
+func getLocalServerModelAndTuples(
+	storeData *StoreData,
 	basePath string,
 ) (*server.Server, *authorizationmodel.AuthzModel, error) {
 	var fgaServer *server.Server
@@ -79,6 +79,11 @@ func getLocalServerAndModel(
 	var authModel *authorizationmodel.AuthzModel
 
 	format, err := storeData.LoadModel(basePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = storeData.LoadTuples(basePath)
 	if err != nil {
 		return nil, nil, err
 	}
