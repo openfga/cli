@@ -31,12 +31,12 @@ func RunTest(
 
 func RunTests(
 	fgaClient *client.OpenFgaClient,
-	storeData StoreData,
-	basePath string,
+	storeData *StoreData,
+	format authorizationmodel.ModelFormat,
 ) (TestResults, error) {
 	test := TestResults{}
 
-	fgaServer, authModel, err := getLocalServerModelAndTuples(&storeData, basePath)
+	fgaServer, authModel, err := getLocalServerModelAndTuples(storeData, format)
 	if err != nil {
 		return test, err
 	}
