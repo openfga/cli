@@ -22,7 +22,23 @@ $(GO_BIN)/gofumpt:
 
 $(BUILD_DIR)/$(BINARY_NAME):
 	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
-	go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
+	@go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
+
+$(GO_BIN)/mockgen:
+	@echo "==> Installing mockgen within ${GO_BIN}"
+	@go install github.com/golang/mock/mockgen@latest
+
+$(MOCK_SRC_DIR):
+	@echo "==> Cloning OpenFGA Go SDK within ${MOCK_SRC_DIR}"
+	@git clone https://github.com/openfga/go-sdk ${MOCK_SRC_DIR}
+
+$(MOCK_DIR)/client.go: $(GO_BIN)/mockgen $(MOCK_SRC_DIR)
+	@echo "==> Generating client mocks within ${MOCK_DIR}"
+	cd ${MOCK_SRC_DIR} && mockgen -source client/client.go -destination ${MOCK_DIR}/client.go
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Phony Rules(https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html)
+#-----------------------------------------------------------------------------------------------------------------------
 
 .PHONY: build run clean test lint audit format
 
@@ -58,3 +74,6 @@ audit: $(GO_BIN)/govulncheck
 format: $(GO_BIN)/gofumpt $(GO_BIN)/gci
 	@echo "==> Formatting project files"
 	gofumpt -w .
+
+mocks: $(MOCK_DIR)/*.go
+	@echo "==> Mocks generated"
