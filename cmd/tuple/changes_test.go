@@ -44,7 +44,7 @@ func TestReadChangesError(t *testing.T) {
 
 	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
 
-	_, err := readChanges(mockFgaClient, 5, "document")
+	_, err := readChanges(mockFgaClient, 5, "document", "")
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -82,12 +82,12 @@ func TestReadChangesEmpty(t *testing.T) {
 
 	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
 
-	output, err := readChanges(mockFgaClient, 5, "document")
+	output, err := readChanges(mockFgaClient, 5, "document", "")
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[]}`
+	expectedOutput := `{"changes":[],"continuation_token":""}`
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -146,12 +146,12 @@ func TestReadChangesSinglePage(t *testing.T) {
 
 	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
 
-	output, err := readChanges(mockFgaClient, 5, "document")
+	output, err := readChanges(mockFgaClient, 5, "document", "")
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}]}` //nolint:lll
+	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":""}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -246,12 +246,12 @@ func TestReadChangesMultiPages(t *testing.T) {
 		mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody2),
 	)
 
-	output, err := readChanges(mockFgaClient, 5, "document")
+	output, err := readChanges(mockFgaClient, 5, "document", "")
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T22:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}},{"operation":"TUPLE_OPERATION_DELETE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}]}` //nolint:lll
+	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T22:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}},{"operation":"TUPLE_OPERATION_DELETE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":"01GXSA8YR785C4FYS3C0RTG7B2"}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -310,12 +310,12 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 
 	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
 
-	output, err := readChanges(mockFgaClient, 1, "document")
+	output, err := readChanges(mockFgaClient, 1, "document", "")
 	if err != nil {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}]}` //nolint:lll
+	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":"01GXSA8YR785C4FYS3C0RTG7B2"}` //nolint:lll
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
