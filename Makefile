@@ -52,7 +52,7 @@ clean:
 	go clean
 	rm -f ${BUILD_DIR}
 
-test: mocks
+test:
 	go test -race \
 			-coverpkg=./... \
 			-coverprofile=coverageunit.tmp.out \

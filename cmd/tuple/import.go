@@ -41,22 +41,22 @@ type failedWriteResponse struct {
 	Reason   string                `json:"reason"`
 }
 
-type importResponse struct {
+type ImportResponse struct {
 	Successful []client.ClientTupleKey `json:"successful"`
 	Failed     []failedWriteResponse   `json:"failed"`
 }
 
-// importTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
+// ImportTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
 // either writes or deletes.
-// It returns a pointer to an importResponse and an error.
-// The importResponse contains the tuples that were successfully imported and the tuples that failed to be imported.
-// Deletes and writes are put together in the same importResponse.
-func importTuples(
+// It returns a pointer to an ImportResponse and an error.
+// The ImportResponse contains the tuples that were successfully imported and the tuples that failed to be imported.
+// Deletes and writes are put together in the same ImportResponse.
+func ImportTuples(
 	fgaClient client.SdkClient,
 	body client.ClientWriteRequest,
 	maxTuplesPerWrite int,
 	maxParallelRequests int,
-) (*importResponse, error) {
+) (*ImportResponse, error) {
 	options := client.ClientWriteOptions{
 		Transaction: &client.TransactionOptions{
 			Disable:             true,
@@ -73,7 +73,7 @@ func importTuples(
 	successfulWrites, failedWrites := processWrites(response.Writes)
 	successfulDeletes, failedDeletes := processDeletes(response.Deletes)
 
-	result := importResponse{
+	result := ImportResponse{
 		Successful: append(successfulWrites, successfulDeletes...),
 		Failed:     append(failedWrites, failedDeletes...),
 	}
@@ -177,7 +177,7 @@ var importCmd = &cobra.Command{
 			Writes: tuples,
 		}
 
-		result, err := importTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
+		result, err := ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 		if err != nil {
 			return err
 		}

@@ -9,10 +9,10 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20231212010208-061d8d8d395f
+	github.com/openfga/api/proto v0.0.0-20231222042535-3037910c90c0
 	github.com/openfga/go-sdk v0.3.3
-	github.com/openfga/language/pkg/go v0.0.0-20231214002416-cca4c4312106
-	github.com/openfga/openfga v1.4.0
+	github.com/openfga/language/pkg/go v0.0.0-20231220180656-9f0ec45883f3
+	github.com/openfga/openfga v1.4.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -48,7 +48,7 @@ require (
 	github.com/muesli/mango-pflag v0.1.0 // indirect
 	github.com/natefinch/wrap v0.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
-	github.com/prometheus/client_golang v1.17.0 // indirect
+	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
@@ -76,6 +76,6 @@ require (
 	google.golang.org/genproto v0.0.0-20231212172506-995d672761c0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231212172506-995d672761c0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231212172506-995d672761c0 // indirect
-	google.golang.org/grpc v1.60.0 // indirect
+	google.golang.org/grpc v1.60.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )

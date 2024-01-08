@@ -20,6 +20,7 @@ A cross-platform CLI to interact with an OpenFGA server
     - [Stores](#stores)
       - [List All Stores](#list-stores)
       - [Create a Store](#create-store)
+      - [Import a Store](#import-store)
       - [Get a Store](#get-store)
       - [Delete a Store](#delete-store)
     - [Authorization Models](#authorization-models)
@@ -162,6 +163,7 @@ store-id: 01H0H015178Y2V4CX10C2KGHF4
 | Description                     | command  | parameters   | example                                                  |
 |---------------------------------|----------|--------------|----------------------------------------------------------|
 | [Create a Store](#create-store) | `create` | `--name`     | `fga store create --name="FGA Demo Store"`               |
+| [Import a Store](#import-store) | `import` | `--file`     | `fga store import --file store.fga.yaml`                 |
 | [List Stores](#list-stores)     | `list`   |              | `fga store list`                                         |
 | [Get a Store](#get-store)       | `get`    | `--store-id` | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
 | [Delete a Store](#delete-store) | `delete` | `--store-id` | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
@@ -210,6 +212,24 @@ To automatically set the created store id as an environment variable that will t
 
 ```bash
 export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
+```
+##### Import Store
+
+###### Command
+fga store **import**
+
+###### Parameters
+* `--file`: File containing the store.
+* `--store-id`: Specifies the store id to import into
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+
+###### Example
+`fga store import --file model.fga.yaml`
+
+###### Response
+```json
+{}
 ```
 
 ##### List Stores
@@ -554,7 +574,7 @@ type document
 | [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id`           | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
 | [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
 | [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id`           | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                      |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--model-id`           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                   |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--continuation-token`,           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=`                   |
 | [Import Relationship Tuples](#import-relationship-tuples)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json` |
 
 ##### Write Relationship Tuples
@@ -719,11 +739,12 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 
 ###### Parameters
 * `--store-id`: Specifies the store id
-* `--type`: restrict to a specific type (optional)
+* `--type`: Restrict to a specific type (optional)
 * `--max-pages`: Max number of pages to retrieve (default: 20)
+* `--continuation-token`: Continuation token to start changes from
 
 ###### Example
-`fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document`
+`fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=`
 
 ###### Response
 ```json5
@@ -738,7 +759,8 @@ fga tuple **changes** --type <type> --store-id=<store-id>
         "user": "user:anne"
       }
     }
-  ]
+  ],
+  "continuation_token":"NHw="
 }
 ```
 

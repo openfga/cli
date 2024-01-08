@@ -72,7 +72,7 @@ var deleteCmd = &cobra.Command{
 			deleteRequest := client.ClientWriteRequest{
 				Deletes: tuples,
 			}
-			response, err := importTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
+			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
 			if err != nil {
 				return err
 			}

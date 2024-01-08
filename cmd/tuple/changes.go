@@ -31,9 +31,10 @@ import (
 // MaxReadChangesPagesLength Limit the changes so that we are not paginating indefinitely.
 var MaxReadChangesPagesLength = 20
 
-func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) (*openfga.ReadChangesResponse, error) {
+func readChanges(
+	fgaClient client.SdkClient, maxPages int, selectedType string, continuationToken string,
+) (*openfga.ReadChangesResponse, error) {
 	changes := []openfga.TupleChange{}
-	continuationToken := ""
 	pageIndex := 0
 
 	for {
@@ -50,18 +51,18 @@ func readChanges(fgaClient client.SdkClient, maxPages int, selectedType string) 
 		}
 
 		changes = append(changes, response.Changes...)
+		previousContinuationToken := continuationToken
+		continuationToken = *response.ContinuationToken
 		pageIndex++
 
 		if response.ContinuationToken == nil ||
-			*response.ContinuationToken == continuationToken ||
+			continuationToken == previousContinuationToken ||
 			pageIndex >= maxPages {
 			break
 		}
-
-		continuationToken = *response.ContinuationToken
 	}
 
-	return &openfga.ReadChangesResponse{Changes: changes}, nil
+	return &openfga.ReadChangesResponse{Changes: changes, ContinuationToken: &continuationToken}, nil
 }
 
 // changesCmd represents the changes command.
@@ -69,7 +70,7 @@ var changesCmd = &cobra.Command{
 	Use:     "changes",
 	Short:   "Read Relationship Tuple Changes (Watch)",
 	Long:    "Get a list of relationship tuple changes (Writes and Deletes) across time.",
-	Example: "fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document",
+	Example: "fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document --continuation-token=MXw=",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -88,7 +89,12 @@ var changesCmd = &cobra.Command{
 			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
-		response, err := readChanges(fgaClient, maxPages, selectedType)
+		continuationToken, err := cmd.Flags().GetString("continuation-token")
+		if err != nil {
+			return fmt.Errorf("failed to get tuple changes due to %w", err)
+		}
+
+		response, err := readChanges(fgaClient, maxPages, selectedType, continuationToken)
 		if err != nil {
 			return err
 		}
@@ -100,4 +106,5 @@ var changesCmd = &cobra.Command{
 func init() {
 	changesCmd.Flags().String("type", "", "Type to restrict the changes by.")
 	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
+	changesCmd.Flags().String("continuation-token", "", "Continuation token to start changes from.")
 }
