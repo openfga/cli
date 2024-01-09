@@ -23,7 +23,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
-	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -33,12 +33,14 @@ func check(
 	relation string,
 	object string,
 	contextualTuples []client.ClientContextualTupleKey,
+	queryContext *map[string]interface{},
 ) (*client.ClientCheckResponse, error) {
 	body := &client.ClientCheckRequest{
 		User:             user,
 		Relation:         relation,
 		Object:           object,
 		ContextualTuples: contextualTuples,
+		Context:          queryContext,
 	}
 	options := &client.ClientCheckOptions{}
 
@@ -54,22 +56,27 @@ func check(
 var checkCmd = &cobra.Command{
 	Use:     "check",
 	Short:   "Check",
+	Example: `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}'`, //nolint:lll
 	Long:    "Check if a user has a particular relation with an object.",
-	Example: `fga check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap`,
 	Args:    cobra.ExactArgs(3), //nolint:gomnd
 	RunE: func(cmd *cobra.Command, args []string) error {
-		clientConfig := cmdutils2.GetClientConfig(cmd)
+		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		contextualTuples, err := cmdutils2.ParseContextualTuples(cmd)
+		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
 			return fmt.Errorf("error parsing contextual tuples for check: %w", err)
 		}
 
-		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples)
+		queryContext, err := cmdutils.ParseQueryContext(cmd, "context")
+		if err != nil {
+			return fmt.Errorf("error parsing query context for check: %w", err)
+		}
+
+		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext)
 		if err != nil {
 			return fmt.Errorf("failed to check due to %w", err)
 		}

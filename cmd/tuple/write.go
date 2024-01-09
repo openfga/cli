@@ -83,11 +83,18 @@ fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
 
 			return output.Display(*response) //nolint:wrapcheck
 		}
+
+		condition, err := cmdutils.ParseTupleCondition(cmd)
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
 		body := &client.ClientWriteTuplesBody{
 			client.ClientTupleKey{
-				User:     args[0],
-				Relation: args[1],
-				Object:   args[2],
+				User:      args[0],
+				Relation:  args[1],
+				Object:    args[2],
+				Condition: condition,
 			},
 		}
 		options := &client.ClientWriteOptions{}
@@ -103,6 +110,8 @@ fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
 func init() {
 	writeCmd.Flags().String("model-id", "", "Model ID")
 	writeCmd.Flags().String("file", "", "Tuples file")
+	writeCmd.Flags().String("condition-name", "", "Condition Name")
+	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 }

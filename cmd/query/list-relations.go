@@ -25,7 +25,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
-	cmdutils2 "github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 )
@@ -43,14 +43,14 @@ func getRelationsForType(
 			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
 
-		authorizationModel = *response.AuthorizationModel
+		authorizationModel = response.GetAuthorizationModel()
 	} else {
 		response, err := fgaClient.ReadLatestAuthorizationModel(context.Background()).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
 
-		authorizationModel = *response.AuthorizationModel
+		authorizationModel = response.GetAuthorizationModel()
 	}
 
 	typeDefs := authorizationModel.TypeDefinitions
@@ -77,6 +77,7 @@ func listRelations(clientConfig fga.ClientConfig,
 	object string,
 	relations []string,
 	contextualTuples []client.ClientContextualTupleKey,
+	queryContext *map[string]interface{},
 ) (*client.ClientListRelationsResponse, error) {
 	if len(relations) < 1 {
 		relationsForType, err := getRelationsForType(clientConfig, fgaClient, object)
@@ -99,6 +100,7 @@ func listRelations(clientConfig fga.ClientConfig,
 		Object:           object,
 		Relations:        relations,
 		ContextualTuples: contextualTuples,
+		Context:          queryContext,
 	}
 	options := &client.ClientListRelationsOptions{}
 
@@ -122,20 +124,25 @@ var listRelationsCmd = &cobra.Command{
 	Example: `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`, //nolint:lll
 	Args:    cobra.ExactArgs(2),                                                                                              //nolint:gomnd,lll
 	RunE: func(cmd *cobra.Command, args []string) error {
-		clientConfig := cmdutils2.GetClientConfig(cmd)
+		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		contextualTuples, err := cmdutils2.ParseContextualTuples(cmd)
+		contextualTuples, err := cmdutils.ParseContextualTuples(cmd)
 		if err != nil {
 			return fmt.Errorf("error parsing contextual tuples for listRelations: %w", err)
 		}
 
+		queryContext, err := cmdutils.ParseQueryContext(cmd, "context")
+		if err != nil {
+			return fmt.Errorf("error parsing query context for check: %w", err)
+		}
+
 		relations, _ := cmd.Flags().GetStringArray("relation")
 
-		response, err := listRelations(clientConfig, fgaClient, args[0], args[1], relations, contextualTuples)
+		response, err := listRelations(clientConfig, fgaClient, args[0], args[1], relations, contextualTuples, queryContext)
 		if err != nil {
 			return fmt.Errorf("failed to list relations due to %w", err)
 		}
