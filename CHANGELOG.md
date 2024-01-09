@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.2
+
+### [0.2.2](https://github.com/openfga/cli/compare/v0.2.1...v0.2.2) (2024-01-08)
+
+Changed:
+- add `fga store import` to import store data (#215)
+- allow specifying `tuple_file` to reference tuples in the FGA store format (#212)
+- support continuation token in `fga tuple changes` method and expose it in the output (#218)
+- add support for specifying condition/context in queries and in write (#219) 
+- allow more comments in the model (#221)
+
+Fixed:
+- fixed issue writing models with conditions
+
 ## v0.2.1
 
 ### [0.2.1](https://github.com/openfga/cli/compare/v0.2.0...v0.2.1) (2023-12-14)
