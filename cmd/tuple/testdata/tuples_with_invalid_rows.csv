@@ -1,0 +1,2 @@
+user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context
+user,beth,,viewer,folder,product-2021,a,b,d,,
