@@ -48,13 +48,14 @@ var writeCmd = &cobra.Command{
 		"When using a CSV file, the file must adhere to a specific header structure for the " +
 		"command to correctly interpret the data. The required CSV header structure is as " +
 		"follows:\n" +
-		"- \"user_type\":   Specifies the type of the user in the relationship tuple.\n" +
-		"- \"user_id\":     The unique identifier of the user.\n" +
-		"- \"relation\":    Defines the nature of the relationship.\n" +
-		"- \"object_type\": Specifies the type of the object in the relationship tuple.\n" +
-		"- \"object_id\":   The unique identifier of the object.\n\n" +
+		"- \"user_type\":     Specifies the type of the user in the relationship tuple.\n" +
+		"- \"user_id\":       The unique identifier of the user.\n" +
+		"- \"user_relation\": Defines the user relation forming a userset.\n" +
+		"- \"relation\":      Defines the tuple relation.\n" +
+		"- \"object_type\":   Specifies the type of the object in the relationship tuple.\n" +
+		"- \"object_id\":     The unique identifier of the object.\n\n" +
 		"For example, a valid CSV file might start with a row like:\n" +
-		"user_type,user_id,relation,object_type,object_id\n\n" +
+		"user_type,user_id,user_relation,relation,object_type,object_id\n\n" +
 		"This command is flexible in accepting data inputs, making it easier to add multiple " +
 		"relationship tuples in various convenient formats.",
 	Args: ExactArgsOrFlag(writeCommandArgumentsCount, "file"),
@@ -188,13 +189,19 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 		const (
 			UserType = iota
 			UserID
+			UserRelation
 			Relation
 			ObjectType
 			ObjectID
 		)
 
+		tupleUserKey := tuple[UserType] + ":" + tuple[UserID]
+		if tuple[UserRelation] != "" {
+			tupleUserKey += "#" + tuple[UserRelation]
+		}
+
 		tupleKey := client.ClientTupleKey{
-			User:     tuple[UserType] + ":" + tuple[UserID],
+			User:     tupleUserKey,
 			Relation: tuple[Relation],
 			Object:   tuple[ObjectType] + ":" + tuple[ObjectID],
 		}
@@ -216,7 +223,7 @@ func guardAgainstInvalidHeaderWithinCSV(reader *csv.Reader) error {
 		headerMap[strings.TrimSpace(header)] = true
 	}
 
-	requiredHeaders := []string{"user_type", "user_id", "relation", "object_type", "object_id"}
+	requiredHeaders := []string{"user_type", "user_id", "user_relation", "relation", "object_type", "object_id"}
 
 	if len(headerMap) != len(requiredHeaders) {
 		return fmt.Errorf( //nolint:goerr113

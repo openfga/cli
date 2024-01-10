@@ -32,7 +32,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product-2021",
 				},
 				{
-					User:     "user:beth",
+					User:     "team:fga#member",
 					Relation: "viewer",
 					Object:   "folder:product-2021",
 				},
@@ -93,7 +93,7 @@ func TestParseTuplesFileData(t *testing.T) {
 		{
 			name:          "it fails to parse a csv file with wrong headers",
 			file:          "testdata/tuples_wrong_headers.csv",
-			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,relation,object_type,object_id\"", //nolint:lll
+			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,user_relation,relation,object_type,object_id\"", //nolint:lll
 		},
 		{
 			name:          "it fails to parse a csv file with missing required headers",
