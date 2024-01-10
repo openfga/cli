@@ -34,7 +34,7 @@ A cross-platform CLI to interact with an OpenFGA server
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
       - [Read Relationship Tuples](#read-relationship-tuples)
-      - [Create Relationship Tuples](#create-relationship-tuples)
+      - [Write Relationship Tuples](#write-relationship-tuples)
       - [Delete Relationship Tuples](#delete-relationship-tuples)
     - [Relationship Queries](#relationship-queries)
       - [Check](#check)
@@ -590,7 +590,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--condition-context`: Condition context (optional)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `yaml` and `json` files are supported
+* `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 

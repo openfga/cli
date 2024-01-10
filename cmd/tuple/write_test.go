@@ -1,0 +1,132 @@
+package tuple
+
+import (
+	"testing"
+
+	"github.com/openfga/go-sdk/client"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestParseTuplesFileData(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		file           string
+		expectedTuples []client.ClientTupleKey
+		expectedError  string
+	}{
+		{
+			name: "it can correctly parse a csv file",
+			file: "testdata/tuples.csv",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+				},
+				{
+					User:     "user:beth",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
+			name: "it can correctly parse a json file",
+			file: "testdata/tuples.json",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+				},
+				{
+					User:     "user:beth",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
+			name: "it can correctly parse a yaml file",
+			file: "testdata/tuples.yaml",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+				},
+				{
+					User:     "user:beth",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
+			name:          "it fails to parse a non-existent file",
+			file:          "testdata/tuples.bad",
+			expectedError: "failed to read file \"testdata/tuples.bad\": open testdata/tuples.bad: no such file or directory", //nolint:lll
+		},
+		{
+			name:          "it fails to parse a non-supported file format",
+			file:          "testdata/tuples.toml",
+			expectedError: "failed to parse input tuples: unsupported file format \".toml\"",
+		},
+		{
+			name:          "it fails to parse a csv file with wrong headers",
+			file:          "testdata/tuples_wrong_headers.csv",
+			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,relation,object_type,object_id\"", //nolint:lll
+		},
+		{
+			name:          "it fails to parse a csv file with missing required headers",
+			file:          "testdata/tuples_missing_required_headers.csv",
+			expectedError: "failed to parse input tuples: required csv header \"object_id\" not found",
+		},
+		{
+			name:          "it fails to parse an empty csv file",
+			file:          "testdata/tuples_empty.csv",
+			expectedError: "failed to parse input tuples: failed to read csv headers: EOF",
+		},
+		{
+			name:          "it fails to parse a csv file with invalid rows",
+			file:          "testdata/tuples_with_invalid_rows.csv",
+			expectedError: "failed to parse input tuples: failed to read tuple from csv file: record on line 2: wrong number of fields", //nolint:lll
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			actualTuples, err := parseTuplesFileData(test.file)
+
+			if test.expectedError != "" {
+				require.EqualError(t, err, test.expectedError)
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, test.expectedTuples, actualTuples)
+		})
+	}
+}

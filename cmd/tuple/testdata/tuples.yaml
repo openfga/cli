@@ -1,0 +1,9 @@
+- user: user:anne
+  relation: owner
+  object: folder:product
+- user: folder:product
+  relation: parent
+  object: folder:product-2021
+- user: user:beth
+  relation: viewer
+  object: folder:product-2021
