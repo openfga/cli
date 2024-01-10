@@ -27,6 +27,7 @@ import (
 	"path"
 	"strings"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
@@ -48,18 +49,22 @@ var writeCmd = &cobra.Command{
 		"When using a CSV file, the file must adhere to a specific header structure for the " +
 		"command to correctly interpret the data. The required CSV header structure is as " +
 		"follows:\n" +
-		"- \"user_type\":     Specifies the type of the user in the relationship tuple.\n" +
-		"- \"user_id\":       The unique identifier of the user.\n" +
-		"- \"user_relation\": Defines the user relation forming a userset.\n" +
-		"- \"relation\":      Defines the tuple relation.\n" +
-		"- \"object_type\":   Specifies the type of the object in the relationship tuple.\n" +
-		"- \"object_id\":     The unique identifier of the object.\n\n" +
+		"- \"user_type\":         Specifies the type of the user in the relationship tuple. (e.g. \"team\")\n" +
+		"- \"user_id\":           The unique identifier of the user. (e.g. \"marketing\")\n" +
+		"- \"user_relation\":     Defines the user relation forming a userset. (optional) (e.g. \"member\")\n" +
+		"- \"relation\":          Defines the tuple relation. (e.g. \"viewer\")\n" +
+		"- \"object_type\":       Specifies the type of the object in the relationship tuple. (e.g. \"document\")\n" +
+		"- \"object_id\":         The unique identifier of the object. (e.g. \"roadmap\")\n" +
+		"- \"condition_name\":    The name of the condition. (optional) (e.g. \"inOfficeIP\")\n" +
+		"- \"condition_context\": The context of the condition as a json object. " +
+		"(optional) (e.g. \"{\"\"ip_addr\"\":\"\"10.0.0.1\"\"}\")\n\n" +
 		"For example, a valid CSV file might start with a row like:\n" +
-		"user_type,user_id,user_relation,relation,object_type,object_id\n\n" +
+		"user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context\n\n" +
 		"This command is flexible in accepting data inputs, making it easier to add multiple " +
 		"relationship tuples in various convenient formats.",
 	Args: ExactArgsOrFlag(writeCommandArgumentsCount, "file"),
 	Example: `  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv`,
@@ -72,23 +77,29 @@ var writeCmd = &cobra.Command{
 		}
 
 		if len(args) == writeCommandArgumentsCount {
-			return writeTuplesFromArgs(args, fgaClient)
+			return writeTuplesFromArgs(cmd, args, fgaClient)
 		}
 
 		return writeTuplesFromFile(cmd.Flags(), fgaClient)
 	},
 }
 
-func writeTuplesFromArgs(args []string, fgaClient *client.OpenFgaClient) error {
+func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.OpenFgaClient) error {
+	condition, err := cmdutils.ParseTupleCondition(cmd)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
+
 	body := client.ClientWriteTuplesBody{
 		client.ClientTupleKey{
-			User:     args[0],
-			Relation: args[1],
-			Object:   args[2],
+			User:      args[0],
+			Relation:  args[1],
+			Object:    args[2],
+			Condition: condition,
 		},
 	}
 
-	_, err := fgaClient.
+	_, err = fgaClient.
 		WriteTuples(context.Background()).
 		Body(body).
 		Options(client.ClientWriteOptions{}).
@@ -193,6 +204,8 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 			Relation
 			ObjectType
 			ObjectID
+			ConditionName
+			ConditionContext
 		)
 
 		tupleUserKey := tuple[UserType] + ":" + tuple[UserID]
@@ -200,10 +213,24 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 			tupleUserKey += "#" + tuple[UserRelation]
 		}
 
+		var condition *openfga.RelationshipCondition = nil
+		if tuple[ConditionName] != "" {
+			conditionContext, err := cmdutils.ParseQueryContextInner(tuple[ConditionContext])
+			if err != nil {
+				return fmt.Errorf("failed to read condition context on line %d: %w", i, err)
+			}
+
+			condition = &openfga.RelationshipCondition{
+				Name:    tuple[ConditionName],
+				Context: conditionContext,
+			}
+		}
+
 		tupleKey := client.ClientTupleKey{
-			User:     tupleUserKey,
-			Relation: tuple[Relation],
-			Object:   tuple[ObjectType] + ":" + tuple[ObjectID],
+			User:      tupleUserKey,
+			Relation:  tuple[Relation],
+			Object:    tuple[ObjectType] + ":" + tuple[ObjectID],
+			Condition: condition,
 		}
 
 		*tuples = append(*tuples, tupleKey)
@@ -223,7 +250,16 @@ func guardAgainstInvalidHeaderWithinCSV(reader *csv.Reader) error {
 		headerMap[strings.TrimSpace(header)] = true
 	}
 
-	requiredHeaders := []string{"user_type", "user_id", "user_relation", "relation", "object_type", "object_id"}
+	requiredHeaders := []string{
+		"user_type",
+		"user_id",
+		"user_relation",
+		"relation",
+		"object_type",
+		"object_id",
+		"condition_name",
+		"condition_context",
+	}
 
 	if len(headerMap) != len(requiredHeaders) {
 		return fmt.Errorf( //nolint:goerr113

@@ -600,11 +600,60 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 
 ###### Response
 ```json5
-{}
+{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+}
 ```
 
 ###### Example (with file)
 `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
+
+If using a `csv` file, the format should be:
+
+```csv
+user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context
+folder,product,,parent,folder,product-2021,inOfficeIP,"{""ip_addr"":""10.0.0.1""}"
+```
+
+
+If using a `yaml` file, the format should be:
+
+```yaml
+- user: folder:5
+  relation: parent
+  object: folder:product-2021
+- user: folder:product-2021
+  relation: parent
+  object: folder:product-2021Q1
+```
+
+If using a `json` file, the format should be:
+
+```json
+[
+  {
+    "user": "user:anne",
+    "relation": "owner",
+    "object": "folder:product"
+  },
+  {
+    "user": "folder:product",
+    "relation": "parent",
+    "object": "folder:product-2021"
+  },
+  {
+    "user": "user:beth",
+    "relation": "viewer",
+    "object": "folder:product-2021"
+  }
+]
+```
 
 ###### Response
 ```json5

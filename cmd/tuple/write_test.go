@@ -3,6 +3,7 @@ package tuple
 import (
 	"testing"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,11 +26,21 @@ func TestParseTuplesFileData(t *testing.T) {
 					User:     "user:anne",
 					Relation: "owner",
 					Object:   "folder:product",
+					Condition: &openfga.RelationshipCondition{
+						Name:    "inOfficeIP",
+						Context: &map[string]interface{}{},
+					},
 				},
 				{
 					User:     "folder:product",
 					Relation: "parent",
 					Object:   "folder:product-2021",
+					Condition: &openfga.RelationshipCondition{
+						Name: "inOfficeIP",
+						Context: &map[string]interface{}{
+							"ip_addr": "10.0.0.1",
+						},
+					},
 				},
 				{
 					User:     "team:fga#member",
@@ -93,7 +104,7 @@ func TestParseTuplesFileData(t *testing.T) {
 		{
 			name:          "it fails to parse a csv file with wrong headers",
 			file:          "testdata/tuples_wrong_headers.csv",
-			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,user_relation,relation,object_type,object_id\"", //nolint:lll
+			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context\"", //nolint:lll
 		},
 		{
 			name:          "it fails to parse a csv file with missing required headers",
