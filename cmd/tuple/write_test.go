@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseTuplesFileData(t *testing.T) {
+func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	tests := []struct {
@@ -94,7 +94,7 @@ func TestParseTuplesFileData(t *testing.T) {
 		{
 			name:          "it fails to parse a non-existent file",
 			file:          "testdata/tuples.bad",
-			expectedError: "failed to read file \"testdata/tuples.bad\": open testdata/tuples.bad: no such file or directory", //nolint:lll
+			expectedError: "failed to read file \"testdata/tuples.bad\": open testdata/tuples.bad: no such file or directory",
 		},
 		{
 			name:          "it fails to parse a non-supported file format",
@@ -104,7 +104,7 @@ func TestParseTuplesFileData(t *testing.T) {
 		{
 			name:          "it fails to parse a csv file with wrong headers",
 			file:          "testdata/tuples_wrong_headers.csv",
-			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context\"", //nolint:lll
+			expectedError: "failed to parse input tuples: csv file must have exactly these headers in order: \"user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context\"",
 		},
 		{
 			name:          "it fails to parse a csv file with missing required headers",
@@ -119,7 +119,7 @@ func TestParseTuplesFileData(t *testing.T) {
 		{
 			name:          "it fails to parse a csv file with invalid rows",
 			file:          "testdata/tuples_with_invalid_rows.csv",
-			expectedError: "failed to parse input tuples: failed to read tuple from csv file: record on line 2: wrong number of fields", //nolint:lll
+			expectedError: "failed to parse input tuples: failed to read tuple from csv file: record on line 2: wrong number of fields",
 		},
 	}
 

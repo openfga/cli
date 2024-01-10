@@ -179,8 +179,8 @@ func parseTuplesFileData(fileName string) ([]client.ClientTupleKey, error) {
 func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 	reader := csv.NewReader(bytes.NewReader(data))
 
-	for i := 0; true; i++ {
-		if i == 0 {
+	for index := 0; true; index++ {
+		if index == 0 {
 			if err := guardAgainstInvalidHeaderWithinCSV(reader); err != nil {
 				return err
 			}
@@ -213,11 +213,12 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 			tupleUserKey += "#" + tuple[UserRelation]
 		}
 
-		var condition *openfga.RelationshipCondition = nil
+		var condition *openfga.RelationshipCondition
+
 		if tuple[ConditionName] != "" {
 			conditionContext, err := cmdutils.ParseQueryContextInner(tuple[ConditionContext])
 			if err != nil {
-				return fmt.Errorf("failed to read condition context on line %d: %w", i, err)
+				return fmt.Errorf("failed to read condition context on line %d: %w", index, err)
 			}
 
 			condition = &openfga.RelationshipCondition{
@@ -283,5 +284,5 @@ func init() {
 	writeCmd.Flags().String("condition-name", "", "Condition Name")
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	writeCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	writeCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
 }
