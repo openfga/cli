@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.3
+
+### [0.2.3](https://github.com/openfga/cli/compare/v0.2.2...v0.2.3) (2024-01-11)
+
+Changed:
+- add support for using csv files to import tuples (#222)
+
+
 ## v0.2.2
 
 ### [0.2.2](https://github.com/openfga/cli/compare/v0.2.1...v0.2.2) (2024-01-08)
