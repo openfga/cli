@@ -12,7 +12,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20231222042535-3037910c90c0
 	github.com/openfga/go-sdk v0.3.3
 	github.com/openfga/language/pkg/go v0.0.0-20240109134059-a66ff55aca89
-	github.com/openfga/openfga v1.4.1
+	github.com/openfga/openfga v1.4.2
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -69,6 +69,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
+	go.uber.org/mock v0.4.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
