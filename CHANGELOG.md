@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.4
+
+### [0.2.4](https://github.com/openfga/cli/compare/v0.2.3...v0.2.4) (2024-01-16)
+
+Fixed:
+- Fixed support for reading json models (#228)
+
+
 ## v0.2.3
 
 ### [0.2.3](https://github.com/openfga/cli/compare/v0.2.2...v0.2.3) (2024-01-11)

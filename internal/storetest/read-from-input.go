@@ -44,7 +44,8 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 		return format, nil, fmt.Errorf("failed to unmarshal file %s due to %w", fileName, err)
 	}
 
-	if format, err := storeData.LoadModel(basePath); err != nil {
+	format, err = storeData.LoadModel(basePath)
+	if err != nil {
 		return format, nil, err
 	}
 
