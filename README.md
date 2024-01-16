@@ -84,6 +84,13 @@ Alpine Linux:
 sudo apk add --allow-untrusted ./fga_<version>_linux_<arch>.apk
 ```
 
+### Windows
+
+via [Scoop](https://scoop.sh/)
+```shell
+scoop install openfga
+```
+
 ### Docker
 ```shell
 docker pull openfga/cli; docker run -it openfga/cli
