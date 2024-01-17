@@ -1,0 +1,4 @@
+user_type,user_id,user_relation,relation,object_type,object_id,condition_name
+user,anne,,owner,folder,product,inOfficeIP
+folder,product,,parent,folder,product-2021,inOfficeIP
+team,fga,member,viewer,folder,product-2021,

@@ -97,6 +97,35 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 			},
 		},
 		{
+			name: "it can correctly parse a csv file with condition_name header but no condition_context header",
+			file: "testdata/tuples_with_condition_name_but_no_condition_context.csv",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+					Condition: &openfga.RelationshipCondition{
+						Name:    "inOfficeIP",
+						Context: &map[string]interface{}{},
+					},
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+					Condition: &openfga.RelationshipCondition{
+						Name:    "inOfficeIP",
+						Context: &map[string]interface{}{},
+					},
+				},
+				{
+					User:     "team:fga#member",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
 			name: "it can correctly parse a json file",
 			file: "testdata/tuples.json",
 			expectedTuples: []client.ClientTupleKey{
@@ -157,6 +186,11 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 			name:          "it fails to parse a csv file with missing required headers",
 			file:          "testdata/tuples_missing_required_headers.csv",
 			expectedError: "failed to parse input tuples: required csv header \"object_id\" not found",
+		},
+		{
+			name:          "it fails to parse a csv file with missing condition_name header when condition_context is present",
+			file:          "testdata/tuples_missing_condition_name_header.csv",
+			expectedError: "failed to parse input tuples: missing \"condition_name\" header which is required when \"condition_context\" is present",
 		},
 		{
 			name:          "it fails to parse an empty csv file",

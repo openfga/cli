@@ -200,9 +200,13 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 		var condition *openfga.RelationshipCondition
 
 		if columns.ConditionName != -1 && tuple[columns.ConditionName] != "" {
-			conditionContext, err := cmdutils.ParseQueryContextInner(tuple[columns.ConditionContext])
-			if err != nil {
-				return fmt.Errorf("failed to read condition context on line %d: %w", index, err)
+			conditionContext := &(map[string]interface{}{})
+			if columns.ConditionContext != -1 {
+				conditionContext, err = cmdutils.ParseQueryContextInner(tuple[columns.ConditionContext])
+				if err != nil {
+					return fmt.Errorf("failed to read condition context on line %d: %w", index, err)
+				}
+
 			}
 
 			condition = &openfga.RelationshipCondition{
@@ -276,7 +280,9 @@ func (columns *csvColumns) validate() error {
 		return errors.New("required csv header \"object_id\" not found")
 	}
 
-	// TODO: can't have only one of ConditionName and ConditionContext (both or none)
+	if columns.ConditionContext != -1 && columns.ConditionName == -1 {
+		return errors.New("missing \"condition_name\" header which is required when \"condition_context\" is present")
+	}
 	return nil
 }
 
