@@ -179,58 +179,42 @@ func parseTuplesFileData(fileName string) ([]client.ClientTupleKey, error) {
 func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 	reader := csv.NewReader(bytes.NewReader(data))
 
+	columns, err := readHeaders(reader)
+	if err != nil {
+		return err
+	}
 	for index := 0; true; index++ {
-		if index == 0 {
-			if err := guardAgainstInvalidHeaderWithinCSV(reader); err != nil {
-				return err
-			}
-
-			continue
-		}
-
 		tuple, err := reader.Read()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-
 			return fmt.Errorf("failed to read tuple from csv file: %w", err)
 		}
 
-		const (
-			UserType = iota
-			UserID
-			UserRelation
-			Relation
-			ObjectType
-			ObjectID
-			ConditionName
-			ConditionContext
-		)
-
-		tupleUserKey := tuple[UserType] + ":" + tuple[UserID]
-		if tuple[UserRelation] != "" {
-			tupleUserKey += "#" + tuple[UserRelation]
+		tupleUserKey := tuple[columns.UserType] + ":" + tuple[columns.UserID]
+		if columns.UserRelation != -1 && tuple[columns.UserRelation] != "" {
+			tupleUserKey += "#" + tuple[columns.UserRelation]
 		}
 
 		var condition *openfga.RelationshipCondition
 
-		if tuple[ConditionName] != "" {
-			conditionContext, err := cmdutils.ParseQueryContextInner(tuple[ConditionContext])
+		if columns.ConditionName != -1 && tuple[columns.ConditionName] != "" {
+			conditionContext, err := cmdutils.ParseQueryContextInner(tuple[columns.ConditionContext])
 			if err != nil {
 				return fmt.Errorf("failed to read condition context on line %d: %w", index, err)
 			}
 
 			condition = &openfga.RelationshipCondition{
-				Name:    tuple[ConditionName],
+				Name:    tuple[columns.ConditionName],
 				Context: conditionContext,
 			}
 		}
 
 		tupleKey := client.ClientTupleKey{
 			User:      tupleUserKey,
-			Relation:  tuple[Relation],
-			Object:    tuple[ObjectType] + ":" + tuple[ObjectID],
+			Relation:  tuple[columns.Relation],
+			Object:    tuple[columns.ObjectType] + ":" + tuple[columns.ObjectID],
 			Condition: condition,
 		}
 
@@ -240,42 +224,86 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 	return nil
 }
 
-func guardAgainstInvalidHeaderWithinCSV(reader *csv.Reader) error {
+type csvColumns struct {
+	UserType         int
+	UserID           int
+	UserRelation     int
+	Relation         int
+	ObjectType       int
+	ObjectID         int
+	ConditionName    int
+	ConditionContext int
+}
+
+func (columns *csvColumns) setHeaderIndex(headerName string, index int) error {
+	switch headerName {
+	case "user_type":
+		columns.UserType = index
+	case "user_id":
+		columns.UserID = index
+	case "user_relation":
+		columns.UserRelation = index
+	case "relation":
+		columns.Relation = index
+	case "object_type":
+		columns.ObjectType = index
+	case "object_id":
+		columns.ObjectID = index
+	case "condition_name":
+		columns.ConditionName = index
+	case "condition_context":
+		columns.ConditionContext = index
+	default:
+		return fmt.Errorf("invalid header %q, valid headers are user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context", headerName)
+	}
+	return nil
+}
+
+func (columns *csvColumns) validate() error {
+	if columns.UserType == -1 {
+		return errors.New("required csv header \"user_type\" not found")
+	}
+	if columns.UserID == -1 {
+		return errors.New("required csv header \"user_id\" not found")
+	}
+	if columns.Relation == -1 {
+		return errors.New("required csv header \"relation\" not found")
+	}
+	if columns.ObjectType == -1 {
+		return errors.New("required csv header \"object_type\" not found")
+	}
+	if columns.ObjectID == -1 {
+		return errors.New("required csv header \"object_id\" not found")
+	}
+
+	// TODO: can't have only one of ConditionName and ConditionContext (both or none)
+	return nil
+}
+
+func readHeaders(reader *csv.Reader) (*csvColumns, error) {
 	headers, err := reader.Read()
 	if err != nil {
-		return fmt.Errorf("failed to read csv headers: %w", err)
+		return nil, fmt.Errorf("failed to read csv headers: %w", err)
 	}
 
-	headerMap := make(map[string]bool)
-	for _, header := range headers {
-		headerMap[strings.TrimSpace(header)] = true
+	columns := &csvColumns{
+		UserType:         -1,
+		UserID:           -1,
+		UserRelation:     -1,
+		Relation:         -1,
+		ObjectType:       -1,
+		ObjectID:         -1,
+		ConditionName:    -1,
+		ConditionContext: -1,
 	}
-
-	requiredHeaders := []string{
-		"user_type",
-		"user_id",
-		"user_relation",
-		"relation",
-		"object_type",
-		"object_id",
-		"condition_name",
-		"condition_context",
-	}
-
-	if len(headerMap) != len(requiredHeaders) {
-		return fmt.Errorf( //nolint:goerr113
-			"csv file must have exactly these headers in order: %q",
-			strings.Join(requiredHeaders, ","),
-		)
-	}
-
-	for _, header := range requiredHeaders {
-		if _, ok := headerMap[header]; !ok {
-			return fmt.Errorf("required csv header %q not found", header) //nolint:goerr113
+	for index, header := range headers {
+		err = columns.setHeaderIndex(strings.TrimSpace(header), index)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	return columns, columns.validate()
 }
 
 func init() {

@@ -1,0 +1,3 @@
+user_type,user_id,relation,object_type,object_id
+user,anne,owner,folder,product
+folder,product,parent,folder,product-2021
