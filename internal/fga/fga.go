@@ -20,6 +20,7 @@ package fga
 import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
+	"strings"
 
 	"github.com/openfga/cli/internal/build"
 )
@@ -27,14 +28,15 @@ import (
 var userAgent = "openfga-cli/" + build.Version
 
 type ClientConfig struct {
-	ApiUrl               string `json:"api_url,omitempty"` //nolint:revive,stylecheck
-	StoreID              string `json:"store_id,omitempty"`
-	AuthorizationModelID string `json:"authorization_model_id,omitempty"`
-	APIToken             string `json:"api_token,omitempty"`
-	APITokenIssuer       string `json:"api_token_issuer,omitempty"`
-	APIAudience          string `json:"api_audience,omitempty"`
-	ClientID             string `json:"client_id,omitempty"`
-	ClientSecret         string `json:"client_secret,omitempty"`
+	ApiUrl               string   `json:"api_url,omitempty"` //nolint:revive,stylecheck
+	StoreID              string   `json:"store_id,omitempty"`
+	AuthorizationModelID string   `json:"authorization_model_id,omitempty"`
+	APIToken             string   `json:"api_token,omitempty"`
+	APITokenIssuer       string   `json:"api_token_issuer,omitempty"`
+	APIAudience          string   `json:"api_audience,omitempty"`
+	ApiScopes            []string `json:"api_scopes,omitempty"`
+	ClientID             string   `json:"client_id,omitempty"`
+	ClientSecret         string   `json:"client_secret,omitempty"`
 }
 
 func (c ClientConfig) getCredentials() *credentials.Credentials {
@@ -55,6 +57,7 @@ func (c ClientConfig) getCredentials() *credentials.Credentials {
 				ClientCredentialsClientSecret:   c.ClientSecret,
 				ClientCredentialsApiAudience:    c.APIAudience,
 				ClientCredentialsApiTokenIssuer: c.APITokenIssuer,
+				ClientCredentialsScopes:         strings.Join(c.ApiScopes, " "),
 			},
 		}
 	}
