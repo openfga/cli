@@ -28,8 +28,13 @@ var (
 	ErrStoreNotFound              = errors.New("store not found")
 	ErrAuthorizationModelNotFound = errors.New("authorization model not found")
 	ErrModelInputMissing          = errors.New("model input not provided")
+	ErrRequiredCsvHeaderMissing   = errors.New("csv header missing")
 )
 
 func ValidationError(op string, details string) error {
 	return fmt.Errorf("%w - %s: %s", ErrValidation, op, details)
+}
+
+func MissingRequiredCsvHeaderError(headerName string) error {
+	return fmt.Errorf("%w (\"%s\")", ErrRequiredCsvHeaderMissing, headerName)
 }
