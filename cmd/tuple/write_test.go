@@ -185,7 +185,7 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 		{
 			name:          "it fails to parse a csv file with missing required headers",
 			file:          "testdata/tuples_missing_required_headers.csv",
-			expectedError: "failed to parse input tuples: required csv header \"object_id\" not found",
+			expectedError: "failed to parse input tuples: csv header missing (\"object_id\")",
 		},
 		{
 			name:          "it fails to parse a csv file with missing condition_name header when condition_context is present",

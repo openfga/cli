@@ -27,6 +27,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/openfga/cli/internal/clierrors"
+
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -183,12 +185,14 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 	if err != nil {
 		return err
 	}
+
 	for index := 0; true; index++ {
 		tuple, err := reader.Read()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
+
 			return fmt.Errorf("failed to read tuple from csv file: %w", err)
 		}
 
@@ -197,22 +201,9 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 			tupleUserKey += "#" + tuple[columns.UserRelation]
 		}
 
-		var condition *openfga.RelationshipCondition
-
-		if columns.ConditionName != -1 && tuple[columns.ConditionName] != "" {
-			conditionContext := &(map[string]interface{}{})
-			if columns.ConditionContext != -1 {
-				conditionContext, err = cmdutils.ParseQueryContextInner(tuple[columns.ConditionContext])
-				if err != nil {
-					return fmt.Errorf("failed to read condition context on line %d: %w", index, err)
-				}
-
-			}
-
-			condition = &openfga.RelationshipCondition{
-				Name:    tuple[columns.ConditionName],
-				Context: conditionContext,
-			}
+		condition, err := parseConditionColumnsForRow(columns, tuple, index)
+		if err != nil {
+			return err
 		}
 
 		tupleKey := client.ClientTupleKey{
@@ -226,6 +217,30 @@ func parseTuplesFromCSV(data []byte, tuples *[]client.ClientTupleKey) error {
 	}
 
 	return nil
+}
+
+func parseConditionColumnsForRow(columns *csvColumns, tuple []string, index int) (*openfga.RelationshipCondition, error) {
+	var condition *openfga.RelationshipCondition
+
+	if columns.ConditionName != -1 && tuple[columns.ConditionName] != "" {
+		conditionContext := &(map[string]interface{}{})
+
+		if columns.ConditionContext != -1 {
+			var err error
+
+			conditionContext, err = cmdutils.ParseQueryContextInner(tuple[columns.ConditionContext])
+			if err != nil {
+				return nil, fmt.Errorf("failed to read condition context on line %d: %w", index, err)
+			}
+		}
+
+		condition = &openfga.RelationshipCondition{
+			Name:    tuple[columns.ConditionName],
+			Context: conditionContext,
+		}
+	}
+
+	return condition, nil
 }
 
 type csvColumns struct {
@@ -258,31 +273,37 @@ func (columns *csvColumns) setHeaderIndex(headerName string, index int) error {
 	case "condition_context":
 		columns.ConditionContext = index
 	default:
-		return fmt.Errorf("invalid header %q, valid headers are user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context", headerName)
+		return fmt.Errorf("invalid header %q, valid headers are user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context", headerName) //nolint:goerr113
 	}
+
 	return nil
 }
 
 func (columns *csvColumns) validate() error {
 	if columns.UserType == -1 {
-		return errors.New("required csv header \"user_type\" not found")
+		return clierrors.MissingRequiredCsvHeaderError("user_type") //nolint:wrapcheck
 	}
+
 	if columns.UserID == -1 {
-		return errors.New("required csv header \"user_id\" not found")
+		return clierrors.MissingRequiredCsvHeaderError("user_id") //nolint:wrapcheck
 	}
+
 	if columns.Relation == -1 {
-		return errors.New("required csv header \"relation\" not found")
+		return clierrors.MissingRequiredCsvHeaderError("relation") //nolint:wrapcheck
 	}
+
 	if columns.ObjectType == -1 {
-		return errors.New("required csv header \"object_type\" not found")
+		return clierrors.MissingRequiredCsvHeaderError("object_type") //nolint:wrapcheck
 	}
+
 	if columns.ObjectID == -1 {
-		return errors.New("required csv header \"object_id\" not found")
+		return clierrors.MissingRequiredCsvHeaderError("object_id") //nolint:wrapcheck
 	}
 
 	if columns.ConditionContext != -1 && columns.ConditionName == -1 {
-		return errors.New("missing \"condition_name\" header which is required when \"condition_context\" is present")
+		return errors.New("missing \"condition_name\" header which is required when \"condition_context\" is present") //nolint:goerr113
 	}
+
 	return nil
 }
 
