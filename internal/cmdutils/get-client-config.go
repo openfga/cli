@@ -54,6 +54,6 @@ func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
 		APIAudience:          clientCredentialsAPIAudience,
 		ClientID:             clientCredentialsClientID,
 		ClientSecret:         clientCredentialsClientSecret,
-		ApiScopes:            clientCredentialsScopes,
+		APIScopes:            clientCredentialsScopes,
 	}
 }

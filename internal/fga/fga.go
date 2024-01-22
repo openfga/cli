@@ -18,9 +18,10 @@ limitations under the License.
 package fga
 
 import (
+	"strings"
+
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
-	"strings"
 
 	"github.com/openfga/cli/internal/build"
 )
@@ -34,7 +35,7 @@ type ClientConfig struct {
 	APIToken             string   `json:"api_token,omitempty"`
 	APITokenIssuer       string   `json:"api_token_issuer,omitempty"`
 	APIAudience          string   `json:"api_audience,omitempty"`
-	ApiScopes            []string `json:"api_scopes,omitempty"`
+	APIScopes            []string `json:"api_scopes,omitempty"`
 	ClientID             string   `json:"client_id,omitempty"`
 	ClientSecret         string   `json:"client_secret,omitempty"`
 }
@@ -57,7 +58,7 @@ func (c ClientConfig) getCredentials() *credentials.Credentials {
 				ClientCredentialsClientSecret:   c.ClientSecret,
 				ClientCredentialsApiAudience:    c.APIAudience,
 				ClientCredentialsApiTokenIssuer: c.APITokenIssuer,
-				ClientCredentialsScopes:         strings.Join(c.ApiScopes, " "),
+				ClientCredentialsScopes:         strings.Join(c.APIScopes, " "),
 			},
 		}
 	}
