@@ -22,7 +22,7 @@ func TestWriteModelFail(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
-	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}` //nolint:lll
+	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}` //nolint:lll
 	body := &client.ClientWriteAuthorizationModelRequest{}
 
 	err := json.Unmarshal([]byte(modelJSONTxt), &body)
@@ -58,7 +58,7 @@ func TestWriteModel(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
-	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}` //nolint:lll
+	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}` //nolint:lll
 
 	body := &client.ClientWriteAuthorizationModelRequest{}
 
