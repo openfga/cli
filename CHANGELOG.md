@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.2.5
+
+### [0.2.5](https://github.com/openfga/cli/compare/v0.2.4...v0.2.5) (2024-01-23)
+
+Added:
+- Add support for oauth2 credentials with scopes instead of audience (#232) - thanks @le-yams
+- `fga tuple import` now supports any columns order and optional fields are no longer required (#230) - thanks @le-yams  
+- Support for mixed operators in the model.
+  `define viewer: ([user] but not blocked) or owner or viewer from parent` is now supported!
+  See [openfga/language#107](https://github.com/openfga/language/pull/107#issue-1990426478) for more details on supported and unsupported functionality
+
+Fixed:
+- Fixed `fga model write` not writing models with conditions (#236)
+- Re-added support for condition parameters as identifiers and relation names (e.g. `list` and `map`)
+
 ## v0.2.4
 
 ### [0.2.4](https://github.com/openfga/cli/compare/v0.2.3...v0.2.4) (2024-01-16)
