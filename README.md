@@ -147,6 +147,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 | Shared Secret          | `--api-token`        | `FGA_API_TOKEN`        | `api-token`        |
 | Client ID              | `--client-id`        | `FGA_CLIENT_ID`        | `client-id`        |
 | Client Secret          | `--client-secret`    | `FGA_CLIENT_SECRET`    | `client-secret`    |
+| Scopes                 | `--api-scopes`       | `FGA_API_SCOPES`       | `api-scopes`       |
 | Token Issuer           | `--api-token-issuer` | `FGA_API_TOKEN_ISSUER` | `api-token-issuer` |
 | Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     | `api-audience`     |
 | Store ID               | `--store-id`         | `FGA_STORE_ID`         | `store-id`         |
