@@ -83,6 +83,20 @@ func (model *AuthzModel) GetTypeDefinitions() []openfga.TypeDefinition {
 	return *model.TypeDefinitions
 }
 
+func (model *AuthzModel) GetConditions() *map[string]openfga.Condition {
+	conditions := make(map[string]openfga.Condition)
+
+	if model == nil || model.Conditions == nil {
+		return &conditions
+	}
+
+	for conditionName, condition := range model.Conditions {
+		conditions[conditionName] = *condition
+	}
+
+	return &conditions
+}
+
 func (model *AuthzModel) GetProtoModel() *pb.AuthorizationModel {
 	if model == nil {
 		return nil
