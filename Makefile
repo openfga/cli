@@ -42,9 +42,11 @@ $(MOCK_DIR)/client.go: $(GO_BIN)/mockgen $(MOCK_SRC_DIR)
 
 .PHONY: build run clean test lint audit format
 
-build: $(BUILD_DIR)/$(BINARY_NAME)
+build:
+	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
+	@go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
  
-run: $(BUILD_DIR)/$(BINARY_NAME)
+run: build
 	${BUILD_DIR}/${BINARY_NAME} $(ARGS)
  
 clean:
