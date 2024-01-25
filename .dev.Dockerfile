@@ -3,7 +3,7 @@ FROM cgr.dev/chainguard/go:1.20@sha256:8454bbbb4061bd8fed6ce0b6de0d08c0a6037fe33
 WORKDIR /app
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o fga ./main.go
+RUN CGO_ENABLED=0 go build -o fga ./cmd/fga/main.go
 
 FROM cgr.dev/chainguard/static@sha256:ee47224a2afc674c1f1089b9dea97d5ee400cf2fff3797398778450a4cfb2a8d
 

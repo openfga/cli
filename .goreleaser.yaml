@@ -8,7 +8,7 @@ before:
 
 builds:
   -
-    main: ./main.go
+    main: ./cmd/fga/main.go
     binary: fga
     env:
       - CGO_ENABLED=0

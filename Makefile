@@ -22,7 +22,7 @@ $(GO_BIN)/gofumpt:
 
 $(BUILD_DIR)/$(BINARY_NAME):
 	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
-	@go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
+	@go build -v -o ${BUILD_DIR}/${BINARY_NAME} ./cmd/fga/main.go
 
 $(GO_BIN)/mockgen:
 	@echo "==> Installing mockgen within ${GO_BIN}"
