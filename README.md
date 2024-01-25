@@ -98,10 +98,8 @@ docker pull openfga/cli; docker run -it openfga/cli
 
 ### Go
 
-> note that the command will be named `cli`
-
 ```shell
-go install github.com/openfga/cli@latest
+go install github.com/openfga/cli/cmd/fga@latest
 ```
 
 ### Manually
