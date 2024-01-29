@@ -73,13 +73,13 @@ func initLocalStore(
 func getLocalServerModelAndTuples(
 	storeData *StoreData,
 	format authorizationmodel.ModelFormat,
-) (*server.Server, *authorizationmodel.AuthzModel, error) {
+) (*server.Server, *authorizationmodel.AuthzModel, func(), error) {
 	var fgaServer *server.Server
-
+	stopServerFn := func() {}
 	var authModel *authorizationmodel.AuthzModel
 
 	if storeData.Model == "" {
-		return fgaServer, authModel, nil
+		return fgaServer, authModel, stopServerFn, nil
 	}
 
 	// If we have at least one local test, initialize the local server
@@ -87,21 +87,26 @@ func getLocalServerModelAndTuples(
 
 	fgaServer, err := server.NewServerWithOpts(server.WithDatastore(datastore))
 	if err != nil {
-		return nil, nil, err //nolint:wrapcheck
+		return nil, nil, stopServerFn, err //nolint:wrapcheck
 	}
 
 	tempModel := authorizationmodel.AuthzModel{}
 	if format == authorizationmodel.ModelFormatJSON {
 		if err := tempModel.ReadFromJSONString(storeData.Model); err != nil {
-			return nil, nil, err //nolint:wrapcheck
+			return nil, nil, stopServerFn, err //nolint:wrapcheck
 		}
 	} else {
 		if err := tempModel.ReadFromDSLString(storeData.Model); err != nil {
-			return nil, nil, err //nolint:wrapcheck
+			return nil, nil, stopServerFn, err //nolint:wrapcheck
 		}
 	}
 
 	authModel = &tempModel
 
-	return fgaServer, authModel, nil
+	stopServerFn = func() {
+		datastore.Close()
+		fgaServer.Close()
+	}
+
+	return fgaServer, authModel, stopServerFn, nil
 }

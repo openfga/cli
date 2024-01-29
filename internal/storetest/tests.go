@@ -36,10 +36,11 @@ func RunTests(
 ) (TestResults, error) {
 	test := TestResults{}
 
-	fgaServer, authModel, err := getLocalServerModelAndTuples(storeData, format)
+	fgaServer, authModel, stopServerFn, err := getLocalServerModelAndTuples(storeData, format)
 	if err != nil {
 		return test, err
 	}
+	defer stopServerFn()
 
 	for index := 0; index < len(storeData.Tests); index++ {
 		result, err := RunTest(
