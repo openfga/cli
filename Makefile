@@ -1,9 +1,19 @@
 #-----------------------------------------------------------------------------------------------------------------------
 # Variables (https://www.gnu.org/software/make/manual/html_node/Using-Variables.html#Using-Variables)
 #-----------------------------------------------------------------------------------------------------------------------
+.DEFAULT_GOAL := help
+
 BINARY_NAME = fga
 BUILD_DIR ?= $(CURDIR)/dist
 GO_BIN ?= $(shell go env GOPATH)/bin
+GO_PKG := github.com/openfga/cli
+
+BUILD_INFO_PKG := $(GO_PKG)/internal/build
+BUILD_TIME := $(shell date -u '+%Y-%m-%d %H:%M:%S')
+GIT_COMMIT := $(shell git rev-parse --short HEAD)
+GO_LINKER_FLAGS = -X '$(BUILD_INFO_PKG).Version=dev' \
+					 -X '$(BUILD_INFO_PKG).Commit=$(GIT_COMMIT)' \
+					 -X '$(BUILD_INFO_PKG).Date=$(BUILD_TIME)'
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Rules (https://www.gnu.org/software/make/manual/html_node/Rule-Introduction.html#Rule-Introduction)
@@ -20,9 +30,9 @@ $(GO_BIN)/gofumpt:
 	@echo "==> Installing gofumpt within "${GO_BIN}""
 	@go install -v mvdan.cc/gofumpt@latest
 
-$(BUILD_DIR)/$(BINARY_NAME):
-	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
-	@go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
+$(GO_BIN)/CompileDaemon:
+	@echo "==> Installing CompileDaemon within "${GO_BIN}""
+	@go install -v github.com/githubnemo/CompileDaemon@latest
 
 $(GO_BIN)/mockgen:
 	@echo "==> Installing mockgen within ${GO_BIN}"
@@ -39,43 +49,49 @@ $(MOCK_DIR)/client.go: $(GO_BIN)/mockgen $(MOCK_SRC_DIR)
 #-----------------------------------------------------------------------------------------------------------------------
 # Phony Rules(https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html)
 #-----------------------------------------------------------------------------------------------------------------------
-
 .PHONY: build run clean test lint audit format
 
-build:
-	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
-	@go build -v -o ${BUILD_DIR}/${BINARY_NAME} main.go
- 
-run: build
-	${BUILD_DIR}/${BINARY_NAME} $(ARGS)
- 
-clean:
-	@echo "==> Cleaning project files"
-	go clean
-	rm -f ${BUILD_DIR}
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-test:
+build: ## Build the CLI binary
+	@echo "==> Building binary within ${BUILD_DIR}/${BINARY_NAME}"
+	@go build -v -ldflags "$(GO_LINKER_FLAGS)" -o "${BUILD_DIR}/${BINARY_NAME}" "$(CURDIR)/cmd/fga/main.go"
+ 
+install: ## Install the CLI binary
+	@$(MAKE) build BUILD_DIR="$(GO_BIN)"
+
+run: $(GO_BIN)/CompileDaemon ## Watch for changes and recompile the CLI binary
+	@echo "==> Watching for changes"
+	@CompileDaemon -build='make install' -command='fga --version'
+ 
+clean: ## Clean project files
+	@echo "==> Cleaning project files"
+	@go clean
+	@rm -f ${BUILD_DIR}
+
+test: ## Run tests
 	go test -race \
-			-coverpkg=./... \
-			-coverprofile=coverageunit.tmp.out \
-			-covermode=atomic \
-			-count=1 \
-			-timeout=5m \
-			./...
+		-coverpkg=./... \
+		-coverprofile=coverageunit.tmp.out \
+		-covermode=atomic \
+		-count=1 \
+		-timeout=5m \
+		./...
 	@cat coverageunit.tmp.out | grep -v "mocks" > coverageunit.out
 	@rm coverageunit.tmp.out
 
-lint: $(GO_BIN)/golangci-lint
+lint: $(GO_BIN)/golangci-lint ## Lint Go source files
 	@echo "==> Linting Go source files"
 	@golangci-lint run -v --fix -c .golangci.yaml ./...
 
-audit: $(GO_BIN)/govulncheck
+audit: $(GO_BIN)/govulncheck ## Audit Go source files
 	@echo "==> Checking Go source files for vulnerabilities"
 	govulncheck ./...
 
-format: $(GO_BIN)/gofumpt $(GO_BIN)/gci
+format: $(GO_BIN)/gofumpt ## Format Go source files
 	@echo "==> Formatting project files"
 	gofumpt -w .
 
-mocks: $(MOCK_DIR)/*.go
+mocks: $(MOCK_DIR)/*.go ## Generate Go mocks
 	@echo "==> Mocks generated"

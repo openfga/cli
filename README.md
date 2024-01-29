@@ -98,10 +98,8 @@ docker pull openfga/cli; docker run -it openfga/cli
 
 ### Go
 
-> note that the command will be named `cli`
-
 ```shell
-go install github.com/openfga/cli@latest
+go install github.com/openfga/cli/cmd/fga@latest
 ```
 
 ### Manually
@@ -120,7 +118,7 @@ Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go
 2. Then use the build command:
 
    ```bash
-   go build -o ./dist/fga main.go
+   go build -o ./dist/fga ./cmd/fga/main.go
    ```
 
    or if you have `make` installed, just run:
