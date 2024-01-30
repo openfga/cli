@@ -75,8 +75,10 @@ func getLocalServerModelAndTuples(
 	format authorizationmodel.ModelFormat,
 ) (*server.Server, *authorizationmodel.AuthzModel, func(), error) {
 	var fgaServer *server.Server
-	stopServerFn := func() {}
+
 	var authModel *authorizationmodel.AuthzModel
+
+	stopServerFn := func() {}
 
 	if storeData.Model == "" {
 		return fgaServer, authModel, stopServerFn, nil

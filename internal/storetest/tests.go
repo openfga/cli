@@ -40,6 +40,7 @@ func RunTests(
 	if err != nil {
 		return test, err
 	}
+
 	defer stopServerFn()
 
 	for index := 0; index < len(storeData.Tests); index++ {
