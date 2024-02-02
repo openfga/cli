@@ -69,7 +69,7 @@ func importStore(
 		}
 	}
 
-	fgaClient, err = clientConfig.GetFgaClient()
+	fgaClient, err = clientConfig.GetFgaClient() //nolint:wsl
 	if err != nil {
 		return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 	}

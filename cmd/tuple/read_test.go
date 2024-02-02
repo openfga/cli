@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/golang/mock/gomock"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -372,4 +374,59 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 	if string(simpleTxt) != simpleOutput {
 		t.Errorf("Expected output %v actual %v", simpleOutput, string(simpleTxt))
 	}
+}
+
+func TestReadResponseCSVDTOParser(t *testing.T) {
+	testCases := []struct {
+		readRes  readResponse
+		expected []readResponseCSVDTO
+	}{
+		{
+			readRes: readResponse{
+				simple: []openfga.TupleKey{
+					{
+						User:     "user:anne",
+						Relation: "reader",
+						Object:   "document:secret.doc",
+						Condition: &openfga.RelationshipCondition{
+							Name:    "inOfficeIP",
+							Context: toPointer(map[string]interface{}{"ip_addr": "10.0.0.1"}),
+						},
+					},
+					{
+						User:      "user:john",
+						Relation:  "writer",
+						Object:    "document:abc.doc",
+						Condition: &openfga.RelationshipCondition{},
+					},
+				},
+			},
+			expected: []readResponseCSVDTO{
+				{
+					UserType:         "user",
+					UserID:           "anne",
+					Relation:         "reader",
+					ObjectType:       "document",
+					ObjectID:         "secret.doc",
+					ConditionName:    "inOfficeIP",
+					ConditionContext: "{\"ip_addr\":\"10.0.0.1\"}",
+				},
+				{
+					UserType:   "user",
+					UserID:     "john",
+					Relation:   "writer",
+					ObjectType: "document",
+					ObjectID:   "abc.doc",
+				},
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		outcome, _ := testCase.readRes.toCsvDTO()
+		assert.Equal(t, testCase.expected, outcome)
+	}
+}
+
+func toPointer[T any](p T) *T {
+	return &p
 }
