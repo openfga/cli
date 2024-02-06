@@ -38,8 +38,8 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 
 	decoder := yaml.NewDecoder(testFile)
 	decoder.KnownFields(true)
-	err = decoder.Decode(&storeData)
 
+	err = decoder.Decode(&storeData)
 	if err != nil {
 		return format, nil, fmt.Errorf("failed to unmarshal file %s due to %w", fileName, err)
 	}

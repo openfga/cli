@@ -18,18 +18,14 @@ limitations under the License.
 package storetest
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"os"
 	"path"
 
 	"github.com/openfga/go-sdk/client"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/tuplefile"
 )
 
 type ModelTestCheck struct {
@@ -96,7 +92,7 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	var errs error
 
 	if storeData.TupleFile != "" {
-		tuples, err := readTupleFile(path.Join(basePath, storeData.TupleFile))
+		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
 		if err != nil {
 			errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
 		} else {
@@ -110,7 +106,7 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 			continue
 		}
 
-		tuples, err := readTupleFile(path.Join(basePath, test.TupleFile))
+		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, test.TupleFile))
 		if err != nil {
 			errs = errors.Join(
 				errs,
@@ -126,39 +122,4 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	}
 
 	return nil
-}
-
-func readTupleFile(tuplePath string) ([]client.ClientContextualTupleKey, error) {
-	var tuples []client.ClientContextualTupleKey
-
-	tupleFile, err := os.Open(tuplePath)
-	if err != nil {
-		return nil, err //nolint:wrapcheck
-	}
-	defer tupleFile.Close()
-
-	switch path.Ext(tuplePath) {
-	case ".json":
-		contents, err := io.ReadAll(tupleFile)
-		if err != nil {
-			return nil, err //nolint:wrapcheck
-		}
-
-		err = json.Unmarshal(contents, &tuples)
-		if err != nil {
-			return nil, err //nolint:wrapcheck
-		}
-	case ".yaml", ".yml":
-		decoder := yaml.NewDecoder(tupleFile)
-		decoder.KnownFields(true)
-
-		err = decoder.Decode(&tuples)
-		if err != nil {
-			return nil, err //nolint:wrapcheck
-		}
-	default:
-		return nil, fmt.Errorf("unsupported file format %s", path.Ext(tuplePath)) //nolint:goerr113
-	}
-
-	return tuples, nil
 }
