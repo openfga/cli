@@ -39,8 +39,8 @@ func TestWriteModelFail(t *testing.T) {
 	mockFgaClient.EXPECT().WriteAuthorizationModel(context.Background()).Return(mockRequest)
 
 	model := authorizationmodel.AuthzModel{}
-	err = model.ReadFromJSONString(modelJSONTxt)
 
+	err = model.ReadFromJSONString(modelJSONTxt)
 	if err != nil {
 		return
 	}

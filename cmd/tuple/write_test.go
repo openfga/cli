@@ -7,6 +7,8 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/openfga/cli/internal/tuplefile"
 )
 
 func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
@@ -209,7 +211,7 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			actualTuples, err := parseTuplesFileData(test.file)
+			actualTuples, err := tuplefile.ReadTupleFile(test.file)
 
 			if test.expectedError != "" {
 				require.EqualError(t, err, test.expectedError)

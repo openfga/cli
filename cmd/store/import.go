@@ -66,8 +66,8 @@ func importStore(
 			return fmt.Errorf("failed to write model due to %w", err)
 		}
 	}
-	fgaClient, err = clientConfig.GetFgaClient() //nolint:wsl
 
+	fgaClient, err = clientConfig.GetFgaClient()
 	if err != nil {
 		return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 	}
@@ -75,8 +75,8 @@ func importStore(
 	writeRequest := client.ClientWriteRequest{
 		Writes: storeData.Tuples,
 	}
-	_, err = tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 
+	_, err = tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
