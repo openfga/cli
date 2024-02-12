@@ -65,7 +65,7 @@ var listCmd = &cobra.Command{
 	Short:   "List Stores",
 	Long:    `Get a list of stores.`,
 	Example: "fga store list",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {

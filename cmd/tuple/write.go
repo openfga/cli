@@ -18,6 +18,7 @@ package tuple
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/openfga/go-sdk/client"
@@ -114,7 +115,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 	}
 
 	if fileName == "" {
-		return fmt.Errorf("file name cannot be empty") //nolint:goerr113
+		return errors.New("file name cannot be empty") //nolint:goerr113
 	}
 
 	maxTuplesPerWrite, err := flags.GetInt("max-tuples-per-write")

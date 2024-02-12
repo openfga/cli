@@ -71,7 +71,7 @@ var listCmd = &cobra.Command{
 	Short:   "Read Authorization Models",
 	Long:    "List authorization models in a store.",
 	Example: "fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {

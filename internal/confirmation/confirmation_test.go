@@ -52,10 +52,12 @@ func TestConfirmation(t *testing.T) {
 		test := test
 		t.Run(test._name, func(t *testing.T) {
 			t.Parallel()
+
 			result, err := askForConfirmation(bufio.NewReader(strings.NewReader(test.input)), "test")
 			if err != nil {
 				t.Error(err)
 			}
+
 			if result != test.result {
 				t.Errorf("Expect result %v actual %v", test.result, result)
 			}

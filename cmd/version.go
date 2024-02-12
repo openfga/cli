@@ -31,7 +31,7 @@ var versionCmd *cobra.Command = &cobra.Command{
 	Use:   "version",
 	Short: "Reports the FGA CLI version",
 	Long:  "Reports the FGA CLI version.",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		fmt.Printf("fga version %s\n", versionStr)
 
 		return nil

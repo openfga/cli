@@ -83,10 +83,12 @@ func TestValidate(t *testing.T) {
 			t.Parallel()
 
 			model := authorizationmodel.AuthzModel{}
+
 			err := model.ReadFromJSONString(test.Input)
 			if err != nil {
 				return
 			}
+
 			output := validate(model)
 
 			if !reflect.DeepEqual(output, test.ExpectedOutput) {

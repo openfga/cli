@@ -138,7 +138,7 @@ var importCmd = &cobra.Command{
 	Deprecated: "use the write/delete command with the flag --file instead",
 	Long: "Imports Relationship Tuples to the store. " +
 		"This will write the tuples in chunks and at the end will report the tuple chunks that failed.",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
 		fgaClient, err := clientConfig.GetFgaClient()
