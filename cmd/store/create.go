@@ -18,6 +18,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/openfga/go-sdk/client"
@@ -60,7 +61,7 @@ func CreateStoreWithModel(
 	response := CreateStoreAndModelResponse{}
 
 	if storeName == "" {
-		return nil, fmt.Errorf(`required flag(s) "name" not set`) //nolint:goerr113
+		return nil, errors.New(`required flag(s) "name" not set`) //nolint:goerr113
 	}
 
 	createStoreResponse, err := create(fgaClient, storeName)

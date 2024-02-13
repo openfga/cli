@@ -65,6 +65,7 @@ func TestGetContextualTuplesWithNoError(t *testing.T) {
 		test := tests[index]
 		t.Run("TestGetContextualTuplesWithNoError"+string(rune(index)), func(t *testing.T) {
 			t.Parallel()
+
 			tuples, err := cmdutils.ParseContextualTuplesInner(test.raw)
 			if err != nil {
 				t.Error(err)
@@ -109,8 +110,8 @@ func TestGetContextualTuplesWithError(t *testing.T) {
 		test := tests[index]
 		t.Run("TestGetContextualTuplesWithNoError"+string(rune(index)), func(t *testing.T) {
 			t.Parallel()
-			_, err := cmdutils.ParseContextualTuplesInner(test.raw)
 
+			_, err := cmdutils.ParseContextualTuplesInner(test.raw)
 			if err == nil {
 				t.Error("Expect error but there is none")
 			}

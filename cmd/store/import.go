@@ -52,11 +52,13 @@ func importStore(
 	} else {
 		authModel := authorizationmodel.AuthzModel{}
 		clientConfig.StoreID = storeID
+
 		if format == authorizationmodel.ModelFormatJSON {
 			err = authModel.ReadFromJSONString(storeData.Model)
 		} else {
 			err = authModel.ReadFromDSLString(storeData.Model)
 		}
+
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
@@ -90,7 +92,7 @@ var importCmd = &cobra.Command{
 	Short:   "Import Store Data",
 	Long:    `Import a store: updating the name, model and appending the global tuples`,
 	Example: "fga store import --file=model.fga.yaml",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
 		storeID, err := cmd.Flags().GetString("store-id")

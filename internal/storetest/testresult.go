@@ -59,7 +59,7 @@ func (result TestResult) IsPassing() bool {
 }
 
 //nolint:cyclop
-func (result TestResult) FriendlyDisplay() string {
+func (result TestResult) FriendlyFailuresDisplay() string {
 	totalCheckCount := len(result.CheckResults)
 	failedCheckCount := 0
 	totalListObjectsCount := len(result.ListObjectsResults)
@@ -71,16 +71,7 @@ func (result TestResult) FriendlyDisplay() string {
 		for index := 0; index < totalCheckCount; index++ {
 			checkResult := result.CheckResults[index]
 
-			if checkResult.IsPassing() {
-				checkResultsOutput = fmt.Sprintf(
-					"%s\n✓ Check(user=%s,relation=%s,object=%s, context=%v)",
-					checkResultsOutput,
-					checkResult.Request.User,
-					checkResult.Request.Relation,
-					checkResult.Request.Object,
-					checkResult.Request.Context,
-				)
-			} else {
+			if !checkResult.IsPassing() {
 				failedCheckCount++
 
 				got := "N/A"
@@ -107,16 +98,7 @@ func (result TestResult) FriendlyDisplay() string {
 		for index := 0; index < totalListObjectsCount; index++ {
 			listObjectsResult := result.ListObjectsResults[index]
 
-			if listObjectsResult.IsPassing() {
-				listObjectsResultsOutput = fmt.Sprintf(
-					"%s\n✓ ListObjects(user=%s,relation=%s,type=%s, context=%v)",
-					listObjectsResultsOutput,
-					listObjectsResult.Request.User,
-					listObjectsResult.Request.Relation,
-					listObjectsResult.Request.Type,
-					listObjectsResult.Request.Context,
-				)
-			} else {
+			if !listObjectsResult.IsPassing() {
 				failedListObjectsCount++
 
 				got := "N/A"
@@ -139,30 +121,30 @@ func (result TestResult) FriendlyDisplay() string {
 		}
 	}
 
-	testStatus := "PASSING"
 	if failedCheckCount+failedListObjectsCount != 0 {
-		testStatus = "FAILING"
+		testStatus := "FAILING"
+		output := fmt.Sprintf(
+			"(%s) %s: Checks (%d/%d passing) | ListObjects (%d/%d passing)",
+			testStatus,
+			result.Name,
+			totalCheckCount-failedCheckCount,
+			totalCheckCount,
+			totalListObjectsCount-failedListObjectsCount,
+			totalListObjectsCount,
+		)
+
+		if failedCheckCount > 0 {
+			output = fmt.Sprintf("%s%s", output, checkResultsOutput)
+		}
+
+		if failedListObjectsCount > 0 {
+			output = fmt.Sprintf("%s%s", output, listObjectsResultsOutput)
+		}
+
+		return output
 	}
 
-	output := fmt.Sprintf(
-		"(%s) %s: Checks (%d/%d passing) | ListObjects (%d/%d passing)",
-		testStatus,
-		result.Name,
-		totalCheckCount-failedCheckCount,
-		totalCheckCount,
-		totalListObjectsCount-failedListObjectsCount,
-		totalListObjectsCount,
-	)
-
-	if failedCheckCount > 0 {
-		output = fmt.Sprintf("%s%s", output, checkResultsOutput)
-	}
-
-	if failedListObjectsCount > 0 {
-		output = fmt.Sprintf("%s%s", output, listObjectsResultsOutput)
-	}
-
-	return output
+	return ""
 }
 
 type TestResults struct {
@@ -184,8 +166,48 @@ func (test TestResults) FriendlyDisplay() string {
 	friendlyResults := []string{}
 
 	for index := 0; index < len(test.Results); index++ {
-		friendlyResults = append(friendlyResults, test.Results[index].FriendlyDisplay())
+		if !test.Results[index].IsPassing() {
+			friendlyResults = append(friendlyResults, test.Results[index].FriendlyFailuresDisplay())
+		}
 	}
 
-	return strings.Join(friendlyResults, "\n---\n")
+	failuresText := strings.Join(friendlyResults, "\n---\n")
+
+	totalTestCount := len(test.Results)
+	failedTestCount := 0
+	totalCheckCount := 0
+	failedCheckCount := 0
+	totalListObjectsCount := 0
+	failedListObjectsCount := 0
+
+	for _, testResult := range test.Results {
+		if !testResult.IsPassing() {
+			failedTestCount++
+		}
+
+		totalCheckCount += len(testResult.CheckResults)
+
+		for _, checkResult := range testResult.CheckResults {
+			if !checkResult.IsPassing() {
+				failedCheckCount++
+			}
+		}
+
+		totalListObjectsCount += len(testResult.ListObjectsResults)
+
+		for _, listObjectsResult := range testResult.ListObjectsResults {
+			if !listObjectsResult.IsPassing() {
+				failedListObjectsCount++
+			}
+		}
+	}
+
+	summary := fmt.Sprintf(
+		"\n---\n\n# Test Summary #\nTests %d/%d passing\nChecks %d/%d passing\nListObjects %d/%d passing",
+		totalTestCount-failedTestCount, totalTestCount,
+		totalCheckCount-failedCheckCount, totalCheckCount,
+		totalListObjectsCount-failedListObjectsCount, totalListObjectsCount,
+	)
+
+	return failuresText + summary
 }
