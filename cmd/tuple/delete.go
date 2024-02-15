@@ -19,14 +19,13 @@ package tuple
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/tuplefile"
 )
 
 // deleteCmd represents the delete command.
@@ -46,19 +45,15 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
-		if fileName != "" {
-			var tuples []client.ClientTupleKeyWithoutCondition
 
-			data, err := os.ReadFile(fileName)
+		if fileName != "" {
+
+			clientTuples, err := tuplefile.ReadTupleFile(fileName)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
 
-			err = yaml.Unmarshal(data, &tuples)
-			if err != nil {
-				return fmt.Errorf("failed to parse input tuples due to %w", err)
-			}
-
+			var openfgaTuples = tuplefile.ClientTupleKeyToTupleKeyWithoutCondition(clientTuples)
 			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 			if err != nil {
 				return fmt.Errorf("failed to parse max tuples per write due to %w", err)
@@ -70,7 +65,7 @@ var deleteCmd = &cobra.Command{
 			}
 
 			deleteRequest := client.ClientWriteRequest{
-				Deletes: tuples,
+				Deletes: openfgaTuples,
 			}
 			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
 			if err != nil {
