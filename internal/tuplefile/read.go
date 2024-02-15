@@ -34,8 +34,10 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	return tuples, nil
 }
 
-func ClientTupleKeyToTupleKeyWithoutCondition(clientTupleKey []client.ClientTupleKey) []openfga.TupleKeyWithoutCondition {
-	var tuples []openfga.TupleKeyWithoutCondition
+func ClientTupleKeyToTupleKeyWithoutCondition(clientTupleKey []client.ClientTupleKey,
+) []openfga.TupleKeyWithoutCondition {
+	tuples := make([]openfga.TupleKeyWithoutCondition, 0, len(clientTupleKey))
+
 	for _, tuple := range clientTupleKey {
 		convertedTuple := openfga.TupleKeyWithoutCondition{
 			User:     tuple.User,
@@ -44,5 +46,6 @@ func ClientTupleKeyToTupleKeyWithoutCondition(clientTupleKey []client.ClientTupl
 		}
 		tuples = append(tuples, convertedTuple)
 	}
+
 	return tuples
 }

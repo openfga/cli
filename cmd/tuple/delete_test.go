@@ -146,9 +146,10 @@ func TestDeleteTuplesFileData(t *testing.T) { //nolint:funlen
 			expectedError: "failed to parse input tuples: unsupported file format \".toml\"",
 		},
 		{
-			name:          "it fails to parse a csv file with wrong headers",
-			file:          "testdata/tuples_wrong_headers.csv",
-			expectedError: "failed to parse input tuples: invalid header \"a\", valid headers are user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context",
+			name: "it fails to parse a csv file with wrong headers",
+			file: "testdata/tuples_wrong_headers.csv",
+			expectedError: "failed to parse input tuples: invalid header \"a\", valid headers are " +
+				"user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context",
 		},
 		{
 			name:          "it fails to parse a csv file with missing required headers",
@@ -156,9 +157,10 @@ func TestDeleteTuplesFileData(t *testing.T) { //nolint:funlen
 			expectedError: "failed to parse input tuples: csv header missing (\"object_id\")",
 		},
 		{
-			name:          "it fails to parse a csv file with missing condition_name header when condition_context is present",
-			file:          "testdata/tuples_missing_condition_name_header.csv",
-			expectedError: "failed to parse input tuples: missing \"condition_name\" header which is required when \"condition_context\" is present",
+			name: "it fails to parse a csv file with missing condition_name header when condition_context is present",
+			file: "testdata/tuples_missing_condition_name_header.csv",
+			expectedError: "failed to parse input tuples: missing \"condition_name\"" +
+				" header which is required when \"condition_context\" is present",
 		},
 		{
 			name:          "it fails to parse an empty csv file",
@@ -166,9 +168,10 @@ func TestDeleteTuplesFileData(t *testing.T) { //nolint:funlen
 			expectedError: "failed to parse input tuples: failed to read csv headers: EOF",
 		},
 		{
-			name:          "it fails to parse a csv file with invalid rows",
-			file:          "testdata/tuples_with_invalid_rows.csv",
-			expectedError: "failed to parse input tuples: failed to read tuple from csv file: record on line 2: wrong number of fields",
+			name: "it fails to parse a csv file with invalid rows",
+			file: "testdata/tuples_with_invalid_rows.csv",
+			expectedError: "failed to parse input tuples: failed to read tuple from csv file:" +
+				" record on line 2: wrong number of fields",
 		},
 	}
 

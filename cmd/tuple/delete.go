@@ -53,7 +53,7 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
 
-			var openfgaTuples = tuplefile.ClientTupleKeyToTupleKeyWithoutCondition(clientTuples)
+			openfgaTuples := tuplefile.ClientTupleKeyToTupleKeyWithoutCondition(clientTuples)
 			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 			if err != nil {
 				return fmt.Errorf("failed to parse max tuples per write due to %w", err)
