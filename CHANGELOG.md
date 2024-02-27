@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.6
+
+### [0.2.6](https://github.com/openfga/cli/compare/v0.2.5...v0.2.6) (2024-02-27)
+
+Fixed:
+- allow transforming from JSON when `this` is not in first place (openfga/language#166)
+
 ## v0.2.5
 
 ### [0.2.5](https://github.com/openfga/cli/compare/v0.2.4...v0.2.5) (2024-01-23)
