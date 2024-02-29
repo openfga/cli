@@ -34,4 +34,5 @@ func init() {
 	StoreCmd.AddCommand(getCmd)
 	StoreCmd.AddCommand(deleteCmd)
 	StoreCmd.AddCommand(importCmd)
+	StoreCmd.AddCommand(exportCmd)
 }
