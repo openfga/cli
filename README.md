@@ -238,6 +238,72 @@ fga store **import**
 {}
 ```
 
+##### Export Store
+
+###### Command
+fga store **export**
+
+###### Parameters
+* `--store-id`: Specifies the store to export
+* `--output-file`: The file to output the store to (optional, writes to the terminal if omitted)
+* `--model-id`: Specifies the model to export (optional, exports the latest model if omitted)
+* `--max-tuples`: Specifies the max number of tuples to include in the output (option, defaults to 100)
+
+###### Example
+`fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4`
+
+###### Response
+```yaml
+name: Test
+model: |+
+    model
+      schema 1.1
+
+    type user
+
+    type group
+      relations
+        define member: [user]
+        define moderator: [user]
+
+tuples:
+    - user: user:1
+      relation: member
+      object: group:admins
+    - user: user:1
+      relation: member
+      object: group:employees
+    - user: user:2
+      relation: member
+      object: group:employees
+    - user: user:1
+      relation: moderator
+      object: group:employees
+tests:
+    - name: Tests
+      check:
+        - user: user:1
+          object: group:admins
+          assertions:
+            member: true
+        - user: user:2
+          object: group:admins
+          assertions:
+            member: false
+        - user: user:1
+          object: group:employees
+          assertions:
+            member: true
+            moderator: true
+        - user: user:2
+          object: group:employees
+          assertions:
+            member: true
+            moderator: false
+```
+
+If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
+
 ##### List Stores
 
 ###### Command

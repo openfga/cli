@@ -14,6 +14,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 
 	mock_client "github.com/openfga/cli/internal/mocks"
+	"github.com/openfga/cli/internal/tuple"
 )
 
 var errMockRead = errors.New("mock error")
@@ -33,6 +34,7 @@ func TestReadError(t *testing.T) {
 
 	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
@@ -73,6 +75,7 @@ func TestReadEmpty(t *testing.T) {
 
 	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
@@ -147,6 +150,7 @@ func TestReadSinglePage(t *testing.T) {
 
 	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
@@ -246,10 +250,12 @@ func TestReadMultiPages(t *testing.T) {
 
 	mockRequest1 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 	options1 := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest2 := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 	options2 := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(continuationToken),
 	}
 	gomock.InOrder(
@@ -334,6 +340,7 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
