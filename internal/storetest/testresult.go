@@ -79,17 +79,21 @@ func (result TestResult) FriendlyFailuresDisplay() string {
 					got = strconv.FormatBool(*checkResult.Got)
 				}
 
-				checkResultsOutput = fmt.Sprintf(
-					"%s\nⅹ Check(user=%s,relation=%s,object=%s, context=%v): expected=%t, got=%s, error=%v",
-					checkResultsOutput,
+				checkResultsOutput += fmt.Sprintf(
+					"\nⅹ Check(user=%s,relation=%s,object=%s",
 					checkResult.Request.User,
 					checkResult.Request.Relation,
-					checkResult.Request.Object,
-					checkResult.Request.Context,
-					checkResult.Expected,
-					got,
-					checkResult.Error,
-				)
+					checkResult.Request.Object)
+
+				if checkResult.Request.Context != nil {
+					checkResultsOutput += fmt.Sprintf(", context:%v", checkResult.Request.Context)
+				}
+
+				checkResultsOutput += fmt.Sprintf("): expected=%t, got=%s", checkResult.Expected, got)
+
+				if checkResult.Error != nil {
+					checkResultsOutput += fmt.Sprintf(", error=%v", checkResult.Error)
+				}
 			}
 		}
 	}
@@ -106,32 +110,40 @@ func (result TestResult) FriendlyFailuresDisplay() string {
 					got = fmt.Sprintf("%s", listObjectsResult.Got)
 				}
 
-				listObjectsResultsOutput = fmt.Sprintf(
-					"%s\nⅹ ListObjects(user=%s,relation=%s,type=%s, context=%v): expected=%s, got=%s, error=%v",
-					listObjectsResultsOutput,
+				listObjectsResultsOutput += fmt.Sprintf(
+					"\nⅹ ListObjects(user=%s,relation=%s,type=%s",
 					listObjectsResult.Request.User,
 					listObjectsResult.Request.Relation,
-					listObjectsResult.Request.Type,
-					listObjectsResult.Request.Context,
-					listObjectsResult.Expected,
-					got,
-					listObjectsResult.Error,
-				)
+					listObjectsResult.Request.Type)
+
+				if listObjectsResult.Request.Context != nil {
+					listObjectsResultsOutput += fmt.Sprintf(", context:%v", listObjectsResult.Request.Context)
+				}
+
+				listObjectsResultsOutput += fmt.Sprintf("): expected=%s, got=%s", listObjectsResult.Expected, got)
+
+				if listObjectsResult.Error != nil {
+					listObjectsResultsOutput += fmt.Sprintf(", error=%v", listObjectsResult.Error)
+				}
 			}
 		}
 	}
 
 	if failedCheckCount+failedListObjectsCount != 0 {
 		testStatus := "FAILING"
-		output := fmt.Sprintf(
-			"(%s) %s: Checks (%d/%d passing) | ListObjects (%d/%d passing)",
-			testStatus,
-			result.Name,
-			totalCheckCount-failedCheckCount,
-			totalCheckCount,
-			totalListObjectsCount-failedListObjectsCount,
-			totalListObjectsCount,
-		)
+		output := fmt.Sprintf("(%s) %s: ", testStatus, result.Name)
+
+		if totalCheckCount > 0 {
+			output += fmt.Sprintf("Checks (%d/%d passing)", totalCheckCount-failedCheckCount, totalCheckCount)
+		}
+
+		if totalCheckCount > 0 && totalListObjectsCount > 0 {
+			output += " | "
+		}
+
+		if totalListObjectsCount > 0 {
+			output += fmt.Sprintf("ListObjects (%d/%d passing)", totalListObjectsCount-failedListObjectsCount, totalListObjectsCount)
+		}
 
 		if failedCheckCount > 0 {
 			output = fmt.Sprintf("%s%s", output, checkResultsOutput)
@@ -202,12 +214,23 @@ func (test TestResults) FriendlyDisplay() string {
 		}
 	}
 
-	summary := fmt.Sprintf(
-		"\n---\n\n# Test Summary #\nTests %d/%d passing\nChecks %d/%d passing\nListObjects %d/%d passing",
-		totalTestCount-failedTestCount, totalTestCount,
-		totalCheckCount-failedCheckCount, totalCheckCount,
-		totalListObjectsCount-failedListObjectsCount, totalListObjectsCount,
-	)
+	summary := failuresText
 
-	return failuresText + summary
+	if totalTestCount > 0 {
+		if failedTestCount > 0 {
+			summary += "\n---\n"
+		}
+
+		summary += fmt.Sprintf("# Test Summary #\nTests %d/%d passing", totalTestCount-failedTestCount, totalTestCount)
+
+		if totalCheckCount > 0 {
+			summary += fmt.Sprintf("\nChecks %d/%d passing", totalCheckCount-failedCheckCount, totalCheckCount)
+		}
+
+		if totalListObjectsCount > 0 {
+			summary += fmt.Sprintf("\nListObjects %d/%d passing", totalListObjectsCount-failedListObjectsCount, totalListObjectsCount)
+		}
+	}
+
+	return summary
 }
