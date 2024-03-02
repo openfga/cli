@@ -540,11 +540,12 @@ tests: # required
 
 ```shell
 (FAILING) test-1: Checks (2/3 passing) | ListObjects (2/2 passing)
-✓ Check(user=user:anne,relation=can_write,object=folder:1)
-ⅹ Check(user=user:anne,relation=can_share,object=folder:1): expected=false, got=true, error=<nil>
-✓ Check(user=user:anne,relation=can_view,object=folder:1)
+ⅹ Check(user=user:anne,relation=can_share,object=folder:1): expected=false, got=true
 ---
-(PASSING) test-2: Checks (1/1 passing) | ListObjects (1/1 passing)
+# Test Summary #
+Tests 1/2 passing
+Checks 3/4 passing
+ListObjects 3/3 passing
 ```
 
 ##### Transform an Authorization Model
