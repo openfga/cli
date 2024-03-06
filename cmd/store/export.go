@@ -17,15 +17,51 @@ limitations under the License.
 package store
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/storetest"
+	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
-func exportStore() {}
+func buildStoreData(fgaClient client.SdkClient, storeId string, modelId string) (*storetest.StoreData, error) {
+	fmt.Printf("Store: %s\n", storeId)
+	fmt.Printf("Model: %s\n", modelId)
+
+	// get the store
+	store, err := fgaClient.GetStore(context.Background()).Execute()
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to fetch store: %w", err)
+	}
+
+	model, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to read authorization model: %w", err)
+	}
+
+	authModel := authorizationmodel.AuthzModel{}
+	authModel.Set(*model.AuthorizationModel)
+	dsl, err := authModel.DisplayAsDSL([]string{"model"})
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to get model dsl: %w", err)
+	}
+
+	storeData := storetest.StoreData{
+		Name:  store.Name,
+		Model: *dsl,
+	}
+
+	return &storeData, nil
+}
 
 var exportCmd = &cobra.Command{
 	Use:     "export",
@@ -34,14 +70,38 @@ var exportCmd = &cobra.Command{
 	Example: "fga store export",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+		fgaClient, err := clientConfig.GetFgaClient()
 
-		fileName, _ := cmd.Flags().GetString("output-file")
-
-		if fileName != "" {
-			fmt.Printf("Printing to %s\n", fileName)
+		if err != nil {
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		fmt.Println(clientConfig.StoreID)
+		storeData, err := buildStoreData(fgaClient, clientConfig.StoreID, clientConfig.AuthorizationModelID)
+
+		if err != nil {
+			return fmt.Errorf("failed to export store: %w", err)
+		}
+
+		if storeData != nil {
+			storeYaml, err := yaml.Marshal(storeData)
+
+			if err != nil {
+				return fmt.Errorf("unable to marshal storedata yaml: %w", err)
+			}
+
+			fileName, _ := cmd.Flags().GetString("output-file")
+
+			if fileName == "" {
+				fmt.Println(string(storeYaml))
+				return nil
+			}
+
+			err = os.WriteFile(fileName, storeYaml, 0666)
+
+			if err != nil {
+				return err
+			}
+		}
 
 		return output.Display(output.EmptyStruct{})
 	},
@@ -52,6 +112,7 @@ func init() {
 
 	exportCmd.Flags().String("output-file", "", "name of the file to export the store to")
 	exportCmd.Flags().String("store-id", "", "store ID")
+	exportCmd.Flags().String("model-id", "", "Authorization Model ID")
 
 	err := exportCmd.MarkFlagRequired("store-id")
 	if err != nil {
