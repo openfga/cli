@@ -8,6 +8,14 @@ updates:
      dependencies:
         patterns:
           - "*"
+  - package-ecosystem: "gomod"
+    directory: "/cmd/fga"
+    schedule:
+      interval: "weekly"
+    groups:
+     dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
