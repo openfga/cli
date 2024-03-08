@@ -96,23 +96,27 @@ var validateCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
-		if err := authorizationmodel.ReadFromInputFileOrArg(
+		fileName, err := authorizationmodel.ReadFromInputFileOrArg(
 			cmd,
 			args,
 			"file",
 			false,
 			&inputModel,
 			openfga.PtrString(""),
-			&validateInputFormat); err != nil {
+			&validateInputFormat,
+		)
+		if err != nil {
 			return err //nolint:wrapcheck
 		}
 
 		authModel := authorizationmodel.AuthzModel{}
-		var err error
+		if err := authModel.ReadModelFromString(inputModel, validateInputFormat, fileName); err != nil {
+			return err //nolint:wrapcheck
+		}
 
 		if validateInputFormat == authorizationmodel.ModelFormatJSON {
 			err = authModel.ReadFromJSONString(inputModel)
-		} else {
+		} else if validateInputFormat == authorizationmodel.ModelFormatDefault {
 			err = authModel.ReadFromDSLString(inputModel)
 		}
 

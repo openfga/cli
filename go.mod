@@ -4,14 +4,15 @@ go 1.21.8
 
 require (
 	github.com/golang/mock v1.6.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/mattn/go-isatty v0.0.20
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20240201160513-05de9d8be3ee
+	github.com/openfga/api/proto v0.0.0-20240305133909-75d0733e601c
 	github.com/openfga/go-sdk v0.3.5
-	github.com/openfga/language/pkg/go v0.0.0-20240304080135-81c3460c0a04
+	github.com/openfga/language/pkg/go v0.0.0-20240308144859-61f2243eb0e4
 	github.com/openfga/openfga v1.5.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
@@ -38,7 +39,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/karlseguin/ccache/v3 v3.0.5 // indirect

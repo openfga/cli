@@ -19,8 +19,11 @@ package authorizationmodel
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
@@ -190,7 +193,62 @@ func (model *AuthzModel) ReadFromDSLString(dslString string) error {
 	return nil
 }
 
-func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) error {
+func (model *AuthzModel) ReadModelFromModFGA(modFile string, fileName string) error {
+	parsedModFile, err := language.TransformModFile(modFile)
+	if err != nil {
+		return fmt.Errorf("failed to transform mod.fga file due to %w", err)
+	}
+
+	moduleFiles := []language.ModuleFile{}
+	fileReadErrors := multierror.Error{}
+	directory := path.Dir(fileName)
+
+	for _, fileName := range parsedModFile.Contents.Value {
+		filePath := path.Join(directory, fileName.Value)
+
+		fileContents, err := os.ReadFile(filePath)
+		if err != nil {
+			fileReadErrors = *multierror.Append(
+				&fileReadErrors,
+				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
+			)
+
+			continue
+		}
+
+		moduleFiles = append(moduleFiles, language.ModuleFile{
+			Name:     fileName.Value,
+			Contents: string(fileContents),
+		})
+	}
+
+	if len(fileReadErrors.Errors) != 0 {
+		return &fileReadErrors
+	}
+
+	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles)
+	if err != nil {
+		return fmt.Errorf("failed to transform module to model due to %w", err)
+	}
+
+	bytes, err := protojson.Marshal(parsedAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	jsonAuthModel := openfga.AuthorizationModel{}
+
+	err = json.Unmarshal(bytes, &jsonAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	model.Set(jsonAuthModel)
+
+	return nil
+}
+
+func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat, fileName string) error {
 	if input == "" {
 		return nil
 	}
@@ -205,6 +263,12 @@ func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) e
 	case ModelFormatFGA:
 	case ModelFormatDefault:
 		if err := model.ReadFromDSLString(input); err != nil {
+			return err
+		}
+
+		return nil
+	case ModelFormatModular:
+		if err := model.ReadModelFromModFGA(input, fileName); err != nil {
 			return err
 		}
 
