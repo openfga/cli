@@ -177,14 +177,16 @@ var readCmd = &cobra.Command{
 		simpleOutput, _ := cmd.Flags().GetBool("simple-output")
 		outputFormat, _ := cmd.Flags().GetString("output-format")
 		dataPrinter := output.NewUniPrinter(outputFormat)
+
 		if outputFormat == "csv" {
 			data, _ := response.toCsvDTO()
 			return dataPrinter.Display(data)
 		}
 		var data any
 		data = *response.complete
-		if simpleOutput {
-			data = response.simple 
+
+		if simpleOutput || outputFormat == "simple-json" {
+			data = response.simple
 		}
 
 		return dataPrinter.Display(data) //nolint:wrapcheck
@@ -196,6 +198,9 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get. Set to 0 to get all pages.")
-	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: json, csv, and yaml.")
+	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: json, simple-json, csv, and yaml.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
+	readCmd.Flags().MarkDeprecated("simple-output", "the flag \"simple-output\" is deprecated and will be removed in future releases.\n"+
+		"Please use the \"--output-format=simple-json\" flag instead.")
+
 }
