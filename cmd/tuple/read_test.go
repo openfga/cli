@@ -377,6 +377,8 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 }
 
 func TestReadResponseCSVDTOParser(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		readRes  readResponse
 		expected []readResponseCSVDTO
@@ -421,6 +423,7 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 			},
 		},
 	}
+
 	for _, testCase := range testCases {
 		outcome, _ := testCase.readRes.toCsvDTO()
 		assert.Equal(t, testCase.expected, outcome)

@@ -55,17 +55,19 @@ func (r readResponse) toCsvDTO() ([]readResponseCSVDTO, error) {
 		// Handle Condition
 		conditionName := ""
 		conditionalContext := ""
+
 		if readRes.Condition != nil {
 			conditionName = readRes.Condition.Name
+
 			if readRes.Condition.Context != nil {
 				b, err := json.Marshal(readRes.Condition.Context)
 				if err != nil {
 					return nil, fmt.Errorf("failed to convert condition context to CSV: %w", err)
 				}
+
 				conditionalContext = string(b)
 			}
 		}
-
 		// Split User and Object
 		user := strings.Split(readRes.User, ":")
 		object := strings.Split(readRes.Object, ":")
@@ -180,7 +182,13 @@ var readCmd = &cobra.Command{
 
 		if outputFormat == "csv" {
 			data, _ := response.toCsvDTO()
-			return dataPrinter.Display(data)
+
+			err := dataPrinter.Display(data)
+			if err != nil {
+				return fmt.Errorf("failed to display csv: %w", err)
+			}
+
+			return nil
 		}
 		var data any
 		data = *response.complete
@@ -198,9 +206,9 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get. Set to 0 to get all pages.")
-	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: json, simple-json, csv, and yaml.")
+	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
+		"json, simple-json, csv, and yaml.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
-	readCmd.Flags().MarkDeprecated("simple-output", "the flag \"simple-output\" is deprecated and will be removed in future releases.\n"+
+	_ = readCmd.Flags().MarkDeprecated("simple-output", "the flag \"simple-output\" is deprecated and will be removed in future releases.\n"+
 		"Please use the \"--output-format=simple-json\" flag instead.")
-
 }

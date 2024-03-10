@@ -78,7 +78,9 @@ func (prt *csvPrinter) DisplayNoColor(data any) error {
 	if err != nil {
 		return fmt.Errorf("unable to marshal CSV with error: %w", err)
 	}
+
 	fmt.Println(string(b))
+
 	return nil
 }
 
@@ -91,7 +93,9 @@ func (prt *yamlPrinter) DisplayNoColor(data any) error {
 	if err != nil {
 		return fmt.Errorf("unable to marshal yaml with error %w", err)
 	}
+
 	fmt.Println(string(result))
+
 	return nil
 }
 
@@ -107,6 +111,7 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 	if os.Getenv("NO_COLOR") != "" {
 		uniPrinter.Colorful = false
 	}
+
 	switch outputFormat {
 	case "yaml":
 		uniPrinter.Printer = &yamlPrinter{}
@@ -115,15 +120,27 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 	default:
 		uniPrinter.Printer = &jsonPrinter{}
 	}
+
 	return &uniPrinter
 }
 
 // Display prints the data using the configured printer and color settings.
 func (prt UniPrinter) Display(data any) error {
 	if prt.Colorful {
-		return prt.Printer.DisplayColor(data)
+		err := prt.Printer.DisplayColor(data)
+		if err != nil {
+			return fmt.Errorf("failed to display colorful output: %w", err)
+		}
+
+		return nil
 	}
-	return prt.Printer.DisplayNoColor(data)
+
+	err := prt.Printer.DisplayNoColor(data)
+	if err != nil {
+		return fmt.Errorf("failed to display output: %w", err)
+	}
+
+	return nil
 }
 
 // EmptyStruct is used when we wish to return an empty object.
