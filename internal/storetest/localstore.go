@@ -87,20 +87,19 @@ func getLocalServerModelAndTuples(
 	// If we have at least one local test, initialize the local server
 	datastore := memory.New()
 
-	fgaServer, err := server.NewServerWithOpts(server.WithDatastore(datastore))
+	fgaServer, err := server.NewServerWithOpts(
+		server.WithDatastore(datastore),
+		server.WithExperimentals(server.ExperimentalEnableModularModels),
+	)
 	if err != nil {
 		return nil, nil, stopServerFn, err //nolint:wrapcheck
 	}
 
 	tempModel := authorizationmodel.AuthzModel{}
-	if format == authorizationmodel.ModelFormatJSON {
-		if err := tempModel.ReadFromJSONString(storeData.Model); err != nil {
-			return nil, nil, stopServerFn, err //nolint:wrapcheck
-		}
-	} else {
-		if err := tempModel.ReadFromDSLString(storeData.Model); err != nil {
-			return nil, nil, stopServerFn, err //nolint:wrapcheck
-		}
+
+	err = tempModel.ReadModelFromString(storeData.Model, format)
+	if err != nil {
+		return nil, nil, stopServerFn, err //nolint:wrapcheck
 	}
 
 	authModel = &tempModel
