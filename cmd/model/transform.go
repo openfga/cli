@@ -37,7 +37,7 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
-		fileName, err := authorizationmodel.ReadFromInputFileOrArg(
+		err := authorizationmodel.ReadFromInputFileOrArg(
 			cmd,
 			args,
 			"file",
@@ -51,7 +51,7 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 		}
 
 		authModel := authorizationmodel.AuthzModel{}
-		if err := authModel.ReadModelFromString(inputModel, transformInputFormat, fileName); err != nil {
+		if err := authModel.ReadModelFromString(inputModel, transformInputFormat); err != nil {
 			return err //nolint:wrapcheck
 		}
 

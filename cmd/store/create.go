@@ -111,7 +111,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 		storeName, _ := cmd.Flags().GetString("name")
 
 		var inputModel string
-		if _, err := authorizationmodel.ReadFromInputFileOrArg(
+		if err := authorizationmodel.ReadFromInputFileOrArg(
 			cmd,
 			args,
 			"model",

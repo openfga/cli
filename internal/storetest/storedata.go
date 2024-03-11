@@ -74,7 +74,7 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 
 	storeName := storeData.Name
 
-	_, err := authorizationmodel.ReadFromFile(
+	err := authorizationmodel.ReadFromFile(
 		path.Join(basePath, storeData.ModelFile),
 		&inputModel,
 		&format,

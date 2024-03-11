@@ -193,15 +193,20 @@ func (model *AuthzModel) ReadFromDSLString(dslString string) error {
 	return nil
 }
 
-func (model *AuthzModel) ReadModelFromModFGA(modFile string, fileName string) error {
-	parsedModFile, err := language.TransformModFile(modFile)
+func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
+	modFileContents, err := os.ReadFile(modFile)
 	if err != nil {
-		return fmt.Errorf("failed to transform mod.fga file due to %w", err)
+		return fmt.Errorf("failed to read fga.mod file due to %w", err)
+	}
+
+	parsedModFile, err := language.TransformModFile(string(modFileContents))
+	if err != nil {
+		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
 	}
 
 	moduleFiles := []language.ModuleFile{}
 	fileReadErrors := multierror.Error{}
-	directory := path.Dir(fileName)
+	directory := path.Dir(modFile)
 
 	for _, fileName := range parsedModFile.Contents.Value {
 		filePath := path.Join(directory, fileName.Value)
@@ -248,7 +253,7 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string, fileName string) er
 	return nil
 }
 
-func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat, fileName string) error {
+func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) error {
 	if input == "" {
 		return nil
 	}
@@ -268,7 +273,7 @@ func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat, f
 
 		return nil
 	case ModelFormatModular:
-		if err := model.ReadModelFromModFGA(input, fileName); err != nil {
+		if err := model.ReadModelFromModFGA(input); err != nil {
 			return err
 		}
 

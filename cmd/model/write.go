@@ -65,7 +65,7 @@ fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"ty
 		}
 
 		var inputModel string
-		if _, err := authorizationmodel.ReadFromInputFileOrArg(
+		if err := authorizationmodel.ReadFromInputFileOrArg(
 			cmd,
 			args,
 			"file",

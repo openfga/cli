@@ -33,10 +33,10 @@ func ReadFromFile(
 	input *string,
 	format *ModelFormat,
 	storeName *string,
-) (string, error) {
+) error {
 	file, err := os.ReadFile(fileName)
 	if err != nil {
-		return "", fmt.Errorf("failed to read file %s due to %w", fileName, err)
+		return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 	}
 
 	*input = string(file)
@@ -46,6 +46,7 @@ func ReadFromFile(
 		switch {
 		case strings.HasSuffix(fileName, "fga.mod"):
 			*format = ModelFormatModular
+			*input = fileName
 		case strings.HasSuffix(fileName, "json"):
 			*format = ModelFormatJSON
 		default:
@@ -57,7 +58,7 @@ func ReadFromFile(
 		*storeName = strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
 	}
 
-	return fileName, nil
+	return nil
 }
 
 func ReadFromInputFileOrArg(
@@ -68,10 +69,10 @@ func ReadFromInputFileOrArg(
 	input *string,
 	storeName *string,
 	format *ModelFormat,
-) (string, error) {
+) error {
 	fileName, err := cmd.Flags().GetString(fileNameArg)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse file name due to %w", err)
+		return fmt.Errorf("failed to parse file name due to %w", err)
 	}
 
 	switch {
@@ -86,10 +87,10 @@ func ReadFromInputFileOrArg(
 	case !isOptional:
 		_ = cmd.Help() // print out the help message so users know what the command expects
 
-		return "", fmt.Errorf("%w", clierrors.ErrModelInputMissing)
+		return fmt.Errorf("%w", clierrors.ErrModelInputMissing)
 	}
 
-	return "", nil
+	return nil
 }
 
 func ReadFromInputFile(
