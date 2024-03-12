@@ -37,16 +37,14 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
-		err := authorizationmodel.ReadFromInputFileOrArg(
+		if err := authorizationmodel.ReadFromInputFileOrArg(
 			cmd,
 			args,
 			"file",
 			false,
 			&inputModel,
 			openfga.PtrString(""),
-			&transformInputFormat,
-		)
-		if err != nil {
+			&transformInputFormat); err != nil {
 			return err //nolint:wrapcheck
 		}
 

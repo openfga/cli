@@ -10,10 +10,10 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20240305133909-75d0733e601c
+	github.com/openfga/api/proto v0.0.0-20240312180017-0c609904ae24
 	github.com/openfga/go-sdk v0.3.5
-	github.com/openfga/language/pkg/go v0.0.0-20240308144859-61f2243eb0e4
-	github.com/openfga/openfga v1.5.0
+	github.com/openfga/language/pkg/go v0.0.0-20240312223328-605a55c5f880
+	github.com/openfga/openfga v1.5.1-0.20240312222040-3f13843536d9
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2

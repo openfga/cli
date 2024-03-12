@@ -231,7 +231,7 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 		return &fileReadErrors
 	}
 
-	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles)
+	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
 	if err != nil {
 		return fmt.Errorf("failed to transform module to model due to %w", err)
 	}

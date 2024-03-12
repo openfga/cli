@@ -73,14 +73,11 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 	var inputModel string
 
 	storeName := storeData.Name
-
-	err := authorizationmodel.ReadFromFile(
+	if err := authorizationmodel.ReadFromFile(
 		path.Join(basePath, storeData.ModelFile),
 		&inputModel,
 		&format,
-		&storeName,
-	)
-	if err != nil {
+		&storeName); err != nil {
 		return format, err //nolint:wrapcheck
 	}
 
