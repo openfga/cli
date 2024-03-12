@@ -23,6 +23,7 @@ import (
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 	"github.com/openfga/go-sdk/client"
@@ -30,10 +31,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func buildStoreData(fgaClient client.SdkClient, storeId string, modelId string) (*storetest.StoreData, error) {
-	fmt.Printf("Store: %s\n", storeId)
-	fmt.Printf("Model: %s\n", modelId)
-
+func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*storetest.StoreData, error) {
 	// get the store
 	store, err := fgaClient.GetStore(context.Background()).Execute()
 
@@ -41,10 +39,10 @@ func buildStoreData(fgaClient client.SdkClient, storeId string, modelId string) 
 		return nil, fmt.Errorf("unable to fetch store: %w", err)
 	}
 
-	model, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
+	model, err := authorizationmodel.ReadFromStore(config, fgaClient)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to read authorization model: %w", err)
+		return nil, err
 	}
 
 	authModel := authorizationmodel.AuthzModel{}
@@ -55,12 +53,12 @@ func buildStoreData(fgaClient client.SdkClient, storeId string, modelId string) 
 		return nil, fmt.Errorf("unable to get model dsl: %w", err)
 	}
 
-	storeData := storetest.StoreData{
+	storeData := &storetest.StoreData{
 		Name:  store.Name,
 		Model: *dsl,
 	}
 
-	return &storeData, nil
+	return storeData, nil
 }
 
 var exportCmd = &cobra.Command{
@@ -76,7 +74,7 @@ var exportCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		storeData, err := buildStoreData(fgaClient, clientConfig.StoreID, clientConfig.AuthorizationModelID)
+		storeData, err := buildStoreData(clientConfig, fgaClient)
 
 		if err != nil {
 			return fmt.Errorf("failed to export store: %w", err)

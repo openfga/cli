@@ -10,6 +10,7 @@ import (
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/fga"
 	mock_client "github.com/openfga/cli/internal/mocks"
 )
@@ -42,7 +43,7 @@ func TestGetModelNoAuthModelID(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	output, err := getModel(clientConfig, mockFgaClient)
+	output, err := authorizationmodel.ReadFromStore(clientConfig, mockFgaClient)
 	if err != nil {
 		t.Fatalf("%v", err)
 	} else if *output != expectedResponse {
@@ -80,7 +81,7 @@ func TestGetModelAuthModelID(t *testing.T) {
 		AuthorizationModelID: "01GXSA8YR785C4FYS3C0RTG7B1",
 	}
 
-	output, err := getModel(clientConfig, mockFgaClient)
+	output, err := authorizationmodel.ReadFromStore(clientConfig, mockFgaClient)
 	if err != nil {
 		t.Fatalf("%v", err)
 	} else if *output != expectedResponse {
@@ -109,7 +110,7 @@ func TestGetModelNoAuthModelIDError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	_, err := getModel(clientConfig, mockFgaClient)
+	_, err := authorizationmodel.ReadFromStore(clientConfig, mockFgaClient)
 	if err == nil {
 		t.Fatalf("Expect error but there is none")
 	}
