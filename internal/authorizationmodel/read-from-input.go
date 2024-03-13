@@ -52,6 +52,10 @@ func ReadFromFile(
 		default:
 			*format = ModelFormatFGA
 		}
+	} else if *format == ModelFormatModular {
+		// If we're provided a modular model we want the input to be the filename as we will handle
+		// reading and parsing the fga.mod file later
+		*input = fileName
 	}
 
 	if *storeName == "" {
