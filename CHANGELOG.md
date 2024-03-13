@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.0-beta.1
+
+### [0.3.0-beta.1](https://github.com/openfga/cli/compare/v0.2.6...v0.3.0-beta.1) (2024-03-13)
+
+Added:
+- Support for [modular models](https://github.com/openfga/rfcs/blob/main/20231212-modular-models.md) ([#262](https://github.com/openfga/cli/issues/262))
+
 ## v0.2.6
 
 ### [0.2.6](https://github.com/openfga/cli/compare/v0.2.5...v0.2.6) (2024-02-27)
