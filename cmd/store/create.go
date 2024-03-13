@@ -74,12 +74,8 @@ func CreateStoreWithModel(
 
 	if inputModel != "" {
 		authModel := authorizationmodel.AuthzModel{}
-		if inputFormat == authorizationmodel.ModelFormatJSON {
-			err = authModel.ReadFromJSONString(inputModel)
-		} else {
-			err = authModel.ReadFromDSLString(inputModel)
-		}
 
+		err = authModel.ReadModelFromString(inputModel, inputFormat)
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}

@@ -43,7 +43,7 @@ func importStore(
 	maxParallelRequests int,
 ) error {
 	var err error
-	if storeID == "" { //nolint:nestif
+	if storeID == "" {
 		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
 		if err != nil {
 			return err
@@ -53,12 +53,7 @@ func importStore(
 		authModel := authorizationmodel.AuthzModel{}
 		clientConfig.StoreID = storeID
 
-		if format == authorizationmodel.ModelFormatJSON {
-			err = authModel.ReadFromJSONString(storeData.Model)
-		} else {
-			err = authModel.ReadFromDSLString(storeData.Model)
-		}
-
+		err = authModel.ReadModelFromString(storeData.Model, format)
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
