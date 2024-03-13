@@ -12,7 +12,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20240312180017-0c609904ae24
 	github.com/openfga/go-sdk v0.3.6-0.20240313140700-3de2c059df44
-	github.com/openfga/language/pkg/go v0.0.0-20240312223328-605a55c5f880
+	github.com/openfga/language/pkg/go v0.0.0-20240313142251-ccdeba043413
 	github.com/openfga/openfga v1.5.1-0.20240312222040-3f13843536d9
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
