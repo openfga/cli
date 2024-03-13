@@ -53,7 +53,8 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 			return err //nolint:wrapcheck
 		}
 
-		if transformInputFormat == authorizationmodel.ModelFormatJSON {
+		if transformInputFormat == authorizationmodel.ModelFormatJSON ||
+			transformInputFormat == authorizationmodel.ModelFormatModular {
 			dslModel, err := authModel.DisplayAsDSL([]string{"model"})
 			if err != nil {
 				return fmt.Errorf("failed to transform model due to %w", err)
