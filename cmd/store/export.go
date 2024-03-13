@@ -39,6 +39,7 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*store
 		return nil, fmt.Errorf("unable to fetch store: %w", err)
 	}
 
+	// get the model
 	model, err := authorizationmodel.ReadFromStore(config, fgaClient)
 	if err != nil {
 		return nil, err
@@ -51,6 +52,9 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*store
 	if err != nil {
 		return nil, fmt.Errorf("unable to get model dsl: %w", err)
 	}
+
+	// get the tuples
+	// rawTuples, err := tuple.BaseRead
 
 	storeData := &storetest.StoreData{
 		Name:  store.Name,

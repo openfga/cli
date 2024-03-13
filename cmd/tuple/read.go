@@ -17,7 +17,6 @@ limitations under the License.
 package tuple
 
 import (
-	"context"
 	"fmt"
 
 	openfga "github.com/openfga/go-sdk"
@@ -26,6 +25,7 @@ import (
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/tuple"
 )
 
 // MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
@@ -34,36 +34,6 @@ var MaxReadPagesLength = 20
 type readResponse struct {
 	complete *openfga.ReadResponse
 	simple   []openfga.TupleKey
-}
-
-func baseRead(fgaClient client.SdkClient, body *client.ClientReadRequest, maxPages int) (
-	*openfga.ReadResponse, error,
-) {
-	tuples := make([]openfga.Tuple, 0)
-	continuationToken := ""
-	pageIndex := 0
-	options := client.ClientReadOptions{}
-
-	for {
-		options.ContinuationToken = &continuationToken
-
-		response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
-		if err != nil {
-			return nil, fmt.Errorf("failed to read tuples due to %w", err)
-		}
-
-		tuples = append(tuples, response.Tuples...)
-		pageIndex++
-
-		if response.ContinuationToken == "" ||
-			(maxPages != 0 && pageIndex >= maxPages) {
-			break
-		}
-
-		continuationToken = response.ContinuationToken
-	}
-
-	return &openfga.ReadResponse{Tuples: tuples}, nil
 }
 
 func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
@@ -82,7 +52,7 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 		body.Object = &object
 	}
 
-	response, err := baseRead(fgaClient, body, maxPages)
+	response, err := tuple.Read(fgaClient, body, maxPages)
 	if err != nil {
 		return nil, err
 	}
