@@ -31,24 +31,23 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// buildStoreData compiles all the data necessary to output to file or stdout, or returns an error if this was not successful.
 func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*storetest.StoreData, error) {
 	// get the store
 	store, err := fgaClient.GetStore(context.Background()).Execute()
-
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch store: %w", err)
 	}
 
 	model, err := authorizationmodel.ReadFromStore(config, fgaClient)
-
 	if err != nil {
 		return nil, err
 	}
 
 	authModel := authorizationmodel.AuthzModel{}
 	authModel.Set(*model.AuthorizationModel)
-	dsl, err := authModel.DisplayAsDSL([]string{"model"})
 
+	dsl, err := authModel.DisplayAsDSL([]string{"model"})
 	if err != nil {
 		return nil, fmt.Errorf("unable to get model dsl: %w", err)
 	}
@@ -61,6 +60,7 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*store
 	return storeData, nil
 }
 
+// exportCmd represents the export store command
 var exportCmd = &cobra.Command{
 	Use:     "export",
 	Short:   "Export store data",
@@ -68,34 +68,30 @@ var exportCmd = &cobra.Command{
 	Example: "fga store export",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
-		fgaClient, err := clientConfig.GetFgaClient()
 
+		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
 		storeData, err := buildStoreData(clientConfig, fgaClient)
-
 		if err != nil {
 			return fmt.Errorf("failed to export store: %w", err)
 		}
 
 		if storeData != nil {
 			storeYaml, err := yaml.Marshal(storeData)
-
 			if err != nil {
 				return fmt.Errorf("unable to marshal storedata yaml: %w", err)
 			}
 
 			fileName, _ := cmd.Flags().GetString("output-file")
-
 			if fileName == "" {
 				fmt.Println(string(storeYaml))
 				return nil
 			}
 
 			err = os.WriteFile(fileName, storeYaml, 0666)
-
 			if err != nil {
 				return err
 			}
