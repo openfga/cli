@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.7
+
+### [0.2.7](https://github.com/openfga/cli/compare/v0.2.6...v0.2.7) (2024-04-27)
+
+Added:
+- Support for exporting tuples as CSV (#250) - thanks @edwin-Marrima
+
+Changed:
+- Simplify the output of `model test` (#265)
+- go > v1.21.8 is now required (#272)
+
+Deprecated:
+- The `--simple-output` flag in `tuple read` has been deprecated in favour of `--output-format=simple-json` (#250) - thanks @edwin-Marrima
+
 ## v0.2.6
 
 ### [0.2.6](https://github.com/openfga/cli/compare/v0.2.5...v0.2.6) (2024-02-27)
