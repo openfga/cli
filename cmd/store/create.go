@@ -132,5 +132,5 @@ var createModelInputFormat = authorizationmodel.ModelFormatDefault
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
 	createCmd.Flags().String("model", "", "Authorization Model File Name")
-	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
+	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga", "json" or "modular`) //nolint:lll
 }

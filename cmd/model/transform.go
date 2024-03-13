@@ -32,7 +32,8 @@ var transformCmd = &cobra.Command{
 	Short: "Transforms an authorization model",
 	Example: `fga model transform --file=model.json
 fga model transform --file=model.fga
-fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"user"}] }' --input-format json`,
+fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"user"}] }' --input-format json
+fga model transform --file=fga.mod`,
 
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -75,6 +76,6 @@ fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"use
 var transformInputFormat = authorizationmodel.ModelFormatDefault
 
 func init() {
-	transformCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
-	transformCmd.Flags().Var(&transformInputFormat, "input-format", `Authorization model input format. Can be "fga" or "json"`) //nolint:lll
+	transformCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format or be an `fga.mod` format") //nolint:lll
+	transformCmd.Flags().Var(&transformInputFormat, "input-format", `Authorization model input format. Can be "fga", "json", or "modular"`)  //nolint:lll
 }

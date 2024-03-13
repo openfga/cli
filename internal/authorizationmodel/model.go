@@ -265,8 +265,7 @@ func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) e
 		}
 
 		return nil
-	case ModelFormatFGA:
-	case ModelFormatDefault:
+	case ModelFormatFGA, ModelFormatDefault:
 		if err := model.ReadFromDSLString(input); err != nil {
 			return err
 		}

@@ -108,14 +108,8 @@ var validateCmd = &cobra.Command{
 		}
 
 		authModel := authorizationmodel.AuthzModel{}
-		var err error
 
-		if validateInputFormat == authorizationmodel.ModelFormatJSON {
-			err = authModel.ReadFromJSONString(inputModel)
-		} else {
-			err = authModel.ReadFromDSLString(inputModel)
-		}
-
+		err := authModel.ReadModelFromString(inputModel, validateInputFormat)
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
@@ -129,6 +123,6 @@ var validateCmd = &cobra.Command{
 var validateInputFormat = authorizationmodel.ModelFormatDefault
 
 func init() {
-	validateCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
-	validateCmd.Flags().Var(&validateInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
+	validateCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format or be an fga.mod file") //nolint:lll
+	validateCmd.Flags().Var(&validateInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular"`)     //nolint:lll
 }
