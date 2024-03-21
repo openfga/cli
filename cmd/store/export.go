@@ -26,6 +26,7 @@ import (
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
+	"github.com/openfga/cli/internal/tuple"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -54,11 +55,21 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*store
 	}
 
 	// get the tuples
-	// rawTuples, err := tuple.BaseRead
+	rawTuples, err := tuple.Read(fgaClient, &client.ClientReadRequest{}, 10)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read tuples: %w", err)
+	}
+
+	tuples := []client.ClientContextualTupleKey{}
+
+	for _, tuple := range rawTuples.GetTuples() {
+		tuples = append(tuples, tuple.GetKey())
+	}
 
 	storeData := &storetest.StoreData{
-		Name:  store.Name,
-		Model: *dsl,
+		Name:   store.Name,
+		Model:  *dsl,
+		Tuples: tuples,
 	}
 
 	return storeData, nil
