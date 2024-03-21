@@ -31,7 +31,7 @@ import (
 type ModelTestCheck struct {
 	User       string                  `json:"user"       yaml:"user"`
 	Object     string                  `json:"object"     yaml:"object"`
-	Context    *map[string]interface{} `json:"context"    yaml:"context"`
+	Context    *map[string]interface{} `json:"context"    yaml:"context,omitempty"`
 	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
 }
 
@@ -44,19 +44,19 @@ type ModelTestListObjects struct {
 
 type ModelTest struct {
 	Name        string                            `json:"name"         yaml:"name"`
-	Description string                            `json:"description"  yaml:"description"`
-	Tuples      []client.ClientContextualTupleKey `json:"tuples"       yaml:"tuples"`
-	TupleFile   string                            `json:"tuple_file"   yaml:"tuple_file"` //nolint:tagliatelle
+	Description string                            `json:"description"  yaml:"description,omitempty"`
+	Tuples      []client.ClientContextualTupleKey `json:"tuples"       yaml:"tuples,omitempty"`
+	TupleFile   string                            `json:"tuple_file"   yaml:"tuple_file,omitempty"` //nolint:tagliatelle
 	Check       []ModelTestCheck                  `json:"check"        yaml:"check"`
-	ListObjects []ModelTestListObjects            `json:"list_objects" yaml:"list_objects"` //nolint:tagliatelle
+	ListObjects []ModelTestListObjects            `json:"list_objects" yaml:"list_objects,omitempty"` //nolint:tagliatelle
 }
 
 type StoreData struct {
 	Name      string                            `json:"name"       yaml:"name"`
 	Model     string                            `json:"model"      yaml:"model"`
-	ModelFile string                            `json:"model_file" yaml:"model_file"` //nolint:tagliatelle
+	ModelFile string                            `json:"model_file" yaml:"model_file,omitempty"` //nolint:tagliatelle
 	Tuples    []client.ClientContextualTupleKey `json:"tuples"     yaml:"tuples"`
-	TupleFile string                            `json:"tuple_file" yaml:"tuple_file"` //nolint:tagliatelle
+	TupleFile string                            `json:"tuple_file" yaml:"tuple_file,omitempty"` //nolint:tagliatelle
 	Tests     []ModelTest                       `json:"tests"      yaml:"tests"`
 }
 

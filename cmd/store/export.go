@@ -60,16 +60,50 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient) (*store
 		return nil, fmt.Errorf("unable to read tuples: %w", err)
 	}
 
-	tuples := []client.ClientContextualTupleKey{}
+	var tuples []client.ClientContextualTupleKey
+	for _, t := range rawTuples.GetTuples() {
+		tuples = append(tuples, t.GetKey())
+	}
 
-	for _, tuple := range rawTuples.GetTuples() {
-		tuples = append(tuples, tuple.GetKey())
+	// get the assertions
+	assertionResponse, err := fgaClient.ReadAssertions(context.Background()).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("unable to read assertions: %w", err)
+	}
+
+	assertions := assertionResponse.GetAssertions()
+	modelChecks := map[string]storetest.ModelTestCheck{}
+
+	for _, assertion := range assertions {
+		key := fmt.Sprintf("%s|%s", assertion.TupleKey.User, assertion.TupleKey.Object)
+		_, exists := modelChecks[key]
+
+		if !exists {
+			modelChecks[key] = storetest.ModelTestCheck{
+				User:       assertion.TupleKey.User,
+				Object:     assertion.TupleKey.Object,
+				Assertions: map[string]bool{},
+			}
+		}
+
+		modelChecks[key].Assertions[assertion.GetTupleKey().Relation] = assertion.Expectation
+	}
+
+	var checks []storetest.ModelTestCheck
+	for _, value := range modelChecks {
+		checks = append(checks, value)
 	}
 
 	storeData := &storetest.StoreData{
 		Name:   store.Name,
 		Model:  *dsl,
 		Tuples: tuples,
+		Tests: []storetest.ModelTest{
+			{
+				Name:  "Tests",
+				Check: checks,
+			},
+		},
 	}
 
 	return storeData, nil
@@ -117,8 +151,6 @@ var exportCmd = &cobra.Command{
 }
 
 func init() {
-	fmt.Println("Initting exportCmd")
-
 	exportCmd.Flags().String("output-file", "", "name of the file to export the store to")
 	exportCmd.Flags().String("store-id", "", "store ID")
 	exportCmd.Flags().String("model-id", "", "Authorization Model ID")
