@@ -125,7 +125,7 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(output.EmptyStruct{}) //nolint:wrapcheck
+		return output.Display(output.EmptyStruct{})
 	},
 }
 

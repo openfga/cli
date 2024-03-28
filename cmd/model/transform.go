@@ -69,7 +69,7 @@ fga model transform --file=fga.mod`,
 			return err //nolint:wrapcheck
 		}
 
-		return output.Display(authModel.DisplayAsJSON([]string{"model"})) //nolint:wrapcheck
+		return output.Display(authModel.DisplayAsJSON([]string{"model"}))
 	},
 }
 

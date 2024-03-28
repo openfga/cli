@@ -182,7 +182,7 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(*result) //nolint:wrapcheck
+		return output.Display(*result)
 	},
 }
 

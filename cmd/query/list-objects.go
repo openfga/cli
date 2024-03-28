@@ -83,7 +83,7 @@ var listObjectsCmd = &cobra.Command{
 			return fmt.Errorf("failed to list objects due to %w", err)
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		return output.Display(*response)
 	},
 }
 

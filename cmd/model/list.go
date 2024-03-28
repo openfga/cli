@@ -101,7 +101,7 @@ var listCmd = &cobra.Command{
 			models.AuthorizationModels = append(models.AuthorizationModels, authModel.DisplayAsJSON(fields))
 		}
 
-		return output.Display(models) //nolint:wrapcheck
+		return output.Display(models)
 	},
 }
 

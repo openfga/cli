@@ -123,7 +123,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 			return err
 		}
 
-		return output.Display(response) //nolint:wrapcheck
+		return output.Display(response)
 	},
 }
 
