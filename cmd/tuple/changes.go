@@ -99,7 +99,7 @@ var changesCmd = &cobra.Command{
 			return err
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		return output.Display(*response)
 	},
 }
 

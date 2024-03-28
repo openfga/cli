@@ -51,7 +51,7 @@ var deleteCmd = &cobra.Command{
 					Message string
 				}
 
-				return output.Display(returnMessage{Message: "Delete store cancelled"}) //nolint:wrapcheck
+				return output.Display(returnMessage{Message: "Delete store cancelled"})
 			}
 		}
 
@@ -64,7 +64,7 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to delete store %v due to %w", clientConfig.StoreID, err)
 		}
 
-		return output.Display(output.EmptyStruct{}) //nolint:wrapcheck
+		return output.Display(output.EmptyStruct{})
 	},
 }
 

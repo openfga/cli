@@ -88,7 +88,7 @@ fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"ty
 			return err
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		return output.Display(*response)
 	},
 }
 

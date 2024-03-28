@@ -116,7 +116,7 @@ var validateCmd = &cobra.Command{
 
 		response := validate(authModel)
 
-		return output.Display(response) //nolint:wrapcheck
+		return output.Display(response)
 	},
 }
 

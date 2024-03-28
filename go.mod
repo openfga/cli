@@ -11,10 +11,10 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20240312180017-0c609904ae24
+	github.com/openfga/api/proto v0.0.0-20240318145204-66b9e5cb403c
 	github.com/openfga/go-sdk v0.3.6-0.20240313140700-3de2c059df44
-	github.com/openfga/language/pkg/go v0.0.0-20240313142251-ccdeba043413
-	github.com/openfga/openfga v1.5.1-0.20240312222040-3f13843536d9
+	github.com/openfga/language/pkg/go v0.0.0-20240327204426-18b0254b2be1
+	github.com/openfga/openfga v1.5.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -37,7 +37,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.20.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
