@@ -74,12 +74,8 @@ func CreateStoreWithModel(
 
 	if inputModel != "" {
 		authModel := authorizationmodel.AuthzModel{}
-		if inputFormat == authorizationmodel.ModelFormatJSON {
-			err = authModel.ReadFromJSONString(inputModel)
-		} else {
-			err = authModel.ReadFromDSLString(inputModel)
-		}
 
+		err = authModel.ReadModelFromString(inputModel, inputFormat)
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}
@@ -127,7 +123,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 			return err
 		}
 
-		return output.Display(response) //nolint:wrapcheck
+		return output.Display(response)
 	},
 }
 
@@ -136,5 +132,5 @@ var createModelInputFormat = authorizationmodel.ModelFormatDefault
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
 	createCmd.Flags().String("model", "", "Authorization Model File Name")
-	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
+	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga", "json" or "modular`) //nolint:lll
 }

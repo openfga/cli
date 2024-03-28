@@ -19,8 +19,11 @@ package authorizationmodel
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
@@ -190,6 +193,66 @@ func (model *AuthzModel) ReadFromDSLString(dslString string) error {
 	return nil
 }
 
+func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
+	modFileContents, err := os.ReadFile(modFile)
+	if err != nil {
+		return fmt.Errorf("failed to read fga.mod file due to %w", err)
+	}
+
+	parsedModFile, err := language.TransformModFile(string(modFileContents))
+	if err != nil {
+		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
+	}
+
+	moduleFiles := []language.ModuleFile{}
+	fileReadErrors := multierror.Error{}
+	directory := path.Dir(modFile)
+
+	for _, fileName := range parsedModFile.Contents.Value {
+		filePath := path.Join(directory, fileName.Value)
+
+		fileContents, err := os.ReadFile(filePath)
+		if err != nil {
+			fileReadErrors = *multierror.Append(
+				&fileReadErrors,
+				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
+			)
+
+			continue
+		}
+
+		moduleFiles = append(moduleFiles, language.ModuleFile{
+			Name:     fileName.Value,
+			Contents: string(fileContents),
+		})
+	}
+
+	if len(fileReadErrors.Errors) != 0 {
+		return &fileReadErrors
+	}
+
+	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
+	if err != nil {
+		return fmt.Errorf("failed to transform module to model due to %w", err)
+	}
+
+	bytes, err := protojson.Marshal(parsedAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	jsonAuthModel := openfga.AuthorizationModel{}
+
+	err = json.Unmarshal(bytes, &jsonAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	model.Set(jsonAuthModel)
+
+	return nil
+}
+
 func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) error {
 	if input == "" {
 		return nil
@@ -202,9 +265,14 @@ func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) e
 		}
 
 		return nil
-	case ModelFormatFGA:
-	case ModelFormatDefault:
+	case ModelFormatFGA, ModelFormatDefault:
 		if err := model.ReadFromDSLString(input); err != nil {
+			return err
+		}
+
+		return nil
+	case ModelFormatModular:
+		if err := model.ReadModelFromModFGA(input); err != nil {
 			return err
 		}
 
@@ -295,7 +363,7 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 			return nil, fmt.Errorf("unable to unmarshal model json string due to: %w", err)
 		}
 
-		transformedJSON, err := language.TransformJSONProtoToDSL(&modelPb)
+		transformedJSON, err := language.TransformJSONProtoToDSL(&modelPb, language.WithIncludeSourceInformation(true))
 		if err != nil {
 			return nil, fmt.Errorf("error transforming from JSON due to: %w", err)
 		}

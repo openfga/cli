@@ -181,8 +181,8 @@ fga store **create**
 
 ###### Parameters
 * `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name. 
-* `--model`: File with the authorization model. Can be in JSON or OpenFGA format (optional).
-* `--format` : Authorization model input format. Can be "fga" or "json" (optional, defaults to the model file extension if present).
+* `--model`: File with the authorization model. Can be in JSON, OpenFGA format, or fga.mod file (optional).
+* `--format` : Authorization model input format. Can be "fga", "json", or "modular" (optional, defaults to the model file extension if present).
 
 ###### Example
 `fga store create --name "FGA Demo Store"`
@@ -352,7 +352,7 @@ fga model **write**
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--file`: File containing the authorization model.
-* `--format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
+* `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
 
 ###### Example
 * `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`
@@ -423,7 +423,7 @@ fga model **validate**
 
 ###### Parameters
 * `--file`: File containing the authorization model.
-* `--format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
+* `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
 
 ###### Example
 `fga model validate --file model.json`
@@ -555,7 +555,7 @@ fga model **transform**
 
 ###### Parameters
 * `--file`: File containing the authorization model
-* `--input-format`: Authorization model input format. Can be "fga" or "json". Defaults to the file extension if provided (optional)
+* `--input-format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
 
 ###### Example
 `fga model transform --file model.json`

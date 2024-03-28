@@ -28,6 +28,7 @@ const (
 	ModelFormatDefault ModelFormat = "default"
 	ModelFormatJSON    ModelFormat = "json"
 	ModelFormatFGA     ModelFormat = "fga"
+	ModelFormatModular ModelFormat = "modular"
 )
 
 func (format *ModelFormat) String() string {
@@ -36,7 +37,7 @@ func (format *ModelFormat) String() string {
 
 func (format *ModelFormat) Set(v string) error {
 	switch v {
-	case "json", "fga":
+	case "json", "fga", "modular":
 		*format = ModelFormat(v)
 
 		return nil

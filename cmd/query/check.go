@@ -81,7 +81,7 @@ var checkCmd = &cobra.Command{
 			return fmt.Errorf("failed to check due to %w", err)
 		}
 
-		return output.Display(*response) //nolint:wrapcheck
+		return output.Display(*response)
 	},
 }
 

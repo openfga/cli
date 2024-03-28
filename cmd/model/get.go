@@ -95,7 +95,7 @@ var getCmd = &cobra.Command{
 		}
 
 		if getOutputFormat == authorizationmodel.ModelFormatJSON {
-			return output.Display(authModel.DisplayAsJSON(fields)) //nolint:wrapcheck
+			return output.Display(authModel.DisplayAsJSON(fields))
 		}
 
 		dslModel, err := authModel.DisplayAsDSL(fields)

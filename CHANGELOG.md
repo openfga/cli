@@ -1,8 +1,15 @@
 # Changelog
 
+## v0.3.0-beta.1
+
+### [0.3.0-beta.1](https://github.com/openfga/cli/compare/v0.2.6...v0.3.0-beta.1) (2024-03-13)
+
+Added:
+- Support for [modular models](https://github.com/openfga/rfcs/blob/main/20231212-modular-models.md) ([#262](https://github.com/openfga/cli/issues/262))
+
 ## v0.2.7
 
-### [0.2.7](https://github.com/openfga/cli/compare/v0.2.6...v0.2.7) (2024-04-27)
+### [0.2.7](https://github.com/openfga/cli/compare/v0.2.6...v0.2.7) (2024-03-13)
 
 Added:
 - Support for exporting tuples as CSV (#250) - thanks @edwin-Marrima

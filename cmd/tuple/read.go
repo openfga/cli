@@ -197,7 +197,7 @@ var readCmd = &cobra.Command{
 			data = response.simple
 		}
 
-		return dataPrinter.Display(data) //nolint:wrapcheck
+		return dataPrinter.Display(data)
 	},
 }
 

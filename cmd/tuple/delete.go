@@ -77,7 +77,7 @@ var deleteCmd = &cobra.Command{
 				return err
 			}
 
-			return output.Display(*response) //nolint:wrapcheck
+			return output.Display(*response)
 		}
 		body := &client.ClientDeleteTuplesBody{
 			client.ClientTupleKeyWithoutCondition{
@@ -92,7 +92,7 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to delete tuples due to %w", err)
 		}
 
-		return output.Display(output.EmptyStruct{}) //nolint:wrapcheck
+		return output.Display(output.EmptyStruct{})
 	},
 }
 
