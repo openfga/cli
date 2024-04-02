@@ -752,7 +752,7 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 * `--relation`: Relation
 * `--object`: Object
 * `--max-pages`: Max number of pages to get. (default 20)
-* `--simple-output`: Output simpler JSON version. (It can be used by write and delete commands)
+* `--output-format`: Can be `csv`, `yaml`, `json` or `simple-json`. Use `simple-json` for a simpler json format that can be piped to the write and delete commands
 
 ###### Example
 `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
@@ -772,7 +772,7 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
   ]
 }
 ```
-###### Response (--simple-output)
+###### Response (--output-format=simple-json)
 ```json5
 [
   {
