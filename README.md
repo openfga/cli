@@ -536,6 +536,8 @@ tests: # required
 ###### Example
 `fga model test --tests tests.fga.yaml`
 
+For more examples of `.fga.yaml` files, check the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+
 ###### Response
 
 ```shell
