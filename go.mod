@@ -1,6 +1,6 @@
 module github.com/openfga/cli
 
-go 1.21.8
+go 1.21.9
 
 require (
 	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
@@ -14,7 +14,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20240318145204-66b9e5cb403c
 	github.com/openfga/go-sdk v0.3.6-0.20240313140700-3de2c059df44
 	github.com/openfga/language/pkg/go v0.0.0-20240327204426-18b0254b2be1
-	github.com/openfga/openfga v1.5.1
+	github.com/openfga/openfga v1.5.2
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -73,7 +73,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
