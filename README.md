@@ -355,7 +355,8 @@ fga model **write**
 * `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
 
 ###### Example
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`
+* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=fga.mod`
 * `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}' --format json`
 
 ###### Response

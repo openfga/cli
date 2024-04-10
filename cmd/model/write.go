@@ -54,7 +54,8 @@ var writeCmd = &cobra.Command{
 	Short: "Write Authorization Model",
 	Long:  "Writes a new authorization model.",
 	Example: `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json
-fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"type":"user"},{"type":"document","relations":{"can_view":{"this":{}}},"metadata":{"relations":{"can_view":{"directly_related_user_types":[{"type":"user"}]}}}}],"schema_version":"1.1"}'`, //nolint:lll
+fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=fga.mod
+fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"type":"user"},{"type":"document","relations":{"can_view":{"this":{}}},"metadata":{"relations":{"can_view":{"directly_related_user_types":[{"type":"user"}]}}}}],"schema_version":"1.1"}' --format=json`, //nolint:lll
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -97,7 +98,7 @@ var writeInputFormat = authorizationmodel.ModelFormatDefault
 func init() {
 	writeCmd.Flags().String("store-id", "", "Store ID")
 	writeCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
-	writeCmd.Flags().Var(&writeInputFormat, "format", `Authorization model input format. Can be "fga" or "json"`)
+	writeCmd.Flags().Var(&writeInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular"`) //nolint:lll
 
 	if err := writeCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
