@@ -41,12 +41,14 @@ func importStore(
 	storeID string,
 	maxTuplesPerWrite int,
 	maxParallelRequests int,
-) error {
+) (*CreateStoreAndModelResponse, error) {
 	var err error
-	if storeID == "" {
+	var response *CreateStoreAndModelResponse //nolint:wsl
+	if storeID == "" {                        //nolint:wsl
 		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
-		if err != nil {
-			return err
+		response = createStoreAndModelResponse
+		if err != nil { //nolint:wsl
+			return nil, err
 		}
 		clientConfig.StoreID = createStoreAndModelResponse.Store.Id //nolint:wsl
 	} else {
@@ -55,18 +57,18 @@ func importStore(
 
 		err = authModel.ReadModelFromString(storeData.Model, format)
 		if err != nil {
-			return err //nolint:wrapcheck
+			return nil, err //nolint:wrapcheck
 		}
 
 		_, err := model.Write(fgaClient, authModel)
 		if err != nil {
-			return fmt.Errorf("failed to write model due to %w", err)
+			return nil, fmt.Errorf("failed to write model due to %w", err)
 		}
 	}
 
 	fgaClient, err = clientConfig.GetFgaClient()
 	if err != nil {
-		return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
 	}
 
 	writeRequest := client.ClientWriteRequest{
@@ -75,10 +77,10 @@ func importStore(
 
 	_, err = tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 	if err != nil {
-		return err //nolint:wrapcheck
+		return nil, err //nolint:wrapcheck
 	}
 
-	return nil
+	return response, nil
 }
 
 // importCmd represents the get command.
@@ -88,6 +90,7 @@ var importCmd = &cobra.Command{
 	Long:    `Import a store: updating the name, model and appending the global tuples`,
 	Example: "fga store import --file=model.fga.yaml",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		var createStoreAndModelResponse *CreateStoreAndModelResponse
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
 		storeID, err := cmd.Flags().GetString("store-id")
@@ -120,12 +123,13 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		err = importStore(clientConfig, fgaClient, storeData, format, storeID, maxTuplesPerWrite, maxParallelRequests)
+		createStoreAndModelResponse, err = importStore(clientConfig, fgaClient, storeData, format,
+			storeID, maxTuplesPerWrite, maxParallelRequests)
 		if err != nil {
 			return err
 		}
 
-		return output.Display(output.EmptyStruct{})
+		return output.Display(createStoreAndModelResponse)
 	},
 }
 
