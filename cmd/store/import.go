@@ -43,11 +43,11 @@ func importStore(
 	maxParallelRequests int,
 ) (*CreateStoreAndModelResponse, error) {
 	var err error
-	var response *CreateStoreAndModelResponse
-	if storeID == "" {
+	var response *CreateStoreAndModelResponse //nolint:wsl
+	if storeID == "" {                        //nolint:wsl
 		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
 		response = createStoreAndModelResponse
-		if err != nil {
+		if err != nil { //nolint:wsl
 			return nil, err
 		}
 		clientConfig.StoreID = createStoreAndModelResponse.Store.Id //nolint:wsl
@@ -123,7 +123,8 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		createStoreAndModelResponse, err = importStore(clientConfig, fgaClient, storeData, format, storeID, maxTuplesPerWrite, maxParallelRequests)
+		createStoreAndModelResponse, err = importStore(clientConfig, fgaClient, storeData, format,
+			storeID, maxTuplesPerWrite, maxParallelRequests)
 		if err != nil {
 			return err
 		}
