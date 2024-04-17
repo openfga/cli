@@ -950,7 +950,7 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple "
 ##### List Relations
 
 ###### Command
-fga query **list-objects** <user> <object> [--relation <relation>]* [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
+fga query **list-relations** <user> <object> [--relation <relation>]* [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
 
 ###### Parameters
 * `--store-id`: Specifies the store id
