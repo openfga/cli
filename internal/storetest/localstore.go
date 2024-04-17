@@ -89,7 +89,6 @@ func getLocalServerModelAndTuples(
 
 	fgaServer, err := server.NewServerWithOpts(
 		server.WithDatastore(datastore),
-		server.WithExperimentals(server.ExperimentalEnableModularModels),
 	)
 	if err != nil {
 		return nil, nil, stopServerFn, err //nolint:wrapcheck
