@@ -47,5 +47,5 @@ func (format *ModelFormat) Set(v string) error {
 }
 
 func (format *ModelFormat) Type() string {
-	return "ModelFormat"
+	return "format"
 }
