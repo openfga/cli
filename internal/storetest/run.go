@@ -61,7 +61,12 @@ func RunCucumberTests(
 	if path != "" {
 		opts.Paths = []string{path}
 	} else {
-		opts.FeatureContents = storeData.ToFeatures()
+		features, err := storeData.ToFeatures()
+		if err != nil {
+			return 1, err
+		}
+
+		opts.FeatureContents = features
 	}
 
 	status := godog.TestSuite{

@@ -18,6 +18,7 @@ limitations under the License.
 package storetest
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
@@ -36,7 +37,7 @@ type ModelTestCheck struct {
 	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
 }
 
-func (m *ModelTestCheck) toScenario() string {
+func (m *ModelTestCheck) toScenario() (string, error) {
 	scenarios := ""
 
 	for relation, value := range m.Assertions {
@@ -47,7 +48,12 @@ func (m *ModelTestCheck) toScenario() string {
 			scenario += "\t\tWhen context is\n"
 
 			for key, value := range *m.Context {
-				scenario += fmt.Sprintf("\t\t\t| %s | %s |\n", key, value)
+				row, err := contextToTableRow(key, value)
+				if err != nil {
+					return "", err
+				}
+
+				scenario += row
 			}
 		}
 
@@ -60,7 +66,7 @@ func (m *ModelTestCheck) toScenario() string {
 		scenarios += scenario + "\n"
 	}
 
-	return scenarios
+	return scenarios, nil
 }
 
 type ModelTestListObjects struct {
@@ -70,7 +76,7 @@ type ModelTestListObjects struct {
 	Assertions map[string][]string     `json:"assertions" yaml:"assertions"`
 }
 
-func (m *ModelTestListObjects) toScenario() string {
+func (m *ModelTestListObjects) toScenario() (string, error) {
 	scenarios := ""
 
 	for relation, objects := range m.Assertions {
@@ -78,8 +84,14 @@ func (m *ModelTestListObjects) toScenario() string {
 
 		if m.Context != nil {
 			scenario += "\t\tWhen context is\n"
+
 			for key, value := range *m.Context {
-				scenario += fmt.Sprintf("\t\t\t| %s | %s |\n", key, value)
+				row, err := contextToTableRow(key, value)
+				if err != nil {
+					return "", err
+				}
+
+				scenario += row
 			}
 		}
 
@@ -97,7 +109,7 @@ func (m *ModelTestListObjects) toScenario() string {
 		scenarios += scenario + "\n"
 	}
 
-	return scenarios
+	return scenarios, nil
 }
 
 type ModelTest struct {
@@ -109,50 +121,81 @@ type ModelTest struct {
 	ListObjects []ModelTestListObjects            `json:"list_objects" yaml:"list_objects"` //nolint:tagliatelle
 }
 
-func (m *ModelTest) toFeature(globalTuples string) godog.Feature {
+func (m *ModelTest) toFeature(globalTuples string) (godog.Feature, error) {
 	featureName := m.Name
+
 	if featureName == "" {
 		featureName = "Test"
+	}
+
+	feature := godog.Feature{
+		Name: featureName,
 	}
 
 	featureString := fmt.Sprintf("Feature: %s\n", featureName)
 
 	localTuples := ""
+
 	if len(m.Tuples) > 0 {
-		localTuples = tuplesToGherkin(m.Tuples)
+		tuples, err := tuplesToGherkin(m.Tuples)
+		if err != nil {
+			return feature, err
+		}
+
+		localTuples += tuples
 	}
 
 	if globalTuples != "" || localTuples != "" {
 		featureString += "\tBackground:\n" + globalTuples + localTuples
 	}
 
-	featureString += m.toCheckScenarios()
-	featureString += m.toListObjectsScenarios()
-
-	return godog.Feature{
-		Name:     featureName,
-		Contents: []byte(featureString),
+	checkScenarios, err := m.toCheckScenarios()
+	if err != nil {
+		return feature, err
 	}
+
+	featureString += checkScenarios
+
+	listObjectsScenarios, err := m.toListObjectsScenarios()
+	if err != nil {
+		return feature, err
+	}
+
+	featureString += listObjectsScenarios
+
+	feature.Contents = []byte(featureString)
+
+	return feature, nil
 }
 
-func (m *ModelTest) toCheckScenarios() string {
+func (m *ModelTest) toCheckScenarios() (string, error) {
 	scenarios := ""
 
 	for _, check := range m.Check {
-		scenarios += "\n\t" + check.toScenario()
+		scenario, err := check.toScenario()
+		if err != nil {
+			return "", err
+		}
+
+		scenarios += "\n\t" + scenario
 	}
 
-	return scenarios
+	return scenarios, nil
 }
 
-func (m *ModelTest) toListObjectsScenarios() string {
+func (m *ModelTest) toListObjectsScenarios() (string, error) {
 	scenarios := ""
 
 	for _, check := range m.ListObjects {
-		scenarios += "\n\t" + check.toScenario()
+		scenario, err := check.toScenario()
+		if err != nil {
+			return "", err
+		}
+
+		scenarios += "\n\t" + scenario
 	}
 
-	return scenarios
+	return scenarios, nil
 }
 
 type StoreData struct {
@@ -228,34 +271,69 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	return nil
 }
 
-func (storeData *StoreData) ToFeatures() []godog.Feature {
+func (storeData *StoreData) ToFeatures() ([]godog.Feature, error) {
 	features := []godog.Feature{}
 	globalTuples := ""
 
 	if len(storeData.Tuples) > 0 {
-		globalTuples += tuplesToGherkin(storeData.Tuples)
+		tuples, err := tuplesToGherkin(storeData.Tuples)
+		if err != nil {
+			return features, err
+		}
+
+		globalTuples += tuples
 	}
 
 	for _, test := range storeData.Tests {
-		features = append(features, test.toFeature(globalTuples))
+		feature, err := test.toFeature(globalTuples)
+		if err != nil {
+			return features, err
+		}
+
+		features = append(features, feature)
 	}
 
-	return features
+	return features, nil
 }
 
-func tuplesToGherkin(tuples []client.ClientContextualTupleKey) string {
+func tuplesToGherkin(tuples []client.ClientContextualTupleKey) (string, error) {
 	givenString := ""
 	for _, tuple := range tuples {
 		givenString += fmt.Sprintf("\t\tGiven %s is a %s of %s", tuple.User, tuple.Relation, tuple.Object)
+
 		if tuple.Condition != nil {
-			givenString += fmt.Sprintf(" with %s being\n", tuple.Condition.Name)
-			for key, value := range *tuple.Condition.Context {
-				givenString += fmt.Sprintf("\t\t\t| %s | %s |\n", key, value)
+			if tuple.Condition.Context != nil {
+				givenString += fmt.Sprintf(" with %s being\n", tuple.Condition.Name)
+
+				for key, value := range *tuple.Condition.Context {
+					row, err := contextToTableRow(key, value)
+					if err != nil {
+						return "", err
+					}
+
+					givenString += row
+				}
+			} else {
+				givenString += fmt.Sprintf(" with %s\n", tuple.Condition.Name)
 			}
 		}
 
 		givenString += "\n"
 	}
 
-	return givenString
+	return givenString, nil
+}
+
+func contextToTableRow(key string, value interface{}) (string, error) {
+	switch value.(type) {
+	case map[string]any, []any:
+		value, err := json.Marshal(value)
+		if err != nil {
+			return "", err //nolint:wrapcheck
+		}
+
+		return fmt.Sprintf("\t\t\t| %s | %s |\n", key, string(value)), nil
+	default:
+		return fmt.Sprintf("\t\t\t| %s | %v |\n", key, value), nil
+	}
 }

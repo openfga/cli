@@ -2,6 +2,7 @@ package storetest
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -66,7 +67,18 @@ func (f *FGAContext) tableToContext(table *godog.Table) (*structpb.Struct, error
 		key := row.Cells[0].Value
 		val := row.Cells[1].Value
 
-		con[key] = val
+		if strings.HasPrefix(val, "{") || strings.HasPrefix(val, "[") {
+			var unmarshalledVal interface{}
+
+			err := json.Unmarshal([]byte(val), &unmarshalledVal)
+			if err != nil {
+				return nil, err //nolint:wrapcheck
+			}
+
+			con[key] = unmarshalledVal
+		} else {
+			con[key] = val
+		}
 	}
 
 	conditionContext, err := structpb.NewStruct(con)
@@ -118,6 +130,14 @@ func (f *FGAContext) writeTuple() error {
 
 		f.contextualTuples = append(f.contextualTuples, tuple)
 	}
+
+	// Clear the data after writing
+	f.user = ""
+	f.relation = ""
+	f.object = ""
+	f.conditionContext = nil
+	f.conditionName = ""
+	f.objectType = ""
 
 	return nil
 }
@@ -314,6 +334,15 @@ func (f *FGAContext) thereIsATupleWithCondition(
 	return f.writeTuple()
 }
 
+func (f *FGAContext) thereIsATupleWithConditionNoValue(user, relation, object, condition string) error {
+	f.user = user
+	f.object = object
+	f.relation = relation
+	f.conditionName = condition
+
+	return f.writeTuple()
+}
+
 func (f *FGAContext) checkHasRelation(user, relation string) error {
 	if strings.Contains(user, ":") {
 		f.user = user
@@ -389,12 +418,14 @@ func (f *FGAContext) addContext(user, object string, table *godog.Table) error {
 		f.object = object
 	}
 
-	conditionContext, err := f.tableToContext(table)
-	if err != nil {
-		return err
-	}
+	if table != nil {
+		conditionContext, err := f.tableToContext(table)
+		if err != nil {
+			return err
+		}
 
-	f.conditionContext = conditionContext
+		f.conditionContext = conditionContext
+	}
 
 	return nil
 }
@@ -482,9 +513,22 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 		return ctx, nil
 	})
 
+	ctx.After(func(ctx context.Context, _ *godog.Scenario, _ error) (context.Context, error) {
+		fga.user = ""
+		fga.relation = ""
+		fga.object = ""
+		fga.conditionContext = nil
+		fga.conditionName = ""
+		fga.contextualTuples = []client.ClientContextualTupleKey{}
+		fga.objectType = ""
+
+		return ctx, nil
+	})
+
 	// Adding tuples using given
 	ctx.Step(`^(\S+:\S+) is an? (\S+) of (\S+:\S+)$`, fga.thereIsATuple)
 	ctx.Step(`^(\S+:\S+) is an? (\S+) of (\S+:\S+) with (\S+) being$`, fga.thereIsATupleWithCondition)
+	ctx.Step(`^(\S+:\S+) is an? (\S+) of (\S+:\S+) with (\S+)$`, fga.thereIsATupleWithConditionNoValue)
 
 	// Conditions
 	ctx.When(`(\S+:\S+) (?:accesses|access) (\S+:\S+) with$`, fga.addContext)
