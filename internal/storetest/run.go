@@ -2,6 +2,7 @@ package storetest
 
 import (
 	"context"
+	"errors"
 
 	"github.com/cucumber/godog"
 	"github.com/openfga/go-sdk/client"
@@ -30,12 +31,27 @@ func RunCucumberTests(
 		return 1, err
 	}
 
+	isLocalTest := authModel != nil
+
 	defer stopServerFn()
 
 	ctx := context.WithValue(context.Background(), ctxKeyFgaClient, fgaClient)
 	ctx = context.WithValue(ctx, ctxKeyAuthModel, authModel)
 	ctx = context.WithValue(ctx, ctxKeyFgaServer, fgaServer)
-	ctx = context.WithValue(ctx, ctxKeyIsLocalTest, authModel != nil)
+	ctx = context.WithValue(ctx, ctxKeyIsLocalTest, isLocalTest)
+
+	if !isLocalTest {
+		cfg := fgaClient.GetConfig()
+
+		err = cfg.ValidateConfig()
+		if err != nil {
+			return 1, err //nolint:wrapcheck
+		}
+
+		if cfg.StoreId == "" {
+			return 1, errors.New("store ID must be provided when running tests remotely") //nolint:goerr113
+		}
+	}
 
 	opts := &godog.Options{
 		Format:         reporter,
