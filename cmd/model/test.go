@@ -23,8 +23,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 )
 
@@ -47,43 +47,39 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		format, storeData, err := storetest.ReadFromFile(testsFileName, path.Dir(testsFileName))
+		var format authorizationmodel.ModelFormat
+		var storeData *storetest.StoreData
+		if testsFileName != "" {
+			f, sd, err := storetest.ReadFromFile(testsFileName, path.Dir(testsFileName))
+			if err != nil {
+				return err //nolint:wrapcheck
+			}
+			format = f
+			storeData = sd
+		}
+
+		features, err := cmd.Flags().GetString("features")
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
 
-		verbose, err := cmd.Flags().GetBool("verbose")
+		reporter, err := cmd.Flags().GetString("reporter")
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
 
-		test, err := storetest.RunTests(
+		status, err := storetest.RunCucumberTests(
+			features,
 			fgaClient,
 			storeData,
 			format,
+			reporter,
 		)
 		if err != nil {
-			return fmt.Errorf("error running tests due to %w", err)
+			return err //nolint:wrapcheck
 		}
 
-		passing := test.IsPassing()
-
-		if verbose {
-			err = output.Display(test.Results)
-			if err != nil {
-				return fmt.Errorf("error displaying test results due to %w", err)
-			}
-
-			if !passing {
-				os.Exit(1)
-			}
-		}
-
-		fmt.Println(test.FriendlyDisplay())
-
-		if !passing {
-			os.Exit(1)
-		}
+		os.Exit(status)
 
 		return nil
 	},
@@ -94,9 +90,6 @@ func init() {
 	testCmd.Flags().String("model-id", "", "Model ID")
 	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
-
-	if err := testCmd.MarkFlagRequired("tests"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
-		os.Exit(1)
-	}
+	testCmd.Flags().String("features", "", "Features directory.")
+	testCmd.Flags().String("reporter", "simple", "Reporter to use for the tests")
 }
