@@ -51,6 +51,8 @@ linters-settings:
           - gopkg.in/yaml.v3
           - github.com/hashicorp/go-multierror
           - github.com/gocarina/gocsv
+          - github.com/cucumber/godog
+          - github.com/cucumber/gherkin
       test:
         files:
           - "$test"
