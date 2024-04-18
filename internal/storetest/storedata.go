@@ -110,7 +110,12 @@ type ModelTest struct {
 }
 
 func (m *ModelTest) toFeature(globalTuples string) godog.Feature {
-	featureString := fmt.Sprintf("Feature: %s\n", m.Name)
+	featureName := m.Name
+	if featureName == "" {
+		featureName = "Test"
+	}
+
+	featureString := fmt.Sprintf("Feature: %s\n", featureName)
 
 	localTuples := ""
 	if len(m.Tuples) > 0 {
@@ -125,7 +130,7 @@ func (m *ModelTest) toFeature(globalTuples string) godog.Feature {
 	featureString += m.toListObjectsScenarios()
 
 	return godog.Feature{
-		Name:     m.Name,
+		Name:     featureName,
 		Contents: []byte(featureString),
 	}
 }
