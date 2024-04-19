@@ -13,34 +13,30 @@ import (
 type ctxKey string
 
 const (
-	ctxKeyAuthModel   ctxKey = "authModel"
-	ctxKeyFgaClient   ctxKey = "fgaClient"
-	ctxKeyFgaServer   ctxKey = "fgaServer"
-	ctxKeyIsLocalTest ctxKey = "isLocalTest"
+	ctxKeyAuthModel  ctxKey = "authModel"
+	ctxKeyFgaClient  ctxKey = "fgaClient"
+	ctxKeyFgaContext ctxKey = "fgaContext"
 )
 
-func RunCucumberTests(
+func RunTests(
 	path string,
 	fgaClient *client.OpenFgaClient,
 	storeData *StoreData,
 	format authorizationmodel.ModelFormat,
 	reporter string,
 ) (int, error) {
-	fgaServer, authModel, stopServerFn, err := getLocalServerModelAndTuples(storeData, format)
+	authModel, err := getAuthModel(storeData, format)
 	if err != nil {
 		return 1, err
 	}
 
 	isLocalTest := authModel != nil
 
-	defer stopServerFn()
-
 	ctx := context.WithValue(context.Background(), ctxKeyFgaClient, fgaClient)
 	ctx = context.WithValue(ctx, ctxKeyAuthModel, authModel)
-	ctx = context.WithValue(ctx, ctxKeyFgaServer, fgaServer)
-	ctx = context.WithValue(ctx, ctxKeyIsLocalTest, isLocalTest)
 
 	if !isLocalTest {
+		// Validate the config for the fga client before running tests
 		cfg := fgaClient.GetConfig()
 
 		err = cfg.ValidateConfig()
@@ -76,4 +72,21 @@ func RunCucumberTests(
 	}.Run()
 
 	return status, nil
+}
+
+func getAuthModel(storeData *StoreData, format authorizationmodel.ModelFormat) (*authorizationmodel.AuthzModel, error) {
+	var authModel *authorizationmodel.AuthzModel
+
+	if storeData == nil || storeData.Model == "" {
+		return authModel, nil
+	}
+
+	tempModel := authorizationmodel.AuthzModel{}
+
+	err := tempModel.ReadModelFromString(storeData.Model, format)
+	if err != nil {
+		return nil, err //nolint:wrapcheck
+	}
+
+	return &tempModel, nil
 }

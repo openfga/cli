@@ -17,6 +17,7 @@ limitations under the License.
 package model
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -68,7 +69,11 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		status, err := storetest.RunCucumberTests(
+		if features == "" && testsFileName == "" {
+			return errors.New("one or both of --features or --tests must be provided") //nolint:goerr113
+		}
+
+		status, err := storetest.RunTests(
 			features,
 			fgaClient,
 			storeData,

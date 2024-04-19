@@ -93,18 +93,6 @@ func (f *simpleFmt) Summary() { //nolint:cyclop
 	}
 }
 
-var (
-	// Check regex.
-	HasRelationRegex               = regexp.MustCompile(`^(?:(?:he|she|they)|(\S+:\S+)) (?:has|have) the (\S+) permission$`)              //nolint:lll
-	HasMultiRelationsRegex         = regexp.MustCompile(`^(?:(?:he|she|they)|(\S+:\S+)) (?:has|have) the following permissions$`)         //nolint:lll
-	DoesNotHaveRelationRegex       = regexp.MustCompile(`^(?:(?:he|she|they)|(\S+:\S+)) (?:does|do) not have the (\S+) permission$`)      //nolint:lll
-	DoesNotHaveMultiRelationsRegex = regexp.MustCompile(`^(?:(?:he|she|they)|(\S+:\S+)) (?:does|do) not have the following permissions$`) //nolint:lll
-
-	// ListObjects regex.
-	HasPermissionsRegex         = regexp.MustCompile(`^(?:(?:he|she|they)|(\S+:\S+)) (?:has|have) the (\S+) permission for$`) //nolint:lll
-	DoesNotHavePermissionsRegex = regexp.MustCompile(`^(?:(?:he|she|they)|(\S+:\S+)) (?:has|have) no (\S+) permission$`)
-)
-
 func (f *simpleFmt) isCheckStep(expr *regexp.Regexp) bool {
 	return expr == HasRelationRegex ||
 		expr == HasMultiRelationsRegex ||
