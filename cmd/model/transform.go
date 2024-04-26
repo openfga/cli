@@ -26,6 +26,20 @@ import (
 	"github.com/openfga/cli/internal/output"
 )
 
+func determineOutputFormat(input, output authorizationmodel.ModelFormat) authorizationmodel.ModelFormat {
+	if output != authorizationmodel.ModelFormatDefault {
+		return output
+	}
+
+	// Output dsl if we have a json model as input
+	if input == authorizationmodel.ModelFormatJSON {
+		return authorizationmodel.ModelFormatFGA
+	}
+
+	// Otherwise output json if we have dsl or modular
+	return authorizationmodel.ModelFormatJSON
+}
+
 // transformCmd represents the transform command.
 var transformCmd = &cobra.Command{
 	Use:   "transform",
@@ -37,6 +51,15 @@ fga model transform --file=fga.mod`,
 
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if transformOutputFormat != authorizationmodel.ModelFormatDefault &&
+			transformOutputFormat != authorizationmodel.ModelFormatFGA &&
+			transformOutputFormat != authorizationmodel.ModelFormatJSON {
+			return fmt.Errorf( //nolint:goerr113
+				`unsupported output format %s, supported formats are "fga" and "json"`,
+				transformOutputFormat,
+			)
+		}
+
 		var inputModel string
 		if err := authorizationmodel.ReadFromInputFileOrArg(
 			cmd,
@@ -54,8 +77,9 @@ fga model transform --file=fga.mod`,
 			return err //nolint:wrapcheck
 		}
 
-		if transformInputFormat == authorizationmodel.ModelFormatJSON ||
-			transformInputFormat == authorizationmodel.ModelFormatModular {
+		transformOutputFormat = determineOutputFormat(transformInputFormat, transformOutputFormat)
+
+		if transformOutputFormat == authorizationmodel.ModelFormatFGA {
 			dslModel, err := authModel.DisplayAsDSL([]string{"model"})
 			if err != nil {
 				return fmt.Errorf("failed to transform model due to %w", err)
@@ -65,17 +89,17 @@ fga model transform --file=fga.mod`,
 			return nil
 		}
 
-		if err := authModel.ReadFromDSLString(inputModel); err != nil {
-			return err //nolint:wrapcheck
-		}
-
 		return output.Display(authModel.DisplayAsJSON([]string{"model"}))
 	},
 }
 
-var transformInputFormat = authorizationmodel.ModelFormatDefault
+var (
+	transformInputFormat  = authorizationmodel.ModelFormatDefault
+	transformOutputFormat = authorizationmodel.ModelFormatDefault
+)
 
 func init() {
 	transformCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format or be an `fga.mod` format") //nolint:lll
 	transformCmd.Flags().Var(&transformInputFormat, "input-format", `Authorization model input format. Can be "fga", "json", or "modular"`)  //nolint:lll
+	transformCmd.Flags().Var(&transformOutputFormat, "output-format", `Authorization model output format. Can be "fga" or "json"."`)         //nolint:lll
 }
