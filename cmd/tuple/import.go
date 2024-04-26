@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -81,6 +82,20 @@ func ImportTuples(
 	return &result, nil
 }
 
+func extractErrMssg(err error) string {
+	errorMsg := err.Error()
+	startIndex := strings.Index(errorMsg, "error message:")
+
+	if startIndex == -1 {
+		return errorMsg
+	}
+
+	errorMsg = errorMsg[startIndex:]
+	errorMsg = strings.TrimSpace(errorMsg)
+
+	return errorMsg
+}
+
 func processWrites(
 	writes []client.ClientWriteRequestWriteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
@@ -93,9 +108,10 @@ func processWrites(
 		if write.Status == client.SUCCESS {
 			successfulWrites = append(successfulWrites, write.TupleKey)
 		} else {
+			reason := extractErrMssg(write.Error)
 			failedWrites = append(failedWrites, failedWriteResponse{
 				TupleKey: write.TupleKey,
-				Reason:   write.Error.Error(),
+				Reason:   reason,
 			})
 		}
 	}
@@ -121,9 +137,10 @@ func processDeletes(
 		if delete.Status == client.SUCCESS {
 			successfulDeletes = append(successfulDeletes, deletedTupleKey)
 		} else {
+			reason := extractErrMssg(delete.Error)
 			failedDeletes = append(failedDeletes, failedWriteResponse{
 				TupleKey: deletedTupleKey,
-				Reason:   delete.Error.Error(),
+				Reason:   reason,
 			})
 		}
 	}
