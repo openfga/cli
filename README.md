@@ -559,7 +559,7 @@ fga model **transform**
 ###### Parameters
 * `--file`: File containing the authorization model
 * `--input-format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
-* `--output-format`: Authorization model output format. Can be "fga" or "json". If input format is `json` then it defaults to DSL, if `fga` or `modular` then defaults to `json` (optional)
+* `--output-format`: Authorization model output format. Can be "fga" or "json". If not specified, it will default to `fga` if the input format is `json` and to `json` otherwise (optional)
 
 
 ###### Example
