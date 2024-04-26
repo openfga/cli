@@ -17,55 +17,15 @@ limitations under the License.
 package model
 
 import (
-	"context"
 	"fmt"
 	"os"
 
-	openfga "github.com/openfga/go-sdk"
-	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 )
-
-func getModel(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*openfga.ReadAuthorizationModelResponse,
-	error,
-) {
-	authorizationModelID := clientConfig.AuthorizationModelID
-
-	var err error
-
-	var model *openfga.ReadAuthorizationModelResponse
-
-	if authorizationModelID != "" {
-		options := client.ClientReadAuthorizationModelOptions{
-			AuthorizationModelId: openfga.PtrString(authorizationModelID),
-		}
-		model, err = fgaClient.ReadAuthorizationModel(context.Background()).Options(options).Execute()
-	} else {
-		options := client.ClientReadLatestAuthorizationModelOptions{}
-		model, err = fgaClient.ReadLatestAuthorizationModel(context.Background()).Options(options).Execute()
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
-	}
-
-	if model.AuthorizationModel == nil {
-		// If there is no model, try to get the store
-		if _, err := fgaClient.GetStore(context.Background()).Execute(); err != nil {
-			return nil, fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
-		}
-
-		return nil, fmt.Errorf("%w", clierrors.ErrAuthorizationModelNotFound)
-	}
-
-	return model, nil
-}
 
 // getCmd represents the get command.
 var getCmd = &cobra.Command{
@@ -81,9 +41,9 @@ var getCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		response, err := getModel(clientConfig, fgaClient)
+		response, err := authorizationmodel.ReadFromStore(clientConfig, fgaClient)
 		if err != nil {
-			return err
+			return err //nolint:wrapcheck
 		}
 
 		authModel := authorizationmodel.AuthzModel{}
