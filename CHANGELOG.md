@@ -1,6 +1,17 @@
 # Changelog
 
-### [0.3.0-beta.1](https://github.com/openfga/cli/compare/v0.2.7...v0.3.0) (2024-03-28)
+### [0.3.1](https://github.com/openfga/cli/compare/v0.3.0...v0.3.1) (2024-04-29)
+
+Added:
+
+- `fga store import` now outputs the store and model details (#299) - thanks @NeerajNagure
+- `fga store export` to support exporting a store (#306)
+- Support specifying output format using `--output-format` for `fga model transform` (#308)
+
+Changed:
+- `fga tuple write` returns simpler error messages (#303) - thanks @shruti2522
+
+### [0.3.0](https://github.com/openfga/cli/compare/v0.2.7...v0.3.0) (2024-03-28)
 
 Added:
 - Support for [modular models](https://github.com/openfga/rfcs/blob/main/20231212-modular-models.md) ([#262](https://github.com/openfga/cli/issues/262))
