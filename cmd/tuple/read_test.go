@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/golang/mock/gomock"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
+	"go.uber.org/mock/gomock"
 
 	mock_client "github.com/openfga/cli/internal/mocks"
 	"github.com/openfga/cli/internal/tuple"

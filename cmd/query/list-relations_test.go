@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/openfga/go-sdk/client"
+	"go.uber.org/mock/gomock"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
