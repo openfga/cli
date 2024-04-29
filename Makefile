@@ -15,6 +15,9 @@ GO_LINKER_FLAGS = -X '$(BUILD_INFO_PKG).Version=dev' \
 					 -X '$(BUILD_INFO_PKG).Commit=$(GIT_COMMIT)' \
 					 -X '$(BUILD_INFO_PKG).Date=$(BUILD_TIME)'
 
+MOCK_DIR ?= internal/mocks
+MOCK_SRC_DIR ?= mocks
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Rules (https://www.gnu.org/software/make/manual/html_node/Rule-Introduction.html#Rule-Introduction)
 #-----------------------------------------------------------------------------------------------------------------------
@@ -36,7 +39,7 @@ $(GO_BIN)/CompileDaemon:
 
 $(GO_BIN)/mockgen:
 	@echo "==> Installing mockgen within ${GO_BIN}"
-	@go install github.com/golang/mock/mockgen@latest
+	@go install go.uber.org/mock/mockgen@latest
 
 $(MOCK_SRC_DIR):
 	@echo "==> Cloning OpenFGA Go SDK within ${MOCK_SRC_DIR}"
@@ -44,7 +47,7 @@ $(MOCK_SRC_DIR):
 
 $(MOCK_DIR)/client.go: $(GO_BIN)/mockgen $(MOCK_SRC_DIR)
 	@echo "==> Generating client mocks within ${MOCK_DIR}"
-	cd ${MOCK_SRC_DIR} && mockgen -source client/client.go -destination ${MOCK_DIR}/client.go
+	mockgen -source $(MOCK_SRC_DIR)/client/client.go -destination ${MOCK_DIR}/client.go
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Phony Rules(https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html)
@@ -93,5 +96,5 @@ format: $(GO_BIN)/gofumpt ## Format Go source files
 	@echo "==> Formatting project files"
 	gofumpt -w .
 
-mocks: $(MOCK_DIR)/*.go ## Generate Go mocks
+generate-mocks: $(MOCK_DIR)/*.go ## Generate Go mocks
 	@echo "==> Mocks generated"

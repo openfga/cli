@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/openfga/go-sdk/client"
+	"go.uber.org/mock/gomock"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 	mockclient "github.com/openfga/cli/internal/mocks"
