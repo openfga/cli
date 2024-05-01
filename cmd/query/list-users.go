@@ -78,7 +78,7 @@ func listUsers(
 
 	response, err := fgaClient.ListUsers(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list relations due to %w", err)
+		return nil, fmt.Errorf("failed to list users due to %w", err)
 	}
 
 	return response, nil
@@ -87,7 +87,7 @@ func listUsers(
 var listUsersCmd = &cobra.Command{
 	Use:     "list-users",
 	Short:   "List users",
-	Long:    "List all users that are associated with an object",
+	Long:    "List all users that have a certain relation with a particular object",
 	Example: `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -121,8 +121,8 @@ var listUsersCmd = &cobra.Command{
 
 func init() {
 	listUsersCmd.Flags().String("object", "", "Object to list users for")
-	listUsersCmd.Flags().String("relation", "", "Relation to search on")
-	listUsersCmd.Flags().String("user-filter", "", "Type or userset to filter to")
+	listUsersCmd.Flags().String("relation", "", "Relation to evaluate on")
+	listUsersCmd.Flags().String("user-filter", "", "Filter the responses can be in the formats <type> (to filter objects and typed public bound access) or <type>#<relation> (to filter usersets)") //nolint:lll
 
 	if err := listUsersCmd.MarkFlagRequired("object"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/query/list-users", err)
