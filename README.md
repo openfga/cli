@@ -41,6 +41,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Expand](#expand)
       - [List Objects](#list-objects)
       - [List Relations](#list-relations)
+      - [List Users](#list-users)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1111,19 +1112,7 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
             "type": "user",
             "id": "anne"
           }
-        },
-        {
-          "wildcard": {
-            "type":"user"
-          }
-        },
-        {
-          "userset": {
-            "id":"eng",
-            "relation":"member",
-            "type":"group"
-          }
-        },
+        }
       ]
     }
 }
