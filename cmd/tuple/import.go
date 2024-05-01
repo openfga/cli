@@ -43,7 +43,7 @@ type FailedWriteResponse struct {
 }
 
 type ImportResponse struct {
-	Successful []client.ClientTupleKey `json:"successful,omitemptys"`
+	Successful []client.ClientTupleKey `json:"successful,omitempty"`
 	Failed     []FailedWriteResponse   `json:"failed,omitempty"`
 }
 

@@ -34,9 +34,22 @@ import (
 )
 
 type importStoreIODependencies struct {
-	createStoreWithModel func(clientConfig fga.ClientConfig, storeName string, inputModel string, inputFormat authorizationmodel.ModelFormat) (*CreateStoreAndModelResponse, error)
-	importTuples         func(fgaClient client.SdkClient, body client.ClientWriteRequest, maxTuplesPerWrite int, maxParallelRequests int) (*tuple.ImportResponse, error)
-	modelWrite           func(fgaClient client.SdkClient, inputModel authorizationmodel.AuthzModel) (*client.ClientWriteAuthorizationModelResponse, error)
+	createStoreWithModel func(
+		clientConfig fga.ClientConfig,
+		storeName string,
+		inputModel string,
+		inputFormat authorizationmodel.ModelFormat,
+	) (*CreateStoreAndModelResponse, error)
+	importTuples func(
+		fgaClient client.SdkClient,
+		body client.ClientWriteRequest,
+		maxTuplesPerWrite int,
+		maxParallelRequests int,
+	) (*tuple.ImportResponse, error)
+	modelWrite func(
+		fgaClient client.SdkClient,
+		inputModel authorizationmodel.AuthzModel,
+	) (*client.ClientWriteAuthorizationModelResponse, error)
 }
 
 type ImportStoreResponse struct {
@@ -54,12 +67,19 @@ func importStore(
 	ioAggregator importStoreIODependencies,
 ) (*ImportStoreResponse, error) {
 	var err error
+
 	var fgaClient client.SdkClient
+
 	response := &ImportStoreResponse{
 		CreateStoreAndModelResponse: &CreateStoreAndModelResponse{},
-	} //nolint:wsl
+	}
 	if storeID == "" { //nolint:wsl
-		createStoreAndModelResponse, err := ioAggregator.createStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
+		createStoreAndModelResponse, err := ioAggregator.createStoreWithModel(
+			clientConfig,
+			storeData.Name,
+			storeData.Model,
+			format,
+		)
 		response.CreateStoreAndModelResponse = createStoreAndModelResponse
 		if err != nil { //nolint:wsl
 			return nil, err
@@ -73,29 +93,36 @@ func importStore(
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}
+
 		fgaClient, err = clientConfig.GetFgaClient()
 		if err != nil {
 			return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		authorizationModelResponse, err := ioAggregator.modelWrite(fgaClient, authModel)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write model due to %w", err)
 		}
+
 		response.Model = authorizationModelResponse
 	}
+
 	fgaClient, err = clientConfig.GetFgaClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
 	}
+
 	writeRequest := client.ClientWriteRequest{
 		Writes: storeData.Tuples,
 	}
 
 	importTupleResponse, err := ioAggregator.importTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 	if err != nil {
-		return nil, err //nolint:wrapcheck
+		return nil, err
 	}
+
 	response.Tuple = importTupleResponse
+
 	return response, nil
 }
 
