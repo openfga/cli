@@ -143,6 +143,81 @@ func RunLocalListObjectsTest(
 	return results
 }
 
+func RunSingleLocalListUsersTest(
+	fgaServer *server.Server,
+	listUsersRequest *pb.ListUsersRequest,
+) (*pb.ListUsersResponse, error) {
+	return fgaServer.ListUsers(context.Background(), listUsersRequest) //nolint:wrapcheck
+}
+
+func RunLocalListUsersTest(
+	fgaServer *server.Server,
+	listUsersTest ModelTestListUsers,
+	tuples []client.ClientContextualTupleKey,
+	options ModelTestOptions,
+) []ModelTestListUsersSingleResult {
+	results := []ModelTestListUsersSingleResult{}
+
+	object, pbObject := convertStoreObjectToObject(listUsersTest.Object)
+
+	userFilter := &pb.UserTypeFilter{
+		Type:     listUsersTest.UserFilter[0].GetType(),
+		Relation: listUsersTest.UserFilter[0].GetRelation(),
+	}
+
+	for relation, expectation := range listUsersTest.Assertions {
+		result := ModelTestListUsersSingleResult{
+			Request: client.ClientListUsersRequest{
+				Object:           object,
+				Relation:         relation,
+				UserFilters:      listUsersTest.UserFilter,
+				ContextualTuples: tuples,
+				Context:          listUsersTest.Context,
+			},
+			Expected: expectation,
+		}
+
+		var (
+			ctx *structpb.Struct
+			err error
+		)
+
+		if listUsersTest.Context != nil {
+			ctx, err = structpb.NewStruct(*listUsersTest.Context)
+		}
+
+		if err != nil {
+			result.Error = err
+		} else {
+			response, err := RunSingleLocalListUsersTest(fgaServer,
+				&pb.ListUsersRequest{
+					StoreId:              *options.StoreID,
+					AuthorizationModelId: *options.ModelID,
+					Object:               pbObject,
+					Relation:             relation,
+					UserFilters:          []*pb.UserTypeFilter{userFilter},
+					Context:              ctx,
+				},
+			)
+			if err != nil {
+				result.Error = err
+			}
+
+			if response != nil {
+				result.Got = ModelTestListUsersAssertion{
+					Users:         convertPbUsersToStrings(response.GetUsers()),
+					ExcludedUsers: []string{},
+				}
+				result.TestResult = result.IsPassing()
+			}
+		}
+
+		results = append(results, result)
+	}
+
+	return results
+}
+
 func RunLocalTest(
 	fgaServer *server.Server,
 	test ModelTest,
@@ -151,6 +226,7 @@ func RunLocalTest(
 ) (TestResult, error) {
 	checkResults := []ModelTestCheckSingleResult{}
 	listObjectResults := []ModelTestListObjectsSingleResult{}
+	listUsersResults := []ModelTestListUsersSingleResult{}
 
 	storeID, modelID, err := initLocalStore(fgaServer, model.GetProtoModel(), tuples)
 	if err != nil {
@@ -172,10 +248,16 @@ func RunLocalTest(
 		listObjectResults = append(listObjectResults, results...)
 	}
 
+	for index := 0; index < len(test.ListUsers); index++ {
+		results := RunLocalListUsersTest(fgaServer, test.ListUsers[index], tuples, testOptions)
+		listUsersResults = append(listUsersResults, results...)
+	}
+
 	return TestResult{
 		Name:               test.Name,
 		Description:        test.Description,
 		CheckResults:       checkResults,
 		ListObjectsResults: listObjectResults,
+		ListUsersResults:   listUsersResults,
 	}, nil
 }

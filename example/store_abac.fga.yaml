@@ -40,7 +40,7 @@ tests:
           user_ip: "192.168.1.0"
         assertions:
           viewer: false # current time is within granted time interval but the user's ip address is outside the CIDR range
-    list_objects: # Each check test is made of: a user, an object type and the expected result for one or more relations
+    list_objects: # Each list objects test is made of: a user, an object type and the expected result for one or more relations
       - user: user:anne
         type: document
         context:
@@ -63,3 +63,23 @@ tests:
           user_ip: "192.168.1.0"
         assertions:
           viewer: []
+    list_users: # Each list user test is made of: an object, a user filter and the expected result for one or more relations
+      - object: document:1
+        user_filter:
+          - type: user
+        context:
+          current_timestamp: "2023-05-03T21:25:23+00:00"
+          user_ip: "192.168.0.0"
+        assertions:
+          viewer:
+            users:
+              - user:anne
+      - object: document:1
+        user_filter:
+          - type: user
+        context:
+          current_timestamp: "2023-05-03T21:25:31+00:00"
+          user_ip: "192.168.0.0"
+        assertions:
+          viewer:
+            users: []

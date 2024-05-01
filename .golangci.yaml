@@ -61,6 +61,7 @@ linters-settings:
           - github.com/openfga/go-sdk
           - github.com/openfga/openfga
           - github.com/stretchr
+          - github.com/openfga/api/proto
 
   tagliatelle:
     case:

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
@@ -42,6 +43,18 @@ type ModelTestListObjects struct {
 	Assertions map[string][]string     `json:"assertions" yaml:"assertions"`
 }
 
+type ModelTestListUsers struct {
+	Object     string                                 `json:"object"      yaml:"object"`
+	UserFilter []openfga.UserTypeFilter               `json:"user_filter" yaml:"user_filter"` //nolint:tagliatelle
+	Context    *map[string]interface{}                `json:"context"     yaml:"context,omitempty"`
+	Assertions map[string]ModelTestListUsersAssertion `json:"assertions"  yaml:"assertions"`
+}
+
+type ModelTestListUsersAssertion struct {
+	Users         []string `json:"users"          yaml:"users"`
+	ExcludedUsers []string `json:"excluded_users" yaml:"excluded_users"` //nolint:tagliatelle
+}
+
 type ModelTest struct {
 	Name        string                            `json:"name"         yaml:"name"`
 	Description string                            `json:"description"  yaml:"description,omitempty"`
@@ -49,6 +62,7 @@ type ModelTest struct {
 	TupleFile   string                            `json:"tuple_file"   yaml:"tuple_file,omitempty"` //nolint:tagliatelle
 	Check       []ModelTestCheck                  `json:"check"        yaml:"check"`
 	ListObjects []ModelTestListObjects            `json:"list_objects" yaml:"list_objects,omitempty"` //nolint:tagliatelle
+	ListUsers   []ModelTestListUsers              `json:"list_users"   yaml:"list_users,omitempty"`   //nolint:tagliatelle
 }
 
 type StoreData struct {
