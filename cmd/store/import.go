@@ -33,20 +33,34 @@ import (
 	"github.com/openfga/cli/internal/storetest"
 )
 
+type importStoreIODependencies struct {
+	createStoreWithModel func(clientConfig fga.ClientConfig, storeName string, inputModel string, inputFormat authorizationmodel.ModelFormat) (*CreateStoreAndModelResponse, error)
+	importTuples         func(fgaClient client.SdkClient, body client.ClientWriteRequest, maxTuplesPerWrite int, maxParallelRequests int) (*tuple.ImportResponse, error)
+	modelWrite           func(fgaClient client.SdkClient, inputModel authorizationmodel.AuthzModel) (*client.ClientWriteAuthorizationModelResponse, error)
+}
+
+type ImportStoreResponse struct {
+	*CreateStoreAndModelResponse
+	Tuple *tuple.ImportResponse `json:"tuple"`
+}
+
 func importStore(
 	clientConfig fga.ClientConfig,
-	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
 	maxTuplesPerWrite int,
 	maxParallelRequests int,
-) (*CreateStoreAndModelResponse, error) {
+	ioAggregator importStoreIODependencies,
+) (*ImportStoreResponse, error) {
 	var err error
-	var response *CreateStoreAndModelResponse //nolint:wsl
-	if storeID == "" {                        //nolint:wsl
-		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
-		response = createStoreAndModelResponse
+	var fgaClient client.SdkClient
+	response := &ImportStoreResponse{
+		CreateStoreAndModelResponse: &CreateStoreAndModelResponse{},
+	} //nolint:wsl
+	if storeID == "" { //nolint:wsl
+		createStoreAndModelResponse, err := ioAggregator.createStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
+		response.CreateStoreAndModelResponse = createStoreAndModelResponse
 		if err != nil { //nolint:wsl
 			return nil, err
 		}
@@ -59,27 +73,29 @@ func importStore(
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}
-
-		_, err := model.Write(fgaClient, authModel)
+		fgaClient, err = clientConfig.GetFgaClient()
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		}
+		authorizationModelResponse, err := ioAggregator.modelWrite(fgaClient, authModel)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write model due to %w", err)
 		}
+		response.Model = authorizationModelResponse
 	}
-
 	fgaClient, err = clientConfig.GetFgaClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
 	}
-
 	writeRequest := client.ClientWriteRequest{
 		Writes: storeData.Tuples,
 	}
 
-	_, err = tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
+	importTupleResponse, err := ioAggregator.importTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
-
+	response.Tuple = importTupleResponse
 	return response, nil
 }
 
@@ -90,7 +106,7 @@ var importCmd = &cobra.Command{
 	Long:    `Import a store: updating the name, model and appending the global tuples`,
 	Example: "fga store import --file=model.fga.yaml",
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		var createStoreAndModelResponse *CreateStoreAndModelResponse
+		var createStoreAndModelResponse *ImportStoreResponse
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
 		storeID, err := cmd.Flags().GetString("store-id")
@@ -118,13 +134,13 @@ var importCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		fgaClient, err := clientConfig.GetFgaClient()
-		if err != nil {
-			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		ioAggregator := importStoreIODependencies{
+			createStoreWithModel: CreateStoreWithModel,
+			importTuples:         tuple.ImportTuples,
+			modelWrite:           model.Write,
 		}
-
-		createStoreAndModelResponse, err = importStore(clientConfig, fgaClient, storeData, format,
-			storeID, maxTuplesPerWrite, maxParallelRequests)
+		createStoreAndModelResponse, err = importStore(clientConfig, storeData, format,
+			storeID, maxTuplesPerWrite, maxParallelRequests, ioAggregator)
 		if err != nil {
 			return err
 		}

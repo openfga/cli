@@ -32,7 +32,7 @@ import (
 )
 
 type CreateStoreAndModelResponse struct {
-	Store client.ClientCreateStoreResponse              `json:"store"`
+	Store *client.ClientCreateStoreResponse             `json:"store"`
 	Model *client.ClientWriteAuthorizationModelResponse `json:"model,omitempty"`
 }
 
@@ -69,7 +69,7 @@ func CreateStoreWithModel(
 		return nil, err
 	}
 
-	response.Store = *createStoreResponse
+	response.Store = createStoreResponse
 	fgaClient.SetStoreId(response.Store.Id)
 
 	if inputModel != "" {

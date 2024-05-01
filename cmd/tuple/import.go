@@ -37,14 +37,14 @@ var MaxTuplesPerWrite = 1
 // MaxParallelRequests Limit the parallel writes to the API.
 var MaxParallelRequests = 10
 
-type failedWriteResponse struct {
+type FailedWriteResponse struct {
 	TupleKey client.ClientTupleKey `json:"tuple_key"`
 	Reason   string                `json:"reason"`
 }
 
 type ImportResponse struct {
-	Successful []client.ClientTupleKey `json:"successful"`
-	Failed     []failedWriteResponse   `json:"failed"`
+	Successful []client.ClientTupleKey `json:"successful,omitemptys"`
+	Failed     []FailedWriteResponse   `json:"failed,omitempty"`
 }
 
 // ImportTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
@@ -98,10 +98,10 @@ func extractErrMssg(err error) string {
 
 func processWrites(
 	writes []client.ClientWriteRequestWriteResponse,
-) ([]client.ClientTupleKey, []failedWriteResponse) {
+) ([]client.ClientTupleKey, []FailedWriteResponse) {
 	var (
 		successfulWrites []client.ClientTupleKey
-		failedWrites     []failedWriteResponse
+		failedWrites     []FailedWriteResponse
 	)
 
 	for _, write := range writes {
@@ -109,7 +109,7 @@ func processWrites(
 			successfulWrites = append(successfulWrites, write.TupleKey)
 		} else {
 			reason := extractErrMssg(write.Error)
-			failedWrites = append(failedWrites, failedWriteResponse{
+			failedWrites = append(failedWrites, FailedWriteResponse{
 				TupleKey: write.TupleKey,
 				Reason:   reason,
 			})
@@ -121,10 +121,10 @@ func processWrites(
 
 func processDeletes(
 	deletes []client.ClientWriteRequestDeleteResponse,
-) ([]client.ClientTupleKey, []failedWriteResponse) {
+) ([]client.ClientTupleKey, []FailedWriteResponse) {
 	var (
 		successfulDeletes []client.ClientTupleKey
-		failedDeletes     []failedWriteResponse
+		failedDeletes     []FailedWriteResponse
 	)
 
 	for _, delete := range deletes {
@@ -138,7 +138,7 @@ func processDeletes(
 			successfulDeletes = append(successfulDeletes, deletedTupleKey)
 		} else {
 			reason := extractErrMssg(delete.Error)
-			failedDeletes = append(failedDeletes, failedWriteResponse{
+			failedDeletes = append(failedDeletes, FailedWriteResponse{
 				TupleKey: deletedTupleKey,
 				Reason:   reason,
 			})
