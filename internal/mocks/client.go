@@ -330,6 +330,35 @@ func (mr *MockSdkClientMockRecorder) ListStoresExecute(request any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListStoresExecute", reflect.TypeOf((*MockSdkClient)(nil).ListStoresExecute), request)
 }
 
+// ListUsers mocks base method.
+func (m *MockSdkClient) ListUsers(ctx context.Context) client.SdkClientListUsersRequestInterface {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUsers", ctx)
+	ret0, _ := ret[0].(client.SdkClientListUsersRequestInterface)
+	return ret0
+}
+
+// ListUsers indicates an expected call of ListUsers.
+func (mr *MockSdkClientMockRecorder) ListUsers(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockSdkClient)(nil).ListUsers), ctx)
+}
+
+// ListUsersExecute mocks base method.
+func (m *MockSdkClient) ListUsersExecute(r client.SdkClientListUsersRequestInterface) (*client.ClientListUsersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUsersExecute", r)
+	ret0, _ := ret[0].(*client.ClientListUsersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUsersExecute indicates an expected call of ListUsersExecute.
+func (mr *MockSdkClientMockRecorder) ListUsersExecute(r any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsersExecute", reflect.TypeOf((*MockSdkClient)(nil).ListUsersExecute), r)
+}
+
 // Read mocks base method.
 func (m *MockSdkClient) Read(ctx context.Context) client.SdkClientReadRequestInterface {
 	m.ctrl.T.Helper()
@@ -2520,6 +2549,128 @@ func (m *MockSdkClientListRelationsRequestInterface) Options(options client.Clie
 func (mr *MockSdkClientListRelationsRequestInterfaceMockRecorder) Options(options any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Options", reflect.TypeOf((*MockSdkClientListRelationsRequestInterface)(nil).Options), options)
+}
+
+// MockSdkClientListUsersRequestInterface is a mock of SdkClientListUsersRequestInterface interface.
+type MockSdkClientListUsersRequestInterface struct {
+	ctrl     *gomock.Controller
+	recorder *MockSdkClientListUsersRequestInterfaceMockRecorder
+}
+
+// MockSdkClientListUsersRequestInterfaceMockRecorder is the mock recorder for MockSdkClientListUsersRequestInterface.
+type MockSdkClientListUsersRequestInterfaceMockRecorder struct {
+	mock *MockSdkClientListUsersRequestInterface
+}
+
+// NewMockSdkClientListUsersRequestInterface creates a new mock instance.
+func NewMockSdkClientListUsersRequestInterface(ctrl *gomock.Controller) *MockSdkClientListUsersRequestInterface {
+	mock := &MockSdkClientListUsersRequestInterface{ctrl: ctrl}
+	mock.recorder = &MockSdkClientListUsersRequestInterfaceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSdkClientListUsersRequestInterface) EXPECT() *MockSdkClientListUsersRequestInterfaceMockRecorder {
+	return m.recorder
+}
+
+// Body mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) Body(body client.ClientListUsersRequest) client.SdkClientListUsersRequestInterface {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Body", body)
+	ret0, _ := ret[0].(client.SdkClientListUsersRequestInterface)
+	return ret0
+}
+
+// Body indicates an expected call of Body.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) Body(body any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Body", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).Body), body)
+}
+
+// Execute mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) Execute() (*client.ClientListUsersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute")
+	ret0, _ := ret[0].(*client.ClientListUsersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) Execute() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).Execute))
+}
+
+// GetAuthorizationModelIdOverride mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) GetAuthorizationModelIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuthorizationModelIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetAuthorizationModelIdOverride indicates an expected call of GetAuthorizationModelIdOverride.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) GetAuthorizationModelIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthorizationModelIdOverride", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).GetAuthorizationModelIdOverride))
+}
+
+// GetBody mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) GetBody() *client.ClientListUsersRequest {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBody")
+	ret0, _ := ret[0].(*client.ClientListUsersRequest)
+	return ret0
+}
+
+// GetBody indicates an expected call of GetBody.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) GetBody() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBody", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).GetBody))
+}
+
+// GetContext mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) GetContext() context.Context {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContext")
+	ret0, _ := ret[0].(context.Context)
+	return ret0
+}
+
+// GetContext indicates an expected call of GetContext.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) GetContext() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContext", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).GetContext))
+}
+
+// GetOptions mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) GetOptions() *client.ClientListUsersOptions {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOptions")
+	ret0, _ := ret[0].(*client.ClientListUsersOptions)
+	return ret0
+}
+
+// GetOptions indicates an expected call of GetOptions.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).GetOptions))
+}
+
+// Options mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) Options(options client.ClientListUsersOptions) client.SdkClientListUsersRequestInterface {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Options", options)
+	ret0, _ := ret[0].(client.SdkClientListUsersRequestInterface)
+	return ret0
+}
+
+// Options indicates an expected call of Options.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) Options(options any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Options", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).Options), options)
 }
 
 // MockSdkClientReadAssertionsRequestInterface is a mock of SdkClientReadAssertionsRequestInterface interface.

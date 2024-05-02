@@ -28,7 +28,7 @@ import (
 var QueryCmd = &cobra.Command{
 	Use:   "query",
 	Short: "Run Queries",
-	Long:  "Run queries (Check, ListObjects, ListRelations, Expand) that are evaluated according to a particular model.",
+	Long:  "Run queries (Check, Expand, ListObjects, ListRelations, ListUsers) that are evaluated according to a particular model.", //nolint:lll
 }
 
 func init() {
@@ -36,6 +36,7 @@ func init() {
 	QueryCmd.AddCommand(expandCmd)
 	QueryCmd.AddCommand(listObjectsCmd)
 	QueryCmd.AddCommand(listRelationsCmd)
+	QueryCmd.AddCommand(listUsersCmd)
 
 	QueryCmd.PersistentFlags().String("store-id", "", "Store ID")
 	QueryCmd.PersistentFlags().String("model-id", "", "Model ID")

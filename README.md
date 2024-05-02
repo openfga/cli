@@ -42,6 +42,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Expand](#expand)
       - [List Objects](#list-objects)
       - [List Relations](#list-relations)
+      - [List Users](#list-users)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1073,6 +1074,49 @@ fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<mode
       }
     }
   }
+}
+```
+
+##### List Users
+
+###### Command
+fga query **list-users** --object <object> --relation <relation> --user-filter <user-filter> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
+
+###### Parameters
+* `--store-id`: Specifies the store id
+* `--object`: Specifies the object to list users for
+* `--relation`: Specifies the relation to search on
+* `--user-filter`: Specifies the type or userset to filter with
+* `--model-id`: Specifies the model id to target (optional)
+* `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
+* `--context`: Condition context (optional)
+
+###### Example
+`fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user`
+`fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user --contextual-tuple "user:anne can_view folder:product"`
+`fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter group#member --context '{"ip_address":"127.0.0.1"}`
+
+###### Response
+```json5
+{
+    {
+      "excluded_users": [
+        {
+          "object": {
+            "type": "user",
+            "id": "beth"
+          }
+        }
+      ],
+      "users": [
+        {
+          "object": {
+            "type": "user",
+            "id": "anne"
+          }
+        }
+      ]
+    }
 }
 ```
 
