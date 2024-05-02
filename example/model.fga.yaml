@@ -47,7 +47,7 @@ tests:
           can_view: true
           can_write: true
           can_share: false
-    list_objects: # Each check test is made of: a user, an object type and the expected result for one or more relations
+    list_objects: # Each list objects test is made of: a user, an object type and the expected result for one or more relations
       - user: user:anne
         type: folder
         assertions:
@@ -69,3 +69,17 @@ tests:
             - folder:product-2021Q1
           can_write: []
           can_share: []
+    list_users: # Each list user test is made of: an object, a user filter and the expected result for one or more relations
+      - object: folder:product-2021
+        user_filter:
+          - type: user
+        assertions:
+          can_view:
+            users:
+              - user:anne
+              - user:beth
+            excluded_users: []
+          can_write:
+            users:
+              - user:anne
+            excluded_users: []

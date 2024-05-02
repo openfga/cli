@@ -97,6 +97,56 @@ func RunRemoteListObjectsTest(
 	return results
 }
 
+func RunSingleRemoteListUsersTest(
+	fgaClient *client.OpenFgaClient,
+	listUsersRequest client.ClientListUsersRequest,
+	expectation ModelTestListUsersAssertion,
+) ModelTestListUsersSingleResult {
+	response, err := fgaClient.ListUsers(context.Background()).Body(listUsersRequest).Execute()
+
+	result := ModelTestListUsersSingleResult{
+		Request:  listUsersRequest,
+		Expected: expectation,
+		Error:    err,
+	}
+
+	if response != nil {
+		result.Got = ModelTestListUsersAssertion{
+			Users:         convertOpenfgaUsers(response.GetUsers()),
+			ExcludedUsers: []string{},
+		}
+		result.TestResult = result.IsPassing()
+	}
+
+	return result
+}
+
+func RunRemoteListUsersTest(
+	fgaClient *client.OpenFgaClient,
+	listUsersTest ModelTestListUsers,
+	tuples []client.ClientContextualTupleKey,
+) []ModelTestListUsersSingleResult {
+	results := []ModelTestListUsersSingleResult{}
+
+	object, _ := convertStoreObjectToObject(listUsersTest.Object)
+	for relation, expectation := range listUsersTest.Assertions {
+		result := RunSingleRemoteListUsersTest(fgaClient,
+			client.ClientListUsersRequest{
+				Object:           object,
+				Relation:         relation,
+				UserFilters:      listUsersTest.UserFilter,
+				Context:          listUsersTest.Context,
+				ContextualTuples: tuples,
+			},
+			expectation,
+		)
+
+		results = append(results, result)
+	}
+
+	return results
+}
+
 func RunRemoteTest(
 	fgaClient *client.OpenFgaClient,
 	test ModelTest,
@@ -116,10 +166,18 @@ func RunRemoteTest(
 		listObjectResults = append(listObjectResults, results...)
 	}
 
+	listUserResults := []ModelTestListUsersSingleResult{}
+
+	for index := 0; index < len(test.ListUsers); index++ {
+		results := RunRemoteListUsersTest(fgaClient, test.ListUsers[index], testTuples)
+		listUserResults = append(listUserResults, results...)
+	}
+
 	return TestResult{
 		Name:               test.Name,
 		Description:        test.Description,
 		CheckResults:       checkResults,
 		ListObjectsResults: listObjectResults,
+		ListUsersResults:   listUserResults,
 	}
 }

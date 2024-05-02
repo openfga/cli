@@ -10,6 +10,8 @@ import (
 	"github.com/openfga/cli/internal/comparison"
 )
 
+const NoValueString = "N/A"
+
 type ModelTestCheckSingleResult struct {
 	Request    client.ClientCheckRequest `json:"request"`
 	Expected   bool                      `json:"expected"`
@@ -34,11 +36,26 @@ func (result ModelTestListObjectsSingleResult) IsPassing() bool {
 	return result.Error == nil && result.Got != nil && comparison.CheckStringArraysEqual(result.Got, result.Expected)
 }
 
+type ModelTestListUsersSingleResult struct {
+	Request    client.ClientListUsersRequest `json:"request"`
+	Expected   ModelTestListUsersAssertion   `json:"expected"`
+	Got        ModelTestListUsersAssertion   `json:"got"`
+	Error      error                         `json:"error"`
+	TestResult bool                          `json:"test_result"`
+}
+
+func (result ModelTestListUsersSingleResult) IsPassing() bool {
+	return result.Error == nil &&
+		comparison.CheckStringArraysEqual(result.Got.Users, result.Expected.Users) &&
+		comparison.CheckStringArraysEqual(result.Got.ExcludedUsers, result.Expected.ExcludedUsers)
+}
+
 type TestResult struct {
 	Name               string                             `json:"name"`
 	Description        string                             `json:"description"`
 	CheckResults       []ModelTestCheckSingleResult       `json:"check_results"`
 	ListObjectsResults []ModelTestListObjectsSingleResult `json:"list_objects_results"`
+	ListUsersResults   []ModelTestListUsersSingleResult   `json:"list_users_results"`
 }
 
 // IsPassing - indicates whether a Test has succeeded completely or has any failing parts.
@@ -55,6 +72,12 @@ func (result TestResult) IsPassing() bool {
 		}
 	}
 
+	for index := 0; index < len(result.ListUsersResults); index++ {
+		if !result.ListUsersResults[index].IsPassing() {
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -63,8 +86,11 @@ func (result TestResult) FriendlyFailuresDisplay() string {
 	failedCheckCount := 0
 	totalListObjectsCount := len(result.ListObjectsResults)
 	failedListObjectsCount := 0
+	totalListUsersCount := len(result.ListUsersResults)
+	failedListUsersCount := 0
 	checkResultsOutput := ""
 	listObjectsResultsOutput := ""
+	listUsersResultsOutput := ""
 
 	if totalCheckCount > 0 {
 		failedCheckCount, checkResultsOutput = buildCheckTestResults(
@@ -76,12 +102,18 @@ func (result TestResult) FriendlyFailuresDisplay() string {
 			totalListObjectsCount, result, failedListObjectsCount, listObjectsResultsOutput)
 	}
 
-	if failedCheckCount+failedListObjectsCount != 0 {
+	if totalListUsersCount > 0 {
+		failedListUsersCount, listUsersResultsOutput = buildListUsersTestResults(
+			totalListUsersCount, result, failedListUsersCount, listUsersResultsOutput)
+	}
+
+	if failedCheckCount+failedListObjectsCount+failedListUsersCount != 0 {
 		return buildTestResultOutput(
-			result, totalCheckCount,
-			failedCheckCount, totalListObjectsCount,
-			failedListObjectsCount, checkResultsOutput,
-			listObjectsResultsOutput)
+			result,
+			totalCheckCount, failedCheckCount,
+			totalListObjectsCount, failedListObjectsCount,
+			totalListUsersCount, failedListUsersCount,
+			checkResultsOutput, listObjectsResultsOutput, listUsersResultsOutput)
 	}
 
 	return ""
@@ -97,7 +129,7 @@ func buildCheckTestResults(totalCheckCount int,
 		if !checkResult.IsPassing() {
 			failedCheckCount++
 
-			got := "N/A"
+			got := NoValueString
 			if checkResult.Got != nil {
 				got = strconv.FormatBool(*checkResult.Got)
 			}
@@ -133,7 +165,7 @@ func buildListObjectsTestResults(
 		if !listObjectsResult.IsPassing() {
 			failedListObjectsCount++
 
-			got := "N/A"
+			got := NoValueString
 			if listObjectsResult.Got != nil {
 				got = fmt.Sprintf("%s", listObjectsResult.Got)
 			}
@@ -159,9 +191,48 @@ func buildListObjectsTestResults(
 	return failedListObjectsCount, listObjectsResultsOutput
 }
 
-func buildTestResultOutput(result TestResult, totalCheckCount int, failedCheckCount int,
+func buildListUsersTestResults(
+	totalListUsersCount int, result TestResult,
+	failedListUsersCount int, listUsersResultsOutput string,
+) (int, string) {
+	for index := 0; index < totalListUsersCount; index++ {
+		listUsersResult := result.ListUsersResults[index]
+
+		if !listUsersResult.IsPassing() {
+			failedListUsersCount++
+
+			got := NoValueString
+			if listUsersResult.Got.Users != nil || listUsersResult.Got.ExcludedUsers != nil {
+				got = fmt.Sprintf("%+v", listUsersResult.Got)
+			}
+
+			userFilter := listUsersResult.Request.UserFilters[0]
+
+			listUsersResultsOutput += fmt.Sprintf(
+				"\nⅹ ListUsers(object=%+v,relation=%s,user_filter=%+v",
+				listUsersResult.Request.Object,
+				listUsersResult.Request.Relation,
+				userFilter)
+
+			if listUsersResult.Request.Context != nil {
+				listUsersResultsOutput += fmt.Sprintf(", context:%v", listUsersResult.Request.Context)
+			}
+
+			listUsersResultsOutput += fmt.Sprintf("): expected=%+v, got=%+v", listUsersResult.Expected, got)
+
+			if listUsersResult.Error != nil {
+				listUsersResultsOutput += fmt.Sprintf(", error=%v", listUsersResult.Error)
+			}
+		}
+	}
+
+	return failedListUsersCount, listUsersResultsOutput
+}
+
+func buildTestResultOutput(result TestResult, totalCheckCount int, failedCheckCount int, //nolint:cyclop
 	totalListObjectsCount int, failedListObjectsCount int,
-	checkResultsOutput string, listObjectsResultsOutput string,
+	totalListUsersCount int, failedListUsersCount int,
+	checkResultsOutput string, listObjectsResultsOutput string, listUsersOutput string,
 ) string {
 	testStatus := "FAILING"
 	output := fmt.Sprintf("(%s) %s: ", testStatus, result.Name)
@@ -179,12 +250,25 @@ func buildTestResultOutput(result TestResult, totalCheckCount int, failedCheckCo
 			totalListObjectsCount-failedListObjectsCount, totalListObjectsCount)
 	}
 
+	if totalListObjectsCount > 0 && totalListUsersCount > 0 {
+		output += " | "
+	}
+
+	if totalListUsersCount > 0 {
+		output += fmt.Sprintf("ListUsers(%d/%d passing)",
+			totalListUsersCount-failedListUsersCount, totalListUsersCount)
+	}
+
 	if failedCheckCount > 0 {
 		output = fmt.Sprintf("%s%s", output, checkResultsOutput)
 	}
 
 	if failedListObjectsCount > 0 {
 		output = fmt.Sprintf("%s%s", output, listObjectsResultsOutput)
+	}
+
+	if failedListUsersCount > 0 {
+		output = fmt.Sprintf("%s%s", output, listUsersOutput)
 	}
 
 	return output
@@ -205,7 +289,7 @@ func (test TestResults) IsPassing() bool {
 	return true
 }
 
-func (test TestResults) FriendlyDisplay() string {
+func (test TestResults) FriendlyDisplay() string { //nolint:cyclop
 	friendlyResults := []string{}
 
 	for index := 0; index < len(test.Results); index++ {
@@ -222,6 +306,8 @@ func (test TestResults) FriendlyDisplay() string {
 	failedCheckCount := 0
 	totalListObjectsCount := 0
 	failedListObjectsCount := 0
+	totalListUsersCount := 0
+	failedListUsersCount := 0
 
 	for _, testResult := range test.Results {
 		if !testResult.IsPassing() {
@@ -243,21 +329,34 @@ func (test TestResults) FriendlyDisplay() string {
 				failedListObjectsCount++
 			}
 		}
+
+		totalListUsersCount += len(testResult.ListUsersResults)
+
+		for _, listUsersResult := range testResult.ListUsersResults {
+			if !listUsersResult.IsPassing() {
+				failedListUsersCount++
+			}
+		}
 	}
 
 	summary := failuresText
 
 	if totalTestCount > 0 {
 		summary = buildTestSummary(
-			failedTestCount, summary, totalTestCount, totalCheckCount, failedCheckCount,
-			totalListObjectsCount, failedListObjectsCount)
+			failedTestCount, summary, totalTestCount,
+			totalCheckCount, failedCheckCount,
+			totalListObjectsCount, failedListObjectsCount,
+			totalListUsersCount, failedListUsersCount,
+		)
 	}
 
 	return summary
 }
 
 func buildTestSummary(failedTestCount int, summary string, totalTestCount int,
-	totalCheckCount int, failedCheckCount int, totalListObjectsCount int, failedListObjectsCount int,
+	totalCheckCount int, failedCheckCount int,
+	totalListObjectsCount int, failedListObjectsCount int,
+	totalListUsersCount int, failedListUsersCount int,
 ) string {
 	if failedTestCount > 0 {
 		summary += "\n---\n"
@@ -274,6 +373,11 @@ func buildTestSummary(failedTestCount int, summary string, totalTestCount int,
 	if totalListObjectsCount > 0 {
 		summary += fmt.Sprintf("\nListObjects %d/%d passing",
 			totalListObjectsCount-failedListObjectsCount, totalListObjectsCount)
+	}
+
+	if totalListUsersCount > 0 {
+		summary += fmt.Sprintf("\nListUsers %d/%d passing",
+			totalListUsersCount-failedListUsersCount, totalListUsersCount)
 	}
 
 	return summary
