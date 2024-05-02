@@ -21,6 +21,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [List All Stores](#list-stores)
       - [Create a Store](#create-store)
       - [Import a Store](#import-store)
+      - [Export a Store](#export-store)
       - [Get a Store](#get-store)
       - [Delete a Store](#delete-store)
     - [Authorization Models](#authorization-models)
@@ -166,13 +167,14 @@ store-id: 01H0H015178Y2V4CX10C2KGHF4
 ### Commands
 
 #### Stores
-| Description                     | command  | parameters   | example                                                  |
-|---------------------------------|----------|--------------|----------------------------------------------------------|
-| [Create a Store](#create-store) | `create` | `--name`     | `fga store create --name="FGA Demo Store"`               |
-| [Import a Store](#import-store) | `import` | `--file`     | `fga store import --file store.fga.yaml`                 |
-| [List Stores](#list-stores)     | `list`   |              | `fga store list`                                         |
-| [Get a Store](#get-store)       | `get`    | `--store-id` | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
-| [Delete a Store](#delete-store) | `delete` | `--store-id` | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
+| Description                     | command  | parameters      | example                                                  |
+|---------------------------------|----------|-----------------|----------------------------------------------------------|
+| [Create a Store](#create-store) | `create` | `--name`        | `fga store create --name="FGA Demo Store"`               |
+| [Import a Store](#import-store) | `import` | `--file`        | `fga store import --file store.fga.yaml`                 |
+| [Export a Store](#export-store) | `export` | `--store-id`    | `fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4` |
+| [List Stores](#list-stores)     | `list`   |                 | `fga store list`                                         |
+| [Get a Store](#get-store)       | `get`    | `--store-id`    | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
+| [Delete a Store](#delete-store) | `delete` | `--store-id`    | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
 
 ##### Create Store
 
