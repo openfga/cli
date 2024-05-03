@@ -1,0 +1,23 @@
+name: FGA Demo Store
+model: |+
+  model
+    schema 1.1
+  
+  type user
+  
+  type doc
+    relations
+      define owner: [user]
+      define reader: [user]
+      define writer: [user]
+
+tuples:
+  - user: user:Kross
+    relation: writer
+    object: doc:dev-docs
+  - user: user:Modric
+    relation: owner
+    object: document:wrong-type
+tests:
+  - name: Tests
+    check: []
