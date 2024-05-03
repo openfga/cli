@@ -32,7 +32,7 @@ import (
 )
 
 type CreateStoreAndModelResponse struct {
-	Store *client.ClientCreateStoreResponse             `json:"store"`
+	Store *client.ClientCreateStoreResponse             `json:"store,omitempty"`
 	Model *client.ClientWriteAuthorizationModelResponse `json:"model,omitempty"`
 }
 

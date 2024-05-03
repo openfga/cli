@@ -33,6 +33,7 @@ import (
 	"github.com/openfga/cli/internal/storetest"
 )
 
+// importStoreIODependencies defines IO dependencies for importing store
 type importStoreIODependencies struct {
 	createStoreWithModel func(
 		clientConfig fga.ClientConfig,
