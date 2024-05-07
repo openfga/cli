@@ -59,7 +59,7 @@ var listObjectsCmd = &cobra.Command{
 	Short:   "List Objects",
 	Long:    "List the objects of a certain type that a user has a particular relation to.",
 	Example: `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`, //nolint:lll
-	Args:    cobra.ExactArgs(3),                                                                                                                                                                                            //nolint:gomnd,lll
+	Args:    cobra.ExactArgs(3),                                                                                                                                                                                            //nolint:mnd,lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
