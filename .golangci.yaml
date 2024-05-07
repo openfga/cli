@@ -24,6 +24,7 @@ linters:
     - nosnakecase
     - testpackage
     - gci
+    - gomnd
 linters-settings:
   depguard:
     rules:

@@ -175,7 +175,7 @@ var exportCmd = &cobra.Command{
 				}
 			}
 
-			err = os.WriteFile(fileName, storeYaml, 0o600) //nolint:gomnd
+			err = os.WriteFile(fileName, storeYaml, 0o600) //nolint:mnd
 			if err != nil {
 				return err //nolint:wrapcheck
 			}
