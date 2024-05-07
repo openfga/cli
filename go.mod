@@ -11,15 +11,15 @@ require (
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20240430203311-36050418a284
-	github.com/openfga/go-sdk v0.3.6-0.20240430041914-d27ef8fa20b8
+	github.com/openfga/go-sdk v0.3.6
 	github.com/openfga/language/pkg/go v0.0.0-20240429103126-f3e71ca3287d
-	github.com/openfga/openfga v1.5.4-0.20240430205231-c4953b813b89
+	github.com/openfga/openfga v1.5.4-rc1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.34.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
