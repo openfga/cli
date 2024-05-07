@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.4.0](https://github.com/openfga/cli/compare/v0.3.1...v0.4.0) (2024-05-07)
+
+Added:
+- Support querying the [list users API](https://openfga.dev/blog/list-users-announcement) with `fga query list-users` (#314)
+- Support for running list users tests via `fga model test` (#315)
+
+Changed:
+- `fga store import` now uses the filename if no name is provided (#318) - thanks @NeerajNagure
+
 ### [0.3.1](https://github.com/openfga/cli/compare/v0.3.0...v0.3.1) (2024-04-29)
 
 Added:
