@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -41,11 +42,17 @@ func importStore(
 	storeID string,
 	maxTuplesPerWrite int,
 	maxParallelRequests int,
+	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
 	var err error
 	var response *CreateStoreAndModelResponse //nolint:wsl
-	if storeID == "" {                        //nolint:wsl
-		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeData.Name, storeData.Model, format)
+	if storeID == "" {                        //nolint:wsl,nestif
+		storeDataName := storeData.Name
+		if storeDataName == "" {
+			storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
+		}
+		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeDataName, //nolint:wsl
+			storeData.Model, format)
 		response = createStoreAndModelResponse
 		if err != nil { //nolint:wsl
 			return nil, err
@@ -124,7 +131,7 @@ var importCmd = &cobra.Command{
 		}
 
 		createStoreAndModelResponse, err = importStore(clientConfig, fgaClient, storeData, format,
-			storeID, maxTuplesPerWrite, maxParallelRequests)
+			storeID, maxTuplesPerWrite, maxParallelRequests, fileName)
 		if err != nil {
 			return err
 		}
