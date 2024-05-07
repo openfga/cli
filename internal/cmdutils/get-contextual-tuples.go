@@ -44,7 +44,7 @@ func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.Client
 
 			var condition *openfga.RelationshipCondition
 
-			if len(tuple) == 4 { //nolint:gomnd
+			if len(tuple) == 4 { //nolint:mnd
 				cond, err := ParseTupleConditionString(tuple[3])
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse condition due to %w", err)

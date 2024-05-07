@@ -58,7 +58,7 @@ var checkCmd = &cobra.Command{
 	Short:   "Check",
 	Example: `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}'`, //nolint:lll
 	Long:    "Check if a user has a particular relation with an object.",
-	Args:    cobra.ExactArgs(3), //nolint:gomnd
+	Args:    cobra.ExactArgs(3), //nolint:mnd
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()

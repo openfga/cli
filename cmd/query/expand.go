@@ -47,7 +47,7 @@ var expandCmd = &cobra.Command{
 	Short:   "Expand",
 	Long:    "Expands the relationships in userset tree format.",
 	Example: `fga query expand --store-id="01H4P8Z95KTXXEP6Z03T75Q984" can_view document:roadmap`,
-	Args:    cobra.ExactArgs(2), //nolint:gomnd
+	Args:    cobra.ExactArgs(2), //nolint:mnd
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
