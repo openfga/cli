@@ -129,3 +129,74 @@ func TestConvertClientTupleKeysToProtoTupleKeys(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertPbObjectOrUsersetToStrings(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		input    *pb.ObjectOrUserset
+		expected string
+	}{
+		"User_Object": {
+			input: &pb.ObjectOrUserset{
+				User: &pb.ObjectOrUserset_Object{
+					Object: &pb.Object{
+						Type: "user",
+						Id:   "anne",
+					},
+				},
+			},
+			expected: "user:anne",
+		},
+		"User_Userset": {
+			input: &pb.ObjectOrUserset{
+				User: &pb.ObjectOrUserset_Userset{
+					Userset: &pb.UsersetUser{
+						Type:     "group",
+						Id:       "fga",
+						Relation: "member",
+					},
+				},
+			},
+			expected: "group:fga#member",
+		},
+	}
+
+	for name, testcase := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := convertPbObjectOrUsersetToStrings([]*pb.ObjectOrUserset{testcase.input})
+
+			assert.Equal(t, []string{testcase.expected}, got)
+		})
+	}
+}
+
+func TestConvertObjectOrUsersetToStrings(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		input    openfga.ObjectOrUserset
+		expected string
+	}{
+		"User_Object": {
+			input:    openfga.ObjectOrUserset{Object: &openfga.FgaObject{Type: "user", Id: "anne"}},
+			expected: "user:anne",
+		},
+		"User_Userset": {
+			input:    openfga.ObjectOrUserset{Userset: &openfga.UsersetUser{Type: "group", Id: "fga", Relation: "member"}},
+			expected: "group:fga#member",
+		},
+	}
+
+	for name, testcase := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			got := convertOpenfgaObjectOrUserset([]openfga.ObjectOrUserset{testcase.input})
+
+			assert.Equal(t, []string{testcase.expected}, got)
+		})
+	}
+}

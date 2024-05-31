@@ -206,7 +206,7 @@ func RunLocalListUsersTest(
 			if response != nil {
 				result.Got = ModelTestListUsersAssertion{
 					Users:         convertPbUsersToStrings(response.GetUsers()),
-					ExcludedUsers: []string{},
+					ExcludedUsers: convertPbObjectOrUsersetToStrings(response.GetExcludedUsers()),
 				}
 				result.TestResult = result.IsPassing()
 			}
