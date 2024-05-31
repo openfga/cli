@@ -31,7 +31,7 @@ func ParseContextualTuplesInner(contextualTuplesArray []string) ([]client.Client
 	contextualTuples := []client.ClientContextualTupleKey{}
 
 	if len(contextualTuplesArray) > 0 {
-		for index := 0; index < len(contextualTuplesArray); index++ {
+		for index := range contextualTuplesArray {
 			tuple := strings.Split(contextualTuplesArray[index], " ")
 			if len(tuple) != 3 && len(tuple) != 4 {
 				return contextualTuples,

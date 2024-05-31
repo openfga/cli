@@ -15,8 +15,7 @@ func convertClientTupleKeysToProtoTupleKeys(
 ) ([]*pb.TupleKey, error) {
 	pbTuples := []*pb.TupleKey{}
 
-	for index := 0; index < len(tuples); index++ {
-		tuple := tuples[index]
+	for _, tuple := range tuples {
 		tpl := pb.TupleKey{
 			User:     tuple.User,
 			Relation: tuple.Relation,

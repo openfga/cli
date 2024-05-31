@@ -114,8 +114,7 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 		}
 	}
 
-	for index := 0; index < len(storeData.Tests); index++ {
-		test := storeData.Tests[index]
+	for index, test := range storeData.Tests {
 		if test.TupleFile == "" {
 			continue
 		}

@@ -32,8 +32,6 @@ func TestConvertPbUsersToStrings(t *testing.T) {
 	}
 
 	for name, testcase := range tests {
-		testcase := testcase
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -66,8 +64,6 @@ func TestConvertOpenfgaUsersToStrings(t *testing.T) {
 	}
 
 	for name, testcase := range tests {
-		testcase := testcase
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -94,8 +90,6 @@ func TestConvertStoreObjectToObject(t *testing.T) {
 	}
 
 	for name, testcase := range tests {
-		testcase := testcase
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
@@ -125,8 +119,6 @@ func TestConvertClientTupleKeysToProtoTupleKeys(t *testing.T) {
 	}
 
 	for name, testcase := range tests {
-		testcase := testcase
-
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 

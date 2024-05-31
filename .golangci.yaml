@@ -12,16 +12,6 @@ linters:
     - forbidigo
     - gochecknoglobals
     # deprecated
-    - exhaustivestruct
-    - interfacer
-    - maligned
-    - scopelint
-    - structcheck
-    - varcheck
-    - deadcode
-    - ifshort
-    - golint
-    - nosnakecase
     - testpackage
     - gci
     - gomnd
