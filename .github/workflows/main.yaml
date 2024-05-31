@@ -120,7 +120,7 @@ jobs:
         version: latest
         args: release --clean --config .goreleaser.yaml --snapshot --skip-sign --skip-publish --skip-announce
 
-  release:
+  goreleaser:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [lint,audit,test,shellcheck]
@@ -128,6 +128,9 @@ jobs:
       contents: write
       packages: write # publish a new github release
       id-token: write # needed for keyless signing
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
+      subjects-as-file: ${{ steps.hashes.outputs.handle }}
     steps:
       - name: Extract Version from Tag
         id: tag_name
@@ -157,6 +160,7 @@ jobs:
       - uses: anchore/sbom-action/download-syft@e8d2a6937ecead383dfe75190d104edd1f9c5751 # v0.16.0
 
       - name: Run GoReleaser
+        id: goreleaser
         uses: goreleaser/goreleaser-action@5742e2a039330cbb23ebf35f046f814d4c6ff811 # v5.1.0
         with:
           distribution: goreleaser
@@ -172,3 +176,110 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: openfga/cli
           short-description: ${{ github.event.repository.description }}
+
+      - name: Generate binary hashes
+        id: binary
+        env:
+          ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+          hashes=$(echo $ARTIFACTS | jq --raw-output '[.[] | {name, "digest": (.extra.Digest // .extra.Checksum)}] | unique | .[] | select(.digest) | {digest} + {name} | join("  ") | sub("^sha256:";"")' | base64 -w0)
+          echo $hashes > digests.txt
+
+      - uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@5a775b367a56d5bd118a224a811bba288150a563 # pin@v2.0.0
+        id: hashes
+        with:
+          path: digests.txt
+  
+      - name: Image digest
+        id: image
+        env:
+            ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+          artifact=$(echo "$ARTIFACTS" | jq -r '[.[] | select (.type=="Docker Manifest")][0]')
+          image=$(echo "$artifact" | jq -r '.path' | cut -d':' -f1)
+          digest=$(echo "$artifact" | jq -r '.extra.Digest')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+  binary-provenance:
+    needs: [ goreleaser ]
+    permissions:
+      actions: read # To read the workflow path.
+      id-token: write # To sign the provenance.
+      contents: write # To add assets to a release.
+
+    # Note: this _must_ be referenced by tag. See: https://github.com/slsa-framework/slsa-verifier/issues/12
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects-as-file: "${{ needs.goreleaser.outputs.subjects-as-file }}"
+      provenance-name: "fga.intoto.jsonl"
+      upload-assets: true # upload to a new release
+
+  image-provenance:
+    needs: [ goreleaser ]
+    permissions:
+      actions: read
+      id-token: write
+      packages: write
+
+    # Note: this _must_ be referenced by tag. See: https://github.com/slsa-framework/slsa-verifier/issues/12
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+    with:
+      image: openfga/cli
+      digest: ${{ needs.goreleaser.outputs.digest }}
+    secrets:
+      registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+      registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  verification-with-slsa-verifier:
+    needs: [ goreleaser, binary-provenance ]
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - name: Install the verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@eb7007070baa04976cb9e25a0d8034f8db030a86 # pin@v2.5.1
+
+      - name: Download assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROVENANCE: "${{ needs.binary-provenance.outputs.provenance-name }}"
+        run: |
+          set -euo pipefail
+          gh -R "$GITHUB_REPOSITORY" release download "$GITHUB_REF_NAME" \
+            -p "$PROVENANCE" -p "*.tar.gz" -p "*.tar.gz.sbom.json"
+
+      - name: Verify assets
+        env:
+          PROVENANCE: "${{ needs.binary-provenance.outputs.provenance-name }}"
+        run: |
+          slsa-verifier verify-artifact \
+            --provenance-path "$PROVENANCE" \
+            --source-uri "github.com/$GITHUB_REPOSITORY" \
+            --source-tag "$GITHUB_REF_NAME" \
+            *.tar.gz *.tar.gz.sbom.json
+
+  verification-with-cosign:
+    needs: [ goreleaser, image-provenance ]
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+
+      - name: Verify image
+        env:
+          IMAGE: openfga/cli
+          DIGEST: ${{ needs.goreleaser.outputs.digest }}
+        run: |
+          cosign verify-attestation \
+              --type slsaprovenance \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+              --certificate-identity-regexp '^https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v[0-9]+.[0-9]+.[0-9]+$' \
+              $IMAGE@$DIGEST
