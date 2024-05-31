@@ -70,7 +70,11 @@ func CreateStoreWithModel(
 	}
 
 	response.Store = *createStoreResponse
-	fgaClient.SetStoreId(response.Store.Id)
+
+	err = fgaClient.SetStoreId(response.Store.Id)
+	if err != nil {
+		return nil, err //nolint:wrapcheck
+	}
 
 	if inputModel != "" {
 		authModel := authorizationmodel.AuthzModel{}

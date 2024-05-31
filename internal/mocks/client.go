@@ -903,6 +903,20 @@ func (mr *MockSdkClientGetStoreRequestInterfaceMockRecorder) GetOptions() *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientGetStoreRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientGetStoreRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientGetStoreRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientGetStoreRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientGetStoreRequestInterface) Options(options client.ClientGetStoreOptions) client.SdkClientGetStoreRequestInterface {
 	m.ctrl.T.Helper()
@@ -983,6 +997,20 @@ func (mr *MockSdkClientDeleteStoreRequestInterfaceMockRecorder) GetOptions() *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientDeleteStoreRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientDeleteStoreRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientDeleteStoreRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientDeleteStoreRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientDeleteStoreRequestInterface) Options(options client.ClientDeleteStoreOptions) client.SdkClientDeleteStoreRequestInterface {
 	m.ctrl.T.Helper()
@@ -1061,6 +1089,20 @@ func (m *MockSdkClientReadAuthorizationModelsRequestInterface) GetOptions() *cli
 func (mr *MockSdkClientReadAuthorizationModelsRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientReadAuthorizationModelsRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientReadAuthorizationModelsRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientReadAuthorizationModelsRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientReadAuthorizationModelsRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -1169,6 +1211,20 @@ func (m *MockSdkClientWriteAuthorizationModelRequestInterface) GetOptions() *cli
 func (mr *MockSdkClientWriteAuthorizationModelRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientWriteAuthorizationModelRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientWriteAuthorizationModelRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientWriteAuthorizationModelRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientWriteAuthorizationModelRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -1293,6 +1349,20 @@ func (mr *MockSdkClientReadAuthorizationModelRequestInterfaceMockRecorder) GetOp
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientReadAuthorizationModelRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientReadAuthorizationModelRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientReadAuthorizationModelRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientReadAuthorizationModelRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientReadAuthorizationModelRequestInterface) Options(options client.ClientReadAuthorizationModelOptions) client.SdkClientReadAuthorizationModelRequestInterface {
 	m.ctrl.T.Helper()
@@ -1371,6 +1441,20 @@ func (m *MockSdkClientReadLatestAuthorizationModelRequestInterface) GetOptions()
 func (mr *MockSdkClientReadLatestAuthorizationModelRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientReadLatestAuthorizationModelRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientReadLatestAuthorizationModelRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientReadLatestAuthorizationModelRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientReadLatestAuthorizationModelRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -1481,6 +1565,20 @@ func (mr *MockSdkClientReadChangesRequestInterfaceMockRecorder) GetOptions() *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientReadChangesRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientReadChangesRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientReadChangesRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientReadChangesRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientReadChangesRequestInterface) Options(options client.ClientReadChangesOptions) client.SdkClientReadChangesRequestInterface {
 	m.ctrl.T.Helper()
@@ -1587,6 +1685,20 @@ func (m *MockSdkClientReadRequestInterface) GetOptions() *client.ClientReadOptio
 func (mr *MockSdkClientReadRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientReadRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientReadRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientReadRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientReadRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -1709,6 +1821,20 @@ func (m *MockSdkClientWriteRequestInterface) GetOptions() *client.ClientWriteOpt
 func (mr *MockSdkClientWriteRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientWriteRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientWriteRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientWriteRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientWriteRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -2049,6 +2175,20 @@ func (mr *MockSdkClientCheckRequestInterfaceMockRecorder) GetOptions() *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientCheckRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientCheckRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientCheckRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientCheckRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientCheckRequestInterface) Options(options client.ClientCheckOptions) client.SdkClientCheckRequestInterface {
 	m.ctrl.T.Helper()
@@ -2169,6 +2309,20 @@ func (m *MockSdkClientBatchCheckRequestInterface) GetOptions() *client.ClientBat
 func (mr *MockSdkClientBatchCheckRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientBatchCheckRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientBatchCheckRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientBatchCheckRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientBatchCheckRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -2293,6 +2447,20 @@ func (mr *MockSdkClientExpandRequestInterfaceMockRecorder) GetOptions() *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientExpandRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientExpandRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientExpandRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientExpandRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientExpandRequestInterface) Options(options client.ClientExpandOptions) client.SdkClientExpandRequestInterface {
 	m.ctrl.T.Helper()
@@ -2413,6 +2581,20 @@ func (m *MockSdkClientListObjectsRequestInterface) GetOptions() *client.ClientLi
 func (mr *MockSdkClientListObjectsRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientListObjectsRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientListObjectsRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientListObjectsRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientListObjectsRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -2537,6 +2719,20 @@ func (mr *MockSdkClientListRelationsRequestInterfaceMockRecorder) GetOptions() *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientListRelationsRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientListRelationsRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientListRelationsRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientListRelationsRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientListRelationsRequestInterface) Options(options client.ClientListRelationsOptions) client.SdkClientListRelationsRequestInterface {
 	m.ctrl.T.Helper()
@@ -2659,6 +2855,20 @@ func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) GetOptions() *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).GetOptions))
 }
 
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientListUsersRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientListUsersRequestInterface)(nil).GetStoreIdOverride))
+}
+
 // Options mocks base method.
 func (m *MockSdkClientListUsersRequestInterface) Options(options client.ClientListUsersOptions) client.SdkClientListUsersRequestInterface {
 	m.ctrl.T.Helper()
@@ -2751,6 +2961,20 @@ func (m *MockSdkClientReadAssertionsRequestInterface) GetOptions() *client.Clien
 func (mr *MockSdkClientReadAssertionsRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientReadAssertionsRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientReadAssertionsRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientReadAssertionsRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientReadAssertionsRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
@@ -2873,6 +3097,20 @@ func (m *MockSdkClientWriteAssertionsRequestInterface) GetOptions() *client.Clie
 func (mr *MockSdkClientWriteAssertionsRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientWriteAssertionsRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientWriteAssertionsRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientWriteAssertionsRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientWriteAssertionsRequestInterface)(nil).GetStoreIdOverride))
 }
 
 // Options mocks base method.
