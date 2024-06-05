@@ -17,6 +17,7 @@ limitations under the License.
 package store
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -44,21 +45,39 @@ func importStore(
 	maxParallelRequests int,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
-	var err error
-	var response *CreateStoreAndModelResponse //nolint:wsl
-	if storeID == "" {                        //nolint:wsl,nestif
+	response := &CreateStoreAndModelResponse{}
+
+	if storeID == "" { //nolint:nestif
 		storeDataName := storeData.Name
 		if storeDataName == "" {
 			storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
 		}
-		createStoreAndModelResponse, err := CreateStoreWithModel(clientConfig, storeDataName, //nolint:wsl
-			storeData.Model, format)
-		response = createStoreAndModelResponse
-		if err != nil { //nolint:wsl
+
+		createStoreAndModelResponse, err := CreateStoreWithModel(
+			clientConfig,
+			storeDataName,
+			storeData.Model,
+			format,
+		)
+		if err != nil {
 			return nil, err
 		}
-		clientConfig.StoreID = createStoreAndModelResponse.Store.Id //nolint:wsl
+
+		response = createStoreAndModelResponse
+		clientConfig.StoreID = createStoreAndModelResponse.Store.Id
 	} else {
+		store, err := fgaClient.GetStore(context.Background()).Execute()
+		if err != nil {
+			return nil, err //nolint:wrapcheck
+		}
+
+		response.Store = client.ClientCreateStoreResponse{
+			CreatedAt: store.GetCreatedAt(),
+			Id:        store.GetId(),
+			Name:      store.GetName(),
+			UpdatedAt: store.GetUpdatedAt(),
+		}
+
 		authModel := authorizationmodel.AuthzModel{}
 		clientConfig.StoreID = storeID
 
@@ -67,13 +86,15 @@ func importStore(
 			return nil, err //nolint:wrapcheck
 		}
 
-		_, err := model.Write(fgaClient, authModel)
+		modelWriteRes, err := model.Write(fgaClient, authModel)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write model due to %w", err)
 		}
+
+		response.Model = modelWriteRes
 	}
 
-	fgaClient, err = clientConfig.GetFgaClient()
+	fgaClient, err := clientConfig.GetFgaClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
 	}
