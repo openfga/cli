@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.4.1](https://github.com/openfga/cli/compare/v0.4.0...v0.4.1) (2024-06-05)
+
+Added:
+- Support asserting the `excluded_users` in `list_users` tests (#337)
+
+Fixed:
+- `fga store import` now outputs store and model details when writing to an existing store (#336)
+
 ### [0.4.0](https://github.com/openfga/cli/compare/v0.3.1...v0.4.0) (2024-05-07)
 
 Added:
