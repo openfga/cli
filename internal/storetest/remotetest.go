@@ -113,7 +113,7 @@ func RunSingleRemoteListUsersTest(
 	if response != nil {
 		result.Got = ModelTestListUsersAssertion{
 			Users:         convertOpenfgaUsers(response.GetUsers()),
-			ExcludedUsers: []string{},
+			ExcludedUsers: convertOpenfgaObjectOrUserset(response.GetExcludedUsers()),
 		}
 		result.TestResult = result.IsPassing()
 	}
@@ -154,21 +154,21 @@ func RunRemoteTest(
 ) TestResult {
 	checkResults := []ModelTestCheckSingleResult{}
 
-	for index := 0; index < len(test.Check); index++ {
+	for index := range test.Check {
 		results := RunRemoteCheckTest(fgaClient, test.Check[index], testTuples)
 		checkResults = append(checkResults, results...)
 	}
 
 	listObjectResults := []ModelTestListObjectsSingleResult{}
 
-	for index := 0; index < len(test.ListObjects); index++ {
+	for index := range test.ListObjects {
 		results := RunRemoteListObjectsTest(fgaClient, test.ListObjects[index], testTuples)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
 	listUserResults := []ModelTestListUsersSingleResult{}
 
-	for index := 0; index < len(test.ListUsers); index++ {
+	for index := range test.ListUsers {
 		results := RunRemoteListUsersTest(fgaClient, test.ListUsers[index], testTuples)
 		listUserResults = append(listUserResults, results...)
 	}

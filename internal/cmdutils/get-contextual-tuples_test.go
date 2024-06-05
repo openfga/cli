@@ -61,8 +61,7 @@ func TestGetContextualTuplesWithNoError(t *testing.T) {
 		},
 	}}
 
-	for index := 0; index < len(tests); index++ {
-		test := tests[index]
+	for index, test := range tests {
 		t.Run("TestGetContextualTuplesWithNoError"+string(rune(index)), func(t *testing.T) {
 			t.Parallel()
 
@@ -75,7 +74,7 @@ func TestGetContextualTuplesWithNoError(t *testing.T) {
 				t.Errorf("Expected parsed tuples to have length %v actual %v", len(test.parsed), len(tuples))
 			}
 
-			for index := 0; index < len(tuples); index++ {
+			for index := range tuples {
 				if tuples[index].User != test.parsed[index].User ||
 					tuples[index].Relation != test.parsed[index].Relation ||
 					tuples[index].Object != test.parsed[index].Object {
@@ -106,8 +105,7 @@ func TestGetContextualTuplesWithError(t *testing.T) {
 		},
 	}}
 
-	for index := 0; index < len(tests); index++ {
-		test := tests[index]
+	for index, test := range tests {
 		t.Run("TestGetContextualTuplesWithNoError"+string(rune(index)), func(t *testing.T) {
 			t.Parallel()
 

@@ -76,9 +76,7 @@ func TestValidate(t *testing.T) {
 		},
 	}
 
-	for index := 0; index < len(tests); index++ {
-		test := tests[index]
-
+	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Parallel()
 

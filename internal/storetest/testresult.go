@@ -60,20 +60,20 @@ type TestResult struct {
 
 // IsPassing - indicates whether a Test has succeeded completely or has any failing parts.
 func (result TestResult) IsPassing() bool {
-	for index := 0; index < len(result.CheckResults); index++ {
-		if !result.CheckResults[index].IsPassing() {
+	for _, test := range result.CheckResults {
+		if !test.IsPassing() {
 			return false
 		}
 	}
 
-	for index := 0; index < len(result.ListObjectsResults); index++ {
-		if !result.ListObjectsResults[index].IsPassing() {
+	for _, test := range result.ListObjectsResults {
+		if !test.IsPassing() {
 			return false
 		}
 	}
 
-	for index := 0; index < len(result.ListUsersResults); index++ {
-		if !result.ListUsersResults[index].IsPassing() {
+	for _, test := range result.ListUsersResults {
+		if !test.IsPassing() {
 			return false
 		}
 	}
@@ -94,17 +94,17 @@ func (result TestResult) FriendlyFailuresDisplay() string {
 
 	if totalCheckCount > 0 {
 		failedCheckCount, checkResultsOutput = buildCheckTestResults(
-			totalCheckCount, result, failedCheckCount, checkResultsOutput)
+			result, failedCheckCount, checkResultsOutput)
 	}
 
 	if totalListObjectsCount > 0 {
 		failedListObjectsCount, listObjectsResultsOutput = buildListObjectsTestResults(
-			totalListObjectsCount, result, failedListObjectsCount, listObjectsResultsOutput)
+			result, failedListObjectsCount, listObjectsResultsOutput)
 	}
 
 	if totalListUsersCount > 0 {
 		failedListUsersCount, listUsersResultsOutput = buildListUsersTestResults(
-			totalListUsersCount, result, failedListUsersCount, listUsersResultsOutput)
+			result, failedListUsersCount, listUsersResultsOutput)
 	}
 
 	if failedCheckCount+failedListObjectsCount+failedListUsersCount != 0 {
@@ -119,13 +119,12 @@ func (result TestResult) FriendlyFailuresDisplay() string {
 	return ""
 }
 
-func buildCheckTestResults(totalCheckCount int,
-	result TestResult, failedCheckCount int,
+func buildCheckTestResults(
+	result TestResult,
+	failedCheckCount int,
 	checkResultsOutput string,
 ) (int, string) {
-	for index := 0; index < totalCheckCount; index++ {
-		checkResult := result.CheckResults[index]
-
+	for _, checkResult := range result.CheckResults {
 		if !checkResult.IsPassing() {
 			failedCheckCount++
 
@@ -156,12 +155,11 @@ func buildCheckTestResults(totalCheckCount int,
 }
 
 func buildListObjectsTestResults(
-	totalListObjectsCount int, result TestResult,
-	failedListObjectsCount int, listObjectsResultsOutput string,
+	result TestResult,
+	failedListObjectsCount int,
+	listObjectsResultsOutput string,
 ) (int, string) {
-	for index := 0; index < totalListObjectsCount; index++ {
-		listObjectsResult := result.ListObjectsResults[index]
-
+	for _, listObjectsResult := range result.ListObjectsResults {
 		if !listObjectsResult.IsPassing() {
 			failedListObjectsCount++
 
@@ -192,12 +190,11 @@ func buildListObjectsTestResults(
 }
 
 func buildListUsersTestResults(
-	totalListUsersCount int, result TestResult,
-	failedListUsersCount int, listUsersResultsOutput string,
+	result TestResult,
+	failedListUsersCount int,
+	listUsersResultsOutput string,
 ) (int, string) {
-	for index := 0; index < totalListUsersCount; index++ {
-		listUsersResult := result.ListUsersResults[index]
-
+	for _, listUsersResult := range result.ListUsersResults {
 		if !listUsersResult.IsPassing() {
 			failedListUsersCount++
 
@@ -280,8 +277,8 @@ type TestResults struct {
 
 // IsPassing - indicates whether a Test Suite has succeeded completely or has any failing tests.
 func (test TestResults) IsPassing() bool {
-	for index := 0; index < len(test.Results); index++ {
-		if !test.Results[index].IsPassing() {
+	for _, testResult := range test.Results {
+		if !testResult.IsPassing() {
 			return false
 		}
 	}
@@ -292,9 +289,9 @@ func (test TestResults) IsPassing() bool {
 func (test TestResults) FriendlyDisplay() string { //nolint:cyclop
 	friendlyResults := []string{}
 
-	for index := 0; index < len(test.Results); index++ {
-		if !test.Results[index].IsPassing() {
-			friendlyResults = append(friendlyResults, test.Results[index].FriendlyFailuresDisplay())
+	for _, testResult := range test.Results {
+		if !testResult.IsPassing() {
+			friendlyResults = append(friendlyResults, testResult.FriendlyFailuresDisplay())
 		}
 	}
 

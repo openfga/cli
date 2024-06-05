@@ -34,29 +34,29 @@ func RunTests(
 	storeData *StoreData,
 	format authorizationmodel.ModelFormat,
 ) (TestResults, error) {
-	test := TestResults{}
+	testResults := TestResults{}
 
 	fgaServer, authModel, stopServerFn, err := getLocalServerModelAndTuples(storeData, format)
 	if err != nil {
-		return test, err
+		return testResults, err
 	}
 
 	defer stopServerFn()
 
-	for index := 0; index < len(storeData.Tests); index++ {
+	for _, test := range storeData.Tests {
 		result, err := RunTest(
 			fgaClient,
 			fgaServer,
-			storeData.Tests[index],
+			test,
 			storeData.Tuples,
 			authModel,
 		)
 		if err != nil {
-			return test, err
+			return testResults, err
 		}
 
-		test.Results = append(test.Results, result)
+		testResults.Results = append(testResults.Results, result)
 	}
 
-	return test, nil
+	return testResults, nil
 }

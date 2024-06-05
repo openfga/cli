@@ -206,7 +206,7 @@ func RunLocalListUsersTest(
 			if response != nil {
 				result.Got = ModelTestListUsersAssertion{
 					Users:         convertPbUsersToStrings(response.GetUsers()),
-					ExcludedUsers: []string{},
+					ExcludedUsers: convertPbObjectOrUsersetToStrings(response.GetExcludedUsers()),
 				}
 				result.TestResult = result.IsPassing()
 			}
@@ -238,17 +238,17 @@ func RunLocalTest(
 		ModelID: modelID,
 	}
 
-	for index := 0; index < len(test.Check); index++ {
+	for index := range test.Check {
 		results := RunLocalCheckTest(fgaServer, test.Check[index], tuples, testOptions)
 		checkResults = append(checkResults, results...)
 	}
 
-	for index := 0; index < len(test.ListObjects); index++ {
+	for index := range test.ListObjects {
 		results := RunLocalListObjectsTest(fgaServer, test.ListObjects[index], tuples, testOptions)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
-	for index := 0; index < len(test.ListUsers); index++ {
+	for index := range test.ListUsers {
 		results := RunLocalListUsersTest(fgaServer, test.ListUsers[index], tuples, testOptions)
 		listUsersResults = append(listUsersResults, results...)
 	}
