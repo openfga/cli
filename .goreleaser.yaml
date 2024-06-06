@@ -1,3 +1,5 @@
+version: 2
+
 project_name: fga
 
 before:
@@ -126,7 +128,7 @@ brews:
     homepage: "https://openfga.dev/"
     description: "A cross-platform CLI to interact with an OpenFGA server."
     license: "Apache-2.0"
-    folder: "Formula"
+    directory: "Formula"
     url_template: "https://github.com/openfga/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     download_strategy: CurlDownloadStrategy
 
@@ -152,7 +154,7 @@ brews:
     homepage: "https://openfga.dev/"
     description: "A cross-platform CLI to interact with an OpenFGA server."
     license: "Apache-2.0"
-    folder: "Formula"
+    directory: "Formula"
     url_template: "https://github.com/openfga/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     download_strategy: CurlDownloadStrategy
 
