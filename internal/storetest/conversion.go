@@ -106,18 +106,3 @@ func convertOpenfgaUsers(users []openfga.User) []string {
 
 	return simpleUsers
 }
-
-func convertOpenfgaObjectOrUserset(users []openfga.ObjectOrUserset) []string {
-	simpleUsers := []string{}
-
-	for _, user := range users {
-		switch {
-		case user.Object != nil:
-			simpleUsers = append(simpleUsers, user.Object.Type+":"+user.Object.Id)
-		case user.Userset != nil:
-			simpleUsers = append(simpleUsers, user.Userset.Type+":"+user.Userset.Id+"#"+user.Userset.Relation)
-		}
-	}
-
-	return simpleUsers
-}

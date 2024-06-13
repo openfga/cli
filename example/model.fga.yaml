@@ -78,8 +78,6 @@ tests:
             users:
               - user:anne
               - user:beth
-            excluded_users: []
           can_write:
             users:
               - user:anne
-            excluded_users: []

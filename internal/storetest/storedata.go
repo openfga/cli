@@ -51,8 +51,7 @@ type ModelTestListUsers struct {
 }
 
 type ModelTestListUsersAssertion struct {
-	Users         []string `json:"users"          yaml:"users"`
-	ExcludedUsers []string `json:"excluded_users" yaml:"excluded_users"` //nolint:tagliatelle
+	Users []string `json:"users" yaml:"users"`
 }
 
 type ModelTest struct {
