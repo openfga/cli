@@ -1100,14 +1100,6 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
 ```json5
 {
     {
-      "excluded_users": [
-        {
-          "object": {
-            "type": "user",
-            "id": "beth"
-          }
-        }
-      ],
       "users": [
         {
           "object": {

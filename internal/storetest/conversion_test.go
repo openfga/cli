@@ -172,31 +172,3 @@ func TestConvertPbObjectOrUsersetToStrings(t *testing.T) {
 		})
 	}
 }
-
-func TestConvertObjectOrUsersetToStrings(t *testing.T) {
-	t.Parallel()
-
-	tests := map[string]struct {
-		input    openfga.ObjectOrUserset
-		expected string
-	}{
-		"User_Object": {
-			input:    openfga.ObjectOrUserset{Object: &openfga.FgaObject{Type: "user", Id: "anne"}},
-			expected: "user:anne",
-		},
-		"User_Userset": {
-			input:    openfga.ObjectOrUserset{Userset: &openfga.UsersetUser{Type: "group", Id: "fga", Relation: "member"}},
-			expected: "group:fga#member",
-		},
-	}
-
-	for name, testcase := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			got := convertOpenfgaObjectOrUserset([]openfga.ObjectOrUserset{testcase.input})
-
-			assert.Equal(t, []string{testcase.expected}, got)
-		})
-	}
-}

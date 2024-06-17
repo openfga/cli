@@ -46,8 +46,7 @@ type ModelTestListUsersSingleResult struct {
 
 func (result ModelTestListUsersSingleResult) IsPassing() bool {
 	return result.Error == nil &&
-		comparison.CheckStringArraysEqual(result.Got.Users, result.Expected.Users) &&
-		comparison.CheckStringArraysEqual(result.Got.ExcludedUsers, result.Expected.ExcludedUsers)
+		comparison.CheckStringArraysEqual(result.Got.Users, result.Expected.Users)
 }
 
 type TestResult struct {
@@ -199,9 +198,6 @@ func buildListUsersTestResults(
 			failedListUsersCount++
 
 			got := NoValueString
-			if listUsersResult.Got.Users != nil || listUsersResult.Got.ExcludedUsers != nil {
-				got = fmt.Sprintf("%+v", listUsersResult.Got)
-			}
 
 			userFilter := listUsersResult.Request.UserFilters[0]
 

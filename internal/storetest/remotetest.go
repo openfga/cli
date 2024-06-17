@@ -112,8 +112,7 @@ func RunSingleRemoteListUsersTest(
 
 	if response != nil {
 		result.Got = ModelTestListUsersAssertion{
-			Users:         convertOpenfgaUsers(response.GetUsers()),
-			ExcludedUsers: convertOpenfgaObjectOrUserset(response.GetExcludedUsers()),
+			Users: convertOpenfgaUsers(response.GetUsers()),
 		}
 		result.TestResult = result.IsPassing()
 	}
