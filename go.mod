@@ -12,14 +12,14 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20240529190005-394820dfc109
 	github.com/openfga/go-sdk v0.5.0
-	github.com/openfga/language/pkg/go v0.0.0-20240530090832-1ae482acc202
+	github.com/openfga/language/pkg/go v0.2.0-beta.0
 	github.com/openfga/openfga v1.5.4
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
