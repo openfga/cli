@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.5.0](https://github.com/openfga/cli/compare/v0.4.1...v0.5.0) (2024-06-18)
+
+Added:
+- `fga store import` now shows a progress bar when writing tuples to show (#348)
+
+Changed:
+- `excluded_users` has been removed from the `fga query list-users` output and the testing for ListUsers (#347)
+
+BREAKING CHANGE:
+
+This version removes the `excluded_users` property from the ``fga query list-users` output and the ListUsers testing,
+for more details see the [associated API change](https://github.com/openfga/api/pull/171).
+
 ### [0.4.1](https://github.com/openfga/cli/compare/v0.4.0...v0.4.1) (2024-06-05)
 
 Added:
