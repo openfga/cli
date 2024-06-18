@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/openfga/cli/cmd/generate"
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/cmd/query"
 	"github.com/openfga/cli/cmd/store"
@@ -81,6 +82,7 @@ func init() {
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)
 	rootCmd.AddCommand(query.QueryCmd)
+	rootCmd.AddCommand(generate.GenerateCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
