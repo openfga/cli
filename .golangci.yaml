@@ -42,6 +42,7 @@ linters-settings:
           - gopkg.in/yaml.v3
           - github.com/hashicorp/go-multierror
           - github.com/gocarina/gocsv
+          - github.com/schollz/progressbar/v3
       test:
         files:
           - "$test"

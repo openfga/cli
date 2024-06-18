@@ -22,8 +22,10 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/openfga/go-sdk/client"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/cmd/model"
@@ -35,78 +37,153 @@ import (
 	"github.com/openfga/cli/internal/storetest"
 )
 
-func importStore(
-	clientConfig fga.ClientConfig,
+const (
+	progressBarWidth         = 40
+	progressBarSleepDelay    = 10 // time.Millisecond
+	progressBarThrottleValue = 65
+	progressBarUpdateDelay   = 5 * time.Millisecond
+)
+
+// createStore creates a new store with the given client configuration and store data.
+func createStore(
+	clientConfig *fga.ClientConfig,
+	storeData *storetest.StoreData,
+	format authorizationmodel.ModelFormat,
+	fileName string,
+) (*CreateStoreAndModelResponse, error) {
+	storeDataName := storeData.Name
+	if storeDataName == "" {
+		storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
+	}
+
+	createStoreAndModelResponse, err := CreateStoreWithModel(*clientConfig, storeDataName, storeData.Model, format)
+	if err != nil {
+		return nil, err
+	}
+
+	clientConfig.StoreID = createStoreAndModelResponse.Store.Id
+
+	return createStoreAndModelResponse, nil
+}
+
+// updateStore updates an existing store with the given client configuration, store data, and store ID.
+func updateStore(
+	clientConfig *fga.ClientConfig,
 	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
-	maxTuplesPerWrite int,
-	maxParallelRequests int,
-	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
-	response := &CreateStoreAndModelResponse{}
+	store, err := fgaClient.GetStore(context.Background()).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get store: %w", err)
+	}
 
-	if storeID == "" { //nolint:nestif
-		storeDataName := storeData.Name
-		if storeDataName == "" {
-			storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
-		}
-
-		createStoreAndModelResponse, err := CreateStoreWithModel(
-			clientConfig,
-			storeDataName,
-			storeData.Model,
-			format,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		response = createStoreAndModelResponse
-		clientConfig.StoreID = createStoreAndModelResponse.Store.Id
-	} else {
-		store, err := fgaClient.GetStore(context.Background()).Execute()
-		if err != nil {
-			return nil, err //nolint:wrapcheck
-		}
-
-		response.Store = client.ClientCreateStoreResponse{
+	response := &CreateStoreAndModelResponse{
+		Store: client.ClientCreateStoreResponse{
 			CreatedAt: store.GetCreatedAt(),
 			Id:        store.GetId(),
 			Name:      store.GetName(),
 			UpdatedAt: store.GetUpdatedAt(),
-		}
-
-		authModel := authorizationmodel.AuthzModel{}
-		clientConfig.StoreID = storeID
-
-		err = authModel.ReadModelFromString(storeData.Model, format)
-		if err != nil {
-			return nil, err //nolint:wrapcheck
-		}
-
-		modelWriteRes, err := model.Write(fgaClient, authModel)
-		if err != nil {
-			return nil, fmt.Errorf("failed to write model due to %w", err)
-		}
-
-		response.Model = modelWriteRes
+		},
 	}
 
-	fgaClient, err := clientConfig.GetFgaClient()
+	authModel := authorizationmodel.AuthzModel{}
+	clientConfig.StoreID = storeID
+
+	if err := authModel.ReadModelFromString(storeData.Model, format); err != nil {
+		return nil, fmt.Errorf("failed to read model: %w", err)
+	}
+
+	modelWriteRes, err := model.Write(fgaClient, authModel)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		return nil, fmt.Errorf("failed to write model: %w", err)
 	}
 
-	writeRequest := client.ClientWriteRequest{
-		Writes: storeData.Tuples,
+	response.Model = modelWriteRes
+
+	return response, nil
+}
+
+// importStore imports store data, either creating a new store or updating an existing one.
+func importStore(
+	clientConfig *fga.ClientConfig,
+	fgaClient client.SdkClient,
+	storeData *storetest.StoreData,
+	format authorizationmodel.ModelFormat,
+	storeID string,
+	maxTuplesPerWrite, maxParallelRequests int,
+	fileName string,
+) (*CreateStoreAndModelResponse, error) {
+	var (
+		response *CreateStoreAndModelResponse
+		err      error
+	)
+
+	if storeID == "" {
+		response, err = createStore(clientConfig, storeData, format, fileName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create store: %w", err)
+		}
+	} else {
+		response, err = updateStore(clientConfig, fgaClient, storeData, format, storeID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to update store: %w", err)
+		}
 	}
 
-	_, err = tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
+	fgaClient, err = clientConfig.GetFgaClient()
 	if err != nil {
-		return nil, err //nolint:wrapcheck
+		return nil, fmt.Errorf("failed to initialize FGA Client: %w", err)
 	}
+
+	// Initialize progress bar
+	bar := progressbar.NewOptions(len(storeData.Tuples),
+		progressbar.OptionSetDescription("Importing tuples"),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSetWidth(progressBarWidth),
+		progressbar.OptionClearOnFinish(),
+		progressbar.OptionFullWidth(),
+		progressbar.OptionThrottle(progressBarThrottleValue*progressBarSleepDelay),
+		progressbar.OptionShowIts(),
+		progressbar.OptionSetItsString("tuples"),
+		progressbar.OptionSetPredictTime(true),
+		progressbar.OptionSetRenderBlankState(true),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "#",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}),
+	)
+
+	for index := 0; index < len(storeData.Tuples); index += maxTuplesPerWrite {
+		end := index + maxTuplesPerWrite
+		if end > len(storeData.Tuples) {
+			end = len(storeData.Tuples)
+		}
+
+		writeRequest := client.ClientWriteRequest{
+			Writes: storeData.Tuples[index:end],
+		}
+		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests); err != nil {
+			return nil, fmt.Errorf("failed to import tuples: %w", err)
+		}
+
+		if err := bar.Add(end - index); err != nil {
+			return nil, fmt.Errorf("failed to update progress bar: %w", err)
+		}
+
+		// Introduce a small delay to smooth out the progress bar rendering
+		time.Sleep(progressBarUpdateDelay)
+	}
+
+	// Ensure progress bar is completed and cleared
+	if err := bar.Finish(); err != nil {
+		return nil, fmt.Errorf("failed to finish progress bar: %w", err)
+	}
+
+	fmt.Println("✅ Store imported")
 
 	return response, nil
 }
@@ -118,46 +195,50 @@ var importCmd = &cobra.Command{
 	Long:    `Import a store: updating the name, model and appending the global tuples`,
 	Example: "fga store import --file=model.fga.yaml",
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		var createStoreAndModelResponse *CreateStoreAndModelResponse
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
 		storeID, err := cmd.Flags().GetString("store-id")
 		if err != nil {
-			return fmt.Errorf("failed to get store-id %w", err)
+			return fmt.Errorf("failed to get store-id: %w", err)
 		}
 
 		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 		if err != nil {
-			return fmt.Errorf("failed to parse max tuples per write due to %w", err)
+			return fmt.Errorf("failed to parse max tuples per write: %w", err)
 		}
 
 		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
 		if err != nil {
-			return fmt.Errorf("failed to parse parallel requests due to %w", err)
+			return fmt.Errorf("failed to parse parallel requests: %w", err)
 		}
 
 		fileName, err := cmd.Flags().GetString("file")
 		if err != nil {
-			return err //nolint:wrapcheck
+			return fmt.Errorf("failed to get file name: %w", err)
 		}
 
 		format, storeData, err := storetest.ReadFromFile(fileName, path.Dir(fileName))
 		if err != nil {
-			return err //nolint:wrapcheck
+			return fmt.Errorf("failed to read from file: %w", err)
 		}
 
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+			return fmt.Errorf("failed to initialize FGA Client: %w", err)
 		}
 
-		createStoreAndModelResponse, err = importStore(clientConfig, fgaClient, storeData, format,
+		createStoreAndModelResponse, err := importStore(&clientConfig, fgaClient, storeData, format,
 			storeID, maxTuplesPerWrite, maxParallelRequests, fileName)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to import store: %w", err)
 		}
 
-		return output.Display(createStoreAndModelResponse)
+		// Print the response using output.Display without printing <nil>
+		if outputErr := output.Display(createStoreAndModelResponse); outputErr != nil {
+			return fmt.Errorf("failed to display output: %w", outputErr)
+		}
+
+		return nil
 	},
 }
 
