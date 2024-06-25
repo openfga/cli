@@ -139,6 +139,7 @@ func importStore(
 
 	// Initialize progress bar
 	bar := progressbar.NewOptions(len(storeData.Tuples),
+		progressbar.OptionSetWriter(os.Stderr),
 		progressbar.OptionSetDescription("Importing tuples"),
 		progressbar.OptionShowCount(),
 		progressbar.OptionSetWidth(progressBarWidth),
