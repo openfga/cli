@@ -183,8 +183,6 @@ func importStore(
 		return nil, fmt.Errorf("failed to finish progress bar: %w", err)
 	}
 
-	fmt.Println("✅ Store imported")
-
 	return response, nil
 }
 
