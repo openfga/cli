@@ -68,7 +68,7 @@ jobs:
     - name: Build
       run: make build
 
-    - name: Run unit test
+    - name: Run tests
       run: make test
 
   shellcheck:

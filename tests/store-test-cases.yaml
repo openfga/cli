@@ -1,0 +1,10 @@
+config:
+  inherit-env: true
+
+tests:
+  001 - it successfully uses the store command to create a new store:
+    command: fga store create --name "FGA Demo Store"
+    exit-code: 0
+    stdout:
+      json:
+        store.name: "FGA Demo Store"
