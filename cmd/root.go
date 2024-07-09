@@ -32,8 +32,10 @@ import (
 	"github.com/openfga/cli/internal/cmdutils"
 )
 
-var cfgFile string
-var noPretty bool // Global variable for the --no-pretty flag
+var (
+	cfgFile  string
+	noPretty bool
+)
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
