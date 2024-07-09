@@ -109,6 +109,7 @@ func init() {
 	listCmd.Flags().Int("max-pages", MaxModelsPagesLength, "Max number of pages to get.")
 	listCmd.Flags().String("store-id", "", "Store ID")
 	listCmd.Flags().StringArray("field", []string{"id", "created_at"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
+	listCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 
 	if err := listCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/list", err)

@@ -17,3 +17,30 @@ limitations under the License.
 // Package cmdutils contains utility and common functions that interaction with the input
 // such as reading or binding flags
 package cmdutils
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+)
+
+// CheckNoPrettyFlag checks if the --no-pretty flag is set.
+func CheckNoPrettyFlag(cmd *cobra.Command) bool {
+	noPretty, err := cmd.Flags().GetBool("no-pretty")
+	if err != nil {
+		return false
+	}
+	return noPretty
+}
+
+// BindViperToCobraFlags binds Viper to Cobra flags.
+func BindViperToCobraFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
+	cmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if viperInstance.IsSet(f.Name) {
+			val := viperInstance.Get(f.Name)
+			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+		}
+	})
+}

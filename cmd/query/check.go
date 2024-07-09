@@ -85,4 +85,6 @@ var checkCmd = &cobra.Command{
 	},
 }
 
-func init() {}
+func init() {
+	checkCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
+}

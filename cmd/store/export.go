@@ -192,6 +192,7 @@ func init() {
 	exportCmd.Flags().String("store-id", "", "store ID")
 	exportCmd.Flags().String("model-id", "", "Authorization Model ID")
 	exportCmd.Flags().Uint("max-tuples", defaultMaxTupleCount, "max number of tuples to return in the output")
+	exportCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 
 	err := exportCmd.MarkFlagRequired("store-id")
 	if err != nil {

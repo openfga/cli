@@ -39,6 +39,7 @@ func init() {
 	TupleCmd.AddCommand(importCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
+	TupleCmd.PersistentFlags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 	err := TupleCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
 		fmt.Print(err)

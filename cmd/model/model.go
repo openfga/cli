@@ -36,4 +36,5 @@ func init() {
 	ModelCmd.AddCommand(transformCmd)
 	ModelCmd.AddCommand(testCmd)
 	ModelCmd.PersistentFlags().String("store-id", "", "Store ID")
+	ModelCmd.PersistentFlags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }

@@ -35,4 +35,5 @@ func init() {
 	StoreCmd.AddCommand(deleteCmd)
 	StoreCmd.AddCommand(importCmd)
 	StoreCmd.AddCommand(exportCmd)
+	StoreCmd.PersistentFlags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }
