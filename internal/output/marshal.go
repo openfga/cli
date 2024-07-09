@@ -129,8 +129,12 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 // Display prints the data using the configured printer and color settings.
 func (prt UniPrinter) Display(data any) error {
 	if cmdutils.CheckNoPrettyFlag(nil) {
+		err := prt.Printer.DisplayNoColor(data)
+		if err != nil {
+			return fmt.Errorf("failed to display output without color: %w", err)
+		}
 
-		return prt.Printer.DisplayNoColor(data)
+		return nil
 	}
 
 	if prt.Colorful {

@@ -28,12 +28,15 @@ import (
 
 // CheckNoPrettyFlag checks if the --no-pretty flag is set.
 func CheckNoPrettyFlag(cmd *cobra.Command) bool {
-	noPretty, err := cmd.Flags().GetBool("no-pretty")
-	if err != nil {
+	if cmd == nil {
 		return false
 	}
 
-	return noPretty
+	if noPretty, err := cmd.Flags().GetBool("no-pretty"); err == nil {
+		return noPretty
+	}
+
+	return false
 }
 
 // BindViperToCobraFlags binds Viper to Cobra flags.
