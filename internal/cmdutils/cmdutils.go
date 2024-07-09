@@ -32,6 +32,7 @@ func CheckNoPrettyFlag(cmd *cobra.Command) bool {
 	if err != nil {
 		return false
 	}
+
 	return noPretty
 }
 
@@ -40,7 +41,10 @@ func BindViperToCobraFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viperInstance.IsSet(f.Name) {
 			val := viperInstance.Get(f.Name)
-			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			if err != nil {
+				fmt.Printf("Error setting flag %s: %v\n", f.Name, err)
+			}
 		}
 	})
 }
