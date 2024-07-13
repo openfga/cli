@@ -101,15 +101,14 @@ func TestValidate(t *testing.T) {
 			output := validate(model)
 
 			if test.NoPretty {
-				expectedJSON, _ := json.Marshal(test.ExpectedOutput)
 				outputJSON, _ := json.Marshal(output)
+				expectedJSON, _ := json.Marshal(test.ExpectedOutput)
+
 				if string(outputJSON) != string(expectedJSON) {
 					t.Fatalf("Expect output %s actual %s", string(expectedJSON), string(outputJSON))
 				}
-			} else {
-				if !reflect.DeepEqual(output, test.ExpectedOutput) {
-					t.Fatalf("Expect output %v actual %v", test.ExpectedOutput, output)
-				}
+			} else if !reflect.DeepEqual(output, test.ExpectedOutput) {
+				t.Fatalf("Expect output %v actual %v", test.ExpectedOutput, output)
 			}
 		})
 	}
