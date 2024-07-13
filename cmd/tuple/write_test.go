@@ -19,6 +19,8 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 		file           string
 		expectedTuples []client.ClientTupleKey
 		expectedError  string
+		noPretty       bool
+		expectedOutput string
 	}{
 		{
 			name: "it can correctly parse a csv file",
@@ -168,6 +170,39 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 					Object:   "folder:product-2021",
 				},
 			},
+		},
+		{
+			name:     "it can correctly parse a csv file with no-pretty option",
+			file:     "testdata/tuples.csv",
+			noPretty: true,
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+					Condition: &openfga.RelationshipCondition{
+						Name:    "inOfficeIP",
+						Context: &map[string]interface{}{},
+					},
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+					Condition: &openfga.RelationshipCondition{
+						Name: "inOfficeIP",
+						Context: &map[string]interface{}{
+							"ip_addr": "10.0.0.1",
+						},
+					},
+				},
+				{
+					User:     "team:fga#member",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+			expectedOutput: `[{"user":"user:anne","relation":"owner","object":"folder:product","condition":{"name":"inOfficeIP","context":{}}},{"user":"folder:product","relation":"parent","object":"folder:product-2021","condition":{"name":"inOfficeIP","context":{"ip_addr":"10.0.0.1"}}},{"user":"team:fga#member","relation":"viewer","object":"folder:product-2021"}]`,
 		},
 		{
 			name:          "it fails to parse a non-existent file",
