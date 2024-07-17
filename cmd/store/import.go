@@ -24,8 +24,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openfga/go-sdk/client"
 	"github.com/schollz/progressbar/v3"
+
+	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/cmd/model"
@@ -75,17 +76,17 @@ func updateStore(
 	storeID string,
 ) (*CreateStoreAndModelResponse, error) {
 	store, err := fgaClient.GetStore(context.Background()).Execute()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get store: %w", err)
-	}
 
 	response := &CreateStoreAndModelResponse{
 		Store: client.ClientCreateStoreResponse{
-			CreatedAt: store.GetCreatedAt(),
-			Id:        store.GetId(),
-			Name:      store.GetName(),
-			UpdatedAt: store.GetUpdatedAt(),
+			Id: storeID,
 		},
+	}
+
+	if err != nil {
+		response.Store.CreatedAt = store.GetCreatedAt()
+		response.Store.Name = store.GetName()
+		response.Store.UpdatedAt = store.GetUpdatedAt()
 	}
 
 	authModel := authorizationmodel.AuthzModel{}
