@@ -62,6 +62,7 @@ var getCmd = &cobra.Command{
 
 func init() {
 	getCmd.Flags().String("store-id", "", "Store ID")
+	getCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 
 	err := getCmd.MarkFlagRequired("store-id")
 	if err != nil {

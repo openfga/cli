@@ -101,6 +101,7 @@ func init() {
 	deleteCmd.Flags().String("model-id", "", "Model ID")
 	deleteCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	deleteCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	deleteCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {

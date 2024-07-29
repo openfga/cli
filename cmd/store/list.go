@@ -88,4 +88,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	listCmd.Flags().Int("max-pages", MaxStoresPagesLength, "Max number of pages to get.")
+	listCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }

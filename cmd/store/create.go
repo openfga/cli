@@ -100,7 +100,7 @@ var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create Store",
 	Long:  "Create an OpenFGA store.",
-	Example: `fga store create --name "FGA Demo Store" 
+	Example: `fga store create --name "FGA Demo Store"
 
 To set the created store id as an environment variable that will be used by the CLI, you can use the following command:
 
@@ -137,4 +137,5 @@ func init() {
 	createCmd.Flags().String("name", "", "Store Name")
 	createCmd.Flags().String("model", "", "Authorization Model File Name")
 	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga", "json" or "modular`) //nolint:lll
+	createCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }

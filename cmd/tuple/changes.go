@@ -107,4 +107,5 @@ func init() {
 	changesCmd.Flags().String("type", "", "Type to restrict the changes by.")
 	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
 	changesCmd.Flags().String("continuation-token", "", "Continuation token to start changes from.")
+	changesCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }

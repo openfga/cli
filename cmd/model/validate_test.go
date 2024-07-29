@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -26,6 +27,7 @@ func TestValidate(t *testing.T) {
 		Input          string
 		IsValid        bool
 		ExpectedOutput validationResult
+		NoPretty       bool
 	}
 
 	tests := []validationTest{
@@ -74,6 +76,15 @@ func TestValidate(t *testing.T) {
 				IsValid: true,
 			},
 		},
+		{
+			Name:     "no-pretty output",
+			Input:    `{"schema_version":"1.1"}`,
+			IsValid:  true,
+			NoPretty: true,
+			ExpectedOutput: validationResult{
+				IsValid: true,
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -89,7 +100,14 @@ func TestValidate(t *testing.T) {
 
 			output := validate(model)
 
-			if !reflect.DeepEqual(output, test.ExpectedOutput) {
+			if test.NoPretty {
+				outputJSON, _ := json.Marshal(output)
+				expectedJSON, _ := json.Marshal(test.ExpectedOutput)
+
+				if string(outputJSON) != string(expectedJSON) {
+					t.Fatalf("Expect output %s actual %s", string(expectedJSON), string(outputJSON))
+				}
+			} else if !reflect.DeepEqual(output, test.ExpectedOutput) {
 				t.Fatalf("Expect output %v actual %v", test.ExpectedOutput, output)
 			}
 		})

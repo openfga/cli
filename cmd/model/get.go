@@ -76,6 +76,7 @@ func init() {
 	getCmd.Flags().String("store-id", "", "Store ID")
 	getCmd.Flags().StringArray("field", []string{"model"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
 	getCmd.Flags().Var(&getOutputFormat, "format", `Authorization model output format. Can be "fga" or "json"`)
+	getCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 
 	if err := getCmd.MarkFlagRequired("store-id"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/get", err)

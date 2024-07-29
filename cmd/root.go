@@ -32,7 +32,10 @@ import (
 	"github.com/openfga/cli/internal/cmdutils"
 )
 
-var cfgFile string
+var (
+	cfgFile  string
+	noPretty bool
+)
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
@@ -67,6 +70,7 @@ func init() {
 	rootCmd.PersistentFlags().String("client-id", "", "Client ID. Sent to the Token Issuer during the Client Credentials flow")                            //nolint:lll
 	rootCmd.PersistentFlags().String("client-secret", "", "Client Secret. Sent to the Token Issuer during the Client Credentials flow")                    //nolint:lll
 	rootCmd.PersistentFlags().StringArray("api-scopes", []string{}, "API Scopes (repeat option for multiple values). Used in the Client Credentials flow") //nolint:lll
+	rootCmd.PersistentFlags().BoolVar(&noPretty, "no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")                   //nolint:lll
 
 	rootCmd.MarkFlagsRequiredTogether(
 		"api-token-issuer",

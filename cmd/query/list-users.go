@@ -123,6 +123,7 @@ func init() {
 	listUsersCmd.Flags().String("object", "", "Object to list users for")
 	listUsersCmd.Flags().String("relation", "", "Relation to evaluate on")
 	listUsersCmd.Flags().String("user-filter", "", "Filter the responses can be in the formats <type> (to filter objects and typed public bound access) or <type>#<relation> (to filter usersets)") //nolint:lll
+	listUsersCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 
 	if err := listUsersCmd.MarkFlagRequired("object"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/query/list-users", err)

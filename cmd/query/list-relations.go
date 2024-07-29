@@ -153,4 +153,5 @@ var listRelationsCmd = &cobra.Command{
 
 func init() {
 	listRelationsCmd.Flags().StringArray("relation", []string{}, "Relation")
+	listRelationsCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }

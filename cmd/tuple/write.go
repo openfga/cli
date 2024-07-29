@@ -152,4 +152,5 @@ func init() {
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
+	writeCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }

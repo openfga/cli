@@ -180,6 +180,8 @@ func init() {
 	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
 		"json, simple-json, csv, and yaml.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
+	readCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
+
 	_ = readCmd.Flags().MarkDeprecated("simple-output", "the flag \"simple-output\" is deprecated and will be removed"+
 		" in future releases.\nPlease use the \"--output-format=simple-json\" flag instead.")
 }

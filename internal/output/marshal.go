@@ -27,6 +27,8 @@ import (
 
 	"github.com/mattn/go-isatty"
 	"github.com/nwidger/jsoncolor"
+
+	"github.com/openfga/cli/internal/cmdutils"
 )
 
 // Printer is a content type agnostic interface for displaying data.
@@ -126,6 +128,15 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 
 // Display prints the data using the configured printer and color settings.
 func (prt UniPrinter) Display(data any) error {
+	if cmdutils.CheckNoPrettyFlag(nil) {
+		err := prt.Printer.DisplayNoColor(data)
+		if err != nil {
+			return fmt.Errorf("failed to display output without color: %w", err)
+		}
+
+		return nil
+	}
+
 	if prt.Colorful {
 		err := prt.Printer.DisplayColor(data)
 		if err != nil {
@@ -184,6 +195,10 @@ func outputNonTerminal(data any) error {
 
 // Display will decorate the output if possible.  Otherwise, will print out the standard JSON.
 func Display(data any) error {
+	if cmdutils.CheckNoPrettyFlag(nil) {
+		return displayNoColorTerminal(data)
+	}
+
 	if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		if os.Getenv("NO_COLOR") != "" {
 			return displayNoColorTerminal(data)

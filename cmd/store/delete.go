@@ -71,6 +71,7 @@ var deleteCmd = &cobra.Command{
 func init() {
 	deleteCmd.Flags().String("store-id", "", "Store ID")
 	deleteCmd.Flags().Bool("force", false, "Force delete without confirmation")
+	deleteCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 
 	err := deleteCmd.MarkFlagRequired("store-id")
 	if err != nil {

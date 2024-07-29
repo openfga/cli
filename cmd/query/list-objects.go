@@ -88,4 +88,5 @@ var listObjectsCmd = &cobra.Command{
 }
 
 func init() {
+	listObjectsCmd.Flags().Bool("no-pretty", false, "Disable pretty features like emojis, statuses, and progress bars")
 }
