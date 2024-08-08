@@ -1,5 +1,10 @@
 # Changelog
 
+### [0.5.2](https://github.com/openfga/cli/compare/v0.5.1...v0.5.2) (2024-08-08)
+
+Fixed:
+- Fixed issue where an error in getting the store in`fga store import` fails the import (#365)
+
 ### [0.5.1](https://github.com/openfga/cli/compare/v0.5.0...v0.5.1) (2024-06-25)
 
 Fixed:
