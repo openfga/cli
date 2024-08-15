@@ -1,5 +1,10 @@
 # Changelog
 
+### [0.5.3](https://github.com/openfga/cli/compare/v0.5.2...v0.5.3) (2024-08-15)
+
+Fixed:
+- Bump OpenFGA to v1.5.9 to fix an issue in the `check` API [CVE-2024-42473](https://github.com/openfga/openfga/security/advisories/GHSA-3f6g-m4hr-59h8)
+
 ### [0.5.2](https://github.com/openfga/cli/compare/v0.5.1...v0.5.2) (2024-08-08)
 
 Fixed:
