@@ -66,6 +66,7 @@ func listUsers(
 	rawUserFilter string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
+	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListUsersResponse, error) {
 	body := &client.ClientListUsersRequest{
 		Object:           parseObject(rawObject),
@@ -75,6 +76,11 @@ func listUsers(
 		Context:          queryContext,
 	}
 	options := &client.ClientListUsersOptions{}
+
+	// Don't set if UNSPECIFIED has been provided, it's the default anyway
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
 
 	response, err := fgaClient.ListUsers(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
@@ -106,11 +112,16 @@ var listUsersCmd = &cobra.Command{
 			return fmt.Errorf("error parsing query context: %w", err)
 		}
 
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for check: %w", err)
+		}
+
 		userFilter, _ := cmd.Flags().GetString("user-filter")
 		object, _ := cmd.Flags().GetString("object")
 		relation, _ := cmd.Flags().GetString("relation")
 
-		response, err := listUsers(fgaClient, object, relation, userFilter, contextualTuples, queryContext)
+		response, err := listUsers(fgaClient, object, relation, userFilter, contextualTuples, queryContext, consistency)
 		if err != nil {
 			return fmt.Errorf("failed to list users due to %w", err)
 		}

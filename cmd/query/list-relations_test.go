@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"go.uber.org/mock/gomock"
 
@@ -41,7 +42,16 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples, queryContext)
+	_, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"user:foo",
+		"doc:doc1",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 
 	if err == nil {
 		t.Error("Expect error but there is none")
@@ -70,7 +80,16 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples, queryContext)
+	_, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"user:foo",
+		"doc:doc1",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 
 	if err == nil {
 		t.Error("Expect error but there is none")
@@ -128,7 +147,16 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	_, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations, contextualTuples, queryContext)
+	_, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"user:foo",
+		"doc:doc1",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -164,8 +192,16 @@ func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
 		Relations: []string{},
 	}
 
-	response, err := listRelations(clientConfig, mockFgaClient, "doc:doc1", "user:foo", relations,
-		contextualTuples, queryContext)
+	response, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"doc:doc1",
+		"user:foo",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}
@@ -228,8 +264,16 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations,
-		contextualTuples, queryContext)
+	output, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"user:foo",
+		"doc:doc1",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}
@@ -280,8 +324,76 @@ func TestListRelationsMultipleRelations(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	output, err := listRelations(clientConfig, mockFgaClient, "user:foo", "doc:doc1", relations,
-		contextualTuples, queryContext)
+	output, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"user:foo",
+		"doc:doc1",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(*output, expectedListRelationsResponse) {
+		t.Errorf("Expect output %v actual %v", expectedListRelationsResponse, *output)
+	}
+}
+
+func TestListRelationsWithConsistency(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockListRelationsExecute := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
+
+	expectedListRelationsResponse := client.ClientListRelationsResponse{
+		Relations: []string{"viewer"},
+	}
+
+	mockListRelationsExecute.EXPECT().Execute().Return(&expectedListRelationsResponse, nil)
+
+	mockListRelationsRequest := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
+	listRelationsOptions := client.ClientListRelationsOptions{
+		Consistency: openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY.Ptr(),
+	}
+	mockListRelationsRequest.EXPECT().Options(listRelationsOptions).Return(mockListRelationsExecute)
+
+	mockBody := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
+
+	relations := []string{"viewer", "editor"}
+	contextualTuples := []client.ClientContextualTupleKey{
+		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
+	}
+	body := client.ClientListRelationsRequest{
+		User:             "user:foo",
+		Relations:        []string{"viewer", "editor"},
+		Object:           "doc:doc1",
+		ContextualTuples: contextualTuples,
+		Context:          queryContext,
+	}
+	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
+	gomock.InOrder(
+		mockFgaClient.EXPECT().ListRelations(context.Background()).Return(mockBody),
+	)
+
+	var clientConfig fga.ClientConfig
+
+	output, err := listRelations(
+		clientConfig,
+		mockFgaClient,
+		"user:foo",
+		"doc:doc1",
+		relations,
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}

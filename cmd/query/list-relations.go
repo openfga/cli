@@ -78,6 +78,7 @@ func listRelations(clientConfig fga.ClientConfig,
 	relations []string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
+	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListRelationsResponse, error) {
 	if len(relations) < 1 {
 		relationsForType, err := getRelationsForType(clientConfig, fgaClient, object)
@@ -103,6 +104,11 @@ func listRelations(clientConfig fga.ClientConfig,
 		Context:          queryContext,
 	}
 	options := &client.ClientListRelationsOptions{}
+
+	// Don't set if UNSPECIFIED has been provided, it's the default anyway
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
 
 	response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
@@ -140,9 +146,23 @@ var listRelationsCmd = &cobra.Command{
 			return fmt.Errorf("error parsing query context for check: %w", err)
 		}
 
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for check: %w", err)
+		}
+
 		relations, _ := cmd.Flags().GetStringArray("relation")
 
-		response, err := listRelations(clientConfig, fgaClient, args[0], args[1], relations, contextualTuples, queryContext)
+		response, err := listRelations(
+			clientConfig,
+			fgaClient,
+			args[0],
+			args[1],
+			relations,
+			contextualTuples,
+			queryContext,
+			consistency,
+		)
 		if err != nil {
 			return fmt.Errorf("failed to list relations due to %w", err)
 		}

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -34,6 +35,7 @@ func check(
 	object string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
+	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientCheckResponse, error) {
 	body := &client.ClientCheckRequest{
 		User:             user,
@@ -43,6 +45,11 @@ func check(
 		Context:          queryContext,
 	}
 	options := &client.ClientCheckOptions{}
+
+	// Don't set if UNSPECIFIED has been provided, it's the default anyway
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
 
 	response, err := fgaClient.Check(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
@@ -76,7 +83,12 @@ var checkCmd = &cobra.Command{
 			return fmt.Errorf("error parsing query context for check: %w", err)
 		}
 
-		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext)
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for check: %w", err)
+		}
+
+		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency)
 		if err != nil {
 			return fmt.Errorf("failed to check due to %w", err)
 		}

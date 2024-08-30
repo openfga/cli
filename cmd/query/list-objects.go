@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -35,6 +36,7 @@ func listObjects(
 	objectType string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
+	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListObjectsResponse, error) {
 	body := &client.ClientListObjectsRequest{
 		User:             user,
@@ -44,6 +46,10 @@ func listObjects(
 		Context:          queryContext,
 	}
 	options := &client.ClientListObjectsOptions{}
+
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
 
 	response, err := fgaClient.ListObjects(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
@@ -75,10 +81,15 @@ var listObjectsCmd = &cobra.Command{
 
 		queryContext, err := cmdutils.ParseQueryContext(cmd, "context")
 		if err != nil {
-			return fmt.Errorf("error parsing query context for check: %w", err)
+			return fmt.Errorf("error parsing query context for listObjects: %w", err)
 		}
 
-		response, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext)
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for listObjects: %w", err)
+		}
+
+		response, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency)
 		if err != nil {
 			return fmt.Errorf("failed to list objects due to %w", err)
 		}
