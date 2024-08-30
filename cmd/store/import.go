@@ -113,7 +113,7 @@ func importStore(
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
-	maxTuplesPerWrite, maxParallelRequests int,
+	maxTuplesPerWrite, maxParallelRequests int32,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
 	var (
@@ -159,8 +159,8 @@ func importStore(
 		}),
 	)
 
-	for index := 0; index < len(storeData.Tuples); index += maxTuplesPerWrite {
-		end := index + maxTuplesPerWrite
+	for index := 0; index < len(storeData.Tuples); index += int(maxTuplesPerWrite) {
+		end := index + int(maxTuplesPerWrite)
 		if end > len(storeData.Tuples) {
 			end = len(storeData.Tuples)
 		}
@@ -202,12 +202,12 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to get store-id: %w", err)
 		}
 
-		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
 		if err != nil {
 			return fmt.Errorf("failed to parse max tuples per write: %w", err)
 		}
 
-		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
 		if err != nil {
 			return fmt.Errorf("failed to parse parallel requests: %w", err)
 		}

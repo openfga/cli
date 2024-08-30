@@ -59,12 +59,12 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to parse input tuples due to %w", err)
 			}
 
-			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+			maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
 			if err != nil {
 				return fmt.Errorf("failed to parse max tuples per write due to %w", err)
 			}
 
-			maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+			maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
 			if err != nil {
 				return fmt.Errorf("failed to parse parallel requests due to %w", err)
 			}

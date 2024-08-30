@@ -74,7 +74,7 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 			return output
 		}
 
-		createdAt := time.Unix(int64(modelID.Time()/1_000), 0).UTC() //nolint:mnd
+		createdAt := ulid.Time(modelID.Time()).UTC()
 		output.CreatedAt = &createdAt
 	}
 
