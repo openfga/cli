@@ -55,14 +55,14 @@ type ImportResponse struct {
 func ImportTuples(
 	fgaClient client.SdkClient,
 	body client.ClientWriteRequest,
-	maxTuplesPerWrite int,
-	maxParallelRequests int,
+	maxTuplesPerWrite int32,
+	maxParallelRequests int32,
 ) (*ImportResponse, error) {
 	options := client.ClientWriteOptions{
 		Transaction: &client.TransactionOptions{
 			Disable:             true,
-			MaxPerChunk:         int32(maxTuplesPerWrite),
-			MaxParallelRequests: int32(maxParallelRequests),
+			MaxPerChunk:         maxTuplesPerWrite,
+			MaxParallelRequests: maxParallelRequests,
 		},
 	}
 
@@ -168,12 +168,12 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 
-		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
 		if err != nil {
 			return fmt.Errorf("failed to parse max tuples per write due to %w", err)
 		}
 
-		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
 		if err != nil {
 			return fmt.Errorf("failed to parse parallel requests due to %w", err)
 		}

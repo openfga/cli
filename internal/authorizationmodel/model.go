@@ -39,7 +39,7 @@ func getCreatedAtFromModelID(id string) (*time.Time, error) {
 		return nil, fmt.Errorf("error parsing model id %w", err)
 	}
 
-	createdAt := time.Unix(int64(modelID.Time()/1_000), 0).UTC() //nolint:mnd
+	createdAt := ulid.Time(modelID.Time()).UTC()
 
 	return &createdAt, nil
 }
@@ -130,6 +130,8 @@ func (model *AuthzModel) GetCreatedAt() *time.Time {
 
 	if model.ID != nil {
 		createdAt, _ := getCreatedAtFromModelID(model.GetID())
+
+		model.CreatedAt = createdAt
 
 		return createdAt
 	}
@@ -286,7 +288,7 @@ func (model *AuthzModel) setCreatedAt() {
 	if *model.ID != "" {
 		modelID, err := ulid.Parse(*model.ID)
 		if err == nil {
-			createdAt := time.Unix(int64(modelID.Time()/1_000), 0).UTC() //nolint:mnd
+			createdAt := ulid.Time(modelID.Time()).UTC()
 			model.CreatedAt = &createdAt
 		}
 	}
