@@ -127,8 +127,8 @@ var listRelationsCmd = &cobra.Command{
 	Use:     "list-relations",
 	Short:   "List Relations",
 	Long:    "List relations that a user has with an object.",
-	Example: `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`, //nolint:lll
-	Args:    cobra.ExactArgs(2),                                                                                              //nolint:mnd,lll
+	Example: `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
+	Args:    cobra.ExactArgs(2),                                                                                                                                 //nolint:mnd,lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
