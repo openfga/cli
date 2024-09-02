@@ -50,7 +50,14 @@ func TestReadError(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
 
-	_, err := read(mockFgaClient, "user:user1", "reader", "document:doc1", 5)
+	_, err := read(
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		5,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -91,7 +98,14 @@ func TestReadEmpty(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
 
-	output, err := read(mockFgaClient, "user:user1", "reader", "document:doc1", 5)
+	output, err := read(
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		5,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}
@@ -166,7 +180,14 @@ func TestReadSinglePage(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
 
-	output, err := read(mockFgaClient, "user:user1", "reader", "document:doc1", 5)
+	output, err := read(
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		5,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}
@@ -281,7 +302,14 @@ func TestReadMultiPages(t *testing.T) {
 		mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody2),
 	)
 
-	output, err := read(mockFgaClient, "user:user1", "reader", "document:doc1", 5)
+	output, err := read(
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		5,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}
@@ -356,7 +384,14 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
 
-	output, err := read(mockFgaClient, "user:user1", "reader", "document:doc1", 1)
+	output, err := read(
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		1,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
 	if err != nil {
 		t.Error(err)
 	}

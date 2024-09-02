@@ -10,7 +10,12 @@ import (
 
 const DefaultReadPageSize int32 = 50
 
-func Read(fgaClient client.SdkClient, body *client.ClientReadRequest, maxPages int) (
+func Read(
+	fgaClient client.SdkClient,
+	body *client.ClientReadRequest,
+	maxPages int,
+	consistency *openfga.ConsistencyPreference,
+) (
 	*openfga.ReadResponse, error,
 ) {
 	tuples := make([]openfga.Tuple, 0)
@@ -18,6 +23,10 @@ func Read(fgaClient client.SdkClient, body *client.ClientReadRequest, maxPages i
 	pageIndex := 0
 	options := client.ClientReadOptions{
 		PageSize: openfga.PtrInt32(DefaultReadPageSize),
+	}
+
+	if consistency != nil && *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
 	}
 
 	for {
