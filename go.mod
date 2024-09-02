@@ -1,6 +1,7 @@
 module github.com/openfga/cli
 
-go 1.22.5
+go 1.22.6
+
 require (
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/hashicorp/go-multierror v1.1.1
