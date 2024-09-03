@@ -136,7 +136,6 @@ func TestExportSuccess(t *testing.T) {
 	readOptions := client.ClientReadOptions{
 		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
-		Consistency:       openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY.Ptr(),
 	}
 
 	mockReadRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
