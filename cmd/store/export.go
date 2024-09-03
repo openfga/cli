@@ -22,6 +22,7 @@ import (
 	"math"
 	"os"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -68,7 +69,12 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient, maxTupl
 	// get the tuples
 	maxPages := int(math.Ceil(float64(maxTupleCount) / float64(tuple.DefaultReadPageSize)))
 
-	rawTuples, err := tuple.Read(fgaClient, &client.ClientReadRequest{}, maxPages, nil)
+	rawTuples, err := tuple.Read(
+		fgaClient,
+		&client.ClientReadRequest{},
+		maxPages,
+		openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY.Ptr(),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read tuples: %w", err)
 	}
