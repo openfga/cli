@@ -42,6 +42,11 @@ func init() {
 	QueryCmd.PersistentFlags().String("model-id", "", "Model ID")
 	QueryCmd.PersistentFlags().StringArray("contextual-tuple", []string{}, `Contextual Tuple, output: "user relation object"`) //nolint:lll
 	QueryCmd.PersistentFlags().String("context", "", "Query context (as a JSON string)")
+	QueryCmd.PersistentFlags().String(
+		"consistency",
+		"",
+		"Consistency preference for the request. Valid options are HIGHER_CONSISTENCY and MINIMIZE_LATENCY.",
+	)
 
 	err := QueryCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil {

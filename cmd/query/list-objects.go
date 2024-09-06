@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -35,6 +36,7 @@ func listObjects(
 	objectType string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
+	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListObjectsResponse, error) {
 	body := &client.ClientListObjectsRequest{
 		User:             user,
@@ -44,6 +46,10 @@ func listObjects(
 		Context:          queryContext,
 	}
 	options := &client.ClientListObjectsOptions{}
+
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
 
 	response, err := fgaClient.ListObjects(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
@@ -58,8 +64,8 @@ var listObjectsCmd = &cobra.Command{
 	Use:     "list-objects",
 	Short:   "List Objects",
 	Long:    "List the objects of a certain type that a user has a particular relation to.",
-	Example: `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`, //nolint:lll
-	Args:    cobra.ExactArgs(3),                                                                                                                                                                                            //nolint:mnd,lll
+	Example: `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap" --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
+	Args:    cobra.ExactArgs(3),                                                                                                                                                                                                                               //nolint:mnd,lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -75,10 +81,15 @@ var listObjectsCmd = &cobra.Command{
 
 		queryContext, err := cmdutils.ParseQueryContext(cmd, "context")
 		if err != nil {
-			return fmt.Errorf("error parsing query context for check: %w", err)
+			return fmt.Errorf("error parsing query context for listObjects: %w", err)
 		}
 
-		response, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext)
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for listObjects: %w", err)
+		}
+
+		response, err := listObjects(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency)
 		if err != nil {
 			return fmt.Errorf("failed to list objects due to %w", err)
 		}

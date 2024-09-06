@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -27,13 +28,24 @@ import (
 	"github.com/openfga/cli/internal/output"
 )
 
-func expand(fgaClient client.SdkClient, relation string, object string) (*client.ClientExpandResponse, error) {
+func expand(
+	fgaClient client.SdkClient,
+	relation string,
+	object string,
+	consistency *openfga.ConsistencyPreference,
+) (*client.ClientExpandResponse, error) {
 	body := &client.ClientExpandRequest{
 		Relation: relation,
 		Object:   object,
 	}
 
-	tuples, err := fgaClient.Expand(context.Background()).Body(*body).Execute()
+	options := &client.ClientExpandOptions{}
+
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
+
+	tuples, err := fgaClient.Expand(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to expand tuples due to %w", err)
 	}
@@ -46,8 +58,8 @@ var expandCmd = &cobra.Command{
 	Use:     "expand",
 	Short:   "Expand",
 	Long:    "Expands the relationships in userset tree format.",
-	Example: `fga query expand --store-id="01H4P8Z95KTXXEP6Z03T75Q984" can_view document:roadmap`,
-	Args:    cobra.ExactArgs(2), //nolint:mnd
+	Example: `fga query expand --store-id="01H4P8Z95KTXXEP6Z03T75Q984" can_view document:roadmap --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
+	Args:    cobra.ExactArgs(2),                                                                                                      //nolint:mnd,lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -56,7 +68,12 @@ var expandCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		response, err := expand(fgaClient, args[0], args[1])
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for check: %w", err)
+		}
+
+		response, err := expand(fgaClient, args[0], args[1], consistency)
 		if err != nil {
 			return err
 		}
