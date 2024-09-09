@@ -1,0 +1,10 @@
+config:
+  inherit-env: true
+
+tests:
+  001 - it successfully imports a store:
+    command: fga store import --file=./tests/fixtures/basic-store.fga.yaml --max-parallel-requests=1 --max-tuples-per-write=1
+    exit-code: 0
+    stdout:
+      json:
+        store.name: "Basic Store"
