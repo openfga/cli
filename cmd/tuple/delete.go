@@ -99,8 +99,8 @@ var deleteCmd = &cobra.Command{
 func init() {
 	deleteCmd.Flags().String("file", "", "Tuples file")
 	deleteCmd.Flags().String("model-id", "", "Model ID")
-	deleteCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	deleteCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	deleteCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
+	deleteCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {

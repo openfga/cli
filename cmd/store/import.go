@@ -245,8 +245,8 @@ var importCmd = &cobra.Command{
 func init() {
 	importCmd.Flags().String("file", "", "File Name. The file should have the store")
 	importCmd.Flags().String("store-id", "", "Store ID")
-	importCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
-	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int32("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	importCmd.Flags().Int32("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 
 	if err := importCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
