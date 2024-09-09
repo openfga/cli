@@ -31,11 +31,13 @@ import (
 	"github.com/openfga/cli/internal/output"
 )
 
-// MaxTuplesPerWrite Limit the tuples in a single batch.
-var MaxTuplesPerWrite = int32(1)
+const (
+	// MaxTuplesPerWrite Limit the tuples in a single batch.
+	MaxTuplesPerWrite = 1
 
-// MaxParallelRequests Limit the parallel writes to the API.
-var MaxParallelRequests = int32(10) //nolint:mnd
+	// MaxParallelRequests Limit the parallel writes to the API.
+	MaxParallelRequests = 10
+)
 
 type failedWriteResponse struct {
 	TupleKey client.ClientTupleKey `json:"tuple_key"`
