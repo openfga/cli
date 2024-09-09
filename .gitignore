@@ -31,3 +31,6 @@ dist/
 
 # Mock source files
 /mocks
+
+# Test files
+/tests/fixtures/identifiers
