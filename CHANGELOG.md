@@ -1,5 +1,11 @@
 # Changelog
 
+### [0.6.1](https://github.com/openfga/cli/compare/v0.6.0...v0.6.1) (2024-09-09)
+
+Fixed:
+- Fixed issue where `fga store import`, `fga tuple write` and `fga tuple delete` could not be ran due to an issue with the `--max-tuples-per-write` and `--max-parallel-requests` options (#389)
+- Fixed an issue where List Users failed test output did not include the returned response (#391)
+
 ### [0.6.0](https://github.com/openfga/cli/compare/v0.5.3...v0.6.0) (2024-09-08)
 
 Added:
