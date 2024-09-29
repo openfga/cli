@@ -67,6 +67,7 @@ func init() {
 	rootCmd.PersistentFlags().String("client-id", "", "Client ID. Sent to the Token Issuer during the Client Credentials flow")                            //nolint:lll
 	rootCmd.PersistentFlags().String("client-secret", "", "Client Secret. Sent to the Token Issuer during the Client Credentials flow")                    //nolint:lll
 	rootCmd.PersistentFlags().StringArray("api-scopes", []string{}, "API Scopes (repeat option for multiple values). Used in the Client Credentials flow") //nolint:lll
+	rootCmd.PersistentFlags().Bool("no-pretty", false, "Disable pretty output features (useful for scripting)")                                            //nolint:lll
 
 	rootCmd.MarkFlagsRequiredTogether(
 		"api-token-issuer",

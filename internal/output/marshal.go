@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/gocarina/gocsv"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 
 	"github.com/mattn/go-isatty"
@@ -184,6 +185,10 @@ func outputNonTerminal(data any) error {
 
 // Display will decorate the output if possible.  Otherwise, will print out the standard JSON.
 func Display(data any) error {
+	if viper.GetBool("no-pretty") {
+		return outputParsable(data)
+	}
+
 	if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		if os.Getenv("NO_COLOR") != "" {
 			return displayNoColorTerminal(data)
@@ -193,4 +198,13 @@ func Display(data any) error {
 	}
 
 	return outputNonTerminal(data)
+}
+
+func outputParsable(data any) error {
+	result, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("unable to marshal json with error %w", err)
+	}
+	fmt.Println(string(result))
+	return nil
 }
