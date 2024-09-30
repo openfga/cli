@@ -21,7 +21,7 @@ jobs:
     name: Lints
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.5.4
+    - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
       with:
         fetch-depth: 0
     - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
@@ -39,7 +39,7 @@ jobs:
     name: Security Audits
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.5.4
+    - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
       with:
         fetch-depth: 0
     - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
@@ -55,7 +55,7 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.5.4
+    - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
       with:
         fetch-depth: 0
 
@@ -75,7 +75,7 @@ jobs:
     name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 #2.0.0
 
@@ -84,7 +84,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') != true
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.5.4
+    - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
       with:
         fetch-depth: 0
     - uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
@@ -100,7 +100,7 @@ jobs:
       shell: bash
 
     - name: Checkout
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.5.4
+      uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
       with:
         fetch-depth: 0
 
@@ -139,7 +139,7 @@ jobs:
         shell: bash
 
       - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.5.4
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.5.4
         with:
           fetch-depth: 0
 
