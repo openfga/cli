@@ -95,7 +95,7 @@ var listCmd = &cobra.Command{
 
 		models := authorizationmodel.AuthzModelList{}
 		authzModels := response.AuthorizationModels
-		for index := range len(authzModels) {
+		for index := range authzModels {
 			authModel := authorizationmodel.AuthzModel{}
 			authModel.Set(authzModels[index])
 			models.AuthorizationModels = append(models.AuthorizationModels, authModel.DisplayAsJSON(fields))
