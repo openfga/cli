@@ -57,6 +57,11 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
+		suppressSummary, err := cmd.Flags().GetBool("suppress-summary")
+    if err != nil {
+        return err //nolint:wrapcheck
+    }
+
 		test, err := storetest.RunTests(
 			fgaClient,
 			storeData,
@@ -73,13 +78,11 @@ var testCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("error displaying test results due to %w", err)
 			}
-
-			if !passing {
-				os.Exit(1)
-			}
 		}
 
-		fmt.Println(test.FriendlyDisplay())
+		if !suppressSummary {
+			fmt.Fprintln(os.Stderr, test.FriendlyDisplay())
+		}
 
 		if !passing {
 			os.Exit(1)
@@ -94,6 +97,7 @@ func init() {
 	testCmd.Flags().String("model-id", "", "Model ID")
 	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
+	testCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 
 	if err := testCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
