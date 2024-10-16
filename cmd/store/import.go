@@ -138,6 +138,12 @@ func importStore(
 		return nil, fmt.Errorf("failed to initialize FGA Client: %w", err)
 	}
 
+	// Check if there are any tuples to import
+	if len(storeData.Tuples) == 0 {
+		fmt.Println("No tuples to import.")
+		return response, nil
+	}
+
 	// Initialize progress bar
 	bar := progressbar.NewOptions(len(storeData.Tuples),
 		progressbar.OptionSetWriter(os.Stderr),
