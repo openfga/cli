@@ -58,9 +58,9 @@ var testCmd = &cobra.Command{
 		}
 
 		suppressSummary, err := cmd.Flags().GetBool("suppress-summary")
-    if err != nil {
-        return err //nolint:wrapcheck
-    }
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
 
 		test, err := storetest.RunTests(
 			fgaClient,
