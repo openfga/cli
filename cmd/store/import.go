@@ -123,7 +123,6 @@ func importStore(
 	}
 
 	if len(storeData.Tuples) == 0 {
-		fmt.Println("No tuples to import.")
 		return response, nil
 	}
 
@@ -146,6 +145,7 @@ func createOrUpdateStore(
 	if storeID == "" {
 		return createStore(clientConfig, storeData, format, fileName)
 	}
+
 	return updateStore(clientConfig, fgaClient, storeData, format, storeID)
 }
 
@@ -179,6 +179,7 @@ func importTuples(
 	if err := bar.Finish(); err != nil {
 		return fmt.Errorf("failed to finish progress bar: %w", err)
 	}
+
 	return nil
 }
 
