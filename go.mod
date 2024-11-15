@@ -10,10 +10,10 @@ require (
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/openfga/api/proto v0.0.0-20241028145042-7c098f10acd2
+	github.com/openfga/api/proto v0.0.0-20241107182745-c14fb4b3d4b4
 	github.com/openfga/go-sdk v0.6.3
 	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20241021130006-9791fa1db4ec
-	github.com/openfga/openfga v1.7.0
+	github.com/openfga/openfga v1.8.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
@@ -29,7 +29,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/term v0.25.0 // indirect
+	golang.org/x/term v0.26.0 // indirect
 	gonum.org/v1/gonum v0.15.1 // indirect
 )
 
@@ -47,7 +47,7 @@ require (
 	github.com/google/cel-go v0.21.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.23.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -66,7 +66,7 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/sagikazarmark/locafero v0.6.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/schollz/progressbar/v3 v3.17.0
+	github.com/schollz/progressbar/v3 v3.17.1
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
@@ -84,7 +84,7 @@ require (
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241021214115-324edc3d5d38 // indirect
