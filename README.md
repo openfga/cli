@@ -161,7 +161,7 @@ api-url: https://api.us1.fga.dev
 client-id: 4Zb..UYjaHreLKOJuU8
 client-secret: J3...2pBwiauD
 api-audience: https://api.us1.fga.dev/
-api-token-issuer: fga.us.auth0.com
+api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
 ```
 
