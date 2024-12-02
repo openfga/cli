@@ -1,5 +1,11 @@
 # Changelog
 
+### [0.6.2](https://github.com/openfga/cli/compare/v0.6.1...v0.6.2) (2024-12-02)
+
+Fixed:
+- Fixed issue where `fga store import` would error when importing a store with no tuples (#408) - thanks @ap0calypse8
+- Fixed repetition in `fga query check` error output (#405) - thanks @Siddhant-K-code
+
 ### [0.6.1](https://github.com/openfga/cli/compare/v0.6.0...v0.6.1) (2024-09-09)
 
 Fixed:
