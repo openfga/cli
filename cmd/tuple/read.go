@@ -88,7 +88,14 @@ func (r readResponse) toCsvDTO() ([]readResponseCSVDTO, error) {
 	return readResponseDTO, nil
 }
 
-func read(fgaClient client.SdkClient, user string, relation string, object string, maxPages int) (
+func read(
+	fgaClient client.SdkClient,
+	user string,
+	relation string,
+	object string,
+	maxPages int,
+	consistency *openfga.ConsistencyPreference,
+) (
 	*readResponse, error,
 ) {
 	body := &client.ClientReadRequest{}
@@ -104,7 +111,7 @@ func read(fgaClient client.SdkClient, user string, relation string, object strin
 		body.Object = &object
 	}
 
-	response, err := tuple.Read(fgaClient, body, maxPages)
+	response, err := tuple.Read(fgaClient, body, maxPages, consistency)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -142,7 +149,12 @@ var readCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
 
-		response, err := read(fgaClient, user, relation, object, maxPages)
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for check: %w", err)
+		}
+
+		response, err := read(fgaClient, user, relation, object, maxPages, consistency)
 		if err != nil {
 			return err
 		}
@@ -180,6 +192,12 @@ func init() {
 	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
 		"json, simple-json, csv, and yaml.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
+	readCmd.Flags().String(
+		"consistency",
+		"",
+		"Consistency preference for the request. Valid options are HIGHER_CONSISTENCY and MINIMIZE_LATENCY.",
+	)
+
 	_ = readCmd.Flags().MarkDeprecated("simple-output", "the flag \"simple-output\" is deprecated and will be removed"+
 		" in future releases.\nPlease use the \"--output-format=simple-json\" flag instead.")
 }

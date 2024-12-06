@@ -72,24 +72,6 @@ func convertPbUsersToStrings(users []*pb.User) []string {
 	return simpleUsers
 }
 
-func convertPbObjectOrUsersetToStrings(users []*pb.ObjectOrUserset) []string {
-	simpleUsers := []string{}
-
-	for _, user := range users {
-		switch typedUser := user.GetUser().(type) {
-		case *pb.ObjectOrUserset_Object:
-			simpleUsers = append(simpleUsers, typedUser.Object.GetType()+":"+typedUser.Object.GetId())
-		case *pb.ObjectOrUserset_Userset:
-			simpleUsers = append(
-				simpleUsers,
-				typedUser.Userset.GetType()+":"+typedUser.Userset.GetId()+"#"+typedUser.Userset.GetRelation(),
-			)
-		}
-	}
-
-	return simpleUsers
-}
-
 func convertOpenfgaUsers(users []openfga.User) []string {
 	simpleUsers := []string{}
 

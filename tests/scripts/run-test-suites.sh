@@ -11,4 +11,6 @@ exit_code=$?
 docker stop openfga-cli-tests
 docker rm openfga-cli-tests
 
+rm -rf tests/fixtures/identifiers
+
 exit $exit_code

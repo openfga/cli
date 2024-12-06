@@ -118,12 +118,12 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return errors.New("file name cannot be empty") //nolint:goerr113
 	}
 
-	maxTuplesPerWrite, err := flags.GetInt("max-tuples-per-write")
+	maxTuplesPerWrite, err := flags.GetInt32("max-tuples-per-write")
 	if err != nil {
 		return fmt.Errorf("failed to parse max tuples per write: %w", err)
 	}
 
-	maxParallelRequests, err := flags.GetInt("max-parallel-requests")
+	maxParallelRequests, err := flags.GetInt32("max-parallel-requests")
 	if err != nil {
 		return fmt.Errorf("failed to parse parallel requests: %w", err)
 	}
@@ -150,6 +150,6 @@ func init() {
 	writeCmd.Flags().String("file", "", "Tuples file")
 	writeCmd.Flags().String("condition-name", "", "Condition Name")
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
-	writeCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	writeCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
+	writeCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
+	writeCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
 }

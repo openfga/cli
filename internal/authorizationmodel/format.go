@@ -25,7 +25,7 @@ import (
 type ModelFormat string
 
 const (
-	ModelFormatDefault ModelFormat = "default"
+	ModelFormatDefault ModelFormat = "autodetect"
 	ModelFormatJSON    ModelFormat = "json"
 	ModelFormatFGA     ModelFormat = "fga"
 	ModelFormatModular ModelFormat = "modular"

@@ -199,6 +199,10 @@ func buildListUsersTestResults(
 
 			got := NoValueString
 
+			if listUsersResult.Got.Users != nil {
+				got = fmt.Sprintf("%+v", listUsersResult.Got)
+			}
+
 			userFilter := listUsersResult.Request.UserFilters[0]
 
 			listUsersResultsOutput += fmt.Sprintf(

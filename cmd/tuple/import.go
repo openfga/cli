@@ -31,11 +31,13 @@ import (
 	"github.com/openfga/cli/internal/output"
 )
 
-// MaxTuplesPerWrite Limit the tuples in a single batch.
-var MaxTuplesPerWrite = 1
+const (
+	// MaxTuplesPerWrite Limit the tuples in a single batch.
+	MaxTuplesPerWrite = 1
 
-// MaxParallelRequests Limit the parallel writes to the API.
-var MaxParallelRequests = 10
+	// MaxParallelRequests Limit the parallel writes to the API.
+	MaxParallelRequests = 10
+)
 
 type failedWriteResponse struct {
 	TupleKey client.ClientTupleKey `json:"tuple_key"`
@@ -55,14 +57,14 @@ type ImportResponse struct {
 func ImportTuples(
 	fgaClient client.SdkClient,
 	body client.ClientWriteRequest,
-	maxTuplesPerWrite int,
-	maxParallelRequests int,
+	maxTuplesPerWrite int32,
+	maxParallelRequests int32,
 ) (*ImportResponse, error) {
 	options := client.ClientWriteOptions{
 		Transaction: &client.TransactionOptions{
 			Disable:             true,
-			MaxPerChunk:         int32(maxTuplesPerWrite),
-			MaxParallelRequests: int32(maxParallelRequests),
+			MaxPerChunk:         maxTuplesPerWrite,
+			MaxParallelRequests: maxParallelRequests,
 		},
 	}
 
@@ -168,12 +170,12 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 
-		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
 		if err != nil {
 			return fmt.Errorf("failed to parse max tuples per write due to %w", err)
 		}
 
-		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
 		if err != nil {
 			return fmt.Errorf("failed to parse parallel requests due to %w", err)
 		}
@@ -206,6 +208,6 @@ var importCmd = &cobra.Command{
 func init() {
 	importCmd.Flags().String("model-id", "", "Model ID")
 	importCmd.Flags().String("file", "", "Tuples file")
-	importCmd.Flags().Int("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	importCmd.Flags().Int("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
+	importCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 }
