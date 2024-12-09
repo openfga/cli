@@ -12,8 +12,8 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20241107182745-c14fb4b3d4b4
 	github.com/openfga/go-sdk v0.6.3
-	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20241021130006-9791fa1db4ec
-	github.com/openfga/openfga v1.8.0
+	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20241115164311-10e575c8e47c
+	github.com/openfga/openfga v1.8.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.19.0
@@ -25,11 +25,14 @@ require (
 
 require (
 	cel.dev/expr v0.18.0 // indirect
+	github.com/Yiling-J/theine-go v0.6.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/zeebo/xxh3 v1.0.2 // indirect
 	golang.org/x/term v0.26.0 // indirect
 	gonum.org/v1/gonum v0.15.1 // indirect
 )
@@ -52,7 +55,6 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/karlseguin/ccache/v3 v3.0.6 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
