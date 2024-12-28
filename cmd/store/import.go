@@ -49,6 +49,7 @@ const (
 // createStore creates a new store with the given client configuration and store data.
 func createStore(
 	clientConfig *fga.ClientConfig,
+	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	fileName string,
@@ -58,7 +59,7 @@ func createStore(
 		storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
 	}
 
-	createStoreAndModelResponse, err := CreateStoreWithModel(*clientConfig, storeDataName, storeData.Model, format)
+	createStoreAndModelResponse, err := CreateStoreWithModel(fgaClient, storeDataName, storeData.Model, format)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +144,7 @@ func createOrUpdateStore(
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
 	if storeID == "" {
-		return createStore(clientConfig, storeData, format, fileName)
+		return createStore(clientConfig, fgaClient, storeData, format, fileName)
 	}
 
 	return updateStore(clientConfig, fgaClient, storeData, format, storeID)
