@@ -225,94 +225,94 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 	}
 }
 
+var writeTuplesTests = []struct {
+	name               string
+	file               string
+	hideImportedTuples bool
+	expectedStats      ImportStats
+	expectedOutput     string
+	expectedError      string
+}{
+	{
+		name:               "shows successful tuples and counts when hide-imported-tuples is false",
+		file:               "testdata/tuples.json",
+		hideImportedTuples: false,
+		expectedStats: ImportStats{
+			TotalTuples:      3,
+			SuccessfulTuples: 3,
+			FailedTuples:     0,
+		},
+		expectedOutput: `{
+						"successful": [
+								{
+										"user": "user:anne",
+										"relation": "owner",
+										"object": "folder:product"
+								},
+								{
+										"user": "folder:product",
+										"relation": "parent",
+										"object": "folder:product-2021"
+								},
+								{
+										"user": "user:beth",
+										"relation": "viewer",
+										"object": "folder:product-2021"
+								}
+						],
+						"total_count": 3,
+						"successful_count": 3,
+						"failed_count": 0
+				}`,
+	},
+	{
+		name:               "shows only counts when hide-imported-tuples is true",
+		file:               "testdata/tuples.json",
+		hideImportedTuples: true,
+		expectedStats: ImportStats{
+			TotalTuples:      3,
+			SuccessfulTuples: 3,
+			FailedTuples:     0,
+		},
+		expectedOutput: `{
+						"total_count": 3,
+						"successful_count": 3,
+						"failed_count": 0
+				}`,
+	},
+	{
+		name:               "shows failed tuples and all counts",
+		file:               "testdata/tuples_with_errors.json",
+		hideImportedTuples: true,
+		expectedStats: ImportStats{
+			TotalTuples:      3,
+			SuccessfulTuples: 1,
+			FailedTuples:     2,
+		},
+		expectedOutput: `{
+						"failed": [
+								{
+										"user": "invalid:user",
+										"relation": "invalid",
+										"object": "invalid:object"
+								},
+								{
+										"user": "another:invalid",
+										"relation": "invalid",
+										"object": "invalid:object"
+								}
+						],
+						"total_count": 3,
+						"successful_count": 1,
+						"failed_count": 2
+				}`,
+	},
+}
+
 func TestWriteTuplesWithImportStats(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name               string
-		file               string
-		hideImportedTuples bool
-		expectedStats      ImportStats
-		expectedOutput     string
-		expectedError      string
-	}{
-		{
-			name:               "shows successful tuples and counts when hide-imported-tuples is false",
-			file:               "testdata/tuples.json",
-			hideImportedTuples: false,
-			expectedStats: ImportStats{
-				TotalTuples:      3,
-				SuccessfulTuples: 3,
-				FailedTuples:     0,
-			},
-			expectedOutput: `{
-							"successful": [
-									{
-											"user": "user:anne",
-											"relation": "owner",
-											"object": "folder:product"
-									},
-									{
-											"user": "folder:product",
-											"relation": "parent",
-											"object": "folder:product-2021"
-									},
-									{
-											"user": "user:beth",
-											"relation": "viewer",
-											"object": "folder:product-2021"
-									}
-							],
-							"total_count": 3,
-							"successful_count": 3,
-							"failed_count": 0
-					}`,
-		},
-		{
-			name:               "shows only counts when hide-imported-tuples is true",
-			file:               "testdata/tuples.json",
-			hideImportedTuples: true,
-			expectedStats: ImportStats{
-				TotalTuples:      3,
-				SuccessfulTuples: 3,
-				FailedTuples:     0,
-			},
-			expectedOutput: `{
-							"total_count": 3,
-							"successful_count": 3,
-							"failed_count": 0
-					}`,
-		},
-		{
-			name:               "shows failed tuples and all counts",
-			file:               "testdata/tuples_with_errors.json",
-			hideImportedTuples: true,
-			expectedStats: ImportStats{
-				TotalTuples:      3,
-				SuccessfulTuples: 1,
-				FailedTuples:     2,
-			},
-			expectedOutput: `{
-							"failed": [
-									{
-											"user": "invalid:user",
-											"relation": "invalid",
-											"object": "invalid:object"
-									},
-									{
-											"user": "another:invalid",
-											"relation": "invalid",
-											"object": "invalid:object"
-									}
-							],
-							"total_count": 3,
-							"successful_count": 1,
-							"failed_count": 2
-					}`,
-		},
-	}
-
-	for _, test := range tests {
+	for _, test := range writeTuplesTests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -344,6 +344,7 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 
 			if test.expectedError != "" {
 				require.EqualError(t, err, test.expectedError)
+
 				return
 			}
 
