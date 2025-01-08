@@ -341,7 +341,7 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.Equal(t, test.expectedStats.TotalTuples, len(tuples))
+			assert.Len(t, tuples, test.expectedStats.TotalTuples)
 		})
 	}
 }
