@@ -165,8 +165,10 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 	}
 
 	outputResponse["total_count"] = stats.TotalTuples
+	outputResponse["successful_count"] = len(response.Successful)
+	outputResponse["failed_count"] = len(response.Failed)
 
-	return output.Display(response) //nolint:wrapcheck
+	return output.Display(outputResponse) //nolint:wrapcheck
 }
 
 func init() {

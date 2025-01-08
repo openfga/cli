@@ -237,7 +237,7 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 		expectedError      string
 	}{
 		{
-			name:               "shows successful tuples and total count when hide-imported-tuples is false",
+			name:               "shows successful tuples and counts when hide-imported-tuples is false",
 			file:               "testdata/tuples.json",
 			hideImportedTuples: false,
 			expectedStats: ImportStats{
@@ -263,11 +263,13 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 											"object": "folder:product-2021"
 									}
 							],
-							"total_count": 3
+							"total_count": 3,
+							"successful_count": 3,
+							"failed_count": 0
 					}`,
 		},
 		{
-			name:               "hides successful tuples when hide-imported-tuples is true",
+			name:               "shows only counts when hide-imported-tuples is true",
 			file:               "testdata/tuples.json",
 			hideImportedTuples: true,
 			expectedStats: ImportStats{
@@ -276,11 +278,13 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 				FailedTuples:     0,
 			},
 			expectedOutput: `{
-							"total_count": 3
+							"total_count": 3,
+							"successful_count": 3,
+							"failed_count": 0
 					}`,
 		},
 		{
-			name:               "shows failed tuples and total count when there are failures",
+			name:               "shows failed tuples and all counts",
 			file:               "testdata/tuples_with_errors.json",
 			hideImportedTuples: true,
 			expectedStats: ImportStats{
@@ -301,7 +305,9 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 											"object": "invalid:object"
 									}
 							],
-							"total_count": 3
+							"total_count": 3,
+							"successful_count": 1,
+							"failed_count": 2
 					}`,
 		},
 	}
@@ -322,7 +328,9 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 					response["failed"] = tuples[test.expectedStats.SuccessfulTuples:]
 				}
 
-				response["total_count"] = len(tuples)
+				response["total_count"] = test.expectedStats.TotalTuples
+				response["successful_count"] = test.expectedStats.SuccessfulTuples
+				response["failed_count"] = test.expectedStats.FailedTuples
 
 				output, err := json.Marshal(response)
 				if err != nil {
@@ -336,7 +344,6 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 
 			if test.expectedError != "" {
 				require.EqualError(t, err, test.expectedError)
-
 				return
 			}
 
