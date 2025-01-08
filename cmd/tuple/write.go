@@ -154,29 +154,19 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return err
 	}
 
-	stats.SuccessfulTuples = len(response.Successful)
-	stats.FailedTuples = len(response.Failed)
+	outputResponse := make(map[string]interface{})
 
-	if !hideImportedTuples {
-		err = output.Display(response)
-		if err != nil {
-			return err
-		}
-	} else if len(response.Failed) > 0 {
-		err = output.Display(map[string]interface{}{
-			"failed": response.Failed,
-		})
-		if err != nil {
-			return err
-		}
+	if !hideImportedTuples && len(response.Successful) > 0 {
+		outputResponse["successful"] = response.Successful
 	}
 
-	fmt.Printf("\nImport Summary:\n")
-	fmt.Printf("Total tuples processed: %d\n", stats.TotalTuples)
-	fmt.Printf("Successfully imported: %d\n", stats.SuccessfulTuples)
-	fmt.Printf("Failed: %d\n", stats.FailedTuples)
+	if len(response.Failed) > 0 {
+		outputResponse["failed"] = response.Failed
+	}
 
-	return nil
+	outputResponse["total_count"] = stats.TotalTuples
+
+	return output.Display(outputResponse)
 }
 
 func init() {

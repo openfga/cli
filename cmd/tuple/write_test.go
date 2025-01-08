@@ -1,11 +1,7 @@
 package tuple
 
 import (
-	"bytes"
-	"fmt"
-	"io"
-	"os"
-	"strings"
+	"encoding/json"
 	"testing"
 
 	openfga "github.com/openfga/go-sdk"
@@ -13,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
@@ -242,7 +237,7 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 		expectedError      string
 	}{
 		{
-			name:               "shows all tuples when hide-imported-tuples is false",
+			name:               "shows successful tuples and total count when hide-imported-tuples is false",
 			file:               "testdata/tuples.json",
 			hideImportedTuples: false,
 			expectedStats: ImportStats{
@@ -251,24 +246,25 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 				FailedTuples:     0,
 			},
 			expectedOutput: `{
-													"successful": [
-																	{
-																					"user": "user:anne",
-																					"relation": "owner",
-																					"object": "folder:product"
-																	},
-																	{
-																					"user": "folder:product",
-																					"relation": "parent",
-																					"object": "folder:product-2021"
-																	},
-																	{
-																					"user": "user:beth",
-																					"relation": "viewer",
-																					"object": "folder:product-2021"
-																	}
-													]
-									}`,
+							"successful": [
+									{
+											"user": "user:anne",
+											"relation": "owner",
+											"object": "folder:product"
+									},
+									{
+											"user": "folder:product",
+											"relation": "parent",
+											"object": "folder:product-2021"
+									},
+									{
+											"user": "user:beth",
+											"relation": "viewer",
+											"object": "folder:product-2021"
+									}
+							],
+							"total_count": 3
+					}`,
 		},
 		{
 			name:               "hides successful tuples when hide-imported-tuples is true",
@@ -279,10 +275,12 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 				SuccessfulTuples: 3,
 				FailedTuples:     0,
 			},
-			expectedOutput: "",
+			expectedOutput: `{
+							"total_count": 3
+					}`,
 		},
 		{
-			name:               "always shows failed tuples even when hide-imported-tuples is true",
+			name:               "shows failed tuples and total count when there are failures",
 			file:               "testdata/tuples_with_errors.json",
 			hideImportedTuples: true,
 			expectedStats: ImportStats{
@@ -291,19 +289,20 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 				FailedTuples:     2,
 			},
 			expectedOutput: `{
-													"failed": [
-																	{
-																					"user": "invalid:user",
-																					"relation": "invalid",
-																					"object": "invalid:object"
-																	},
-																	{
-																					"user": "another:invalid",
-																					"relation": "invalid",
-																					"object": "invalid:object"
-																	}
-													]
-									}`,
+							"failed": [
+									{
+											"user": "invalid:user",
+											"relation": "invalid",
+											"object": "invalid:object"
+									},
+									{
+											"user": "another:invalid",
+											"relation": "invalid",
+											"object": "invalid:object"
+									}
+							],
+							"total_count": 3
+					}`,
 		},
 	}
 
@@ -311,41 +310,29 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			old := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
-
-			hideImportedTuples = test.hideImportedTuples
-
 			tuples, err := tuplefile.ReadTupleFile(test.file)
 			if err == nil {
-				response := map[string][]client.ClientTupleKey{}
+				response := make(map[string]interface{})
 
-				if !hideImportedTuples || test.expectedStats.FailedTuples > 0 {
-					if test.expectedStats.SuccessfulTuples > 0 {
-						response["successful"] = tuples[:test.expectedStats.SuccessfulTuples]
-					}
-					if test.expectedStats.FailedTuples > 0 {
-						response["failed"] = tuples[test.expectedStats.SuccessfulTuples:]
-					}
-					err = output.Display(response)
-					if err != nil {
-						t.Fatal(err)
-					}
+				if !test.hideImportedTuples && test.expectedStats.SuccessfulTuples > 0 {
+					response["successful"] = tuples[:test.expectedStats.SuccessfulTuples]
+				}
+
+				if test.expectedStats.FailedTuples > 0 {
+					response["failed"] = tuples[test.expectedStats.SuccessfulTuples:]
+				}
+
+				response["total_count"] = len(tuples)
+
+				output, err := json.Marshal(response)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if test.expectedOutput != "" {
+					assert.JSONEq(t, test.expectedOutput, string(output))
 				}
 			}
-
-			fmt.Fprintf(w, "\nImport Summary:\n")
-			fmt.Fprintf(w, "Total tuples processed: %d\n", test.expectedStats.TotalTuples)
-			fmt.Fprintf(w, "Successfully imported: %d\n", test.expectedStats.SuccessfulTuples)
-			fmt.Fprintf(w, "Failed: %d\n", test.expectedStats.FailedTuples)
-
-			w.Close()
-			os.Stdout = old
-
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			output := buf.String()
 
 			if test.expectedError != "" {
 				require.EqualError(t, err, test.expectedError)
@@ -354,19 +341,6 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, test.expectedStats.TotalTuples, len(tuples))
-			assert.Contains(t, output, fmt.Sprintf("Total tuples processed: %d", test.expectedStats.TotalTuples))
-			assert.Contains(t, output, fmt.Sprintf("Successfully imported: %d", test.expectedStats.SuccessfulTuples))
-			assert.Contains(t, output, fmt.Sprintf("Failed: %d", test.expectedStats.FailedTuples))
-
-			if test.expectedOutput != "" {
-				jsonPart := output
-				if idx := strings.Index(output, "\nImport Summary"); idx >= 0 {
-					jsonPart = output[:idx]
-				}
-				if jsonPart != "" {
-					assert.JSONEq(t, test.expectedOutput, jsonPart)
-				}
-			}
 		})
 	}
 }
