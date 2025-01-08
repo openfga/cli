@@ -166,7 +166,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 
 	outputResponse["total_count"] = stats.TotalTuples
 
-	return output.Display(outputResponse)
+	return output.Display(response) //nolint:wrapcheck
 }
 
 func init() {

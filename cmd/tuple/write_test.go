@@ -336,6 +336,7 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 
 			if test.expectedError != "" {
 				require.EqualError(t, err, test.expectedError)
+
 				return
 			}
 
