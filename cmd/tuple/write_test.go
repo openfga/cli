@@ -311,18 +311,14 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Temporarily redirect stdout
 			old := os.Stdout
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			// Set the hide flag
 			hideImportedTuples = test.hideImportedTuples
 
-			// Execute test
 			tuples, err := tuplefile.ReadTupleFile(test.file)
 			if err == nil {
-				// Create a response based on the test case
 				response := map[string][]client.ClientTupleKey{}
 
 				if !hideImportedTuples || test.expectedStats.FailedTuples > 0 {
@@ -339,17 +335,14 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 				}
 			}
 
-			// Print stats after JSON output
 			fmt.Fprintf(w, "\nImport Summary:\n")
 			fmt.Fprintf(w, "Total tuples processed: %d\n", test.expectedStats.TotalTuples)
 			fmt.Fprintf(w, "Successfully imported: %d\n", test.expectedStats.SuccessfulTuples)
 			fmt.Fprintf(w, "Failed: %d\n", test.expectedStats.FailedTuples)
 
-			// Restore stdout
 			w.Close()
 			os.Stdout = old
 
-			// Read captured output
 			var buf bytes.Buffer
 			io.Copy(&buf, r)
 			output := buf.String()
@@ -366,7 +359,6 @@ func TestWriteTuplesWithImportStats(t *testing.T) {
 			assert.Contains(t, output, fmt.Sprintf("Failed: %d", test.expectedStats.FailedTuples))
 
 			if test.expectedOutput != "" {
-				// Extract JSON part from output (before the summary)
 				jsonPart := output
 				if idx := strings.Index(output, "\nImport Summary"); idx >= 0 {
 					jsonPart = output[:idx]
