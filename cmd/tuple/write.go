@@ -32,6 +32,14 @@ import (
 
 const writeCommandArgumentsCount = 3
 
+var hideImportedTuples bool
+
+type ImportStats struct {
+	TotalTuples      int
+	SuccessfulTuples int
+	FailedTuples     int
+}
+
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
 	Use:   "write",
@@ -133,6 +141,10 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return err //nolint:wrapcheck
 	}
 
+	stats := ImportStats{
+		TotalTuples: len(tuples),
+	}
+
 	writeRequest := client.ClientWriteRequest{
 		Writes: tuples,
 	}
@@ -142,7 +154,29 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return err
 	}
 
-	return output.Display(response) //nolint:wrapcheck
+	stats.SuccessfulTuples = len(response.Successful)
+	stats.FailedTuples = len(response.Failed)
+
+	if !hideImportedTuples {
+		err = output.Display(response)
+		if err != nil {
+			return err
+		}
+	} else if len(response.Failed) > 0 {
+		err = output.Display(map[string]interface{}{
+			"failed": response.Failed,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("\nImport Summary:\n")
+	fmt.Printf("Total tuples processed: %d\n", stats.TotalTuples)
+	fmt.Printf("Successfully imported: %d\n", stats.SuccessfulTuples)
+	fmt.Printf("Failed: %d\n", stats.FailedTuples)
+
+	return nil
 }
 
 func init() {
@@ -152,4 +186,5 @@ func init() {
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
+	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
 }
