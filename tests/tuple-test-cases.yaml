@@ -28,13 +28,9 @@ tests:
     exit-code: 0
     stdout:
       json:
-        failed:
-          - user: "invalid:user"
-            relation: "invalid"
-            object: "invalid:object"
-          - user: "another:invalid"
-            relation: "invalid"
-            object: "invalid:object"
+        failed.0.user: "invalid:user"
+        failed.0.relation: "invalid"
+        failed.0.object: "invalid:object"
         total_count: "3"
         successful_count: "0"
         failed_count: "2"
