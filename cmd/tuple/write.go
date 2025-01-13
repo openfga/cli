@@ -141,10 +141,6 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return err //nolint:wrapcheck
 	}
 
-	stats := ImportStats{
-		TotalTuples: len(tuples),
-	}
-
 	writeRequest := client.ClientWriteRequest{
 		Writes: tuples,
 	}
@@ -164,7 +160,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		outputResponse["failed"] = response.Failed
 	}
 
-	outputResponse["total_count"] = stats.TotalTuples
+	outputResponse["total_count"] = len(tuples)
 	outputResponse["successful_count"] = len(response.Successful)
 	outputResponse["failed_count"] = len(response.Failed)
 
