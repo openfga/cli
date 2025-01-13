@@ -19,9 +19,9 @@ tests:
     exit-code: 0
     stdout:
       json:
-        total_count: 3
-        successful_count: 3
-        failed_count: 0
+        total_count: "3"
+        successful_count: "3"
+        failed_count: "0"
 
   004 - it shows failed tuples and counts:
     command: fga tuple write --file=./tests/fixtures/tuples_with_errors.json --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh)
