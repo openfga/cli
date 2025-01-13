@@ -31,6 +31,6 @@ tests:
         failed.0.user: "invalid:user"
         failed.0.relation: "invalid"
         failed.0.object: "invalid:object"
-        total_count: 3
-        successful_count: 1
-        failed_count: 2
+        total_count: "3"
+        successful_count: "1"
+        failed_count: "2"
