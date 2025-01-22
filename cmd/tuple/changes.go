@@ -32,14 +32,15 @@ import (
 var MaxReadChangesPagesLength = 20
 
 func readChanges(
-	fgaClient client.SdkClient, maxPages int, selectedType string, continuationToken string,
+	fgaClient client.SdkClient, maxPages int, selectedType string, startTime string, continuationToken string,
 ) (*openfga.ReadChangesResponse, error) {
 	changes := []openfga.TupleChange{}
 	pageIndex := 0
 
 	for {
 		body := &client.ClientReadChangesRequest{
-			Type: selectedType,
+			Type:      selectedType,
+			StartTime: startTime,
 		}
 		options := &client.ClientReadChangesOptions{
 			ContinuationToken: &continuationToken,
@@ -70,7 +71,7 @@ var changesCmd = &cobra.Command{
 	Use:     "changes",
 	Short:   "Read Relationship Tuple Changes (Watch)",
 	Long:    "Get a list of relationship tuple changes (Writes and Deletes) across time.",
-	Example: "fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document --continuation-token=MXw=",
+	Example: "fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document --start-time 2022-01-01T00:00:00Z --continuation-token=MXw=",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -89,12 +90,17 @@ var changesCmd = &cobra.Command{
 			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
+		startTime, err := cmd.Flags().GetString("start-time")
+		if err != nil {
+			return fmt.Errorf("failed to get tuple changes due to %w", err)
+		}
+
 		continuationToken, err := cmd.Flags().GetString("continuation-token")
 		if err != nil {
 			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
-		response, err := readChanges(fgaClient, maxPages, selectedType, continuationToken)
+		response, err := readChanges(fgaClient, maxPages, selectedType, startTime, continuationToken)
 		if err != nil {
 			return err
 		}
@@ -105,6 +111,7 @@ var changesCmd = &cobra.Command{
 
 func init() {
 	changesCmd.Flags().String("type", "", "Type to restrict the changes by.")
+	changesCmd.Flags().String("start-time", "", "Time to return changes since.")
 	changesCmd.Flags().Int("max-pages", MaxReadChangesPagesLength, "Max number of pages to get.")
 	changesCmd.Flags().String("continuation-token", "", "Continuation token to start changes from.")
 }
