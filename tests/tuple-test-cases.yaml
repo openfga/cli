@@ -14,3 +14,11 @@ tests:
     stdout:
       json:
         successful.0.user: "user:anne"
+  003 - it shows only counts when hide-imported-tuples is true:
+    command: fga tuple write --file=./tests/fixtures/basic-tuples.json --hide-imported-tuples --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh)
+    exit-code: 0
+    stdout:
+      json:
+        total_count: "1"
+        successful_count: "1"
+        failed_count: "0"
