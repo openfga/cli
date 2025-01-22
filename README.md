@@ -674,6 +674,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
@@ -755,7 +756,29 @@ If using a `json` file, the format should be:
       },
       "reason":"Write validation error ..."
     }
-  ]
+  ],
+  "failed_count": 1,
+  "successful_count": 1,
+  "total_count": 2
+}
+```
+
+###### Response with `--hide-imported-tuples`
+```json5
+{
+  "failed": [
+    {
+      "tuple_key": {
+        "object":"document:roadmap",
+        "relation":"writer",
+        "user":"carl"
+      },
+      "reason":"Write validation error ..."
+    }
+  ],
+  "failed_count": 1,
+  "successful_count": 1,
+  "total_count": 2
 }
 ```
 

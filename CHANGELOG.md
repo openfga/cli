@@ -1,5 +1,10 @@
 # Changelog
 
+#### [0.6.3](https://github.com/openfga/cli/compare/v0.6.2...v0.6.3) (2025-01-22)
+
+Added:
+- Introduced `--hide-imported-tuples` flag to `fga tuple write` to suppress logging of successfully imported tuples (#437) - thanks @Siddhant-K-code
+
 ### [0.6.2](https://github.com/openfga/cli/compare/v0.6.1...v0.6.2) (2024-12-02)
 
 Fixed:
