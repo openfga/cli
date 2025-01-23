@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -35,7 +34,6 @@ func check(
 	object string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
-	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientCheckResponse, error) {
 	body := &client.ClientCheckRequest{
 		User:             user,
@@ -46,14 +44,9 @@ func check(
 	}
 	options := &client.ClientCheckOptions{}
 
-	// Don't set if UNSPECIFIED has been provided, it's the default anyway
-	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
-		options.Consistency = consistency
-	}
-
 	response, err := fgaClient.Check(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
-		return nil, err //nolint:wrapcheck
+		return nil, fmt.Errorf("failed to check due to %w", err)
 	}
 
 	return response, nil
@@ -63,7 +56,7 @@ func check(
 var checkCmd = &cobra.Command{
 	Use:     "check",
 	Short:   "Check",
-	Example: `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}' --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
+	Example: `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}'`, //nolint:lll
 	Long:    "Check if a user has a particular relation with an object.",
 	Args:    cobra.ExactArgs(3), //nolint:mnd
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -83,14 +76,9 @@ var checkCmd = &cobra.Command{
 			return fmt.Errorf("error parsing query context for check: %w", err)
 		}
 
-		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext)
 		if err != nil {
-			return fmt.Errorf("error parsing consistency for check: %w", err)
-		}
-
-		response, err := check(fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency)
-		if err != nil {
-			return fmt.Errorf("check failed: %w", err)
+			return fmt.Errorf("failed to check due to %w", err)
 		}
 
 		return output.Display(*response)
