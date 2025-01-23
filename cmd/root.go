@@ -61,6 +61,7 @@ func init() {
 	// it is still kept here for backward compatibility
 	rootCmd.PersistentFlags().String("server-url", "http://localhost:8080", "OpenFGA API URI e.g. https://api.fga.example:8080") //nolint:lll
 	rootCmd.PersistentFlags().String("api-url", "http://localhost:8080", "OpenFGA API URI e.g. https://api.fga.example:8080")    //nolint:lll
+	_ = rootCmd.PersistentFlags().MarkHidden("server-url")
 
 	rootCmd.PersistentFlags().String("api-token", "", "API Token. Will be sent in as a Bearer in the Authorization header")
 	rootCmd.PersistentFlags().String("api-token-issuer", "", "API Token Issuer. API responsible for issuing the API Token. Used in the Client Credentials flow") //nolint:lll

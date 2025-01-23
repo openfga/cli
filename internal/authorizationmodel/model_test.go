@@ -12,7 +12,7 @@ import (
 const (
 	modelID        = "01GVKXGDCV2SMG6TRE9NMBQ2VG"
 	typeName       = "user"
-	modelCreatedAt = "2023-03-16 00:35:51 +0000 UTC"
+	modelCreatedAt = "2023-03-16 00:35:51.835 +0000 UTC"
 )
 
 func TestReadingInvalidModelFromInvalidJSON(t *testing.T) {
@@ -49,7 +49,7 @@ func TestReadingValidModelFromJSON(t *testing.T) {
 	}
 
 	if model.CreatedAt.String() != modelCreatedAt {
-		t.Errorf("Expected %v to equal %v", model.CreatedAt.String(), modelCreatedAt)
+		t.Errorf("Expected %v to equal %v", model.GetCreatedAt().String(), modelCreatedAt)
 	}
 
 	if model.GetTypeDefinitions()[0].GetType() != typeName {
@@ -100,7 +100,7 @@ func TestDisplayAsJsonWithFields(t *testing.T) {
 	}
 
 	if jsonModel1.GetCreatedAt().String() != modelCreatedAt {
-		t.Errorf("Expected %v to equal %v", jsonModel1.CreatedAt.String(), modelCreatedAt)
+		t.Errorf("Expected %v to equal %v", jsonModel1.GetCreatedAt().String(), modelCreatedAt)
 	}
 
 	if jsonModel1.GetTypeDefinitions()[0].GetType() != typeName {
@@ -117,7 +117,7 @@ func TestDisplayAsJsonWithFields(t *testing.T) {
 	}
 
 	if jsonModel1.GetCreatedAt().String() != modelCreatedAt {
-		t.Errorf("Expected %v to equal %v", jsonModel2.CreatedAt.String(), modelCreatedAt)
+		t.Errorf("Expected %v to equal %v", jsonModel2.GetCreatedAt().String(), modelCreatedAt)
 	}
 
 	if jsonModel2.GetTypeDefinitions() != nil {

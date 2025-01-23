@@ -26,6 +26,7 @@ import (
 
 	"github.com/schollz/progressbar/v3"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
@@ -113,33 +114,77 @@ func importStore(
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
-	maxTuplesPerWrite, maxParallelRequests int,
+	maxTuplesPerWrite, maxParallelRequests int32,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
-	var (
-		response *CreateStoreAndModelResponse
-		err      error
-	)
-
-	if storeID == "" {
-		response, err = createStore(clientConfig, storeData, format, fileName)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create store: %w", err)
-		}
-	} else {
-		response, err = updateStore(clientConfig, fgaClient, storeData, format, storeID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update store: %w", err)
-		}
-	}
-
-	fgaClient, err = clientConfig.GetFgaClient()
+	response, err := createOrUpdateStore(clientConfig, fgaClient, storeData, format, storeID, fileName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize FGA Client: %w", err)
+		return nil, err
 	}
 
-	// Initialize progress bar
-	bar := progressbar.NewOptions(len(storeData.Tuples),
+	if len(storeData.Tuples) == 0 {
+		return response, nil
+	}
+
+	err = importTuples(fgaClient, storeData.Tuples, maxTuplesPerWrite, maxParallelRequests)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+func createOrUpdateStore(
+	clientConfig *fga.ClientConfig,
+	fgaClient client.SdkClient,
+	storeData *storetest.StoreData,
+	format authorizationmodel.ModelFormat,
+	storeID string,
+	fileName string,
+) (*CreateStoreAndModelResponse, error) {
+	if storeID == "" {
+		return createStore(clientConfig, storeData, format, fileName)
+	}
+
+	return updateStore(clientConfig, fgaClient, storeData, format, storeID)
+}
+
+func importTuples(
+	fgaClient client.SdkClient,
+	tuples []openfga.TupleKey,
+	maxTuplesPerWrite, maxParallelRequests int32,
+) error {
+	bar := createProgressBar(len(tuples))
+
+	for index := 0; index < len(tuples); index += int(maxTuplesPerWrite) {
+		end := index + int(maxTuplesPerWrite)
+		if end > len(tuples) {
+			end = len(tuples)
+		}
+
+		writeRequest := client.ClientWriteRequest{
+			Writes: tuples[index:end],
+		}
+		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests); err != nil {
+			return fmt.Errorf("failed to import tuples: %w", err)
+		}
+
+		if err := bar.Add(end - index); err != nil {
+			return fmt.Errorf("failed to update progress bar: %w", err)
+		}
+
+		time.Sleep(progressBarUpdateDelay)
+	}
+
+	if err := bar.Finish(); err != nil {
+		return fmt.Errorf("failed to finish progress bar: %w", err)
+	}
+
+	return nil
+}
+
+func createProgressBar(total int) *progressbar.ProgressBar {
+	return progressbar.NewOptions(total,
 		progressbar.OptionSetWriter(os.Stderr),
 		progressbar.OptionSetDescription("Importing tuples"),
 		progressbar.OptionShowCount(),
@@ -158,34 +203,6 @@ func importStore(
 			BarEnd:        "]",
 		}),
 	)
-
-	for index := 0; index < len(storeData.Tuples); index += maxTuplesPerWrite {
-		end := index + maxTuplesPerWrite
-		if end > len(storeData.Tuples) {
-			end = len(storeData.Tuples)
-		}
-
-		writeRequest := client.ClientWriteRequest{
-			Writes: storeData.Tuples[index:end],
-		}
-		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests); err != nil {
-			return nil, fmt.Errorf("failed to import tuples: %w", err)
-		}
-
-		if err := bar.Add(end - index); err != nil {
-			return nil, fmt.Errorf("failed to update progress bar: %w", err)
-		}
-
-		// Introduce a small delay to smooth out the progress bar rendering
-		time.Sleep(progressBarUpdateDelay)
-	}
-
-	// Ensure progress bar is completed and cleared
-	if err := bar.Finish(); err != nil {
-		return nil, fmt.Errorf("failed to finish progress bar: %w", err)
-	}
-
-	return response, nil
 }
 
 // importCmd represents the get command.
@@ -202,12 +219,12 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to get store-id: %w", err)
 		}
 
-		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
 		if err != nil {
 			return fmt.Errorf("failed to parse max tuples per write: %w", err)
 		}
 
-		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
 		if err != nil {
 			return fmt.Errorf("failed to parse parallel requests: %w", err)
 		}
@@ -245,8 +262,8 @@ var importCmd = &cobra.Command{
 func init() {
 	importCmd.Flags().String("file", "", "File Name. The file should have the store")
 	importCmd.Flags().String("store-id", "", "Store ID")
-	importCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
-	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int32("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	importCmd.Flags().Int32("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 
 	if err := importCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)

@@ -114,7 +114,7 @@ func TestReadChangesSinglePage(t *testing.T) {
 		Object:   "document:doc1",
 	}
 
-	operation := openfga.WRITE
+	operation := openfga.TUPLEOPERATION_WRITE
 	changesTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	changes := []openfga.TupleChange{
@@ -180,7 +180,7 @@ func TestReadChangesMultiPages(t *testing.T) {
 		Object:   "document:doc1",
 	}
 
-	operation1 := openfga.WRITE
+	operation1 := openfga.TUPLEOPERATION_WRITE
 	changesTime1 := time.Date(2009, time.November, 10, 22, 0, 0, 0, time.UTC)
 
 	changes1 := []openfga.TupleChange{
@@ -195,7 +195,7 @@ func TestReadChangesMultiPages(t *testing.T) {
 		ContinuationToken: openfga.PtrString(continuationToken),
 	}
 
-	operation2 := openfga.DELETE
+	operation2 := openfga.TUPLEOPERATION_DELETE
 	changesTime2 := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	changes2 := []openfga.TupleChange{
@@ -278,7 +278,7 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 		Object:   "document:doc1",
 	}
 
-	operation := openfga.WRITE
+	operation := openfga.TUPLEOPERATION_WRITE
 	changesTime := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	changes := []openfga.TupleChange{

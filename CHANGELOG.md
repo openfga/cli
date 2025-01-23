@@ -1,5 +1,32 @@
 # Changelog
 
+#### [0.6.3](https://github.com/openfga/cli/compare/v0.6.2...v0.6.3) (2025-01-22)
+
+Added:
+- Introduced `--hide-imported-tuples` flag to `fga tuple write` to suppress logging of successfully imported tuples (#437) - thanks @Siddhant-K-code
+
+### [0.6.2](https://github.com/openfga/cli/compare/v0.6.1...v0.6.2) (2024-12-02)
+
+Fixed:
+- Fixed issue where `fga store import` would error when importing a store with no tuples (#408) - thanks @ap0calypse8
+- Fixed repetition in `fga query check` error output (#405) - thanks @Siddhant-K-code
+
+### [0.6.1](https://github.com/openfga/cli/compare/v0.6.0...v0.6.1) (2024-09-09)
+
+Fixed:
+- Fixed issue where `fga store import`, `fga tuple write` and `fga tuple delete` could not be ran due to an issue with the `--max-tuples-per-write` and `--max-parallel-requests` options (#389)
+- Fixed an issue where List Users failed test output did not include the returned response (#391)
+
+### [0.6.0](https://github.com/openfga/cli/compare/v0.5.3...v0.6.0) (2024-09-08)
+
+Added:
+- Support usage of consistency parameter (#381)
+
+### [0.5.3](https://github.com/openfga/cli/compare/v0.5.2...v0.5.3) (2024-08-15)
+
+Fixed:
+- Bump OpenFGA to v1.5.9 to fix an issue in the `check` API [CVE-2024-42473](https://github.com/openfga/openfga/security/advisories/GHSA-3f6g-m4hr-59h8)
+
 ### [0.5.2](https://github.com/openfga/cli/compare/v0.5.1...v0.5.2) (2024-08-08)
 
 Fixed:

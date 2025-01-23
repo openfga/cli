@@ -68,7 +68,7 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient, maxTupl
 	// get the tuples
 	maxPages := int(math.Ceil(float64(maxTupleCount) / float64(tuple.DefaultReadPageSize)))
 
-	rawTuples, err := tuple.Read(fgaClient, &client.ClientReadRequest{}, maxPages)
+	rawTuples, err := tuple.Read(fgaClient, &client.ClientReadRequest{}, maxPages, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read tuples: %w", err)
 	}

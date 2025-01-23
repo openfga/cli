@@ -161,7 +161,7 @@ api-url: https://api.us1.fga.dev
 client-id: 4Zb..UYjaHreLKOJuU8
 client-secret: J3...2pBwiauD
 api-audience: https://api.us1.fga.dev/
-api-token-issuer: fga.us.auth0.com
+api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
 ```
 
@@ -674,6 +674,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
@@ -755,7 +756,29 @@ If using a `json` file, the format should be:
       },
       "reason":"Write validation error ..."
     }
-  ]
+  ],
+  "failed_count": 1,
+  "successful_count": 1,
+  "total_count": 2
+}
+```
+
+###### Response with `--hide-imported-tuples`
+```json5
+{
+  "failed": [
+    {
+      "tuple_key": {
+        "object":"document:roadmap",
+        "relation":"writer",
+        "user":"carl"
+      },
+      "reason":"Write validation error ..."
+    }
+  ],
+  "failed_count": 1,
+  "successful_count": 1,
+  "total_count": 2
 }
 ```
 
@@ -981,10 +1004,11 @@ fga query **check** <user> <relation> <object> [--condition] [--contextual-tuple
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional)
 * `--context`: Condition context (optional)
+* `--consistency`: Consistency preference (optional)
 
 ###### Example
 - `fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
-- `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}'`
+- `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}' --consistency="HIGHER_CONSISTENCY"`
 
 
 ###### Response
@@ -1004,10 +1028,11 @@ fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple "
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 * `--context`: Condition context (optional)
+* `--consistency`: Consistency preference (optional)
 
 ###### Example
 - `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
-- `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --context '{"ip_address":"127.0.0.1"}`
+- `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --context '{"ip_address":"127.0.0.1"} --consistency="HIGHER_CONSISTENCY"`
 
 ###### Response
 ```json5
@@ -1029,11 +1054,12 @@ fga query **list-relations** <user> <object> [--relation <relation>]* [--context
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 * `--context`: Condition context (optional)
+* `--consistency`: Consistency preference (optional)
 
 ###### Example
 - `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`
 - `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --contextual-tuple "user:anne can_view folder:product"`
-- `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --context '{"ip_address":"127.0.0.1"}`
+- `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --context '{"ip_address":"127.0.0.1"} --consistency="HIGHER_CONSISTENCY"`
 
 ###### Response
 ```json5
@@ -1052,6 +1078,7 @@ fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<mode
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
+* `--consistency`: Consistency preference (optional)
 
 ###### Example
 `fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`
@@ -1090,11 +1117,12 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
 * `--model-id`: Specifies the model id to target (optional)
 * `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
 * `--context`: Condition context (optional)
+* `--consistency`: Consistency preference (optional)
 
 ###### Example
 - `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user`
 - `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user --contextual-tuple "user:anne can_view folder:product"`
-- `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter group#member --context '{"ip_address":"127.0.0.1"}`
+- `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter group#member --context '{"ip_address":"127.0.0.1"} --consistency="HIGHER_CONSISTENCY"`
 
 ###### Response
 ```json5

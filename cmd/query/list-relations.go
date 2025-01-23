@@ -78,6 +78,7 @@ func listRelations(clientConfig fga.ClientConfig,
 	relations []string,
 	contextualTuples []client.ClientContextualTupleKey,
 	queryContext *map[string]interface{},
+	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListRelationsResponse, error) {
 	if len(relations) < 1 {
 		relationsForType, err := getRelationsForType(clientConfig, fgaClient, object)
@@ -104,6 +105,11 @@ func listRelations(clientConfig fga.ClientConfig,
 	}
 	options := &client.ClientListRelationsOptions{}
 
+	// Don't set if UNSPECIFIED has been provided, it's the default anyway
+	if *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
+		options.Consistency = consistency
+	}
+
 	response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list relations due to %w", err)
@@ -121,8 +127,8 @@ var listRelationsCmd = &cobra.Command{
 	Use:     "list-relations",
 	Short:   "List Relations",
 	Long:    "List relations that a user has with an object.",
-	Example: `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`, //nolint:lll
-	Args:    cobra.ExactArgs(2),                                                                                              //nolint:mnd,lll
+	Example: `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
+	Args:    cobra.ExactArgs(2),                                                                                                                                 //nolint:mnd,lll
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -140,9 +146,23 @@ var listRelationsCmd = &cobra.Command{
 			return fmt.Errorf("error parsing query context for check: %w", err)
 		}
 
+		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
+		if err != nil {
+			return fmt.Errorf("error parsing consistency for check: %w", err)
+		}
+
 		relations, _ := cmd.Flags().GetStringArray("relation")
 
-		response, err := listRelations(clientConfig, fgaClient, args[0], args[1], relations, contextualTuples, queryContext)
+		response, err := listRelations(
+			clientConfig,
+			fgaClient,
+			args[0],
+			args[1],
+			relations,
+			contextualTuples,
+			queryContext,
+			consistency,
+		)
 		if err != nil {
 			return fmt.Errorf("failed to list relations due to %w", err)
 		}
