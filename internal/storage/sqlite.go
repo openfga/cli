@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	openfga "github.com/openfga/go-sdk"
@@ -38,7 +39,19 @@ var GET_TUPLES_COUNT = `
 	SELECT COUNT(*) from import_job where bulk_job_id = ? and status = ?
 `
 
-func NewDatabase() (*sql.DB, error) {
+var UPDATE_TUPLE_STATUS = `
+	UPDATE import_job set status = ?, reason = ? where ROWID = ?
+`
+
+var JOB_STATUS = `
+	SELECT status, count(status) FROM import_job where bulk_job_id = ? group by status 
+`
+
+var GET_ALL_JOBS = `
+	SELECT DISTINCT bulk_job_id FROM import_job
+`
+
+func NewDatabase() (*sql.Conn, error) {
 	dsnURI := "file:cli.db?_journal_mode=WAL"
 	db, err := sql.Open("sqlite", dsnURI)
 	if err != nil {
@@ -48,10 +61,11 @@ func NewDatabase() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	conn, err := db.Conn(context.Background())
+	return conn, nil
 }
 
-func InsertTuples(db *sql.DB, bulkJobID string, storeID string, tuples []client.ClientTupleKey) error {
+func InsertTuples(db *sql.Conn, bulkJobID string, storeID string, tuples []client.ClientTupleKey) error {
 	valueStrings := make([]string, 0, len(tuples))
 	valueArgs := make([]interface{}, 0, len(tuples)*10)
 	for _, tuple := range tuples {
@@ -77,7 +91,7 @@ func InsertTuples(db *sql.DB, bulkJobID string, storeID string, tuples []client.
 	}
 
 	stmt := fmt.Sprintf(INSERT_TUPLES, strings.Join(valueStrings, ","))
-	_, err := db.Exec(stmt, valueArgs...)
+	_, err := db.ExecContext(context.Background(), stmt, valueArgs...)
 	if err != nil {
 		return err
 	}
@@ -85,8 +99,8 @@ func InsertTuples(db *sql.DB, bulkJobID string, storeID string, tuples []client.
 	return nil
 }
 
-func GetRemainingTuples(db *sql.DB, bulkJobID string, count int) ([]TuplesResult, error) {
-	row, err := db.Query(READ_TUPLES, bulkJobID, NOT_INSERTED, count)
+func GetRemainingTuples(db *sql.Conn, bulkJobID string, count int) ([]TuplesResult, error) {
+	row, err := db.QueryContext(context.Background(), READ_TUPLES, bulkJobID, NOT_INSERTED, count)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +130,6 @@ func GetRemainingTuples(db *sql.DB, bulkJobID string, count int) ([]TuplesResult
 		}
 		tuples = append(tuples, TuplesResult{Rowid: rowid, Tuple: result})
 	}
-	fmt.Printf("%+v", tuples)
 	return tuples, nil
 }
 
@@ -125,19 +138,65 @@ type TuplesResult struct {
 	Rowid int64
 }
 
-func GetTotalAndRemainingTuples(db *sql.DB, bulkJobID string) (int64, int64, error) {
+func GetTotalAndRemainingTuples(db *sql.Conn, bulkJobID string) (int64, int64, error) {
 	var notInsertedCount, insertedCount int64
-	row, err := db.Query(GET_TUPLES_COUNT, bulkJobID, NOT_INSERTED)
+	row, err := db.QueryContext(context.Background(), GET_TUPLES_COUNT, bulkJobID, NOT_INSERTED)
 	if err != nil {
 		return 0, 0, err
 	}
 	row.Next()
 	row.Scan(&notInsertedCount)
-	row, err = db.Query(GET_TUPLES_COUNT, bulkJobID, INSERTED)
+	row, err = db.QueryContext(context.Background(), GET_TUPLES_COUNT, bulkJobID, INSERTED)
 	if err != nil {
 		return 0, 0, err
 	}
 	row.Next()
 	row.Scan(&insertedCount)
 	return notInsertedCount, insertedCount, nil
+}
+
+func UpdateStatus(db *sql.Conn, rowid int64, status int, reason string) error {
+	_, err := db.ExecContext(context.Background(), UPDATE_TUPLE_STATUS, status, reason, rowid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetSummary(db *sql.Conn, bulkJobID string) (int, int, error) {
+	var success, failed, status, result int
+	row, err := db.QueryContext(context.Background(), JOB_STATUS, bulkJobID)
+	if err != nil {
+		return 0, 0, err
+	}
+	for row.Next() {
+		err = row.Scan(&status, &result)
+		if err != nil {
+			return 0, 0, err
+		}
+		switch status {
+		case NOT_INSERTED:
+			failed = result
+			break
+		case INSERTED:
+			success = result
+			break
+		}
+	}
+
+	return success, failed, nil
+}
+
+func GetAllJobs(db *sql.Conn) ([]string, error) {
+	results := make([]string, 0)
+	var result string
+	row, err := db.QueryContext(context.Background(), GET_ALL_JOBS)
+	if err != nil {
+		return nil, err
+	}
+	for row.Next() {
+		row.Scan(&result)
+		results = append(results, result)
+	}
+	return results, nil
 }

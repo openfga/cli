@@ -17,6 +17,8 @@ limitations under the License.
 package _import
 
 import (
+	"fmt"
+	"github.com/openfga/cli/internal/storage"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
 )
@@ -27,6 +29,19 @@ var statusCmd = &cobra.Command{
 	Short: "Check the status of the import job",
 	Long:  "The status command is used to check if the import job is running.",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		bulkJobID, err := cmd.Flags().GetString("job-id")
+		if err != nil {
+			return fmt.Errorf("failed to get job-id: %w", err)
+		}
+		conn, err := storage.NewDatabase()
+		if err != nil {
+			return err
+		}
+		success, failed, err := storage.GetSummary(conn, bulkJobID)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("The status for Job ID - %s: Success - %d, Failed - %d", bulkJobID, success, failed)
 		return nil
 	},
 }

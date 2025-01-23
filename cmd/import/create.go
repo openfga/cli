@@ -17,22 +17,15 @@ limitations under the License.
 package _import
 
 import (
-	"context"
 	"fmt"
-	"github.com/oklog/ulid/v2"
 	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/job"
 	"github.com/openfga/cli/internal/storage"
 	"github.com/openfga/cli/internal/tuplefile"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
-	"sync/atomic"
 )
-
-type CreateImportJobResponse struct {
-	JobId string `json:"job_id"`
-}
 
 // ImportJobTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
 // either writes or deletes.
@@ -43,60 +36,28 @@ func ImportJobTuples(
 	fgaClient client.SdkClient,
 	tuples []client.ClientTupleKey,
 	storeID string,
-) (*CreateImportJobResponse, error) {
-	bulkJobID := ulid.Make().String()
-	db, err := storage.NewDatabase()
+	requestRate int,
+	maxRequests int,
+	rampIntervalInSeconds int64,
+) error {
+	conn, err := storage.NewDatabase()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	err = storage.InsertTuples(db, bulkJobID, storeID, tuples)
+	bulkJobID, err := job.CreateJob(conn, storeID, tuples)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	fmt.Printf("Job created successfully - %s\n", bulkJobID)
 
-	notInsertedTuplesCount, insertedTuplesCount, err := storage.GetTotalAndRemainingTuples(db, bulkJobID)
-	totalTuplesCount := insertedTuplesCount + notInsertedTuplesCount
+	err = job.ImportTuples(conn, bulkJobID, fgaClient, requestRate, maxRequests, rampIntervalInSeconds)
 	if err != nil {
-		return nil, err
-	}
-	completedTuples := atomic.Int64{}
-	completedTuples.Store(insertedTuplesCount)
-
-	for i := completedTuples; i.Load() < totalTuplesCount; {
-		remainingTuples, err := storage.GetRemainingTuples(db, bulkJobID, 3)
-		if err != nil {
-			return nil, err
-		}
-		for _, tuple := range remainingTuples {
-			go func() {
-				_, err = fgaClient.
-					WriteTuples(context.Background()).
-					Body(client.ClientWriteTuplesBody{tuple.Tuple}).
-					Options(client.ClientWriteOptions{}).
-					Execute()
-				if err != nil {
-					err.Error()
-				} else {
-					println("Success")
-				}
-				completedTuples.Add(1)
-			}()
-		}
+		return err
 	}
 
-	// Write 1 tuple per request
-	// Start with 20 requests per second
-	// Slowly ramp up - find ramp up logic
-	// Each time a request is successful we have to write it to a file
-	// --Resuming
-	// If resuming, we can ignore all the successful writes, start with failed writes
-	// --Failed
-	// Once fully completed, we can show a summary
-	// No. of successful writes, number of failed writes
-	// --While executing we can show
-	// Percentage completed, current RPS, expected time to complete
-	return &CreateImportJobResponse{JobId: bulkJobID}, nil
+	success, failed, err := storage.GetSummary(conn, bulkJobID)
+	fmt.Printf("The status for Job ID - %s: Success - %d, Failed - %d", bulkJobID, success, failed)
+	return nil
 }
 
 // createCmd represents the import command.
@@ -123,18 +84,33 @@ var createCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 
+		initialRequestRate, err := cmd.Flags().GetInt("initial-request-rate")
+		if initialRequestRate <= 0 || err != nil {
+			initialRequestRate = 20
+		}
+
+		maxRequests, err := cmd.Flags().GetInt("max-requests")
+		if maxRequests <= 0 || err != nil {
+			maxRequests = 2000
+		}
+
+		rampInterval, err := cmd.Flags().GetInt64("ramp-interval-seconds")
+		if rampInterval <= 0 || err != nil {
+			rampInterval = 120
+		}
+
 		var tuples []client.ClientTupleKey
 		tuples, err = tuplefile.ReadTupleFile(fileName)
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
 
-		result, err := ImportJobTuples(fgaClient, tuples, storeID)
+		err = ImportJobTuples(fgaClient, tuples, storeID, initialRequestRate, maxRequests, rampInterval)
 		if err != nil {
 			return err
 		}
 
-		return output.Display(*result)
+		return nil
 	},
 }
 

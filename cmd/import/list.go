@@ -17,6 +17,8 @@ limitations under the License.
 package _import
 
 import (
+	"fmt"
+	"github.com/openfga/cli/internal/storage"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
 )
@@ -27,9 +29,17 @@ var listCmd = &cobra.Command{
 	Short: "List all the import jobs",
 	Long:  "List all the import jobs",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		conn, err := storage.NewDatabase()
+		if err != nil {
+			return err
+		}
+		results, err := storage.GetAllJobs(conn)
+		if err != nil {
+			return err
+		}
+		for _, result := range results {
+			fmt.Println(result)
+		}
 		return nil
 	},
-}
-
-func init() {
 }

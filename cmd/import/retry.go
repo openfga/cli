@@ -17,6 +17,10 @@ limitations under the License.
 package _import
 
 import (
+	"fmt"
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/job"
+	"github.com/openfga/cli/internal/storage"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
 )
@@ -27,6 +31,40 @@ var retryCmd = &cobra.Command{
 	Short: "Retry a import job",
 	Long:  "Retry a import job",
 	RunE: func(cmd *cobra.Command, _ []string) error {
+		clientConfig := cmdutils.GetClientConfig(cmd)
+		conn, err := storage.NewDatabase()
+		bulkJobID, err := cmd.Flags().GetString("job-id")
+		if err != nil {
+			return fmt.Errorf("failed to get job-id: %w", err)
+		}
+
+		fgaClient, err := clientConfig.GetFgaClient()
+		if err != nil {
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		}
+
+		initialRequestRate, err := cmd.Flags().GetInt("initial-request-rate")
+		if initialRequestRate <= 0 || err != nil {
+			initialRequestRate = 20
+		}
+
+		maxRequests, err := cmd.Flags().GetInt("max-requests")
+		if maxRequests <= 0 || err != nil {
+			maxRequests = 2000
+		}
+
+		rampInterval, err := cmd.Flags().GetInt64("ramp-interval-seconds")
+		if rampInterval <= 0 || err != nil {
+			rampInterval = 120
+		}
+
+		err = job.ImportTuples(conn, bulkJobID, fgaClient, initialRequestRate, maxRequests, rampInterval)
+		if err != nil {
+			return err
+		}
+
+		success, failed, err := storage.GetSummary(conn, bulkJobID)
+		fmt.Printf("The status for Job ID - %s: Success - %d, Failed - %d", bulkJobID, success, failed)
 		return nil
 	},
 }
