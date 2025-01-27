@@ -130,9 +130,11 @@ func importStore(
 		}
 	}
 
-	err = importAssertions(fgaClient, storeData.Tests, response.Store.Id, response.Model.AuthorizationModelId)
-	if err != nil {
-		return nil, err
+	if len(storeData.Tests) != 0 && response.Model != nil {
+		err = importAssertions(fgaClient, storeData.Tests, response.Store.Id, response.Model.AuthorizationModelId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return response, nil
@@ -196,17 +198,21 @@ func importAssertions(
 	var assertions []client.ClientAssertion
 
 	for _, modelTest := range modelTests {
-		checkAssertions := getCheckAssertions(modelTest.Check)
-		assertions = append(assertions, checkAssertions...)
+		if len(modelTest.Check) > 0 {
+			checkAssertions := getCheckAssertions(modelTest.Check)
+			assertions = append(assertions, checkAssertions...)
+		}
 	}
 
-	writeOptions := client.ClientWriteAssertionsOptions{
-		AuthorizationModelId: &modelId,
-		StoreId:              &storeId,
-	}
+	if len(assertions) > 0 {
+		writeOptions := client.ClientWriteAssertionsOptions{
+			AuthorizationModelId: &modelId,
+			StoreId:              &storeId,
+		}
 
-	if _, err := fgaClient.WriteAssertions(context.Background()).Body(assertions).Options(writeOptions).Execute(); err != nil {
-		return fmt.Errorf("failed to import assertions: %w", err)
+		if _, err := fgaClient.WriteAssertions(context.Background()).Body(assertions).Options(writeOptions).Execute(); err != nil {
+			return fmt.Errorf("failed to import assertions: %w", err)
+		}
 	}
 	return nil
 }
