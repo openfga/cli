@@ -67,7 +67,7 @@ func CreateStoreWithModel(
 
 	err = fgaClient.SetStoreId(response.Store.Id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to set store ID: %w", err)
 	}
 
 	if inputModel != "" {

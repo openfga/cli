@@ -192,8 +192,8 @@ func importTuples(
 func importAssertions(
 	fgaClient client.SdkClient,
 	modelTests []storetest.ModelTest,
-	storeId string,
-	modelId string,
+	storeID string,
+	modelID string,
 ) error {
 	var assertions []client.ClientAssertion
 
@@ -206,14 +206,16 @@ func importAssertions(
 
 	if len(assertions) > 0 {
 		writeOptions := client.ClientWriteAssertionsOptions{
-			AuthorizationModelId: &modelId,
-			StoreId:              &storeId,
+			AuthorizationModelId: &modelID,
+			StoreId:              &storeID,
 		}
 
-		if _, err := fgaClient.WriteAssertions(context.Background()).Body(assertions).Options(writeOptions).Execute(); err != nil {
+		_, err := fgaClient.WriteAssertions(context.Background()).Body(assertions).Options(writeOptions).Execute()
+		if err != nil {
 			return fmt.Errorf("failed to import assertions: %w", err)
 		}
 	}
+
 	return nil
 }
 
