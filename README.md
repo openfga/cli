@@ -655,7 +655,7 @@ type document
 | [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id`           | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
 | [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
 | [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id`           | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                      |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--continuation-token`,           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=`                   |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--start-time`, `--continuation-token`,           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --start-time=2022-01-01T00:00:00Z --continuation-token=M3w=`                   |
 | [Import Relationship Tuples](#import-relationship-tuples)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json` |
 
 ##### Write Relationship Tuples
@@ -896,6 +896,7 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--type`: Restrict to a specific type (optional)
+* `--start-time`: Return changes since a specified time (optional)
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 * `--continuation-token`: Continuation token to start changes from
 
