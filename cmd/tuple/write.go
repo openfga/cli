@@ -31,7 +31,10 @@ import (
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
-const writeCommandArgumentsCount = 3
+const (
+	writeCommandArgumentsCount = 3
+	secondsInMinute            = 60
+)
 
 var hideImportedTuples bool
 
@@ -119,6 +122,7 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 
 func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error {
 	startTime := time.Now()
+
 	fileName, err := flags.GetString("file")
 	if err != nil {
 		return fmt.Errorf("failed to parse file name: %w", err)
@@ -154,7 +158,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 
 	duration := time.Since(startTime)
 	minutes := int(duration.Minutes())
-	seconds := int(duration.Seconds()) % 60
+	seconds := int(duration.Seconds()) % secondsInMinute
 	timeSpent := fmt.Sprintf("%dm %ds", minutes, seconds)
 
 	outputResponse := make(map[string]interface{})

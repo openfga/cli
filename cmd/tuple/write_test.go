@@ -170,6 +170,7 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 				},
 			},
 			verifyOutput: func(t *testing.T, output map[string]interface{}) {
+				t.Helper()
 				timeSpent, ok := output["time_spent"].(string)
 				require.True(t, ok, "time_spent should be a string")
 				require.Regexp(t, `^\d+m \d+s$`, timeSpent, "time_spent should be in format 'XXm YYs'")
