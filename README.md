@@ -896,7 +896,7 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--type`: Restrict to a specific type (optional)
-* `--start-time`: Return changes since a specified time
+* `--start-time`: Return changes since a specified time (optional)
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 * `--continuation-token`: Continuation token to start changes from
 
