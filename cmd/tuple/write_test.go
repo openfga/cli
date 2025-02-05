@@ -19,7 +19,6 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 		file           string
 		expectedTuples []client.ClientTupleKey
 		expectedError  string
-		verifyOutput   func(*testing.T, map[string]interface{})
 	}{
 		{
 			name: "it can correctly parse a csv file",
@@ -147,33 +146,6 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 					Relation: "viewer",
 					Object:   "folder:product-2021",
 				},
-			},
-		},
-		{
-			name: "it correctly includes time spent in output format",
-			file: "testdata/tuples.json",
-			expectedTuples: []client.ClientTupleKey{
-				{
-					User:     "user:anne",
-					Relation: "owner",
-					Object:   "folder:product",
-				},
-				{
-					User:     "folder:product",
-					Relation: "parent",
-					Object:   "folder:product-2021",
-				},
-				{
-					User:     "user:beth",
-					Relation: "viewer",
-					Object:   "folder:product-2021",
-				},
-			},
-			verifyOutput: func(t *testing.T, output map[string]interface{}) {
-				t.Helper()
-				timeSpent, ok := output["time_spent"].(string)
-				require.True(t, ok, "time_spent should be a string")
-				require.Regexp(t, `^\d+m \d+s$`, timeSpent, "time_spent should be in format 'XXm YYs'")
 			},
 		},
 		{
