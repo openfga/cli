@@ -41,9 +41,7 @@ func readChanges(
 	var startTimeObj *time.Time
 
 	if startTime != "" {
-		layout := "2006-01-02T15:04:05Z"
-
-		parsedTime, err := time.Parse(layout, startTime)
+		parsedTime, err := time.Parse(time.RFC3339, startTime)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse startTime: %w", err)
 		}

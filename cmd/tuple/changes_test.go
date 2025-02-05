@@ -102,8 +102,6 @@ func TestReadChangesEmpty(t *testing.T) {
 func TestReadChangesSinglePage(t *testing.T) {
 	t.Parallel()
 
-	const layout = "2006-01-02T15:04:05Z"
-
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
@@ -141,7 +139,7 @@ func TestReadChangesSinglePage(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
-	sTime, err := time.Parse(layout, "2022-01-01T00:00:00Z")
+	sTime, err := time.Parse(time.RFC3339, "2022-01-01T00:00:00Z")
 	if err != nil {
 		t.Error(err)
 	}
@@ -173,8 +171,6 @@ func TestReadChangesSinglePage(t *testing.T) {
 
 func TestReadChangesMultiPages(t *testing.T) {
 	t.Parallel()
-
-	const layout = "2006-01-02T15:04:05Z"
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -242,7 +238,7 @@ func TestReadChangesMultiPages(t *testing.T) {
 	mockBody1 := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 	mockBody2 := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
-	sTime, err := time.Parse(layout, "2022-01-01T00:00:00Z")
+	sTime, err := time.Parse(time.RFC3339, "2022-01-01T00:00:00Z")
 	if err != nil {
 		t.Error(err)
 	}
@@ -282,8 +278,6 @@ func TestReadChangesMultiPages(t *testing.T) {
 func TestReadChangesMultiPagesLimit(t *testing.T) {
 	t.Parallel()
 
-	const layout = "2006-01-02T15:04:05Z"
-
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
@@ -321,7 +315,7 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 
 	mockBody := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
 
-	sTime, err := time.Parse(layout, "2022-01-01T00:00:00Z")
+	sTime, err := time.Parse(time.RFC3339, "2022-01-01T00:00:00Z")
 	if err != nil {
 		t.Error(err)
 	}
