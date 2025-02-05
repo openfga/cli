@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -117,6 +118,7 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 }
 
 func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error {
+	startTime := time.Now()
 	fileName, err := flags.GetString("file")
 	if err != nil {
 		return fmt.Errorf("failed to parse file name: %w", err)
@@ -150,6 +152,11 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return err
 	}
 
+	duration := time.Since(startTime)
+	minutes := int(duration.Minutes())
+	seconds := int(duration.Seconds()) % 60
+	timeSpent := fmt.Sprintf("%dm %ds", minutes, seconds)
+
 	outputResponse := make(map[string]interface{})
 
 	if !hideImportedTuples && len(response.Successful) > 0 {
@@ -163,6 +170,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 	outputResponse["total_count"] = len(tuples)
 	outputResponse["successful_count"] = len(response.Successful)
 	outputResponse["failed_count"] = len(response.Failed)
+	outputResponse["time_spent"] = timeSpent
 
 	return output.Display(outputResponse) //nolint:wrapcheck
 }

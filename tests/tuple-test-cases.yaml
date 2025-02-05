@@ -22,3 +22,4 @@ tests:
         total_count: "1"
         successful_count: "1"
         failed_count: "0"
+        time_spent: "~"
