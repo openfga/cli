@@ -132,8 +132,6 @@ func TestImportStore(t *testing.T) {
 func TestUpdateStore(t *testing.T) {
 	t.Parallel()
 
-	clientConfig := fga.ClientConfig{}
-
 	expectedAssertions := []client.ClientAssertion{{
 		User:        "user:anne",
 		Relation:    "reader",
@@ -201,6 +199,8 @@ func TestUpdateStore(t *testing.T) {
 	for _, test := range importStoreTests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
+
+			clientConfig := fga.ClientConfig{}
 
 			mockCtrl := gomock.NewController(t)
 			defer mockCtrl.Finish()
