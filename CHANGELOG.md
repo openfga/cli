@@ -1,5 +1,9 @@
 # Changelog
 
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.3...HEAD) (2025-02-06)
+Added:
+- Support for start-time parameter in changes command (#443) 
+
 #### [0.6.3](https://github.com/openfga/cli/compare/v0.6.2...v0.6.3) (2025-01-22)
 
 Added:
