@@ -31,10 +31,7 @@ import (
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
-const (
-	writeCommandArgumentsCount = 3
-	secondsInMinute            = 60
-)
+const writeCommandArgumentsCount = 3
 
 var hideImportedTuples bool
 
@@ -157,9 +154,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 	}
 
 	duration := time.Since(startTime)
-	minutes := int(duration.Minutes())
-	seconds := int(duration.Seconds()) % secondsInMinute
-	timeSpent := fmt.Sprintf("%dm %ds", minutes, seconds)
+	timeSpent := duration.String()
 
 	outputResponse := make(map[string]interface{})
 
