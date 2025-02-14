@@ -27,7 +27,6 @@ import (
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -48,16 +47,11 @@ func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateS
 }
 
 func CreateStoreWithModel(
-	clientConfig fga.ClientConfig,
+	fgaClient client.SdkClient,
 	storeName string,
 	inputModel string,
 	inputFormat authorizationmodel.ModelFormat,
 ) (*CreateStoreAndModelResponse, error) {
-	fgaClient, err := clientConfig.GetFgaClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
-	}
-
 	response := CreateStoreAndModelResponse{}
 
 	if storeName == "" {
@@ -73,7 +67,7 @@ func CreateStoreWithModel(
 
 	err = fgaClient.SetStoreId(response.Store.Id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck
+		return nil, fmt.Errorf("failed to set store ID: %w", err)
 	}
 
 	if inputModel != "" {
@@ -109,6 +103,10 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
+		fgaClient, err := clientConfig.GetFgaClient()
+		if err != nil {
+			return fmt.Errorf("failed to initialize FGA Client: %w", err)
+		}
 
 		var inputModel string
 		if err := authorizationmodel.ReadFromInputFileOrArg(
@@ -122,7 +120,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 			return err //nolint:wrapcheck
 		}
 
-		response, err := CreateStoreWithModel(clientConfig, storeName, inputModel, createModelInputFormat)
+		response, err := CreateStoreWithModel(fgaClient, storeName, inputModel, createModelInputFormat)
 		if err != nil {
 			return err
 		}
