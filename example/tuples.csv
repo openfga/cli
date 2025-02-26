@@ -1,0 +1,4 @@
+user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context
+user,anne,,owner,folder,product,inOfficeIP,
+folder,product,,parent,folder,product-2021,inOfficeIP,"{""ip_addr"":""10.0.0.1""}"
+team,fga,member,viewer,folder,product-2021,,
