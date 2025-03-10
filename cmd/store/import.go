@@ -31,12 +31,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/cmd/model"
-	"github.com/openfga/cli/cmd/tuple"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
+	"github.com/openfga/cli/internal/tuple"
 )
 
 const (
@@ -115,7 +115,7 @@ func importStore(
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
-	maxTuplesPerWrite, maxParallelRequests int32,
+	minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests int,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
 	response, err := createOrUpdateStore(clientConfig, fgaClient, storeData, format, storeID, fileName)
@@ -124,7 +124,7 @@ func importStore(
 	}
 
 	if len(storeData.Tuples) != 0 {
-		err = importTuples(fgaClient, storeData.Tuples, maxTuplesPerWrite, maxParallelRequests)
+		err = importTuples(fgaClient, storeData.Tuples, minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests)
 		if err != nil {
 			return nil, err
 		}
@@ -158,12 +158,12 @@ func createOrUpdateStore(
 func importTuples(
 	fgaClient client.SdkClient,
 	tuples []openfga.TupleKey,
-	maxTuplesPerWrite, maxParallelRequests int32,
+	minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests int,
 ) error {
 	bar := createProgressBar(len(tuples))
 
-	for index := 0; index < len(tuples); index += int(maxTuplesPerWrite) {
-		end := index + int(maxTuplesPerWrite)
+	for index := 0; index < len(tuples); index += maxTuplesPerWrite {
+		end := index + maxTuplesPerWrite
 		if end > len(tuples) {
 			end = len(tuples)
 		}
@@ -171,7 +171,11 @@ func importTuples(
 		writeRequest := client.ClientWriteRequest{
 			Writes: tuples[index:end],
 		}
-		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests); err != nil {
+
+		if _, err := tuple.ImportTuples(
+			context.TODO(), fgaClient,
+			minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
+			writeRequest); err != nil {
 			return fmt.Errorf("failed to import tuples: %w", err)
 		}
 
@@ -272,14 +276,29 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to get store-id: %w", err)
 		}
 
-		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 		if err != nil {
-			return fmt.Errorf("failed to parse max tuples per write: %w", err)
+			return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
 		}
 
-		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
 		if err != nil {
-			return fmt.Errorf("failed to parse parallel requests: %w", err)
+			return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
+		}
+
+		minRPS, err := cmd.Flags().GetInt("min-rps")
+		if err != nil {
+			return fmt.Errorf("failed to parse min-rps due to %w", err)
+		}
+
+		maxRPS, err := cmd.Flags().GetInt("max-rps")
+		if err != nil {
+			return fmt.Errorf("failed to parse max-rps due to %w", err)
+		}
+
+		rampUpPeriodInSec, err := cmd.Flags().GetInt("rampup-period-in-sec")
+		if err != nil {
+			return fmt.Errorf("failed to parse parallel requests due to %w", err)
 		}
 
 		fileName, err := cmd.Flags().GetString("file")
@@ -298,7 +317,7 @@ var importCmd = &cobra.Command{
 		}
 
 		createStoreAndModelResponse, err := importStore(&clientConfig, fgaClient, storeData, format,
-			storeID, maxTuplesPerWrite, maxParallelRequests, fileName)
+			storeID, minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests, fileName)
 		if err != nil {
 			return fmt.Errorf("failed to import store: %w", err)
 		}
@@ -315,8 +334,17 @@ var importCmd = &cobra.Command{
 func init() {
 	importCmd.Flags().String("file", "", "File Name. The file should have the store")
 	importCmd.Flags().String("store-id", "", "Store ID")
-	importCmd.Flags().Int32("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
-	importCmd.Flags().Int32("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+
+	importCmd.Flags().Int("min-rps", 0, "The initial requests per second.")
+	importCmd.Flags().Int("max-rps", 0, "The maximum requests per second.")
+	importCmd.Flags().Int("rampup-period-in-sec", 0, "The period over which to ramp up the request rate.")
+	importCmd.MarkFlagsRequiredTogether(
+		"min-rps",
+		"max-rps",
+		"rampup-period-in-sec",
+	)
 
 	if err := importCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
