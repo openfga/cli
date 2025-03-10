@@ -63,13 +63,24 @@ var writeCmd = &cobra.Command{
 		"For example, a valid CSV file might start with a row like:\n" +
 		"user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context\n\n" +
 		"This command is flexible in accepting data inputs, making it easier to add multiple " +
-		"relationship tuples in various convenient formats.",
+		"relationship tuples in various convenient formats.\n\n" +
+		"Rate Limiting:\n" +
+		"You can control the rate at which tuples are written using the following flags:\n" +
+		"- min-rps: Minimum requests per second for writes\n" +
+		"- max-rps: Maximum requests per second for writes\n" +
+		"- rampup-period-in-sec: Period in seconds to ramp up from min-rps to max-rps\n\n" +
+		"If any of these flags are provided, all three must be provided with positive values. " +
+		"The command will start writing tuples at the min-rps rate and gradually increase to " +
+		"max-rps over the specified rampup period. If all tuples are written before the rampup " +
+		"period ends, the command will exit. If the rampup period ends and there are still tuples " +
+		"to write, the command will continue writing at the max-rps rate until all tuples are written.",
 	Args: ExactArgsOrFlag(writeCommandArgumentsCount, "file"),
 	Example: `  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
-  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv`,
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json --min-rps=10 --max-rps=50 --rampup-period-in-sec=60`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -139,6 +150,33 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return fmt.Errorf("failed to parse parallel requests: %w", err)
 	}
 
+	// Extract RPS control parameters
+	minRPS, err := flags.GetInt32("min-rps")
+	if err != nil {
+		return fmt.Errorf("failed to parse min-rps: %w", err)
+	}
+
+	maxRPS, err := flags.GetInt32("max-rps")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-rps: %w", err)
+	}
+
+	rampupPeriod, err := flags.GetInt32("rampup-period-in-sec")
+	if err != nil {
+		return fmt.Errorf("failed to parse rampup-period-in-sec: %w", err)
+	}
+
+	// Validate RPS parameters - if one is provided, all three should be required
+	if minRPS > 0 || maxRPS > 0 || rampupPeriod > 0 {
+		if minRPS <= 0 || maxRPS <= 0 || rampupPeriod <= 0 {
+			return errors.New("if any of min-rps, max-rps, or rampup-period-in-sec is provided, all three must be provided with positive values") //nolint:goerr113
+		}
+
+		if minRPS > maxRPS {
+			return errors.New("min-rps cannot be greater than max-rps") //nolint:goerr113
+		}
+	}
+
 	tuples, err := tuplefile.ReadTupleFile(fileName)
 	if err != nil {
 		return err //nolint:wrapcheck
@@ -148,7 +186,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		Writes: tuples,
 	}
 
-	response, err := ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
+	response, err := ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriod)
 	if err != nil {
 		return err
 	}
@@ -182,4 +220,7 @@ func init() {
 	writeCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
 	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
+	writeCmd.Flags().Int32("min-rps", 0, "Minimum requests per second for writes")
+	writeCmd.Flags().Int32("max-rps", 0, "Maximum requests per second for writes")
+	writeCmd.Flags().Int32("rampup-period-in-sec", 0, "Period in seconds to ramp up from min-rps to max-rps")
 }

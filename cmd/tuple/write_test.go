@@ -2,13 +2,18 @@ package tuple
 
 import (
 	"testing"
+	"time"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/mocks"
 	"github.com/openfga/cli/internal/tuplefile"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
@@ -222,4 +227,70 @@ func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
 			assert.Equal(t, test.expectedTuples, actualTuples)
 		})
 	}
+}
+
+func TestWriteTuplesWithRateLimit(t *testing.T) {
+	// Create a mock FGA client
+	mockClient := &mocks.SdkClient{}
+
+	// Create a test write request with multiple tuples
+	tuples := []client.ClientTupleKey{
+		{
+			User:     "user:anne",
+			Relation: "can_view",
+			Object:   "document:roadmap",
+		},
+		{
+			User:     "user:bob",
+			Relation: "can_view",
+			Object:   "document:roadmap",
+		},
+		{
+			User:     "user:charlie",
+			Relation: "can_view",
+			Object:   "document:roadmap",
+		},
+	}
+
+	writeRequest := client.ClientWriteRequest{
+		Writes: tuples,
+	}
+
+	// Set up the mock client to return a successful response for each tuple
+	mockWriteAPI := &mocks.WriteAPI{}
+	mockBodyAPI := &mocks.WriteBodyAPI{}
+	mockOptionsAPI := &mocks.WriteOptionsAPI{}
+	mockExecuteAPI := &mocks.WriteExecuteAPI{}
+
+	mockClient.On("Write", mock.Anything).Return(mockWriteAPI)
+	mockWriteAPI.On("Body", mock.Anything).Return(mockBodyAPI)
+	mockBodyAPI.On("Options", mock.Anything).Return(mockOptionsAPI)
+	mockOptionsAPI.On("Execute").Return(&client.ClientWriteResponse{
+		Writes: []client.ClientWriteRequestWriteResponse{
+			{
+				TupleKey: tuples[0],
+				Status:   client.SUCCESS,
+			},
+		},
+	}, nil)
+
+	// Call ImportTuples with rate limiting
+	minRPS := int32(10)
+	maxRPS := int32(20)
+	rampupPeriod := int32(1) // 1 second for faster test
+	maxTuplesPerWrite := int32(1)
+	maxParallelRequests := int32(1)
+
+	startTime := time.Now()
+	response, err := ImportTuples(mockClient, writeRequest, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriod)
+	duration := time.Since(startTime)
+
+	// Verify the results
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+
+	// The test should take at least 1/maxRPS * len(tuples) seconds
+	// but we'll be lenient in the test to avoid flakiness
+	minExpectedDuration := time.Second / time.Duration(maxRPS) * time.Duration(len(tuples)) / 2
+	assert.True(t, duration >= minExpectedDuration, "Expected duration to be at least %v, but got %v", minExpectedDuration, duration)
 }
