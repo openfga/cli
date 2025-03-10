@@ -20,6 +20,7 @@ package fga
 import (
 	"strings"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
 
@@ -75,6 +76,10 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 		AuthorizationModelId: c.AuthorizationModelID,
 		Credentials:          c.getCredentials(),
 		UserAgent:            userAgent,
+		RetryParams: &openfga.RetryParams{
+			MaxRetry:    15,
+			MinWaitInMs: 500,
+		},
 	}
 }
 
