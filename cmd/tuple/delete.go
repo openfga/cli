@@ -17,7 +17,6 @@ limitations under the License.
 package tuple
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -60,7 +59,7 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to parse input tuples due to %w", err)
 			}
 
-			// Convert ClientTupleKeyWithoutCondition to ClientTupleKey
+			// Convert ClientTupleKey to ClientTupleKeyWithoutCondition
 			tuples := make([]client.ClientTupleKey, len(tuplesWithoutCondition))
 			for i, t := range tuplesWithoutCondition {
 				tuples[i] = client.ClientTupleKey{
@@ -107,8 +106,18 @@ var deleteCmd = &cobra.Command{
 				}
 			}
 
+			// Convert ClientTupleKey to ClientTupleKeyWithoutCondition
+			tuplesWithoutCondition = make([]client.ClientTupleKeyWithoutCondition, len(tuples))
+			for i, t := range tuples {
+				tuplesWithoutCondition[i] = client.ClientTupleKeyWithoutCondition{
+					User:     t.User,
+					Relation: t.Relation,
+					Object:   t.Object,
+				}
+			}
+
 			deleteRequest := client.ClientWriteRequest{
-				Deletes: tuples,
+				Deletes: tuplesWithoutCondition,
 			}
 			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriod)
 			if err != nil {
@@ -118,8 +127,8 @@ var deleteCmd = &cobra.Command{
 			return output.Display(*response)
 		}
 
-		// Create a ClientTupleKey from the arguments
-		tupleKey := client.ClientTupleKey{
+		// Create a ClientTupleKeyWithoutCondition from the arguments
+		tupleKey := client.ClientTupleKeyWithoutCondition{
 			User:     args[0],
 			Relation: args[1],
 			Object:   args[2],
@@ -127,7 +136,7 @@ var deleteCmd = &cobra.Command{
 
 		// Create a delete request with the tuple
 		deleteRequest := client.ClientWriteRequest{
-			Deletes: []client.ClientTupleKey{tupleKey},
+			Deletes: []client.ClientTupleKeyWithoutCondition{tupleKey},
 		}
 
 		// Extract RPS control parameters

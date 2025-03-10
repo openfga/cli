@@ -42,8 +42,8 @@ const (
 )
 
 type failedWriteResponse struct {
-	TupleKey client.ClientTupleKey `json:"tuple_key"`
-	Reason   string                `json:"reason"`
+	TupleKey interface{} `json:"tuple_key"`
+	Reason   string      `json:"reason"`
 }
 
 type ImportResponse struct {
@@ -128,16 +128,34 @@ func importTuplesWithRateLimit(
 
 	// Add write tuples to batches
 	for _, tuple := range body.Writes {
-		writeBatches = append(writeBatches, client.ClientWriteRequest{
-			Writes: []client.ClientTupleKey{tuple},
-		})
+		// Convert to ClientTupleKeyWithoutCondition if needed
+		tupleWithoutCondition, ok := tuple.(client.ClientTupleKeyWithoutCondition)
+		if ok {
+			writeBatches = append(writeBatches, client.ClientWriteRequest{
+				Writes: []client.ClientTupleKeyWithoutCondition{tupleWithoutCondition},
+			})
+		} else {
+			// Assume it's already a ClientTupleKey
+			writeBatches = append(writeBatches, client.ClientWriteRequest{
+				Writes: []client.ClientTupleKey{tuple},
+			})
+		}
 	}
 
 	// Add delete tuples to batches
 	for _, tuple := range body.Deletes {
-		writeBatches = append(writeBatches, client.ClientWriteRequest{
-			Deletes: []client.ClientTupleKey{tuple},
-		})
+		// Convert to ClientTupleKeyWithoutCondition if needed
+		tupleWithoutCondition, ok := tuple.(client.ClientTupleKeyWithoutCondition)
+		if ok {
+			writeBatches = append(writeBatches, client.ClientWriteRequest{
+				Deletes: []client.ClientTupleKeyWithoutCondition{tupleWithoutCondition},
+			})
+		} else {
+			// Assume it's already a ClientTupleKey
+			writeBatches = append(writeBatches, client.ClientWriteRequest{
+				Deletes: []client.ClientTupleKey{tuple},
+			})
+		}
 	}
 
 	// Calculate ramp-up parameters
