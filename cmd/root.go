@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	_import "github.com/openfga/cli/cmd/import"
 	"os"
 	"strings"
 
@@ -82,6 +83,7 @@ func init() {
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)
 	rootCmd.AddCommand(query.QueryCmd)
+	rootCmd.AddCommand(_import.ImportCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
