@@ -128,34 +128,24 @@ func importTuplesWithRateLimit(
 
 	// Add write tuples to batches
 	for _, tuple := range body.Writes {
-		// Convert to ClientTupleKeyWithoutCondition if needed
-		tupleWithoutCondition, ok := tuple.(client.ClientTupleKeyWithoutCondition)
-		if ok {
-			writeBatches = append(writeBatches, client.ClientWriteRequest{
-				Writes: []client.ClientTupleKeyWithoutCondition{tupleWithoutCondition},
-			})
-		} else {
-			// Assume it's already a ClientTupleKey
-			writeBatches = append(writeBatches, client.ClientWriteRequest{
-				Writes: []client.ClientTupleKey{tuple},
-			})
-		}
+		// We need to handle ClientTupleKey directly
+		writeBatches = append(writeBatches, client.ClientWriteRequest{
+			Writes: []client.ClientTupleKey{tuple},
+		})
 	}
 
 	// Add delete tuples to batches
 	for _, tuple := range body.Deletes {
-		// Convert to ClientTupleKeyWithoutCondition if needed
-		tupleWithoutCondition, ok := tuple.(client.ClientTupleKeyWithoutCondition)
-		if ok {
-			writeBatches = append(writeBatches, client.ClientWriteRequest{
-				Deletes: []client.ClientTupleKeyWithoutCondition{tupleWithoutCondition},
-			})
-		} else {
-			// Assume it's already a ClientTupleKey
-			writeBatches = append(writeBatches, client.ClientWriteRequest{
-				Deletes: []client.ClientTupleKey{tuple},
-			})
+		// We need to handle ClientTupleKeyWithoutCondition directly
+		// Convert ClientTupleKey to ClientTupleKeyWithoutCondition
+		tupleWithoutCondition := client.ClientTupleKeyWithoutCondition{
+			User:     tuple.User,
+			Relation: tuple.Relation,
+			Object:   tuple.Object,
 		}
+		writeBatches = append(writeBatches, client.ClientWriteRequest{
+			Deletes: []client.ClientTupleKeyWithoutCondition{tupleWithoutCondition},
+		})
 	}
 
 	// Calculate ramp-up parameters
@@ -199,9 +189,14 @@ func importTuplesWithRateLimit(
 			}
 			if len(batch.Deletes) > 0 {
 				for _, tuple := range batch.Deletes {
+					// Convert ClientTupleKeyWithoutCondition to interface{}
 					failedDeletes = append(failedDeletes, failedWriteResponse{
-						TupleKey: tuple,
-						Reason:   extractErrMssg(err),
+						TupleKey: map[string]string{
+							"user":     tuple.User,
+							"relation": tuple.Relation,
+							"object":   tuple.Object,
+						},
+						Reason: extractErrMssg(err),
 					})
 				}
 			}
@@ -277,7 +272,8 @@ func processDeletes(
 	)
 
 	for _, delete := range deletes {
-		deletedTupleKey := openfga.TupleKey{
+		// Convert to ClientTupleKey
+		deletedTupleKey := client.ClientTupleKey{
 			Object:   delete.TupleKey.Object,
 			Relation: delete.TupleKey.Relation,
 			User:     delete.TupleKey.User,

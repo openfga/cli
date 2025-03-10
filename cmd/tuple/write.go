@@ -107,23 +107,21 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 
 	if condition == nil {
 		// Use ClientTupleKeyWithoutCondition if there's no condition
-		body = client.ClientWriteTuplesBody{
-			client.ClientTupleKeyWithoutCondition{
-				User:     args[0],
-				Relation: args[1],
-				Object:   args[2],
-			},
+		tupleWithoutCondition := client.ClientTupleKeyWithoutCondition{
+			User:     args[0],
+			Relation: args[1],
+			Object:   args[2],
 		}
+		body = []client.ClientTupleKeyWithoutCondition{tupleWithoutCondition}
 	} else {
 		// Use ClientTupleKey if there's a condition
-		body = client.ClientWriteTuplesBody{
-			client.ClientTupleKey{
-				User:      args[0],
-				Relation:  args[1],
-				Object:    args[2],
-				Condition: condition,
-			},
+		tupleKey := client.ClientTupleKey{
+			User:      args[0],
+			Relation:  args[1],
+			Object:    args[2],
+			Condition: condition,
 		}
+		body = []client.ClientTupleKey{tupleKey}
 	}
 
 	_, err = fgaClient.
