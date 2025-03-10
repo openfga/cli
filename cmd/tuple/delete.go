@@ -18,6 +18,7 @@ package tuple
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -47,16 +48,26 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 		if fileName != "" {
-			var tuples []client.ClientTupleKeyWithoutCondition
+			var tuplesWithoutCondition []client.ClientTupleKeyWithoutCondition
 
 			data, err := os.ReadFile(fileName)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
 
-			err = yaml.Unmarshal(data, &tuples)
+			err = yaml.Unmarshal(data, &tuplesWithoutCondition)
 			if err != nil {
 				return fmt.Errorf("failed to parse input tuples due to %w", err)
+			}
+
+			// Convert ClientTupleKeyWithoutCondition to ClientTupleKey
+			tuples := make([]client.ClientTupleKey, len(tuplesWithoutCondition))
+			for i, t := range tuplesWithoutCondition {
+				tuples[i] = client.ClientTupleKey{
+					User:     t.User,
+					Relation: t.Relation,
+					Object:   t.Object,
+				}
 			}
 
 			maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
@@ -69,30 +80,99 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to parse parallel requests due to %w", err)
 			}
 
+			// Extract RPS control parameters
+			minRPS, err := cmd.Flags().GetInt32("min-rps")
+			if err != nil {
+				return fmt.Errorf("failed to parse min-rps: %w", err)
+			}
+
+			maxRPS, err := cmd.Flags().GetInt32("max-rps")
+			if err != nil {
+				return fmt.Errorf("failed to parse max-rps: %w", err)
+			}
+
+			rampupPeriod, err := cmd.Flags().GetInt32("rampup-period-in-sec")
+			if err != nil {
+				return fmt.Errorf("failed to parse rampup-period-in-sec: %w", err)
+			}
+
+			// Validate RPS parameters - if one is provided, all three should be required
+			if minRPS > 0 || maxRPS > 0 || rampupPeriod > 0 {
+				if minRPS <= 0 || maxRPS <= 0 || rampupPeriod <= 0 {
+					return errors.New("if any of min-rps, max-rps, or rampup-period-in-sec is provided, all three must be provided with positive values") //nolint:goerr113
+				}
+
+				if minRPS > maxRPS {
+					return errors.New("min-rps cannot be greater than max-rps") //nolint:goerr113
+				}
+			}
+
 			deleteRequest := client.ClientWriteRequest{
 				Deletes: tuples,
 			}
-			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
+			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriod)
 			if err != nil {
 				return err
 			}
 
 			return output.Display(*response)
 		}
-		body := &client.ClientDeleteTuplesBody{
-			client.ClientTupleKeyWithoutCondition{
-				User:     args[0],
-				Relation: args[1],
-				Object:   args[2],
-			},
-		}
-		options := &client.ClientWriteOptions{}
-		_, err = fgaClient.DeleteTuples(context.Background()).Body(*body).Options(*options).Execute()
-		if err != nil {
-			return fmt.Errorf("failed to delete tuples due to %w", err)
+
+		// Create a ClientTupleKey from the arguments
+		tupleKey := client.ClientTupleKey{
+			User:     args[0],
+			Relation: args[1],
+			Object:   args[2],
 		}
 
-		return output.Display(output.EmptyStruct{})
+		// Create a delete request with the tuple
+		deleteRequest := client.ClientWriteRequest{
+			Deletes: []client.ClientTupleKey{tupleKey},
+		}
+
+		// Extract RPS control parameters
+		minRPS, err := cmd.Flags().GetInt32("min-rps")
+		if err != nil {
+			return fmt.Errorf("failed to parse min-rps: %w", err)
+		}
+
+		maxRPS, err := cmd.Flags().GetInt32("max-rps")
+		if err != nil {
+			return fmt.Errorf("failed to parse max-rps: %w", err)
+		}
+
+		rampupPeriod, err := cmd.Flags().GetInt32("rampup-period-in-sec")
+		if err != nil {
+			return fmt.Errorf("failed to parse rampup-period-in-sec: %w", err)
+		}
+
+		// Validate RPS parameters - if one is provided, all three should be required
+		if minRPS > 0 || maxRPS > 0 || rampupPeriod > 0 {
+			if minRPS <= 0 || maxRPS <= 0 || rampupPeriod <= 0 {
+				return errors.New("if any of min-rps, max-rps, or rampup-period-in-sec is provided, all three must be provided with positive values") //nolint:goerr113
+			}
+
+			if minRPS > maxRPS {
+				return errors.New("min-rps cannot be greater than max-rps") //nolint:goerr113
+			}
+		}
+
+		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
+		if err != nil {
+			return fmt.Errorf("failed to parse max tuples per write due to %w", err)
+		}
+
+		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
+		if err != nil {
+			return fmt.Errorf("failed to parse parallel requests due to %w", err)
+		}
+
+		response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriod)
+		if err != nil {
+			return err
+		}
+
+		return output.Display(*response)
 	},
 }
 
@@ -101,6 +181,9 @@ func init() {
 	deleteCmd.Flags().String("model-id", "", "Model ID")
 	deleteCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	deleteCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	deleteCmd.Flags().Int32("min-rps", 0, "Minimum requests per second for writes")
+	deleteCmd.Flags().Int32("max-rps", 0, "Maximum requests per second for writes")
+	deleteCmd.Flags().Int32("rampup-period-in-sec", 0, "Period in seconds to ramp up from min-rps to max-rps")
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {

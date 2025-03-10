@@ -18,6 +18,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -116,6 +117,7 @@ func importStore(
 	format authorizationmodel.ModelFormat,
 	storeID string,
 	maxTuplesPerWrite, maxParallelRequests int32,
+	minRPS, maxRPS, rampupPeriodInSec int32,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
 	response, err := createOrUpdateStore(clientConfig, fgaClient, storeData, format, storeID, fileName)
@@ -124,7 +126,7 @@ func importStore(
 	}
 
 	if len(storeData.Tuples) != 0 {
-		err = importTuples(fgaClient, storeData.Tuples, maxTuplesPerWrite, maxParallelRequests)
+		err = importTuples(fgaClient, storeData.Tuples, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriodInSec)
 		if err != nil {
 			return nil, err
 		}
@@ -159,6 +161,7 @@ func importTuples(
 	fgaClient client.SdkClient,
 	tuples []openfga.TupleKey,
 	maxTuplesPerWrite, maxParallelRequests int32,
+	minRPS, maxRPS, rampupPeriodInSec int32,
 ) error {
 	bar := createProgressBar(len(tuples))
 
@@ -171,7 +174,7 @@ func importTuples(
 		writeRequest := client.ClientWriteRequest{
 			Writes: tuples[index:end],
 		}
-		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests); err != nil {
+		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriodInSec); err != nil {
 			return fmt.Errorf("failed to import tuples: %w", err)
 		}
 
@@ -282,6 +285,33 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse parallel requests: %w", err)
 		}
 
+		// Extract RPS control parameters
+		minRPS, err := cmd.Flags().GetInt32("min-rps")
+		if err != nil {
+			return fmt.Errorf("failed to parse min-rps: %w", err)
+		}
+
+		maxRPS, err := cmd.Flags().GetInt32("max-rps")
+		if err != nil {
+			return fmt.Errorf("failed to parse max-rps: %w", err)
+		}
+
+		rampupPeriod, err := cmd.Flags().GetInt32("rampup-period-in-sec")
+		if err != nil {
+			return fmt.Errorf("failed to parse rampup-period-in-sec: %w", err)
+		}
+
+		// Validate RPS parameters - if one is provided, all three should be required
+		if minRPS > 0 || maxRPS > 0 || rampupPeriod > 0 {
+			if minRPS <= 0 || maxRPS <= 0 || rampupPeriod <= 0 {
+				return errors.New("if any of min-rps, max-rps, or rampup-period-in-sec is provided, all three must be provided with positive values") //nolint:goerr113
+			}
+
+			if minRPS > maxRPS {
+				return errors.New("min-rps cannot be greater than max-rps") //nolint:goerr113
+			}
+		}
+
 		fileName, err := cmd.Flags().GetString("file")
 		if err != nil {
 			return fmt.Errorf("failed to get file name: %w", err)
@@ -298,7 +328,7 @@ var importCmd = &cobra.Command{
 		}
 
 		createStoreAndModelResponse, err := importStore(&clientConfig, fgaClient, storeData, format,
-			storeID, maxTuplesPerWrite, maxParallelRequests, fileName)
+			storeID, maxTuplesPerWrite, maxParallelRequests, minRPS, maxRPS, rampupPeriod, fileName)
 		if err != nil {
 			return fmt.Errorf("failed to import store: %w", err)
 		}
@@ -317,6 +347,9 @@ func init() {
 	importCmd.Flags().String("store-id", "", "Store ID")
 	importCmd.Flags().Int32("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
 	importCmd.Flags().Int32("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int32("min-rps", 0, "Minimum requests per second for writes")
+	importCmd.Flags().Int32("max-rps", 0, "Maximum requests per second for writes")
+	importCmd.Flags().Int32("rampup-period-in-sec", 0, "Period in seconds to ramp up from min-rps to max-rps")
 
 	if err := importCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
