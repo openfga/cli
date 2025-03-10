@@ -35,10 +35,12 @@ type CreateStoreAndModelResponse struct {
 	Model *client.ClientWriteAuthorizationModelResponse `json:"model,omitempty"`
 }
 
-func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateStoreResponse, error) {
+func create(
+	ctx context.Context, fgaClient client.SdkClient, storeName string,
+) (*client.ClientCreateStoreResponse, error) {
 	body := client.ClientCreateStoreRequest{Name: storeName}
 
-	store, err := fgaClient.CreateStore(context.Background()).Body(body).Execute()
+	store, err := fgaClient.CreateStore(ctx).Body(body).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create store %v due to %w", storeName, err)
 	}
@@ -47,6 +49,7 @@ func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateS
 }
 
 func CreateStoreWithModel(
+	ctx context.Context,
 	fgaClient client.SdkClient,
 	storeName string,
 	inputModel string,
@@ -58,7 +61,7 @@ func CreateStoreWithModel(
 		return nil, errors.New(`required flag(s) "name" not set`) //nolint:goerr113
 	}
 
-	createStoreResponse, err := create(fgaClient, storeName)
+	createStoreResponse, err := create(ctx, fgaClient, storeName)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +81,7 @@ func CreateStoreWithModel(
 			return nil, err //nolint:wrapcheck
 		}
 
-		createAuthZModelResponse, err := model.Write(fgaClient, authModel)
+		createAuthZModelResponse, err := model.Write(ctx, fgaClient, authModel)
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}
@@ -120,7 +123,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 			return err //nolint:wrapcheck
 		}
 
-		response, err := CreateStoreWithModel(fgaClient, storeName, inputModel, createModelInputFormat)
+		response, err := CreateStoreWithModel(cmd.Context(), fgaClient, storeName, inputModel, createModelInputFormat)
 		if err != nil {
 			return err
 		}

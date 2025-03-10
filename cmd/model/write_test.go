@@ -22,7 +22,7 @@ func TestWriteModelFail(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
-	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}` //nolint:lll
+	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}`
 	body := &client.ClientWriteAuthorizationModelRequest{}
 
 	err := json.Unmarshal([]byte(modelJSONTxt), &body)
@@ -36,7 +36,7 @@ func TestWriteModelFail(t *testing.T) {
 	mockRequest := mockclient.NewMockSdkClientWriteAuthorizationModelRequestInterface(mockCtrl)
 	mockRequest.EXPECT().Body(*body).Return(mockExecute)
 
-	mockFgaClient.EXPECT().WriteAuthorizationModel(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().WriteAuthorizationModel(gomock.Any()).Return(mockRequest)
 
 	model := authorizationmodel.AuthzModel{}
 
@@ -45,7 +45,7 @@ func TestWriteModelFail(t *testing.T) {
 		return
 	}
 
-	_, err = Write(mockFgaClient, model)
+	_, err = Write(context.TODO(), mockFgaClient, model)
 	if err == nil {
 		t.Fatalf("Expect error but there is none")
 	}
@@ -58,7 +58,7 @@ func TestWriteModel(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
-	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}` //nolint:lll
+	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}`
 
 	body := &client.ClientWriteAuthorizationModelRequest{}
 
@@ -78,7 +78,7 @@ func TestWriteModel(t *testing.T) {
 	mockRequest := mockclient.NewMockSdkClientWriteAuthorizationModelRequestInterface(mockCtrl)
 	mockRequest.EXPECT().Body(*body).Return(mockExecute)
 
-	mockFgaClient.EXPECT().WriteAuthorizationModel(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().WriteAuthorizationModel(gomock.Any()).Return(mockRequest)
 
 	model := authorizationmodel.AuthzModel{}
 
@@ -87,7 +87,7 @@ func TestWriteModel(t *testing.T) {
 		return
 	}
 
-	output, err := Write(mockFgaClient, model)
+	output, err := Write(context.TODO(), mockFgaClient, model)
 	if err != nil {
 		t.Fatal(err)
 	}
