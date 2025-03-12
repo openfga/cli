@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -43,7 +44,7 @@ func ImportTuples(ctx context.Context, fgaClient client.SdkClient,
 ) (*ImportResponse, error) {
 	options := client.ClientWriteOptions{
 		Transaction: &client.TransactionOptions{
-			Disable:             true,
+			Disable:             false,
 			MaxPerChunk:         int32(maxTuplesPerWrite),
 			MaxParallelRequests: int32(maxParallelRequests),
 		},
@@ -99,10 +100,13 @@ func importTuplesWithRPS(ctx context.Context, fgaClient client.SdkClient,
 	deletes := body.Deletes
 	numRequests := (len(writes) + len(deletes)) / maxTuplesPerWrite
 
+	fmt.Printf("Importing tuples: writing %d tuples and deleting %d tuples over %v requests\n", len(writes), len(deletes), numRequests)
 	reqs := make([]func() error, numRequests)
 	for i := 0; i < numRequests; i++ {
 		writeChunk, deleteChunk := getImportChunk(i, maxTuplesPerWrite, writes, deletes)
 		if len(writeChunk)+len(deleteChunk) == 0 {
+			fmt.Printf("Failed to import tuples due to empty write chunk index %v\n", i)
+			reqs[i] = func() error { return nil }
 			break
 		}
 
@@ -120,14 +124,16 @@ func importTuplesWithRPS(ctx context.Context, fgaClient client.SdkClient,
 
 			successfulWrites, failedWrites := processWrites(response.Writes)
 			successfulDeletes, failedDeletes := processDeletes(response.Deletes)
-			result.Successful = append(successfulWrites, successfulDeletes...)
-			result.Failed = append(failedWrites, failedDeletes...)
+			result.Successful = append(result.Successful, successfulWrites...)
+			result.Successful = append(result.Successful, successfulDeletes...)
+			result.Failed = append(result.Failed, failedWrites...)
+			result.Failed = append(result.Failed, failedDeletes...)
 
 			return nil
 		}
 	}
 
-	if err := requests.RampUpAPIRequests(ctx, minRPS, maxRPS, rampUpPeriodInSec, maxParallelRequests, reqs); err != nil {
+	if err := requests.RampUpAPIRequests(ctx, minRPS, maxRPS, rampUpPeriodInSec, time.Second, maxParallelRequests, reqs); err != nil {
 		return nil, fmt.Errorf("failed to import tuples due to %w", err)
 	}
 
@@ -141,6 +147,10 @@ func importTuplesWithRPS(ctx context.Context, fgaClient client.SdkClient,
 func getImportChunk(index int, maxTuplesPerWrite int, writes []client.ClientTupleKey, deletes []client.ClientTupleKeyWithoutCondition) ([]client.ClientTupleKey, []client.ClientTupleKeyWithoutCondition) {
 	numWrites := len(writes)
 	numDeletes := len(deletes)
+
+	if numWrites == 0 {
+		return []client.ClientTupleKey{}, getDeleteChunk(index, maxTuplesPerWrite, deletes)
+	}
 
 	start := index * maxTuplesPerWrite
 	end := start + maxTuplesPerWrite
@@ -163,7 +173,7 @@ func getImportChunk(index int, maxTuplesPerWrite int, writes []client.ClientTupl
 			end = numWrites + numDeletes
 		}
 
-		if start >= end {
+		if start > end {
 			return []client.ClientTupleKey{}, []client.ClientTupleKeyWithoutCondition{}
 		}
 
@@ -174,6 +184,24 @@ func getImportChunk(index int, maxTuplesPerWrite int, writes []client.ClientTupl
 	}
 
 	return writeChunk, deleteChunk
+}
+
+func getDeleteChunk(index int, maxTuplesPerWrite int, deletes []client.ClientTupleKeyWithoutCondition) []client.ClientTupleKeyWithoutCondition {
+	numDeletes := len(deletes)
+
+	start := index * maxTuplesPerWrite
+	end := start + maxTuplesPerWrite
+	if end > numDeletes {
+		end = numDeletes
+	}
+
+	if start > end {
+		return []client.ClientTupleKeyWithoutCondition{}
+	}
+
+	deleteChunk := deletes[start:end]
+
+	return deleteChunk
 }
 
 func extractErrMsg(err error) string {

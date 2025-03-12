@@ -88,14 +88,14 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to parse parallel requests due to %w", err)
 			}
 
-			deleteRequest := client.ClientWriteRequest{
+			writeRequest := client.ClientWriteRequest{
 				Deletes: tuples,
 			}
 
 			response, err := tuple.ImportTuples(
 				context.TODO(), fgaClient,
 				minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
-				deleteRequest)
+				writeRequest)
 			if err != nil {
 				return err
 			}
@@ -140,8 +140,8 @@ var deleteCmd = &cobra.Command{
 func init() {
 	deleteCmd.Flags().String("file", "", "Tuples file")
 	deleteCmd.Flags().String("model-id", "", "Model ID")
-	deleteCmd.Flags().Int32("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
-	deleteCmd.Flags().Int32("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	deleteCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	deleteCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 
 	deleteCmd.Flags().Int("min-rps", 0, "The initial requests per second.")
 	deleteCmd.Flags().Int("max-rps", 0, "The maximum requests per second.")

@@ -9,27 +9,29 @@ import (
 	"golang.org/x/time/rate"
 )
 
-// RampUpAPIRequests gradually increases the rate of API requests from minRPS to maxRPS over rampUpPeriodInSec seconds.
+// RampUpAPIRequests gradually increases the rate of API requests from minRPS to maxRPS over rampUpPeriodInMin seconds.
 // After reaching maxRPS, it maintains this rate until all requests are sent or the context is canceled.
 // Parameters:
 // - ctx: The context to control cancellation.
 // - minRPS: The initial requests per second.
 // - maxRPS: The maximum requests per second.
-// - rampUpPeriodInSec: The period over which to ramp up the request rate.
+// - rampUpPeriod: The period over which to ramp up the request rate.
+// - rampupPeriodDuration: The unit of each ramp-up period.
 // - maxInFlight: The maximum number of concurrent requests, used to protect the client and the server from being overwhelmed.
 // - requests: A slice of functions representing the API requests to be made.
-func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriodInSec, maxInFlight int, requests []func() error) error {
-	rpsIncrement := float64(maxRPS-minRPS) / float64(rampUpPeriodInSec)
+func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriod int, rampupPeriodDuration time.Duration, maxInFlight int, requests []func() error) error {
+	rpsIncrement := float64(maxRPS-minRPS) / float64(rampUpPeriod)
 	limiter := rate.NewLimiter(rate.Limit(minRPS), 1)
 	semaphore := make(chan struct{}, maxInFlight)
 	var wg sync.WaitGroup
 
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(rampupPeriodDuration)
 	defer ticker.Stop()
 
 	requestIndex := 0
+	requestsLen := len(requests)
 
-	for step := 0; step <= rampUpPeriodInSec; step++ {
+	for step := 0; step <= rampUpPeriod; step++ {
 		select {
 		case <-ctx.Done():
 			wg.Wait()
@@ -41,7 +43,7 @@ func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriodInSec, m
 			}
 
 			for i := 0; i < int(limiter.Limit()); i++ {
-				if requestIndex >= len(requests) {
+				if requestIndex >= requestsLen {
 					wg.Wait()
 					return nil
 				}
@@ -52,6 +54,10 @@ func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriodInSec, m
 				go func(req func() error) {
 					defer wg.Done()
 					defer func() { <-semaphore }()
+					if req == nil {
+						fmt.Printf("Error: request function is nil, request %d out of %d\n", requestIndex, requestsLen)
+						return
+					}
 					if err := req(); err != nil {
 						fmt.Printf("Error: %v\n", err)
 					}

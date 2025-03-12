@@ -20,7 +20,7 @@ func TestRampUpAPIRequests_Success(t *testing.T) {
 		}
 	}
 
-	err := requests.RampUpAPIRequests(context.Background(), 10, 20, 2, 5, requestsList)
+	err := requests.RampUpAPIRequests(context.Background(), 10, 20, 2, time.Second, 5, requestsList)
 	if err != nil {
 		t.Fatalf("expected no error, got %v, %v", err, callCount)
 	}
@@ -44,7 +44,7 @@ func TestRampUpAPIRequests_RampUpRate(t *testing.T) {
 	}
 
 	startTime := time.Now()
-	err := requests.RampUpAPIRequests(ctx, 1, 10, 3, 5, requestsList)
+	err := requests.RampUpAPIRequests(ctx, 1, 10, 3, time.Second, 5, requestsList)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -70,7 +70,7 @@ func TestRampUpAPIRequests_ContextCancelled(t *testing.T) {
 		}
 	}
 
-	err := requests.RampUpAPIRequests(ctx, 1, 10, 5, 5, requestsList)
+	err := requests.RampUpAPIRequests(ctx, 1, 10, 5, time.Second, 5, requestsList)
 	if err == nil {
 		t.Fatalf("expected error, got nil")
 	}
@@ -96,7 +96,7 @@ func TestRampUpAPIRequests_RequestError(t *testing.T) {
 		}
 	}
 
-	err := requests.RampUpAPIRequests(ctx, 1, 10, 5, 5, requestsList)
+	err := requests.RampUpAPIRequests(ctx, 1, 10, 5, time.Second, 5, requestsList)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
