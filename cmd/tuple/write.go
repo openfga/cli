@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -31,6 +32,14 @@ import (
 )
 
 const writeCommandArgumentsCount = 3
+
+var hideImportedTuples bool
+
+type ImportStats struct {
+	TotalTuples      int
+	SuccessfulTuples int
+	FailedTuples     int
+}
 
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
@@ -109,6 +118,8 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 }
 
 func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error {
+	startTime := time.Now()
+
 	fileName, err := flags.GetString("file")
 	if err != nil {
 		return fmt.Errorf("failed to parse file name: %w", err)
@@ -142,7 +153,25 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return err
 	}
 
-	return output.Display(response) //nolint:wrapcheck
+	duration := time.Since(startTime)
+	timeSpent := duration.String()
+
+	outputResponse := make(map[string]interface{})
+
+	if !hideImportedTuples && len(response.Successful) > 0 {
+		outputResponse["successful"] = response.Successful
+	}
+
+	if len(response.Failed) > 0 {
+		outputResponse["failed"] = response.Failed
+	}
+
+	outputResponse["total_count"] = len(tuples)
+	outputResponse["successful_count"] = len(response.Successful)
+	outputResponse["failed_count"] = len(response.Failed)
+	outputResponse["time_spent"] = timeSpent
+
+	return output.Display(outputResponse) //nolint:wrapcheck
 }
 
 func init() {
@@ -152,4 +181,5 @@ func init() {
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
+	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
 }

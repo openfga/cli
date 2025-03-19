@@ -1,5 +1,19 @@
 # Changelog
 
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.4...HEAD)
+
+
+#### [0.6.4](https://github.com/openfga/cli/compare/v0.6.3...v0.6.4) (2025-02-07)
+
+Added:
+- Support for start-time parameter in changes command (#443)
+- Support importing assertions during `fga store import` (#446) - Thanks @sujitha-av
+
+#### [0.6.3](https://github.com/openfga/cli/compare/v0.6.2...v0.6.3) (2025-01-22)
+
+Added:
+- Introduced `--hide-imported-tuples` flag to `fga tuple write` to suppress logging of successfully imported tuples (#437) - thanks @Siddhant-K-code
+
 ### [0.6.2](https://github.com/openfga/cli/compare/v0.6.1...v0.6.2) (2024-12-02)
 
 Fixed:
