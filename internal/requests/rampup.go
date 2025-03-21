@@ -3,7 +3,9 @@ package requests
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -19,22 +21,38 @@ import (
 // - rampupPeriodDuration: The unit of each ramp-up period.
 // - maxInFlight: The maximum number of concurrent requests, used to protect the client and the server.
 // - requests: A slice of functions representing the API requests to be made.
-func RampUpAPIRequests( //nolint:gocognit,cyclop
+func RampUpAPIRequests( //nolint:cyclop
 	ctx context.Context,
 	minRPS, maxRPS, rampUpPeriod int, rampupPeriodDuration time.Duration, maxInFlight int,
 	requests []func() error,
 ) error {
-	rpsIncrement := float64(maxRPS-minRPS) / float64(rampUpPeriod)
-	limiter := rate.NewLimiter(rate.Limit(minRPS), 1)
-	semaphore := make(chan struct{}, maxInFlight)
+	var (
+		rpsIncrement = float64(maxRPS-minRPS) / float64(rampUpPeriod)
+		limiter      = rate.NewLimiter(rate.Limit(minRPS), 1)
+		semaphore    = make(chan struct{}, maxInFlight)
+		waitGroup    sync.WaitGroup
+		ticker       = time.NewTicker(rampupPeriodDuration)
+		requestIndex int32
+	)
 
-	var waitGroup sync.WaitGroup
-
-	ticker := time.NewTicker(rampupPeriodDuration)
 	defer ticker.Stop()
 
-	requestIndex := 0
-	requestsLen := len(requests)
+	if len(requests) > math.MaxInt32 {
+		return fmt.Errorf( //nolint:err113
+			"too many requests in ramp up: %d. max supported is %d", len(requests), math.MaxInt32,
+		)
+	}
+
+	requestsLen := int32(len(requests)) //nolint:gosec
+
+	worker := func(req func() error) {
+		defer waitGroup.Done()
+		defer func() { <-semaphore }()
+
+		if err := req(); err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
+	}
 
 	for step := 0; step <= rampUpPeriod; step++ {
 		select {
@@ -50,32 +68,19 @@ func RampUpAPIRequests( //nolint:gocognit,cyclop
 			}
 
 			for i := 0; i < int(limiter.Limit()); i++ { //nolint:intrange
-				if requestIndex >= requestsLen {
+				idx := atomic.AddInt32(&requestIndex, 1) - 1
+				if idx >= requestsLen {
 					waitGroup.Wait()
 
 					return nil
 				}
 
+				req := requests[idx]
 				semaphore <- struct{}{}
 
 				waitGroup.Add(1)
 
-				go func(req func() error) {
-					defer waitGroup.Done()
-					defer func() { <-semaphore }()
-
-					if req == nil {
-						fmt.Printf("Error: request function is nil, request %d out of %d\n", requestIndex, requestsLen)
-
-						return
-					}
-
-					if err := req(); err != nil {
-						fmt.Printf("Error: %v\n", err)
-					}
-				}(requests[requestIndex])
-
-				requestIndex++
+				go worker(req)
 			}
 
 			newRPS := rate.Limit(float64(minRPS) + rpsIncrement*float64(step))
@@ -99,26 +104,19 @@ func RampUpAPIRequests( //nolint:gocognit,cyclop
 			}
 
 			for i := 0; i < int(limiter.Limit()); i++ { //nolint:intrange
-				if requestIndex >= len(requests) {
+				idx := atomic.AddInt32(&requestIndex, 1) - 1
+				if idx >= requestsLen {
 					waitGroup.Wait()
 
 					return nil
 				}
 
+				req := requests[idx]
 				semaphore <- struct{}{}
 
 				waitGroup.Add(1)
 
-				go func(req func() error) {
-					defer waitGroup.Done()
-					defer func() { <-semaphore }()
-
-					if err := req(); err != nil {
-						fmt.Printf("Error: %v\n", err)
-					}
-				}(requests[requestIndex])
-
-				requestIndex++
+				go worker(req)
 			}
 		}
 	}
