@@ -44,6 +44,7 @@ type ClientConfig struct {
 	APIScopes            []string `json:"api_scopes,omitempty"`
 	ClientID             string   `json:"client_id,omitempty"`
 	ClientSecret         string   `json:"client_secret,omitempty"`
+	Debug                bool     `json:"debug,omitempty"`
 }
 
 func (c ClientConfig) getCredentials() *credentials.Credentials {
@@ -85,6 +86,7 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 			MaxRetry:    MaxSdkRetry,
 			MinWaitInMs: MinSdkWaitInMs,
 		},
+		Debug: c.Debug,
 	}
 }
 
