@@ -2,6 +2,9 @@
 
 #### [Unreleased](https://github.com/openfga/cli/compare/v0.6.4...HEAD)
 
+Added:
+- Support for RPS ramp up for tuple writes, which can be helpful when importing a large amount of tuples (#463)
+
 
 #### [0.6.4](https://github.com/openfga/cli/compare/v0.6.3...v0.6.4) (2025-02-07)
 

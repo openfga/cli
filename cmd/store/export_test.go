@@ -17,17 +17,17 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"go.uber.org/mock/gomock"
 
-	mock_client "github.com/openfga/cli/internal/mocks"
+	mockclient "github.com/openfga/cli/internal/mocks"
 )
 
-//nolint:funlen,cyclop
+//nolint:cyclop
 func TestExportSuccess(t *testing.T) {
 	t.Parallel()
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	clientConfig := fga.ClientConfig{
 		StoreID:              "12345",
@@ -44,14 +44,14 @@ func TestExportSuccess(t *testing.T) {
 		UpdatedAt: expectedTime,
 	}
 
-	mockExecute := mock_client.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
+	mockExecute := mockclient.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
 	mockExecute.EXPECT().Execute().Return(&storeResponse, nil)
 	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
 
 	// Mocking Authorization model GET...
 	var modelResponse client.ClientReadAuthorizationModelResponse
 
-	mockGetModelRequest := mock_client.NewMockSdkClientReadAuthorizationModelRequestInterface(mockCtrl)
+	mockGetModelRequest := mockclient.NewMockSdkClientReadAuthorizationModelRequestInterface(mockCtrl)
 	modelJSON := `{
 	  "authorization_model": {
 		"id": "01GXSA8YR785C4FYS3C0RTG7B1",
@@ -138,7 +138,7 @@ func TestExportSuccess(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 
-	mockReadRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+	mockReadRequest := mockclient.NewMockSdkClientReadRequestInterface(mockCtrl)
 	mockReadRequest.EXPECT().Body(readRequest).Return(mockReadRequest)
 	mockReadRequest.EXPECT().Options(readOptions).Return(mockReadRequest)
 	mockReadRequest.EXPECT().Execute().Return(&readResponse, nil)
@@ -170,7 +170,7 @@ func TestExportSuccess(t *testing.T) {
 		AuthorizationModelId: openfga.PtrString("01GXSA8YR785C4FYS3C0RTG7B1"),
 	}
 
-	mockAssertionsRequest := mock_client.NewMockSdkClientReadAssertionsRequestInterface(mockCtrl)
+	mockAssertionsRequest := mockclient.NewMockSdkClientReadAssertionsRequestInterface(mockCtrl)
 	mockAssertionsRequest.EXPECT().Options(readAssertionsOptions).Return(mockAssertionsRequest)
 	mockAssertionsRequest.EXPECT().Execute().Return(&assertionsResponse, nil)
 	mockFgaClient.EXPECT().ReadAssertions(context.Background()).Return(mockAssertionsRequest)

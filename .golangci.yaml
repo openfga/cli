@@ -36,10 +36,12 @@ linters-settings:
           - github.com/openfga/go-sdk
           - github.com/openfga/language
           - github.com/openfga/openfga
+          - github.com/rung/go-safecast
           - github.com/schollz/progressbar/v3
           - github.com/spf13/cobra
           - github.com/spf13/pflag
           - github.com/spf13/viper
+          - golang.org/x/time/rate
           - google.golang.org/protobuf/encoding/protojson
           - google.golang.org/protobuf/types/known/structpb
           - gopkg.in/yaml.v3
@@ -74,4 +76,9 @@ issues:
   exclude-rules:
     - path: "cmd/tuple/write(.*).go"
       linters:
+        - lll
+    - path: _test.go
+      linters:
+        - err113
+        - funlen
         - lll
