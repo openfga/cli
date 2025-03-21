@@ -13,7 +13,7 @@ require (
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20250127102726-f9709139a369
-	github.com/openfga/go-sdk v0.6.6-0.20250320160356-fd34a4aeecb8
+	github.com/openfga/go-sdk v0.6.6-0.20250321145054-8b996f70d7bb
 	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20250220223040-ed0cfba54336
 	github.com/openfga/openfga v1.8.7
 	github.com/rung/go-safecast v1.0.1
