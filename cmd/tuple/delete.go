@@ -97,7 +97,7 @@ var deleteCmd = &cobra.Command{
 				minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
 				writeRequest)
 			if err != nil {
-				return err
+				return err //nolint:wrapcheck
 			}
 
 			duration := time.Since(startTime)
@@ -152,7 +152,7 @@ func init() {
 		"rampup-period-in-sec",
 	)
 
-	deleteCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
+	deleteCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output") //nolint:lll
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {

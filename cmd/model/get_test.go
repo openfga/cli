@@ -29,7 +29,7 @@ func TestGetModelNoAuthModelID(t *testing.T) {
 
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
-	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}}` //nolint:all
+	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}}`
 	if err := json.Unmarshal([]byte(modelJSON), &expectedResponse); err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -63,7 +63,7 @@ func TestGetModelAuthModelID(t *testing.T) {
 
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
-	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}}` //nolint:all
+	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}}`
 	if err := json.Unmarshal([]byte(modelJSON), &expectedResponse); err != nil {
 		t.Fatalf("%v", err)
 	}

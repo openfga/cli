@@ -17,13 +17,18 @@ import (
 // - maxRPS: The maximum requests per second.
 // - rampUpPeriod: The period over which to ramp up the request rate.
 // - rampupPeriodDuration: The unit of each ramp-up period.
-// - maxInFlight: The maximum number of concurrent requests, used to protect the client and the server from being overwhelmed.
+// - maxInFlight: The maximum number of concurrent requests, used to protect the client and the server.
 // - requests: A slice of functions representing the API requests to be made.
-func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriod int, rampupPeriodDuration time.Duration, maxInFlight int, requests []func() error) error {
+func RampUpAPIRequests( //nolint:gocognit,cyclop
+	ctx context.Context,
+	minRPS, maxRPS, rampUpPeriod int, rampupPeriodDuration time.Duration, maxInFlight int,
+	requests []func() error,
+) error {
 	rpsIncrement := float64(maxRPS-minRPS) / float64(rampUpPeriod)
 	limiter := rate.NewLimiter(rate.Limit(minRPS), 1)
 	semaphore := make(chan struct{}, maxInFlight)
-	var wg sync.WaitGroup
+
+	var waitGroup sync.WaitGroup
 
 	ticker := time.NewTicker(rampupPeriodDuration)
 	defer ticker.Stop()
@@ -34,30 +39,37 @@ func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriod int, ra
 	for step := 0; step <= rampUpPeriod; step++ {
 		select {
 		case <-ctx.Done():
-			wg.Wait()
-			return ctx.Err()
+			waitGroup.Wait()
+
+			return ctx.Err() //nolint:wrapcheck
 		case <-ticker.C:
 			if err := limiter.Wait(ctx); err != nil {
-				wg.Wait()
-				return err
+				waitGroup.Wait()
+
+				return err //nolint:wrapcheck
 			}
 
-			for i := 0; i < int(limiter.Limit()); i++ {
+			for i := 0; i < int(limiter.Limit()); i++ { //nolint:intrange
 				if requestIndex >= requestsLen {
-					wg.Wait()
+					waitGroup.Wait()
+
 					return nil
 				}
 
 				semaphore <- struct{}{}
-				wg.Add(1)
+
+				waitGroup.Add(1)
 
 				go func(req func() error) {
-					defer wg.Done()
+					defer waitGroup.Done()
 					defer func() { <-semaphore }()
+
 					if req == nil {
 						fmt.Printf("Error: request function is nil, request %d out of %d\n", requestIndex, requestsLen)
+
 						return
 					}
+
 					if err := req(); err != nil {
 						fmt.Printf("Error: %v\n", err)
 					}
@@ -72,29 +84,35 @@ func RampUpAPIRequests(ctx context.Context, minRPS, maxRPS, rampUpPeriod int, ra
 	}
 
 	limiter.SetLimit(rate.Limit(maxRPS))
+
 	for {
 		select {
 		case <-ctx.Done():
-			wg.Wait()
-			return ctx.Err()
+			waitGroup.Wait()
+
+			return ctx.Err() //nolint:wrapcheck
 		case <-ticker.C:
 			if err := limiter.Wait(ctx); err != nil {
-				wg.Wait()
-				return err
+				waitGroup.Wait()
+
+				return err //nolint:wrapcheck
 			}
 
-			for i := 0; i < int(limiter.Limit()); i++ {
+			for i := 0; i < int(limiter.Limit()); i++ { //nolint:intrange
 				if requestIndex >= len(requests) {
-					wg.Wait()
+					waitGroup.Wait()
+
 					return nil
 				}
 
 				semaphore <- struct{}{}
-				wg.Add(1)
+
+				waitGroup.Add(1)
 
 				go func(req func() error) {
-					defer wg.Done()
+					defer waitGroup.Done()
 					defer func() { <-semaphore }()
+
 					if err := req(); err != nil {
 						fmt.Printf("Error: %v\n", err)
 					}

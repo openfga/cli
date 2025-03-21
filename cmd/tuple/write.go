@@ -121,7 +121,7 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 	)
 }
 
-func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error {
+func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error { //nolint:cyclop
 	startTime := time.Now()
 
 	fileName, err := flags.GetString("file")
@@ -172,7 +172,7 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
 		writeRequest)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	duration := time.Since(startTime)

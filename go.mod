@@ -16,6 +16,7 @@ require (
 	github.com/openfga/go-sdk v0.6.6-0.20250320160356-fd34a4aeecb8
 	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20250220223040-ed0cfba54336
 	github.com/openfga/openfga v1.8.7
+	github.com/rung/go-safecast v1.0.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.20.0

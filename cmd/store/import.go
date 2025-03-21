@@ -124,7 +124,9 @@ func importStore(
 	}
 
 	if len(storeData.Tuples) != 0 {
-		err = importTuples(fgaClient, storeData.Tuples, minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests)
+		err = importTuples(
+			fgaClient, storeData.Tuples, minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
+		)
 		if err != nil {
 			return nil, err
 		}

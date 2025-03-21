@@ -9,6 +9,8 @@ import (
 )
 
 func TestProcessWrites(t *testing.T) {
+	t.Parallel()
+
 	writes := []client.ClientWriteRequestWriteResponse{
 		{
 			TupleKey: client.ClientTupleKey{User: "user:1", Relation: "access", Object: "document:1"},
@@ -23,12 +25,14 @@ func TestProcessWrites(t *testing.T) {
 
 	successful, failed := processWrites(writes)
 
-	assert.Equal(t, 1, len(successful))
-	assert.Equal(t, 1, len(failed))
+	assert.Len(t, successful, 1)
+	assert.Len(t, failed, 1)
 	assert.Equal(t, "error message: some error", failed[0].Reason)
 }
 
 func TestProcessDeletes(t *testing.T) {
+	t.Parallel()
+
 	deletes := []client.ClientWriteRequestDeleteResponse{
 		{
 			TupleKey: client.ClientTupleKeyWithoutCondition{User: "user:1", Relation: "access", Object: "document:1"},
@@ -43,12 +47,14 @@ func TestProcessDeletes(t *testing.T) {
 
 	successful, failed := processDeletes(deletes)
 
-	assert.Equal(t, 1, len(successful))
-	assert.Equal(t, 1, len(failed))
+	assert.Len(t, successful, 1)
+	assert.Len(t, failed, 1)
 	assert.Equal(t, "error message: some error", failed[0].Reason)
 }
 
 func TestGetImportChunk(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name              string
 		index             int
@@ -281,11 +287,13 @@ func TestGetImportChunk(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			writeChunk, deleteChunk := getImportChunk(tt.index, tt.maxTuplesPerWrite, tt.writes, tt.deletes)
-			assert.Equal(t, tt.expectedWrites, writeChunk)
-			assert.Equal(t, tt.expectedDeletes, deleteChunk)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			writeChunk, deleteChunk := getImportChunk(test.index, test.maxTuplesPerWrite, test.writes, test.deletes)
+			assert.Equal(t, test.expectedWrites, writeChunk)
+			assert.Equal(t, test.expectedDeletes, deleteChunk)
 		})
 	}
 }

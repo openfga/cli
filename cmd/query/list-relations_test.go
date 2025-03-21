@@ -107,7 +107,7 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
-	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"}]}}` //nolint:all
+	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"}]}}`
 	if err := json.Unmarshal([]byte(modelJSON), &expectedResponse); err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -173,7 +173,7 @@ func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
 
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
-	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"},{"relations":{},"type":"user"}]}}` //nolint:all
+	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"},{"relations":{},"type":"user"}]}}`
 	if err := json.Unmarshal([]byte(modelJSON), &expectedResponse); err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -222,7 +222,7 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
-	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"}]}}` //nolint:all
+	modelJSON := `{"authorization_model":{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"doc"}]}}`
 	if err := json.Unmarshal([]byte(modelJSON), &expectedResponse); err != nil {
 		t.Fatalf("%v", err)
 	}

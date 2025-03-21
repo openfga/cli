@@ -27,6 +27,11 @@ import (
 	"github.com/openfga/cli/internal/build"
 )
 
+const (
+	MaxSdkRetry    = 15
+	MinSdkWaitInMs = 500
+)
+
 var userAgent = "openfga-cli/" + build.Version
 
 type ClientConfig struct {
@@ -77,8 +82,8 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 		Credentials:          c.getCredentials(),
 		UserAgent:            userAgent,
 		RetryParams: &openfga.RetryParams{
-			MaxRetry:    15,
-			MinWaitInMs: 500,
+			MaxRetry:    MaxSdkRetry,
+			MinWaitInMs: MinSdkWaitInMs,
 		},
 	}
 }

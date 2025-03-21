@@ -15,7 +15,7 @@ import (
 
 var errMockList = errors.New("mock error")
 
-const model1JSON = `{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}` //nolint:all
+const model1JSON = `{"id":"01GXSA8YR785C4FYS3C0RTG7B1","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}`
 
 func TestListModelsEmpty(t *testing.T) {
 	t.Parallel()
@@ -163,7 +163,7 @@ func TestListModelsMultiPage(t *testing.T) {
 
 	var model2 openfga.AuthorizationModel
 
-	model2JSON := `{"id":"01GXSA8YR785C4FYS3C0RTG7B2","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}` //nolint:all
+	model2JSON := `{"id":"01GXSA8YR785C4FYS3C0RTG7B2","schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}]}`
 	if err := json.Unmarshal([]byte(model2JSON), &model2); err != nil {
 		t.Fatalf("%v", err)
 	}
