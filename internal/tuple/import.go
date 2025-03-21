@@ -144,64 +144,37 @@ func importTuplesWithRPS(ctx context.Context, fgaClient client.SdkClient,
 // It receives an index, the maximum number of tuples per write, and the writes and deletes to import,
 // and based on that returns the chunk of tuples to write/delete.
 // It does that by filling the buckets with the writes first and then when out of writes, fills the rest with deletes.
-func getImportChunk(index int, maxTuplesPerWrite int, writes []client.ClientTupleKey, deletes []client.ClientTupleKeyWithoutCondition) ([]client.ClientTupleKey, []client.ClientTupleKeyWithoutCondition) {
-	numWrites := len(writes)
-	numDeletes := len(deletes)
-
-	if numWrites == 0 {
-		return []client.ClientTupleKey{}, getDeleteChunk(index, maxTuplesPerWrite, deletes)
-	}
-
+func getImportChunk(index, maxTuplesPerWrite int, writes []client.ClientTupleKey, deletes []client.ClientTupleKeyWithoutCondition) ([]client.ClientTupleKey, []client.ClientTupleKeyWithoutCondition) {
 	start := index * maxTuplesPerWrite
 	end := start + maxTuplesPerWrite
-	if end > numWrites {
-		end = numWrites
-	}
 
-	if start > end {
-		return []client.ClientTupleKey{}, []client.ClientTupleKeyWithoutCondition{}
-	}
-
-	writeChunk := writes[start:end]
+	writeChunk := []client.ClientTupleKey{}
 	deleteChunk := []client.ClientTupleKeyWithoutCondition{}
 
-	// if the number of writes < chunks, we have space to fill with deletes
-	if len(writeChunk) < maxTuplesPerWrite && numDeletes > 0 {
-		start = end + (index * maxTuplesPerWrite)
-		end = start + (maxTuplesPerWrite - len(writeChunk))
-		if end > numWrites+numDeletes {
-			end = numWrites + numDeletes
+	if start < len(writes) {
+		if end > len(writes) {
+			end = len(writes)
 		}
+		writeChunk = writes[start:end]
+	}
 
-		if start > end {
-			return []client.ClientTupleKey{}, []client.ClientTupleKeyWithoutCondition{}
+	if len(deletes) == 0 || len(writeChunk) == maxTuplesPerWrite {
+		return writeChunk, deleteChunk
+	}
+
+	indexOffset := index - len(writes)/maxTuplesPerWrite
+	extraWrites := len(writes) % maxTuplesPerWrite
+	start = indexOffset * maxTuplesPerWrite
+	end = start + maxTuplesPerWrite - extraWrites
+
+	if start < len(deletes) {
+		if end > len(deletes) {
+			end = len(deletes)
 		}
-
-		start = start - numWrites
-		end = end - numWrites
-
 		deleteChunk = deletes[start:end]
 	}
 
 	return writeChunk, deleteChunk
-}
-
-func getDeleteChunk(index int, maxTuplesPerWrite int, deletes []client.ClientTupleKeyWithoutCondition) []client.ClientTupleKeyWithoutCondition {
-	numDeletes := len(deletes)
-
-	start := index * maxTuplesPerWrite
-	end := start + maxTuplesPerWrite
-	if end > numDeletes {
-		end = numDeletes
-	}
-
-	if start > end {
-		return []client.ClientTupleKeyWithoutCondition{}
-	}
-
-	deleteChunk := deletes[start:end]
-
-	return deleteChunk
 }
 
 func extractErrMsg(err error) string {

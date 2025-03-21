@@ -129,6 +129,21 @@ func TestGetImportChunk(t *testing.T) {
 			expectedDeletes: []client.ClientTupleKeyWithoutCondition{{User: "user:1", Relation: "access", Object: "document:1"}},
 		},
 		{
+			name:              "Only deletes, exceeding limit, index = 1",
+			index:             1,
+			maxTuplesPerWrite: 2,
+			writes:            []client.ClientTupleKey{},
+			deletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:1", Relation: "access", Object: "document:1"},
+				{User: "user:2", Relation: "access", Object: "document:2"},
+				{User: "user:3", Relation: "access", Object: "document:3"},
+				{User: "user:4", Relation: "access", Object: "document:4"},
+				{User: "user:5", Relation: "access", Object: "document:5"},
+			},
+			expectedWrites:  []client.ClientTupleKey{},
+			expectedDeletes: []client.ClientTupleKeyWithoutCondition{{User: "user:3", Relation: "access", Object: "document:3"}, {User: "user:4", Relation: "access", Object: "document:4"}},
+		},
+		{
 			name:              "Index out of range for deletes",
 			index:             1,
 			maxTuplesPerWrite: 2,
@@ -187,7 +202,7 @@ func TestGetImportChunk(t *testing.T) {
 			expectedDeletes: []client.ClientTupleKeyWithoutCondition{},
 		},
 		{
-			name:              "Mixed writes and deletes, exactly at limit",
+			name:              "Mixed writes and deletes",
 			index:             0,
 			maxTuplesPerWrite: 2,
 			writes: []client.ClientTupleKey{
@@ -203,6 +218,66 @@ func TestGetImportChunk(t *testing.T) {
 				{User: "user:2", Relation: "access", Object: "document:2"},
 			},
 			expectedDeletes: []client.ClientTupleKeyWithoutCondition{},
+		},
+		{
+			name:              "Mixed writes and deletes",
+			index:             1,
+			maxTuplesPerWrite: 2,
+			writes: []client.ClientTupleKey{
+				{User: "user:1", Relation: "access", Object: "document:1"},
+				{User: "user:2", Relation: "access", Object: "document:2"},
+			},
+			deletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:3", Relation: "access", Object: "document:3"},
+				{User: "user:4", Relation: "access", Object: "document:4"},
+			},
+			expectedWrites: []client.ClientTupleKey{},
+			expectedDeletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:3", Relation: "access", Object: "document:3"},
+				{User: "user:4", Relation: "access", Object: "document:4"},
+			},
+		},
+		{
+			name:              "Mixed writes and deletes",
+			index:             0,
+			maxTuplesPerWrite: 5,
+			writes: []client.ClientTupleKey{
+				{User: "user:1", Relation: "access", Object: "document:1"},
+				{User: "user:2", Relation: "access", Object: "document:2"},
+			},
+			deletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:3", Relation: "access", Object: "document:3"},
+				{User: "user:4", Relation: "access", Object: "document:4"},
+			},
+			expectedWrites: []client.ClientTupleKey{
+				{User: "user:1", Relation: "access", Object: "document:1"},
+				{User: "user:2", Relation: "access", Object: "document:2"},
+			},
+			expectedDeletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:3", Relation: "access", Object: "document:3"},
+				{User: "user:4", Relation: "access", Object: "document:4"},
+			},
+		},
+		{
+			name:              "Mixed writes and deletes",
+			index:             1,
+			maxTuplesPerWrite: 2,
+			writes: []client.ClientTupleKey{
+				{User: "user:1", Relation: "access", Object: "document:1"},
+				{User: "user:2", Relation: "access", Object: "document:2"},
+				{User: "user:3", Relation: "access", Object: "document:3"},
+			},
+			deletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:4", Relation: "access", Object: "document:4"},
+				{User: "user:5", Relation: "access", Object: "document:5"},
+				{User: "user:6", Relation: "access", Object: "document:6"},
+			},
+			expectedWrites: []client.ClientTupleKey{
+				{User: "user:3", Relation: "access", Object: "document:3"},
+			},
+			expectedDeletes: []client.ClientTupleKeyWithoutCondition{
+				{User: "user:4", Relation: "access", Object: "document:4"},
+			},
 		},
 	}
 
