@@ -1,6 +1,17 @@
 # Changelog
 
-#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.4...HEAD)
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.5...HEAD)
+
+#### [0.6.5](https://github.com/openfga/cli/compare/v0.6.4...v0.6.5) (2025-03-24)
+
+Added:
+- Support for RPS ramp up for tuple writes, which can be helpful when importing a large amount of tuples (#463)
+  On `fga tuple write` we now support the following flags: `--max-rps` and `--rampup-period-in-sec`. If one is set, both are required.
+  e.g. `--max-rps 10 --rampup-period-in-sec 10`
+  If these flags are set the CLI will start ramping up requests from 1RPS to the configured max RPS over the configured period
+
+Changed:
+- The deprecated `fga tuple import` has now been aliased to `fga tuple write` (#463)
 
 
 #### [0.6.4](https://github.com/openfga/cli/compare/v0.6.3...v0.6.4) (2025-02-07)

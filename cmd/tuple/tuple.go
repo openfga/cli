@@ -36,7 +36,6 @@ func init() {
 	TupleCmd.AddCommand(readCmd)
 	TupleCmd.AddCommand(writeCmd)
 	TupleCmd.AddCommand(deleteCmd)
-	TupleCmd.AddCommand(importCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
 	err := TupleCmd.MarkPersistentFlagRequired("store-id")

@@ -11,7 +11,7 @@ import (
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
-func TestParseTuplesFileData(t *testing.T) { //nolint:funlen
+func TestParseTuplesFileData(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {

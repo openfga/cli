@@ -157,7 +157,7 @@ func TestReadChangesSinglePage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":""}` //nolint:lll
+	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":""}`
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -263,7 +263,7 @@ func TestReadChangesMultiPages(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T22:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}},{"operation":"TUPLE_OPERATION_DELETE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":"01GXSA8YR785C4FYS3C0RTG7B2"}` //nolint:lll
+	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T22:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}},{"operation":"TUPLE_OPERATION_DELETE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":"01GXSA8YR785C4FYS3C0RTG7B2"}`
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {
@@ -333,7 +333,7 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":"01GXSA8YR785C4FYS3C0RTG7B2"}` //nolint:lll
+	expectedOutput := `{"changes":[{"operation":"TUPLE_OPERATION_WRITE","timestamp":"2009-11-10T23:00:00Z","tuple_key":{"object":"document:doc1","relation":"reader","user":"user:user1"}}],"continuation_token":"01GXSA8YR785C4FYS3C0RTG7B2"}`
 
 	outputTxt, err := json.Marshal(output)
 	if err != nil {

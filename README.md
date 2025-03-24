@@ -674,11 +674,14 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
+* `--max-rps`: Max requests per second, when set the CLI will ramp up requests from 1RPS to the set value over the set period. Used in conjunction with `--rampup-period-in-sec` (optional)
+* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Used in conjunction with `--max-rps` (optional)
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`
 
 ###### Response
 ```json5

@@ -58,7 +58,7 @@ func TestExpandWithNoError(t *testing.T) {
 
 	mockExecute := mock_client.NewMockSdkClientExpandRequestInterface(mockCtrl)
 
-	expandResponseTxt := `{"tree":{"root":{"name":"document:roadmap#viewer","union":{"nodes":[{"name": "document:roadmap#viewer","leaf":{"users":{"users":["user:81684243-9356-4421-8fbf-a4f8d36aa31b"]}}}]}}}}` //nolint:all
+	expandResponseTxt := `{"tree":{"root":{"name":"document:roadmap#viewer","union":{"nodes":[{"name": "document:roadmap#viewer","leaf":{"users":{"users":["user:81684243-9356-4421-8fbf-a4f8d36aa31b"]}}}]}}}}`
 
 	expectedResponse := client.ClientExpandResponse{}
 	if err := json.Unmarshal([]byte(expandResponseTxt), &expectedResponse); err != nil {
@@ -100,7 +100,7 @@ func TestExpandWithConsistency(t *testing.T) {
 
 	mockExecute := mock_client.NewMockSdkClientExpandRequestInterface(mockCtrl)
 
-	expandResponseTxt := `{"tree":{"root":{"name":"document:roadmap#viewer","union":{"nodes":[{"name": "document:roadmap#viewer","leaf":{"users":{"users":["user:81684243-9356-4421-8fbf-a4f8d36aa31b"]}}}]}}}}` //nolint:all
+	expandResponseTxt := `{"tree":{"root":{"name":"document:roadmap#viewer","union":{"nodes":[{"name": "document:roadmap#viewer","leaf":{"users":{"users":["user:81684243-9356-4421-8fbf-a4f8d36aa31b"]}}}]}}}}`
 
 	expectedResponse := client.ClientExpandResponse{}
 	if err := json.Unmarshal([]byte(expandResponseTxt), &expectedResponse); err != nil {
