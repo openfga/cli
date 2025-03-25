@@ -192,8 +192,8 @@ func TestReadSinglePage(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`                                                                                 //nolint:lll
+	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}`
+	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`
 
 	outputTxt, err := json.Marshal(output.complete)
 	if err != nil {
@@ -314,8 +314,8 @@ func TestReadMultiPages(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T22:00:00Z"},{"key":{"object":"document:doc2","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"},{"object":"document:doc2","relation":"reader","user":"user:user1"}]`                                                                                                                            //nolint:lll
+	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T22:00:00Z"},{"key":{"object":"document:doc2","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}`
+	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"},{"object":"document:doc2","relation":"reader","user":"user:user1"}]`
 
 	outputTxt, err := json.Marshal(output.complete)
 	if err != nil {
@@ -396,8 +396,8 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}` //nolint:lll
-	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`                                                                                 //nolint:lll
+	expectedOutput := `{"continuation_token":"","tuples":[{"key":{"object":"document:doc1","relation":"reader","user":"user:user1"},"timestamp":"2009-11-10T23:00:00Z"}]}`
+	simpleOutput := `[{"object":"document:doc1","relation":"reader","user":"user:user1"}]`
 
 	outputTxt, err := json.Marshal(output.complete)
 	if err != nil {

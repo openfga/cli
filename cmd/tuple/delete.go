@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -27,6 +28,7 @@ import (
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/tuple"
 )
 
 // deleteCmd represents the delete command.
@@ -47,6 +49,8 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 		if fileName != "" {
+			startTime := time.Now()
+
 			var tuples []client.ClientTupleKeyWithoutCondition
 
 			data, err := os.ReadFile(fileName)
@@ -59,25 +63,47 @@ var deleteCmd = &cobra.Command{
 				return fmt.Errorf("failed to parse input tuples due to %w", err)
 			}
 
-			maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
+			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 			if err != nil {
-				return fmt.Errorf("failed to parse max tuples per write due to %w", err)
+				return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
 			}
 
-			maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
+			maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
 			if err != nil {
-				return fmt.Errorf("failed to parse parallel requests due to %w", err)
+				return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
 			}
 
-			deleteRequest := client.ClientWriteRequest{
+			writeRequest := client.ClientWriteRequest{
 				Deletes: tuples,
 			}
-			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
+
+			response, err := tuple.ImportTuplesWithoutRampUp(
+				cmd.Context(), fgaClient,
+				maxTuplesPerWrite, maxParallelRequests,
+				writeRequest)
 			if err != nil {
-				return err
+				return err //nolint:wrapcheck
 			}
 
-			return output.Display(*response)
+			duration := time.Since(startTime)
+			timeSpent := duration.String()
+
+			outputResponse := make(map[string]interface{})
+
+			if !hideImportedTuples && len(response.Successful) > 0 {
+				outputResponse["successful"] = response.Successful
+			}
+
+			if len(response.Failed) > 0 {
+				outputResponse["failed"] = response.Failed
+			}
+
+			outputResponse["total_count"] = len(tuples)
+			outputResponse["successful_count"] = len(response.Successful)
+			outputResponse["failed_count"] = len(response.Failed)
+			outputResponse["time_spent"] = timeSpent
+
+			return output.Display(outputResponse)
 		}
 		body := &client.ClientDeleteTuplesBody{
 			client.ClientTupleKeyWithoutCondition{
@@ -99,8 +125,10 @@ var deleteCmd = &cobra.Command{
 func init() {
 	deleteCmd.Flags().String("file", "", "Tuples file")
 	deleteCmd.Flags().String("model-id", "", "Model ID")
-	deleteCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	deleteCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	deleteCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	deleteCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+
+	deleteCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output") //nolint:lll
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {

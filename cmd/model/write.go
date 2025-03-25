@@ -28,9 +28,11 @@ import (
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/utils"
 )
 
 func Write(
+	ctx context.Context,
 	fgaClient client.SdkClient,
 	inputModel authorizationmodel.AuthzModel,
 ) (*client.ClientWriteAuthorizationModelResponse, error) {
@@ -40,7 +42,7 @@ func Write(
 		Conditions:      inputModel.GetConditions(),
 	}
 
-	model, err := fgaClient.WriteAuthorizationModel(context.Background()).Body(body).Execute()
+	model, err := fgaClient.WriteAuthorizationModel(ctx).Body(body).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to write model due to %w", err)
 	}
@@ -77,6 +79,8 @@ fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"ty
 			return err //nolint:wrapcheck
 		}
 
+		debug, _ := cmd.Flags().GetBool("debug")
+
 		authModel := authorizationmodel.AuthzModel{}
 
 		err = authModel.ReadModelFromString(inputModel, writeInputFormat)
@@ -84,7 +88,9 @@ fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"ty
 			return err //nolint:wrapcheck
 		}
 
-		response, err := Write(fgaClient, authModel)
+		ctx := utils.WithDebugContext(cmd.Context(), debug)
+
+		response, err := Write(ctx, fgaClient, authModel)
 		if err != nil {
 			return err
 		}

@@ -27,7 +27,6 @@ import (
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
-	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -36,10 +35,12 @@ type CreateStoreAndModelResponse struct {
 	Model *client.ClientWriteAuthorizationModelResponse `json:"model,omitempty"`
 }
 
-func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateStoreResponse, error) {
+func create(
+	ctx context.Context, fgaClient client.SdkClient, storeName string,
+) (*client.ClientCreateStoreResponse, error) {
 	body := client.ClientCreateStoreRequest{Name: storeName}
 
-	store, err := fgaClient.CreateStore(context.Background()).Body(body).Execute()
+	store, err := fgaClient.CreateStore(ctx).Body(body).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create store %v due to %w", storeName, err)
 	}
@@ -48,23 +49,19 @@ func create(fgaClient client.SdkClient, storeName string) (*client.ClientCreateS
 }
 
 func CreateStoreWithModel(
-	clientConfig fga.ClientConfig,
+	ctx context.Context,
+	fgaClient client.SdkClient,
 	storeName string,
 	inputModel string,
 	inputFormat authorizationmodel.ModelFormat,
 ) (*CreateStoreAndModelResponse, error) {
-	fgaClient, err := clientConfig.GetFgaClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize FGA Client due to %w", err)
-	}
-
 	response := CreateStoreAndModelResponse{}
 
 	if storeName == "" {
 		return nil, errors.New(`required flag(s) "name" not set`) //nolint:goerr113
 	}
 
-	createStoreResponse, err := create(fgaClient, storeName)
+	createStoreResponse, err := create(ctx, fgaClient, storeName)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +70,7 @@ func CreateStoreWithModel(
 
 	err = fgaClient.SetStoreId(response.Store.Id)
 	if err != nil {
-		return nil, err //nolint:wrapcheck
+		return nil, fmt.Errorf("failed to set store ID: %w", err)
 	}
 
 	if inputModel != "" {
@@ -84,7 +81,7 @@ func CreateStoreWithModel(
 			return nil, err //nolint:wrapcheck
 		}
 
-		createAuthZModelResponse, err := model.Write(fgaClient, authModel)
+		createAuthZModelResponse, err := model.Write(ctx, fgaClient, authModel)
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}
@@ -109,6 +106,10 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
+		fgaClient, err := clientConfig.GetFgaClient()
+		if err != nil {
+			return fmt.Errorf("failed to initialize FGA Client: %w", err)
+		}
 
 		var inputModel string
 		if err := authorizationmodel.ReadFromInputFileOrArg(
@@ -122,7 +123,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 			return err //nolint:wrapcheck
 		}
 
-		response, err := CreateStoreWithModel(clientConfig, storeName, inputModel, createModelInputFormat)
+		response, err := CreateStoreWithModel(cmd.Context(), fgaClient, storeName, inputModel, createModelInputFormat)
 		if err != nil {
 			return err
 		}

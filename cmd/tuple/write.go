@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
@@ -27,15 +28,26 @@ import (
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/tuple"
 	"github.com/openfga/cli/internal/tuplefile"
+	"github.com/openfga/cli/internal/utils"
 )
 
 const writeCommandArgumentsCount = 3
 
+var hideImportedTuples bool
+
+type ImportStats struct {
+	TotalTuples      int
+	SuccessfulTuples int
+	FailedTuples     int
+}
+
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
-	Use:   "write",
-	Short: "Create Relationship Tuples",
+	Use:     "write",
+	Aliases: []string{"import"},
+	Short:   "Create Relationship Tuples",
 	Long: "Add relationship tuples to the store. This command allows for the creation of " +
 		"relationship tuples either through direct command line arguments or by specifying a " +
 		"file. The file can be in JSON, YAML, or CSV format.\n\n" +
@@ -60,7 +72,9 @@ var writeCmd = &cobra.Command{
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
-  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv`,
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -73,7 +87,7 @@ var writeCmd = &cobra.Command{
 			return writeTuplesFromArgs(cmd, args, fgaClient)
 		}
 
-		return writeTuplesFromFile(cmd.Flags(), fgaClient)
+		return writeTuplesFromFile(cmd.Context(), cmd.Flags(), fgaClient)
 	},
 }
 
@@ -108,7 +122,9 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 	)
 }
 
-func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error {
+func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error { //nolint:cyclop
+	startTime := time.Now()
+
 	fileName, err := flags.GetString("file")
 	if err != nil {
 		return fmt.Errorf("failed to parse file name: %w", err)
@@ -118,14 +134,29 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		return errors.New("file name cannot be empty") //nolint:goerr113
 	}
 
-	maxTuplesPerWrite, err := flags.GetInt32("max-tuples-per-write")
+	maxTuplesPerWrite, err := flags.GetInt("max-tuples-per-write")
 	if err != nil {
-		return fmt.Errorf("failed to parse max tuples per write: %w", err)
+		return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
 	}
 
-	maxParallelRequests, err := flags.GetInt32("max-parallel-requests")
+	maxParallelRequests, err := flags.GetInt("max-parallel-requests")
 	if err != nil {
-		return fmt.Errorf("failed to parse parallel requests: %w", err)
+		return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
+	}
+
+	maxRPS, err := flags.GetInt("max-rps")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-rps due to %w", err)
+	}
+
+	rampUpPeriodInSec, err := flags.GetInt("rampup-period-in-sec")
+	if err != nil {
+		return fmt.Errorf("failed to parse parallel requests due to %w", err)
+	}
+
+	debug, err := flags.GetBool("debug")
+	if err != nil {
+		return fmt.Errorf("failed to parse debug flag due to %w", err)
 	}
 
 	tuples, err := tuplefile.ReadTupleFile(fileName)
@@ -137,12 +168,35 @@ func writeTuplesFromFile(flags *flag.FlagSet, fgaClient *client.OpenFgaClient) e
 		Writes: tuples,
 	}
 
-	response, err := ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests)
+	newCtx := utils.WithDebugContext(ctx, debug)
+
+	response, err := tuple.ImportTuples(
+		newCtx, fgaClient,
+		tuple.DefaultMinRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
+		writeRequest)
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
-	return output.Display(response) //nolint:wrapcheck
+	duration := time.Since(startTime)
+	timeSpent := duration.String()
+
+	outputResponse := make(map[string]interface{})
+
+	if !hideImportedTuples && len(response.Successful) > 0 {
+		outputResponse["successful"] = response.Successful
+	}
+
+	if len(response.Failed) > 0 {
+		outputResponse["failed"] = response.Failed
+	}
+
+	outputResponse["total_count"] = len(tuples)
+	outputResponse["successful_count"] = len(response.Successful)
+	outputResponse["failed_count"] = len(response.Failed)
+	outputResponse["time_spent"] = timeSpent
+
+	return output.Display(outputResponse) //nolint:wrapcheck
 }
 
 func init() {
@@ -150,6 +204,15 @@ func init() {
 	writeCmd.Flags().String("file", "", "Tuples file")
 	writeCmd.Flags().String("condition-name", "", "Condition Name")
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
-	writeCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	writeCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
+	writeCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	writeCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
+
+	writeCmd.Flags().Int("max-rps", 0, "The maximum requests per second.")
+	writeCmd.Flags().Int("rampup-period-in-sec", 0, "The period over which to ramp up the request rate.")
+	writeCmd.MarkFlagsRequiredTogether(
+		"max-rps",
+		"rampup-period-in-sec",
+	)
+
+	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
 }

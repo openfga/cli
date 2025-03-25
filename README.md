@@ -652,11 +652,10 @@ type document
 
 | Description                                                                       | command   | parameters                           | example                                                                                                           |
 |-----------------------------------------------------------------------------------|-----------|--------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id`           | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
+| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` `--file`          | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
 | [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
 | [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`, `--model-id`           | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`                      |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--continuation-token`,           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=`                   |
-| [Import Relationship Tuples](#import-relationship-tuples)                        | `import`  | `--store-id`, `--model-id`, `--file` | `fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json` |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--start-time`, `--continuation-token`,           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --start-time=2022-01-01T00:00:00Z --continuation-token=M3w=`                   |
 
 ##### Write Relationship Tuples
 
@@ -674,10 +673,15 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
+* `--max-rps`: Max requests per second, when set the CLI will ramp up requests from 1RPS to the set value over the set period. Used in conjunction with `--rampup-period-in-sec` (optional)
+* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Used in conjunction with `--max-rps` (optional)
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`
 
 ###### Response
 ```json5
@@ -755,9 +759,41 @@ If using a `json` file, the format should be:
       },
       "reason":"Write validation error ..."
     }
-  ]
+  ],
+  "failed_count": 1,
+  "successful_count": 1,
+  "total_count": 2
 }
 ```
+
+###### Response with `--hide-imported-tuples`
+```json5
+{
+  "failed": [
+    {
+      "tuple_key": {
+        "object":"document:roadmap",
+        "relation":"writer",
+        "user":"carl"
+      },
+      "reason":"Write validation error ..."
+    }
+  ],
+  "failed_count": 1,
+  "successful_count": 1,
+  "total_count": 2
+}
+```
+
+In some cases you could want to retry failed tuples (e.g. network connectivity error). To achieve that, you can direct the output to a file:
+
+`fga tuple write --file tuples.json' --hide-imported-tuples > results.json`
+
+Then, process the file with `jq` to convert it to format that you can send the CLI again:
+
+`jq -c '[.failed[] | {user: .tuple_key.user, relation: .tuple_key.relation, object: .tuple_key.object}]' result.json > failed_tuples.json`
+
+`fga tuple write --file failed_tuples.json' --hide-imported-tuples `
 
 ##### Delete Relationship Tuples
 
@@ -858,11 +894,11 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 ```
 
 
-If you want to transform this output in a way that can be then imported using the `fga tuple import` you can run
+If you want to transform this output in a way that can be then imported using the `fga tuple write` you can run
 
 ```
 fga tuple read --output-format=simple-json --max-pages 0 > tuples.json
-fga tuple import --file tuples.json
+fga tuple write --file tuples.json
 ```
 
 ##### Read Relationship Tuple Changes (Watch)
@@ -873,6 +909,7 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 ###### Parameters
 * `--store-id`: Specifies the store id
 * `--type`: Restrict to a specific type (optional)
+* `--start-time`: Return changes since a specified time (optional)
 * `--max-pages`: Max number of pages to retrieve (default: 20)
 * `--continuation-token`: Continuation token to start changes from
 
@@ -894,69 +931,6 @@ fga tuple **changes** --type <type> --store-id=<store-id>
     }
   ],
   "continuation_token":"NHw="
-}
-```
-
-##### Import Relationship Tuples
-
-###### Command
-fga tuple **import** --store-id=<store-id> [--model-id=<model-id>] --file <filename> [--max-tuples-per-write=<num>] [--max-parallel-requests=<num>]
-
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `yaml` and `json` files are supported
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
-* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
-
-File format should be:
-In YAML:
-```yaml
-- user: user:anne
-  relation: can_view
-  object: document:roadmap
-- user: user:beth
-  relation: can_view
-  object: document:roadmap
-```
-
-In JSON:
-
-```json
-[{
-  "user": "user:anne",
-  "relation": "can_view",
-  "object": "document:roadmap"
-}, {
-  "user": "user:beth",
-  "relation": "can_view",
-  "object": "document:roadmap"
-}]
-```
-
-###### Example
-`fga tuple import --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
-
-###### Response
-```json5
-{
-  "successful": [
-    {
-      "object":"document:roadmap",
-      "relation":"writer",
-      "user":"user:annie"
-    }
-  ],
-  "failed": [
-    {
-      "tuple_key": {
-        "object":"document:roadmap",
-        "relation":"writer",
-        "user":"carl"
-      },
-      "reason":"Write validation error ..."
-    }
-  ]
 }
 ```
 

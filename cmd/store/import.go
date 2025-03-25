@@ -31,12 +31,12 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/cmd/model"
-	"github.com/openfga/cli/cmd/tuple"
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
+	"github.com/openfga/cli/internal/tuple"
 )
 
 const (
@@ -48,7 +48,9 @@ const (
 
 // createStore creates a new store with the given client configuration and store data.
 func createStore(
+	ctx context.Context,
 	clientConfig *fga.ClientConfig,
+	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	fileName string,
@@ -58,7 +60,7 @@ func createStore(
 		storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
 	}
 
-	createStoreAndModelResponse, err := CreateStoreWithModel(*clientConfig, storeDataName, storeData.Model, format)
+	createStoreAndModelResponse, err := CreateStoreWithModel(ctx, fgaClient, storeDataName, storeData.Model, format)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +72,14 @@ func createStore(
 
 // updateStore updates an existing store with the given client configuration, store data, and store ID.
 func updateStore(
+	ctx context.Context,
 	clientConfig *fga.ClientConfig,
 	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
 ) (*CreateStoreAndModelResponse, error) {
-	store, err := fgaClient.GetStore(context.Background()).Execute()
+	store, err := fgaClient.GetStore(ctx).Execute()
 
 	response := &CreateStoreAndModelResponse{
 		Store: client.ClientCreateStoreResponse{
@@ -84,7 +87,7 @@ func updateStore(
 		},
 	}
 
-	if err != nil {
+	if err != nil && store != nil {
 		response.Store.CreatedAt = store.GetCreatedAt()
 		response.Store.Name = store.GetName()
 		response.Store.UpdatedAt = store.GetUpdatedAt()
@@ -97,7 +100,7 @@ func updateStore(
 		return nil, fmt.Errorf("failed to read model: %w", err)
 	}
 
-	modelWriteRes, err := model.Write(fgaClient, authModel)
+	modelWriteRes, err := model.Write(ctx, fgaClient, authModel)
 	if err != nil {
 		return nil, fmt.Errorf("failed to write model: %w", err)
 	}
@@ -109,32 +112,41 @@ func updateStore(
 
 // importStore imports store data, either creating a new store or updating an existing one.
 func importStore(
+	ctx context.Context,
 	clientConfig *fga.ClientConfig,
 	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
 	format authorizationmodel.ModelFormat,
 	storeID string,
-	maxTuplesPerWrite, maxParallelRequests int32,
+	maxTuplesPerWrite, maxParallelRequests int,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
-	response, err := createOrUpdateStore(clientConfig, fgaClient, storeData, format, storeID, fileName)
+	response, err := createOrUpdateStore(ctx, clientConfig, fgaClient, storeData, format, storeID, fileName)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(storeData.Tuples) == 0 {
-		return response, nil
+	if len(storeData.Tuples) != 0 {
+		err = importTuples(
+			ctx, fgaClient, storeData.Tuples, maxTuplesPerWrite, maxParallelRequests,
+		)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = importTuples(fgaClient, storeData.Tuples, maxTuplesPerWrite, maxParallelRequests)
-	if err != nil {
-		return nil, err
+	if len(storeData.Tests) != 0 && response.Model != nil {
+		err = importAssertions(ctx, fgaClient, storeData.Tests, response.Store.Id, response.Model.AuthorizationModelId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return response, nil
 }
 
 func createOrUpdateStore(
+	ctx context.Context,
 	clientConfig *fga.ClientConfig,
 	fgaClient client.SdkClient,
 	storeData *storetest.StoreData,
@@ -143,21 +155,21 @@ func createOrUpdateStore(
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
 	if storeID == "" {
-		return createStore(clientConfig, storeData, format, fileName)
+		return createStore(ctx, clientConfig, fgaClient, storeData, format, fileName)
 	}
 
-	return updateStore(clientConfig, fgaClient, storeData, format, storeID)
+	return updateStore(ctx, clientConfig, fgaClient, storeData, format, storeID)
 }
 
 func importTuples(
-	fgaClient client.SdkClient,
+	ctx context.Context, fgaClient client.SdkClient,
 	tuples []openfga.TupleKey,
-	maxTuplesPerWrite, maxParallelRequests int32,
+	maxTuplesPerWrite, maxParallelRequests int,
 ) error {
 	bar := createProgressBar(len(tuples))
 
-	for index := 0; index < len(tuples); index += int(maxTuplesPerWrite) {
-		end := index + int(maxTuplesPerWrite)
+	for index := 0; index < len(tuples); index += maxTuplesPerWrite {
+		end := index + maxTuplesPerWrite
 		if end > len(tuples) {
 			end = len(tuples)
 		}
@@ -165,7 +177,9 @@ func importTuples(
 		writeRequest := client.ClientWriteRequest{
 			Writes: tuples[index:end],
 		}
-		if _, err := tuple.ImportTuples(fgaClient, writeRequest, maxTuplesPerWrite, maxParallelRequests); err != nil {
+
+		if _, err := tuple.ImportTuplesWithoutRampUp(
+			ctx, fgaClient, maxTuplesPerWrite, maxParallelRequests, writeRequest); err != nil {
 			return fmt.Errorf("failed to import tuples: %w", err)
 		}
 
@@ -181,6 +195,54 @@ func importTuples(
 	}
 
 	return nil
+}
+
+func importAssertions(
+	ctx context.Context,
+	fgaClient client.SdkClient,
+	modelTests []storetest.ModelTest,
+	storeID string,
+	modelID string,
+) error {
+	var assertions []client.ClientAssertion
+
+	for _, modelTest := range modelTests {
+		if len(modelTest.Check) > 0 {
+			checkAssertions := getCheckAssertions(modelTest.Check)
+			assertions = append(assertions, checkAssertions...)
+		}
+	}
+
+	if len(assertions) > 0 {
+		writeOptions := client.ClientWriteAssertionsOptions{
+			AuthorizationModelId: &modelID,
+			StoreId:              &storeID,
+		}
+
+		_, err := fgaClient.WriteAssertions(ctx).Body(assertions).Options(writeOptions).Execute()
+		if err != nil {
+			return fmt.Errorf("failed to import assertions: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAssertion {
+	var assertions []client.ClientAssertion
+
+	for _, checkTest := range checkTests {
+		for relation, expectation := range checkTest.Assertions {
+			assertions = append(assertions, client.ClientAssertion{
+				User:        checkTest.User,
+				Relation:    relation,
+				Object:      checkTest.Object,
+				Expectation: expectation,
+			})
+		}
+	}
+
+	return assertions
 }
 
 func createProgressBar(total int) *progressbar.ProgressBar {
@@ -219,14 +281,14 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to get store-id: %w", err)
 		}
 
-		maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
+		maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 		if err != nil {
-			return fmt.Errorf("failed to parse max tuples per write: %w", err)
+			return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
 		}
 
-		maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
+		maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
 		if err != nil {
-			return fmt.Errorf("failed to parse parallel requests: %w", err)
+			return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
 		}
 
 		fileName, err := cmd.Flags().GetString("file")
@@ -244,7 +306,8 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client: %w", err)
 		}
 
-		createStoreAndModelResponse, err := importStore(&clientConfig, fgaClient, storeData, format,
+		createStoreAndModelResponse, err := importStore(
+			cmd.Context(), &clientConfig, fgaClient, storeData, format,
 			storeID, maxTuplesPerWrite, maxParallelRequests, fileName)
 		if err != nil {
 			return fmt.Errorf("failed to import store: %w", err)
@@ -262,8 +325,8 @@ var importCmd = &cobra.Command{
 func init() {
 	importCmd.Flags().String("file", "", "File Name. The file should have the store")
 	importCmd.Flags().String("store-id", "", "Store ID")
-	importCmd.Flags().Int32("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
-	importCmd.Flags().Int32("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 
 	if err := importCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
