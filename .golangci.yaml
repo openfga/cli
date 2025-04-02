@@ -77,8 +77,16 @@ formatters:
     goimports:
       local-prefixes: ["github.com/openfga/cli"]
 
+output:
+  formats:
+    text:
+      path: stdout
+      print-issued-lines: true
+      print-linter-name: true
+      colors: true
+
 issues:
-  exclude:
+  exclude-rules:
     - path: "cmd/tuple/write(.*).go"
       linters:
         - lll
