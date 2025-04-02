@@ -43,23 +43,23 @@ func validateImportParams(minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, 
 ) error {
 	if maxRPS != 0 && minRPS > maxRPS {
 		if minRPS <= 0 || maxRPS <= 0 || rampUpPeriodInSec < 0 {
-			return errors.New("ramp-up parameters must be a positive integer") //nolint:goerr113
+			return errors.New("ramp-up parameters must be a positive integer") //nolint:err113
 		}
 
-		return errors.New("minRPS must be less than or equal to maxRPS") //nolint:goerr113
+		return errors.New("minRPS must be less than or equal to maxRPS") //nolint:err113
 	}
 
 	if maxTuplesPerWrite < 1 {
-		return errors.New("maxTuplesPerWrite must be at least 1") //nolint:goerr113
+		return errors.New("maxTuplesPerWrite must be at least 1") //nolint:err113
 	}
 
 	if maxParallelRequests < 1 {
-		return errors.New("maxParallelRequests must be at least 1") //nolint:goerr113
+		return errors.New("maxParallelRequests must be at least 1") //nolint:err113
 	}
 
 	requestsLen := len(body.Writes) + len(body.Deletes)
 	if requestsLen > math.MaxInt32 {
-		return fmt.Errorf( //nolint:goerr113
+		return fmt.Errorf( //nolint:err113
 			"too many requests in ramp up: %d. max supported is %d", requestsLen, math.MaxInt32,
 		)
 	}

@@ -134,7 +134,7 @@ func init() {
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) != n && !cmd.Flags().Changed(flag) {
-			return fmt.Errorf("at least %d arg(s) are required OR the flag --%s", n, flag) //nolint:goerr113
+			return fmt.Errorf("at least %d arg(s) are required OR the flag --%s", n, flag) //nolint:err113
 		}
 
 		return nil

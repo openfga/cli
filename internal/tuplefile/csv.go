@@ -114,7 +114,7 @@ func (columns *csvColumns) setHeaderIndex(headerName string, index int) error {
 	case "condition_context":
 		columns.ConditionContext = index
 	default:
-		return fmt.Errorf("invalid header %q, valid headers are user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context", headerName) //nolint:goerr113,lll
+		return fmt.Errorf("invalid header %q, valid headers are user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context", headerName) //nolint:err113,lll
 	}
 
 	return nil
@@ -142,7 +142,7 @@ func (columns *csvColumns) validate() error {
 	}
 
 	if columns.ConditionContext != -1 && columns.ConditionName == -1 {
-		return errors.New( //nolint:goerr113
+		return errors.New( //nolint:err113
 			"missing \"condition_name\" header which is required when \"condition_context\" is present",
 		)
 	}

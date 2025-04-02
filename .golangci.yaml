@@ -1,10 +1,12 @@
+version: "2"
+
 run:
   timeout: 3m
   modules-download-mode: readonly
   allow-parallel-runners: true
 
 linters:
-  enable-all: true
+  default: all
   disable:
     - dupl #temporary
     - exhaustruct

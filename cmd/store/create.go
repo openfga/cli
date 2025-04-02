@@ -58,7 +58,7 @@ func CreateStoreWithModel(
 	response := CreateStoreAndModelResponse{}
 
 	if storeName == "" {
-		return nil, errors.New(`required flag(s) "name" not set`) //nolint:goerr113
+		return nil, errors.New(`required flag(s) "name" not set`) //nolint:err113
 	}
 
 	createStoreResponse, err := create(ctx, fgaClient, storeName)
@@ -97,7 +97,7 @@ var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create Store",
 	Long:  "Create an OpenFGA store.",
-	Example: `fga store create --name "FGA Demo Store" 
+	Example: `fga store create --name "FGA Demo Store"
 
 To set the created store id as an environment variable that will be used by the CLI, you can use the following command:
 
