@@ -75,14 +75,15 @@ formatters:
     - goimports
   settings:
     goimports:
-      local-prefixes: "github.com/openfga/cli"
+      local-prefixes: ["github.com/openfga/cli"]
 
-exclude:
-  - path: "cmd/tuple/write(.*).go"
-    linters:
-      - lll
-  - path: _test.go
-    linters:
-      - err113
-      - funlen
-      - lll
+issues:
+  exclude:
+    - path: "cmd/tuple/write(.*).go"
+      linters:
+        - lll
+    - path: _test.go
+      linters:
+        - err113
+        - funlen
+        - lll
