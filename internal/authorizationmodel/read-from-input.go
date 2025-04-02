@@ -42,8 +42,8 @@ func ReadFromFile(
 	*input = string(file)
 
 	// if the input format is set as the default, set it from the file extension (and default to fga)
-	switch *format {
-	case ModelFormatDefault:
+	// nolint:staticcheck,exhaustive
+	if *format == ModelFormatDefault {
 		switch {
 		case strings.HasSuffix(fileName, "fga.mod"):
 			*format = ModelFormatModular
@@ -53,14 +53,10 @@ func ReadFromFile(
 		default:
 			*format = ModelFormatFGA
 		}
-	case ModelFormatModular:
+	} else if *format == ModelFormatModular {
 		// If we're provided a modular model we want the input to be the filename as we will handle
 		// reading and parsing the fga.mod file later
 		*input = fileName
-	case ModelFormatJSON:
-		// No special handling needed for JSON format
-	case ModelFormatFGA:
-		// No special handling needed for FGA format
 	}
 
 	if *storeName == "" {
