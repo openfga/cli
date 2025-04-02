@@ -85,13 +85,12 @@ output:
       print-linter-name: true
       colors: true
 
-issues:
-  exclude-rules:
-    - path: "cmd/tuple/write(.*).go"
-      linters:
-        - lll
-    - path: _test.go
-      linters:
-        - err113
-        - funlen
-        - lll
+exclude:
+  - path: "cmd/tuple/write(.*).go"
+    linters:
+      - lll
+  - path: _test.go
+    linters:
+      - err113
+      - funlen
+      - lll
