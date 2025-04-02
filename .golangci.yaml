@@ -70,13 +70,13 @@ linters:
       lines: 120
       statements: 80
   exclusions:
-    paths:
-      - "cmd/tuple/write(.*).go"
-      - "_test.go"
-    linters:
-      - lll
-      - err113
-      - funlen
+    - path: "cmd/tuple/write(.*).go"
+      linters:
+        - lll
+    - path: "_test.go"
+      linters:
+        - err113
+        - funlen
 
 formatters:
   enable:
