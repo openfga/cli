@@ -69,6 +69,15 @@ linters:
     funlen:
       lines: 120
       statements: 80
+  exclusions:
+    - path: "cmd/tuple/write(.*).go"
+      linters:
+        - lll
+    - path: _test.go
+      linters:
+        - err113
+        - funlen
+        - lll
 
 formatters:
   enable:
@@ -84,13 +93,3 @@ output:
       print-issued-lines: true
       print-linter-name: true
       colors: true
-
-exclude:
-  - path: "cmd/tuple/write(.*).go"
-    linters:
-      - lll
-  - path: _test.go
-    linters:
-      - err113
-      - funlen
-      - lll
