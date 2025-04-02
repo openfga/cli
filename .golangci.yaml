@@ -17,7 +17,8 @@ linters:
     - testpackage
     - gci
     - gomnd
-linters-settings:
+
+settings:
   depguard:
     rules:
       main:
@@ -73,14 +74,12 @@ linters-settings:
   goimports:
     local-prefixes: "github.com/openfga/cli"
 
-issues:
-  exclude-use-default: true
-  exclude-rules:
-    - path: "cmd/tuple/write(.*).go"
-      linters:
-        - lll
-    - path: _test.go
-      linters:
-        - err113
-        - funlen
-        - lll
+exclude:
+  - path: "cmd/tuple/write(.*).go"
+    linters:
+      - lll
+  - path: _test.go
+    linters:
+      - err113
+      - funlen
+      - lll
