@@ -1,29 +1,24 @@
 version: "2"
-
 run:
-  timeout: 3m
   modules-download-mode: readonly
   allow-parallel-runners: true
-
 linters:
   default: all
   disable:
-    - dupl #temporary
+    - dupl
     - exhaustruct
-    - gochecknoinits
     - forbidigo
     - gochecknoglobals
-    # deprecated
+    - gochecknoinits
+    - mnd
     - testpackage
-    - gci
-    - gomnd
   settings:
     depguard:
       rules:
         main:
           files:
             - $all
-            - "!$test"
+            - '!$test'
           allow:
             - $gostd
             - github.com/gocarina/gocsv
@@ -49,7 +44,7 @@ linters:
             - gopkg.in/yaml.v3
         test:
           files:
-            - "$test"
+            - $test
           allow:
             - $gostd
             - github.com/golang/mock/gomock
@@ -59,17 +54,21 @@ linters:
             - github.com/openfga/openfga
             - github.com/stretchr
             - go.uber.org/mock/gomock
-
-    tagliatelle:
-      case:
-        use-field-name: true
-        rules:
-          json: snake
-
     funlen:
       lines: 120
       statements: 80
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+        use-field-name: true
   exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
       - linters:
           - lll
@@ -77,19 +76,24 @@ linters:
       - linters:
           - err113
           - funlen
+          - lll
         path: _test.go
-
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 formatters:
   enable:
+    - gofmt
+    - gofumpt
     - goimports
   settings:
     goimports:
-      local-prefixes: ["github.com/openfga/cli"]
-
-output:
-  formats:
-    text:
-      path: stdout
-      print-issued-lines: true
-      print-linter-name: true
-      colors: true
+      local-prefixes:
+        - github.com/openfga/cli
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
