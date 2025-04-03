@@ -23,7 +23,7 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	case ".csv":
 		err = parseTuplesFromCSV(data, &tuples)
 	default:
-		err = fmt.Errorf("unsupported file format %q", path.Ext(fileName)) //nolint:goerr113
+		err = fmt.Errorf("unsupported file format %q", path.Ext(fileName)) //nolint:err113
 	}
 
 	if err != nil {

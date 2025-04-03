@@ -1,84 +1,99 @@
+version: "2"
 run:
-  timeout: 3m
   modules-download-mode: readonly
   allow-parallel-runners: true
-
 linters:
-  enable-all: true
+  default: all
   disable:
-    - dupl #temporary
+    - dupl
     - exhaustruct
-    - gochecknoinits
     - forbidigo
     - gochecknoglobals
-    # deprecated
+    - gochecknoinits
+    - mnd
     - testpackage
-    - gci
-    - gomnd
-linters-settings:
-  depguard:
-    rules:
-      main:
-        files:
-          - $all
-          - "!$test"
-        allow:
-          - $gostd
-          - github.com/gocarina/gocsv
-          - github.com/hashicorp/go-multierror
-          - github.com/mattn/go-isatty
-          - github.com/muesli/mango-cobra
-          - github.com/muesli/roff
-          - github.com/nwidger/jsoncolor
-          - github.com/oklog/ulid/v2
-          - github.com/openfga/api
-          - github.com/openfga/cli
-          - github.com/openfga/go-sdk
-          - github.com/openfga/language
-          - github.com/openfga/openfga
-          - github.com/rung/go-safecast
-          - github.com/schollz/progressbar/v3
-          - github.com/spf13/cobra
-          - github.com/spf13/pflag
-          - github.com/spf13/viper
-          - golang.org/x/time/rate
-          - google.golang.org/protobuf/encoding/protojson
-          - google.golang.org/protobuf/types/known/structpb
-          - gopkg.in/yaml.v3
-      test:
-        files:
-          - "$test"
-        allow:
-          - $gostd
-          - github.com/golang/mock/gomock
-          - github.com/openfga/api/proto
-          - github.com/openfga/cli
-          - github.com/openfga/go-sdk
-          - github.com/openfga/openfga
-          - github.com/stretchr
-          - go.uber.org/mock/gomock
-
-  tagliatelle:
-    case:
-      use-field-name: true
+  settings:
+    depguard:
       rules:
-        json: snake
-
-  funlen:
-    lines: 120
-    statements: 80
-
-  goimports:
-    local-prefixes: "github.com/openfga/cli"
-
-issues:
-  exclude-use-default: true
-  exclude-rules:
-    - path: "cmd/tuple/write(.*).go"
-      linters:
-        - lll
-    - path: _test.go
-      linters:
-        - err113
-        - funlen
-        - lll
+        main:
+          files:
+            - $all
+            - '!$test'
+          allow:
+            - $gostd
+            - github.com/gocarina/gocsv
+            - github.com/hashicorp/go-multierror
+            - github.com/mattn/go-isatty
+            - github.com/muesli/mango-cobra
+            - github.com/muesli/roff
+            - github.com/nwidger/jsoncolor
+            - github.com/oklog/ulid/v2
+            - github.com/openfga/api
+            - github.com/openfga/cli
+            - github.com/openfga/go-sdk
+            - github.com/openfga/language
+            - github.com/openfga/openfga
+            - github.com/rung/go-safecast
+            - github.com/schollz/progressbar/v3
+            - github.com/spf13/cobra
+            - github.com/spf13/pflag
+            - github.com/spf13/viper
+            - golang.org/x/time/rate
+            - google.golang.org/protobuf/encoding/protojson
+            - google.golang.org/protobuf/types/known/structpb
+            - gopkg.in/yaml.v3
+        test:
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com/golang/mock/gomock
+            - github.com/openfga/api/proto
+            - github.com/openfga/cli
+            - github.com/openfga/go-sdk
+            - github.com/openfga/openfga
+            - github.com/stretchr
+            - go.uber.org/mock/gomock
+    funlen:
+      lines: 120
+      statements: 80
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+        use-field-name: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - lll
+        path: cmd/tuple/write(.*).go
+      - linters:
+          - err113
+          - funlen
+          - lll
+        path: _test.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/openfga/cli
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

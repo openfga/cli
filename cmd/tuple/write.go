@@ -131,7 +131,7 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	}
 
 	if fileName == "" {
-		return errors.New("file name cannot be empty") //nolint:goerr113
+		return errors.New("file name cannot be empty") //nolint:err113
 	}
 
 	maxTuplesPerWrite, err := flags.GetInt("max-tuples-per-write")
