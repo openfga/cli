@@ -32,3 +32,15 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 
 	return tuples, nil
 }
+
+func TupleKeysToTupleKeysWithoutCondition(tks []client.ClientTupleKey) []client.ClientTupleKeyWithoutCondition {
+	tkswc := make([]client.ClientTupleKeyWithoutCondition, 0, len(tks))
+	for _, tk := range tks {
+		tkswc = append(tkswc, client.ClientTupleKeyWithoutCondition{
+			User:     tk.User,
+			Relation: tk.Relation,
+			Object:   tk.Object,
+		})
+	}
+	return tkswc
+}
