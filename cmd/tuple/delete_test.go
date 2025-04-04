@@ -10,7 +10,7 @@ import (
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
-func TestDeleteTuplesFileData(t *testing.T) { //nolint:funlen
+func TestDeleteTuplesFileData(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -176,7 +176,6 @@ func TestDeleteTuplesFileData(t *testing.T) { //nolint:funlen
 	}
 
 	for _, test := range tests {
-		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 

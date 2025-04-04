@@ -42,5 +42,6 @@ func TupleKeysToTupleKeysWithoutCondition(tks []client.ClientTupleKey) []client.
 			Object:   tk.Object,
 		})
 	}
+
 	return tkswc
 }
