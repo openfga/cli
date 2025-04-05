@@ -33,6 +33,8 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	return tuples, nil
 }
 
+// TupleKeysToTupleKeysWithoutCondition converts ClientTupleKey to ClientTupleKeyWithoutCondition,
+// stripping out condition-related fields.
 func TupleKeysToTupleKeysWithoutCondition(tks []client.ClientTupleKey) []client.ClientTupleKeyWithoutCondition {
 	tkswc := make([]client.ClientTupleKeyWithoutCondition, 0, len(tks))
 	for _, tk := range tks {
