@@ -66,5 +66,6 @@ func TupleKeysToTupleKeysWithoutCondition(tks ...client.ClientTupleKey) []client
 	for _, tk := range tks {
 		converted = append(converted, TupleKeyToTupleKeyWithoutCondition(tk))
 	}
+
 	return converted
 }
