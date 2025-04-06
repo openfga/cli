@@ -54,7 +54,7 @@ var deleteCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
-			clientTupleKeyWithoutCondition := tuplefile.TupleKeysToTupleKeysWithoutCondition(clientTupleKeys)
+			clientTupleKeyWithoutCondition := tuple.TupleKeysToTupleKeysWithoutCondition(clientTupleKeys...)
 
 			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 			if err != nil {

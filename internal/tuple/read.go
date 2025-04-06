@@ -50,3 +50,21 @@ func Read(
 
 	return &openfga.ReadResponse{Tuples: tuples}, nil
 }
+
+func TupleKeyToTupleKeyWithoutCondition(tk client.ClientTupleKey) client.ClientTupleKeyWithoutCondition {
+	return client.ClientTupleKeyWithoutCondition{
+		Object:   tk.GetObject(),
+		Relation: tk.GetRelation(),
+		User:     tk.GetUser(),
+	}
+}
+
+// TupleKeysToTupleKeysWithoutCondition converts ClientTupleKeys to a slice of
+// ClientTupleKeyWithoutCondition, stripping out condition-related fields.
+func TupleKeysToTupleKeysWithoutCondition(tks ...client.ClientTupleKey) []client.ClientTupleKeyWithoutCondition {
+	converted := make([]client.ClientTupleKeyWithoutCondition, 0, len(tks))
+	for _, tk := range tks {
+		converted = append(converted, TupleKeyToTupleKeyWithoutCondition(tk))
+	}
+	return converted
+}
