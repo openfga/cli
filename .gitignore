@@ -25,6 +25,7 @@ go.work
 # IDEs
 .idea/
 *.iml
+.vscode
 
 # Built files
 dist/
@@ -34,6 +35,3 @@ dist/
 
 # Test files
 /tests/fixtures/identifiers
-
-# IDE configs
-.vscode
