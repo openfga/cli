@@ -8,6 +8,8 @@ import (
 
 	"github.com/openfga/go-sdk/client"
 	"gopkg.in/yaml.v3"
+
+	"github.com/openfga/cli/internal/clierrors"
 )
 
 func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
@@ -22,7 +24,7 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	case ".json", ".yaml", ".yml":
 		err = yaml.Unmarshal(data, &tuples)
 		if err == nil && len(tuples) == 0 {
-			err = fmt.Errorf("found empty %s file: no action taken", strings.TrimPrefix(path.Ext(fileName), "."))
+			err = clierrors.EmptyTuplesFileError(strings.TrimPrefix(path.Ext(fileName), "."))
 		}
 	case ".csv":
 		err = parseTuplesFromCSV(data, &tuples)

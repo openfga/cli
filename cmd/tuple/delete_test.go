@@ -177,12 +177,12 @@ func TestDeleteTuplesFileData(t *testing.T) {
 		{
 			name:          "empty json file should throw a warning",
 			file:          "testdata/tuples_empty.json",
-			expectedError: "failed to parse input tuples: found empty json file: no action taken",
+			expectedError: "failed to parse input tuples: tuples file is empty (json)",
 		},
 		{
 			name:          "empty yaml file should throw a warning",
 			file:          "testdata/tuples_empty.yaml",
-			expectedError: "failed to parse input tuples: found empty yaml file: no action taken",
+			expectedError: "failed to parse input tuples: tuples file is empty (yaml)",
 		},
 	}
 
