@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/openfga/cli/internal/tuple"
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
@@ -173,6 +174,16 @@ func TestDeleteTuplesFileData(t *testing.T) {
 			expectedError: "failed to parse input tuples: failed to read tuple from csv file:" +
 				" record on line 2: wrong number of fields",
 		},
+		{
+			name:          "empty json file should throw a warning",
+			file:          "testdata/tuples_empty.json",
+			expectedError: "failed to parse input tuples: found empty json file: no action taken",
+		},
+		{
+			name:          "empty yaml file should throw a warning",
+			file:          "testdata/tuples_empty.yaml",
+			expectedError: "failed to parse input tuples: found empty yaml file: no action taken",
+		},
 	}
 
 	for _, test := range tests {
@@ -180,7 +191,7 @@ func TestDeleteTuplesFileData(t *testing.T) {
 			t.Parallel()
 
 			actualTuples, err := tuplefile.ReadTupleFile(test.file)
-			deleteTuples := tuplefile.TupleKeysToTupleKeysWithoutCondition(actualTuples)
+			deleteTuples := tuple.TupleKeysToTupleKeysWithoutCondition(actualTuples...)
 
 			if test.expectedError != "" {
 				require.EqualError(t, err, test.expectedError)

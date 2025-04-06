@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/openfga/go-sdk/client"
 	"gopkg.in/yaml.v3"
@@ -20,6 +21,9 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	switch path.Ext(fileName) {
 	case ".json", ".yaml", ".yml":
 		err = yaml.Unmarshal(data, &tuples)
+		if err == nil && len(tuples) == 0 {
+			err = fmt.Errorf("found empty %s file: no action taken", strings.TrimPrefix(path.Ext(fileName), "."))
+		}
 	case ".csv":
 		err = parseTuplesFromCSV(data, &tuples)
 	default:

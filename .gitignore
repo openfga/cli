@@ -34,3 +34,6 @@ dist/
 
 # Test files
 /tests/fixtures/identifiers
+
+# IDE configs
+.vscode
