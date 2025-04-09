@@ -29,6 +29,7 @@ var (
 	ErrAuthorizationModelNotFound = errors.New("authorization model not found")
 	ErrModelInputMissing          = errors.New("model input not provided")
 	ErrRequiredCsvHeaderMissing   = errors.New("csv header missing")
+	ErrEmptyTuplesFile            = errors.New("tuples file is empty")
 )
 
 func ValidationError(op string, details string) error {
@@ -37,4 +38,8 @@ func ValidationError(op string, details string) error {
 
 func MissingRequiredCsvHeaderError(headerName string) error {
 	return fmt.Errorf("%w (\"%s\")", ErrRequiredCsvHeaderMissing, headerName)
+}
+
+func EmptyTuplesFileError(extName string) error {
+	return fmt.Errorf("%w (%s)", ErrEmptyTuplesFile, extName)
 }
