@@ -13,15 +13,15 @@ require (
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/openfga/api/proto v0.0.0-20250127102726-f9709139a369
-	github.com/openfga/go-sdk v0.6.6-0.20250324152300-586e2599b309
+	github.com/openfga/go-sdk v0.7.1
 	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20250220223040-ed0cfba54336
-	github.com/openfga/openfga v1.8.8
+	github.com/openfga/openfga v1.8.9
 	github.com/rung/go-safecast v1.0.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
-	go.uber.org/mock v0.5.0
+	go.uber.org/mock v0.5.1
 	golang.org/x/time v0.11.0
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
@@ -87,11 +87,11 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect
 	google.golang.org/grpc v1.71.0 // indirect
 )
