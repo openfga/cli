@@ -117,12 +117,12 @@ var validateCmd = &cobra.Command{
 
 		response := validate(authModel)
 
-		// Display the results regardless of validation success/failure
-		if displayErr := output.Display(response); displayErr != nil {
-			return displayErr //nolint:wrapcheck
+		err = output.Display(response)
+		if err != nil {
+			return err //nolint:wrapcheck
 		}
 
-		// Return a validation error if the model is invalid
+		// Return an error if validation failed to ensure non-zero exit code
 		if !response.IsValid {
 			return clierrors.ValidationError("validate", *response.Error)
 		}
