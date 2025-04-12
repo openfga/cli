@@ -18,7 +18,6 @@ package model
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/oklog/ulid/v2"
@@ -29,6 +28,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -117,20 +117,14 @@ var validateCmd = &cobra.Command{
 
 		response := validate(authModel)
 
-		// Check if model is invalid BEFORE displaying the output
-		var validationErr error
-		if !response.IsValid {
-			validationErr = fmt.Errorf("model validation failed: %s", *response.Error)
-		}
-
 		// Display the results regardless of validation success/failure
 		if displayErr := output.Display(response); displayErr != nil {
 			return displayErr //nolint:wrapcheck
 		}
 
-		// Return the validation error if one occurred
-		if validationErr != nil {
-			return validationErr
+		// Return a validation error if the model is invalid
+		if !response.IsValid {
+			return clierrors.ValidationError("validate", *response.Error) //nolint:wrapcheck
 		}
 
 		return nil
