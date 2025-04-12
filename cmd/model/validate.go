@@ -18,6 +18,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/oklog/ulid/v2"
@@ -116,7 +117,23 @@ var validateCmd = &cobra.Command{
 
 		response := validate(authModel)
 
-		return output.Display(response)
+		// Check if model is invalid BEFORE displaying the output
+		var validationErr error
+		if !response.IsValid {
+			validationErr = fmt.Errorf("model validation failed: %s", *response.Error)
+		}
+
+		// Display the results regardless of validation success/failure
+		if displayErr := output.Display(response); displayErr != nil {
+			return displayErr //nolint:wrapcheck
+		}
+
+		// Return the validation error if one occurred
+		if validationErr != nil {
+			return validationErr
+		}
+
+		return nil
 	},
 }
 
