@@ -124,7 +124,7 @@ var validateCmd = &cobra.Command{
 
 		// Return a validation error if the model is invalid
 		if !response.IsValid {
-			return clierrors.ValidationError("validate", *response.Error) //nolint:wrapcheck
+			return clierrors.ValidationError("validate", *response.Error)
 		}
 
 		return nil
