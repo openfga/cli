@@ -19,6 +19,7 @@ package fga
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	openfga "github.com/openfga/go-sdk"
@@ -100,11 +101,12 @@ func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
 	return fgaClient, nil
 }
 
-// GetServerVersion returns the version of the OpenFGA server
+// GetServerVersion returns the version of the OpenFGA server.
 func (c ClientConfig) GetServerVersion(fgaClient *client.OpenFgaClient) (string, error) {
 	store, err := fgaClient.GetStore(context.Background()).Execute()
 	if err != nil {
-		return "unknown", err
+		return "unknown", fmt.Errorf("failed to get store: %w", err)
 	}
+
 	return store.GetId(), nil
 }

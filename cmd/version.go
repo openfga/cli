@@ -27,9 +27,7 @@ import (
 
 var versionStr = fmt.Sprintf("v`%s` (commit: `%s`, date: `%s`)", build.Version, build.Commit, build.Date)
 
-var (
-	forceServerVersion bool
-)
+var forceServerVersion bool
 
 // versionCmd is the entrypoint for the `fga version` command.
 var versionCmd *cobra.Command = &cobra.Command{
@@ -44,12 +42,14 @@ var versionCmd *cobra.Command = &cobra.Command{
 		if clientConfig.ApiUrl != "" || forceServerVersion {
 			if clientConfig.ApiUrl == "" {
 				fmt.Println("Warning: No API URL configured. Use --force to check server version anyway.")
+
 				return nil
 			}
 
 			fgaClient, err := clientConfig.GetFgaClient()
 			if err != nil {
 				fmt.Printf("Warning: Could not connect to OpenFGA server: %v\n", err)
+
 				return nil
 			}
 
@@ -57,6 +57,7 @@ var versionCmd *cobra.Command = &cobra.Command{
 			if err != nil {
 				fmt.Printf("Warning: Could not get OpenFGA server version: %v\n", err)
 				fmt.Printf("openfga version v`unknown`\n")
+
 				return nil
 			}
 
@@ -69,6 +70,11 @@ var versionCmd *cobra.Command = &cobra.Command{
 }
 
 func init() {
-	versionCmd.Flags().BoolVar(&forceServerVersion, "force", false, "Force checking server version even if API URL is not configured")
+	versionCmd.Flags().BoolVar(
+		&forceServerVersion,
+		"force",
+		false,
+		"Force checking server version even if API URL is not configured",
+	)
 	rootCmd.AddCommand(versionCmd)
 }
