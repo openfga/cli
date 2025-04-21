@@ -23,7 +23,7 @@ MOCK_SRC_DIR ?= mocks
 #-----------------------------------------------------------------------------------------------------------------------
 $(GO_BIN)/golangci-lint:
 	@echo "==> Installing golangci-lint within "${GO_BIN}""
-	@go install -v github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@go install -v github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 
 $(GO_BIN)/govulncheck:
 	@echo "==> Installing govulncheck within "${GO_BIN}""
