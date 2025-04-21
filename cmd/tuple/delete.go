@@ -19,14 +19,15 @@ package tuple
 import (
 	"context"
 	"fmt"
-	"os"
+	"time"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/tuple"
+	"github.com/openfga/cli/internal/tuplefile"
 )
 
 // deleteCmd represents the delete command.
@@ -47,37 +48,55 @@ var deleteCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
 		if fileName != "" {
-			var tuples []client.ClientTupleKeyWithoutCondition
+			startTime := time.Now()
 
-			data, err := os.ReadFile(fileName)
+			clientTupleKeys, err := tuplefile.ReadTupleFile(fileName)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
+			clientTupleKeyWithoutCondition := tuple.TupleKeysToTupleKeysWithoutCondition(clientTupleKeys...)
 
-			err = yaml.Unmarshal(data, &tuples)
+			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 			if err != nil {
-				return fmt.Errorf("failed to parse input tuples due to %w", err)
+				return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
 			}
 
-			maxTuplesPerWrite, err := cmd.Flags().GetInt32("max-tuples-per-write")
+			maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
 			if err != nil {
-				return fmt.Errorf("failed to parse max tuples per write due to %w", err)
+				return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
 			}
 
-			maxParallelRequests, err := cmd.Flags().GetInt32("max-parallel-requests")
+			writeRequest := client.ClientWriteRequest{
+				Deletes: clientTupleKeyWithoutCondition,
+			}
+
+			response, err := tuple.ImportTuplesWithoutRampUp(
+				cmd.Context(), fgaClient,
+				maxTuplesPerWrite, maxParallelRequests,
+				writeRequest)
 			if err != nil {
-				return fmt.Errorf("failed to parse parallel requests due to %w", err)
+				return err //nolint:wrapcheck
 			}
 
-			deleteRequest := client.ClientWriteRequest{
-				Deletes: tuples,
-			}
-			response, err := ImportTuples(fgaClient, deleteRequest, maxTuplesPerWrite, maxParallelRequests)
-			if err != nil {
-				return err
+			duration := time.Since(startTime)
+			timeSpent := duration.String()
+
+			outputResponse := make(map[string]interface{})
+
+			if !hideImportedTuples && len(response.Successful) > 0 {
+				outputResponse["successful"] = response.Successful
 			}
 
-			return output.Display(*response)
+			if len(response.Failed) > 0 {
+				outputResponse["failed"] = response.Failed
+			}
+
+			outputResponse["total_count"] = len(clientTupleKeyWithoutCondition)
+			outputResponse["successful_count"] = len(response.Successful)
+			outputResponse["failed_count"] = len(response.Failed)
+			outputResponse["time_spent"] = timeSpent
+
+			return output.Display(outputResponse)
 		}
 		body := &client.ClientDeleteTuplesBody{
 			client.ClientTupleKeyWithoutCondition{
@@ -99,14 +118,16 @@ var deleteCmd = &cobra.Command{
 func init() {
 	deleteCmd.Flags().String("file", "", "Tuples file")
 	deleteCmd.Flags().String("model-id", "", "Model ID")
-	deleteCmd.Flags().Int32("max-tuples-per-write", MaxTuplesPerWrite, "Max tuples per write chunk.")
-	deleteCmd.Flags().Int32("max-parallel-requests", MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	deleteCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
+	deleteCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+
+	deleteCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output") //nolint:lll
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) != n && !cmd.Flags().Changed(flag) {
-			return fmt.Errorf("at least %d arg(s) are required OR the flag --%s", n, flag) //nolint:goerr113
+			return fmt.Errorf("at least %d arg(s) are required OR the flag --%s", n, flag) //nolint:err113
 		}
 
 		return nil

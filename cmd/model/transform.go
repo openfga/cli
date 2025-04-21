@@ -54,7 +54,7 @@ fga model transform --file=fga.mod`,
 		if transformOutputFormat != authorizationmodel.ModelFormatDefault &&
 			transformOutputFormat != authorizationmodel.ModelFormatFGA &&
 			transformOutputFormat != authorizationmodel.ModelFormatJSON {
-			return fmt.Errorf( //nolint:goerr113
+			return fmt.Errorf( //nolint:err113
 				`unsupported output format %s, supported formats are "fga" and "json"`,
 				transformOutputFormat,
 			)

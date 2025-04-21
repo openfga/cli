@@ -110,7 +110,7 @@ func TestImportStore(t *testing.T) {
 			if test.mockWriteAssertions {
 				setupWriteAssertionsMock(mockCtrl, mockFgaClient, expectedAssertions, expectedOptions)
 			} else {
-				mockFgaClient.EXPECT().WriteAssertions(context.Background()).Times(0)
+				mockFgaClient.EXPECT().WriteAssertions(gomock.Any()).Times(0)
 			}
 
 			if test.mockWriteModel {
@@ -121,7 +121,7 @@ func TestImportStore(t *testing.T) {
 				setupCreateStoreMock(mockCtrl, mockFgaClient, storeID)
 			}
 
-			_, err := importStore(&fga.ClientConfig{}, mockFgaClient, &test.testStore, "", "", 1, 1, "")
+			_, err := importStore(context.TODO(), &fga.ClientConfig{}, mockFgaClient, &test.testStore, "", "", 10, 1, "")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -212,7 +212,7 @@ func TestUpdateStore(t *testing.T) {
 			if test.mockWriteAssertions {
 				setupWriteAssertionsMock(mockCtrl, mockFgaClient, expectedAssertions, expectedOptions)
 			} else {
-				mockFgaClient.EXPECT().WriteAssertions(context.Background()).Times(0)
+				mockFgaClient.EXPECT().WriteAssertions(gomock.Any()).Times(0)
 			}
 
 			if test.mockWriteModel {
@@ -223,7 +223,7 @@ func TestUpdateStore(t *testing.T) {
 				setupGetStoreMock(mockCtrl, mockFgaClient, storeID, sampleTime)
 			}
 
-			_, err := importStore(&clientConfig, mockFgaClient, &test.testStore, "", storeID, 1, 1, "")
+			_, err := importStore(context.TODO(), &clientConfig, mockFgaClient, &test.testStore, "", storeID, 10, 1, "")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -238,7 +238,7 @@ func setupGetStoreMock(
 	sampleTime time.Time,
 ) {
 	mockGetStore := mockclient.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
-	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockGetStore)
+	mockFgaClient.EXPECT().GetStore(gomock.Any()).Return(mockGetStore)
 	mockGetStore.EXPECT().Execute().Return(
 		&client.ClientGetStoreResponse{Id: storeID, Name: "test-store", CreatedAt: sampleTime, UpdatedAt: sampleTime},
 		nil,
@@ -247,7 +247,7 @@ func setupGetStoreMock(
 
 func setupCreateStoreMock(mockCtrl *gomock.Controller, mockFgaClient *mockclient.MockSdkClient, storeID string) {
 	mockCreateStore := mockclient.NewMockSdkClientCreateStoreRequestInterface(mockCtrl)
-	mockFgaClient.EXPECT().CreateStore(context.Background()).Return(mockCreateStore)
+	mockFgaClient.EXPECT().CreateStore(gomock.Any()).Return(mockCreateStore)
 	mockCreateStore.EXPECT().Body(gomock.Any()).Return(mockCreateStore)
 	mockCreateStore.EXPECT().Execute().Return(&client.ClientCreateStoreResponse{Id: storeID}, nil)
 	mockFgaClient.EXPECT().SetStoreId(storeID)
@@ -255,7 +255,7 @@ func setupCreateStoreMock(mockCtrl *gomock.Controller, mockFgaClient *mockclient
 
 func setupWriteModelMock(mockCtrl *gomock.Controller, mockFgaClient *mockclient.MockSdkClient, modelID string) {
 	mockWriteModel := mockclient.NewMockSdkClientWriteAuthorizationModelRequestInterface(mockCtrl)
-	mockFgaClient.EXPECT().WriteAuthorizationModel(context.Background()).Return(mockWriteModel)
+	mockFgaClient.EXPECT().WriteAuthorizationModel(gomock.Any()).Return(mockWriteModel)
 	mockWriteModel.EXPECT().Body(gomock.Any()).Return(mockWriteModel)
 	mockWriteModel.EXPECT().Execute().Return(
 		&client.ClientWriteAuthorizationModelResponse{AuthorizationModelId: modelID},
@@ -270,7 +270,7 @@ func setupWriteAssertionsMock(
 	expectedOptions client.ClientWriteAssertionsOptions,
 ) {
 	mockWriteAssertions := mockclient.NewMockSdkClientWriteAssertionsRequestInterface(mockCtrl)
-	mockFgaClient.EXPECT().WriteAssertions(context.Background()).Return(mockWriteAssertions)
+	mockFgaClient.EXPECT().WriteAssertions(gomock.Any()).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Body(expectedAssertions).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Options(expectedOptions).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Execute().Return(nil, nil)

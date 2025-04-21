@@ -34,9 +34,9 @@ func TestCreateError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockExecute)
 
-	mockFgaClient.EXPECT().CreateStore(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().CreateStore(gomock.Any()).Return(mockBody)
 
-	_, err := create(mockFgaClient, "foo")
+	_, err := create(context.TODO(), mockFgaClient, "foo")
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -68,9 +68,9 @@ func TestCreateSuccess(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockExecute)
 
-	mockFgaClient.EXPECT().CreateStore(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().CreateStore(gomock.Any()).Return(mockBody)
 
-	output, err := create(mockFgaClient, "foo")
+	output, err := create(context.TODO(), mockFgaClient, "foo")
 	if err != nil {
 		t.Error(err)
 	}

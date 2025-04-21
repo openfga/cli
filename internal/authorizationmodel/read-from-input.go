@@ -42,6 +42,7 @@ func ReadFromFile(
 	*input = string(file)
 
 	// if the input format is set as the default, set it from the file extension (and default to fga)
+	//nolint:staticcheck
 	if *format == ModelFormatDefault {
 		switch {
 		case strings.HasSuffix(fileName, "fga.mod"):

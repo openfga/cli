@@ -20,10 +20,16 @@ package fga
 import (
 	"strings"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/go-sdk/credentials"
 
 	"github.com/openfga/cli/internal/build"
+)
+
+const (
+	MaxSdkRetry    = 15
+	MinSdkWaitInMs = 500
 )
 
 var userAgent = "openfga-cli/" + build.Version
@@ -38,6 +44,16 @@ type ClientConfig struct {
 	APIScopes            []string `json:"api_scopes,omitempty"`
 	ClientID             string   `json:"client_id,omitempty"`
 	ClientSecret         string   `json:"client_secret,omitempty"`
+	Debug                bool     `json:"debug,omitempty"`
+}
+
+func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
+	fgaClient, err := client.NewSdkClient(c.getClientConfig())
+	if err != nil {
+		return nil, err //nolint:wrapcheck
+	}
+
+	return fgaClient, nil
 }
 
 func (c ClientConfig) getCredentials() *credentials.Credentials {
@@ -75,14 +91,10 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 		AuthorizationModelId: c.AuthorizationModelID,
 		Credentials:          c.getCredentials(),
 		UserAgent:            userAgent,
+		RetryParams: &openfga.RetryParams{
+			MaxRetry:    MaxSdkRetry,
+			MinWaitInMs: MinSdkWaitInMs,
+		},
+		Debug: c.Debug,
 	}
-}
-
-func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
-	fgaClient, err := client.NewSdkClient(c.getClientConfig())
-	if err != nil {
-		return nil, err //nolint:wrapcheck
-	}
-
-	return fgaClient, nil
 }

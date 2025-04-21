@@ -132,7 +132,7 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	}
 
 	if errs != nil {
-		return errors.Join(errors.New("failed to process one or more tuple files"), errs) //nolint:goerr113
+		return errors.Join(errors.New("failed to process one or more tuple files"), errs) //nolint:err113
 	}
 
 	return nil

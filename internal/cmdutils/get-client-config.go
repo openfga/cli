@@ -44,6 +44,7 @@ func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
 	clientCredentialsClientID, _ := cmd.Flags().GetString("client-id")
 	clientCredentialsClientSecret, _ := cmd.Flags().GetString("client-secret")
 	clientCredentialsScopes, _ := cmd.Flags().GetStringArray("api-scopes")
+	debug, _ := cmd.Flags().GetBool("debug")
 
 	return fga.ClientConfig{
 		ApiUrl:               apiURL,
@@ -55,5 +56,6 @@ func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
 		ClientID:             clientCredentialsClientID,
 		ClientSecret:         clientCredentialsClientSecret,
 		APIScopes:            clientCredentialsScopes,
+		Debug:                debug,
 	}
 }
