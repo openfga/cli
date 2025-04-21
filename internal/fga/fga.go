@@ -47,6 +47,15 @@ type ClientConfig struct {
 	Debug                bool     `json:"debug,omitempty"`
 }
 
+func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
+	fgaClient, err := client.NewSdkClient(c.getClientConfig())
+	if err != nil {
+		return nil, err //nolint:wrapcheck
+	}
+
+	return fgaClient, nil
+}
+
 func (c ClientConfig) getCredentials() *credentials.Credentials {
 	if c.APIToken != "" {
 		return &credentials.Credentials{
@@ -88,13 +97,4 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 		},
 		Debug: c.Debug,
 	}
-}
-
-func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
-	fgaClient, err := client.NewSdkClient(c.getClientConfig())
-	if err != nil {
-		return nil, err //nolint:wrapcheck
-	}
-
-	return fgaClient, nil
 }
