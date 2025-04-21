@@ -19,16 +19,15 @@ package tuple
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/tuple"
+	"github.com/openfga/cli/internal/tuplefile"
 )
 
 // deleteCmd represents the delete command.
@@ -51,17 +50,11 @@ var deleteCmd = &cobra.Command{
 		if fileName != "" {
 			startTime := time.Now()
 
-			var tuples []client.ClientTupleKeyWithoutCondition
-
-			data, err := os.ReadFile(fileName)
+			clientTupleKeys, err := tuplefile.ReadTupleFile(fileName)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
-
-			err = yaml.Unmarshal(data, &tuples)
-			if err != nil {
-				return fmt.Errorf("failed to parse input tuples due to %w", err)
-			}
+			clientTupleKeyWithoutCondition := tuple.TupleKeysToTupleKeysWithoutCondition(clientTupleKeys...)
 
 			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
 			if err != nil {
@@ -74,7 +67,7 @@ var deleteCmd = &cobra.Command{
 			}
 
 			writeRequest := client.ClientWriteRequest{
-				Deletes: tuples,
+				Deletes: clientTupleKeyWithoutCondition,
 			}
 
 			response, err := tuple.ImportTuplesWithoutRampUp(
@@ -98,7 +91,7 @@ var deleteCmd = &cobra.Command{
 				outputResponse["failed"] = response.Failed
 			}
 
-			outputResponse["total_count"] = len(tuples)
+			outputResponse["total_count"] = len(clientTupleKeyWithoutCondition)
 			outputResponse["successful_count"] = len(response.Successful)
 			outputResponse["failed_count"] = len(response.Failed)
 			outputResponse["time_spent"] = timeSpent
