@@ -106,10 +106,12 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 
 	if storeData.TupleFile != "" {
 		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
-		if err != nil {
+		if err != nil { //nolint:gocritic
 			errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
-		} else {
+		} else if storeData.Tuples == nil {
 			storeData.Tuples = tuples
+		} else {
+			storeData.Tuples = append(storeData.Tuples, tuples...)
 		}
 	}
 
