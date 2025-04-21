@@ -28,6 +28,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -116,7 +117,17 @@ var validateCmd = &cobra.Command{
 
 		response := validate(authModel)
 
-		return output.Display(response)
+		err = output.Display(response)
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
+		// Return an error if validation failed to ensure non-zero exit code
+		if !response.IsValid {
+			return clierrors.ValidationError("validate", *response.Error)
+		}
+
+		return nil
 	},
 }
 
