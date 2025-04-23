@@ -1,9 +1,16 @@
 # Changelog
 
-#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.5...HEAD)
-- feat(import): allow to use tuples and tuple_file together (#369) - thanks @DanielBertocci
-- feat: add suppress-summary flag to model test command (#407) - thanks @Siddhant-K-code
-- fix: validate command to exit with non-zero status on errors (#485) - thanks @Siddhant-K-code
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.6...HEAD)
+
+
+#### [0.6.6](https://github.com/openfga/cli/compare/v0.6.5...v0.6.6) (2025-04-23)
+
+Added:
+- Allow to use `tuples` and `tuple_file` together in the store file (#369) - thanks @DanielBertocci
+- Add `--suppress-summary` flag to `model test` command (#407) - thanks @Siddhant-K-code
+
+Changed:
+- fix validate command to properly exit with non-zero status on errors (#485) - thanks @Siddhant-K-code
 
 #### [0.6.5](https://github.com/openfga/cli/compare/v0.6.4...v0.6.5) (2025-03-24)
 
