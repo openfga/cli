@@ -284,6 +284,17 @@ func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) e
 	return nil
 }
 
+func (model *AuthzModel) GetAsJSONString() (*string, error) {
+	bytes, err := json.Marshal(model)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal due to %w", err)
+	}
+
+	jsonString := string(bytes)
+
+	return &jsonString, nil
+}
+
 func (model *AuthzModel) DisplayAsJSON(fields []string) AuthzModel {
 	newModel := AuthzModel{}
 
@@ -353,17 +364,6 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 	}
 
 	return &dslModel, nil
-}
-
-func (model *AuthzModel) GetAsJSONString() (*string, error) {
-	bytes, err := json.Marshal(model)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal due to %w", err)
-	}
-
-	jsonString := string(bytes)
-
-	return &jsonString, nil
 }
 
 func (model *AuthzModel) setCreatedAt() {
