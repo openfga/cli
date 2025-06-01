@@ -48,6 +48,7 @@ func TestListObjectsWithError(t *testing.T) {
 	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
 	_, err := listObjects(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
@@ -96,6 +97,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
 	output, err := listObjects(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
@@ -150,6 +152,7 @@ func TestListObjectsWithConsistency(t *testing.T) {
 	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
 	output, err := listObjects(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",

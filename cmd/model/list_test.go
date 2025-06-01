@@ -40,7 +40,7 @@ func TestListModelsEmpty(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest)
 
-	output, err := listModels(mockFgaClient, 5)
+	output, err := listModels(t.Context(), mockFgaClient, 5)
 	if err != nil {
 		t.Error(err)
 	}
@@ -75,7 +75,7 @@ func TestListModelsFail(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest)
 
-	_, err := listModels(mockFgaClient, 5)
+	_, err := listModels(t.Context(), mockFgaClient, 5)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -113,7 +113,7 @@ func TestListModelsSinglePage(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest)
 
-	output, err := listModels(mockFgaClient, 5)
+	output, err := listModels(t.Context(), mockFgaClient, 5)
 	if err != nil {
 		t.Error(err)
 	}
@@ -194,7 +194,7 @@ func TestListModelsMultiPage(t *testing.T) {
 		mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest2),
 	)
 
-	output, err := listModels(mockFgaClient, 2)
+	output, err := listModels(t.Context(), mockFgaClient, 2)
 	if err != nil {
 		t.Error(err)
 	}
@@ -245,7 +245,7 @@ func TestListModelsMultiPageMaxPage(t *testing.T) {
 	mockRequest1.EXPECT().Options(options1).Return(mockExecute1)
 	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest1)
 
-	output, err := listModels(mockFgaClient, 0)
+	output, err := listModels(t.Context(), mockFgaClient, 0)
 	if err != nil {
 		t.Error(err)
 	}

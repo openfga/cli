@@ -33,7 +33,7 @@ func TestGetError(t *testing.T) {
 		StoreID: "12345",
 	}
 
-	_, err := getStore(clientConfig, mockFgaClient)
+	_, err := getStore(t.Context(), clientConfig, mockFgaClient)
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -64,7 +64,7 @@ func TestGetSuccess(t *testing.T) {
 		StoreID: "12345",
 	}
 
-	output, err := getStore(clientConfig, mockFgaClient)
+	output, err := getStore(t.Context(), clientConfig, mockFgaClient)
 	if err != nil {
 		t.Error(err)
 	}

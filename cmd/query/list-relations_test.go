@@ -42,6 +42,7 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	_, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"user:foo",
@@ -80,6 +81,7 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
 	_, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"user:foo",
@@ -147,6 +149,7 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 	var clientConfig fga.ClientConfig
 
 	_, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"user:foo",
@@ -264,6 +267,7 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 	var clientConfig fga.ClientConfig
 
 	output, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"user:foo",
@@ -324,6 +328,7 @@ func TestListRelationsMultipleRelations(t *testing.T) {
 	var clientConfig fga.ClientConfig
 
 	output, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"user:foo",
@@ -384,6 +389,7 @@ func TestListRelationsWithConsistency(t *testing.T) {
 	var clientConfig fga.ClientConfig
 
 	output, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"user:foo",

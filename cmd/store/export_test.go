@@ -175,7 +175,7 @@ func TestExportSuccess(t *testing.T) {
 	mockFgaClient.EXPECT().ReadAssertions(t.Context()).Return(mockAssertionsRequest)
 
 	// Execute
-	output, err := buildStoreData(clientConfig, mockFgaClient, 50)
+	output, err := buildStoreData(t.Context(), clientConfig, mockFgaClient, 50)
 	// Expect
 	if err != nil {
 		t.Error(err)

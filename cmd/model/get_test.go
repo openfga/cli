@@ -42,7 +42,7 @@ func TestGetModelNoAuthModelID(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	output, err := authorizationmodel.ReadFromStore(clientConfig, mockFgaClient)
+	output, err := authorizationmodel.ReadFromStore(t.Context(), clientConfig, mockFgaClient)
 	if err != nil {
 		t.Fatalf("%v", err)
 	} else if *output != expectedResponse {
@@ -80,7 +80,7 @@ func TestGetModelAuthModelID(t *testing.T) {
 		AuthorizationModelID: "01GXSA8YR785C4FYS3C0RTG7B1",
 	}
 
-	output, err := authorizationmodel.ReadFromStore(clientConfig, mockFgaClient)
+	output, err := authorizationmodel.ReadFromStore(t.Context(), clientConfig, mockFgaClient)
 	if err != nil {
 		t.Fatalf("%v", err)
 	} else if *output != expectedResponse {
@@ -109,7 +109,7 @@ func TestGetModelNoAuthModelIDError(t *testing.T) {
 
 	var clientConfig fga.ClientConfig
 
-	_, err := authorizationmodel.ReadFromStore(clientConfig, mockFgaClient)
+	_, err := authorizationmodel.ReadFromStore(t.Context(), clientConfig, mockFgaClient)
 	if err == nil {
 		t.Fatalf("Expect error but there is none")
 	}

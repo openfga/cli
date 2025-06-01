@@ -47,6 +47,7 @@ func TestCheckWithError(t *testing.T) {
 	mockFgaClient.EXPECT().Check(t.Context()).Return(mockBody)
 
 	_, err := check(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
@@ -99,6 +100,7 @@ func TestCheckWithNoError(t *testing.T) {
 	mockFgaClient.EXPECT().Check(t.Context()).Return(mockBody)
 
 	output, err := check(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
@@ -157,6 +159,7 @@ func TestCheckWithConsistency(t *testing.T) {
 	mockFgaClient.EXPECT().Check(t.Context()).Return(mockBody)
 
 	output, err := check(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
