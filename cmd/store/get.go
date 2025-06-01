@@ -29,8 +29,8 @@ import (
 	"github.com/openfga/cli/internal/output"
 )
 
-func getStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*client.ClientGetStoreResponse, error) {
-	store, err := fgaClient.GetStore(context.Background()).Execute()
+func getStore(ctx context.Context, clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*client.ClientGetStoreResponse, error) {
+	store, err := fgaClient.GetStore(ctx).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get store %v due to %w", clientConfig.StoreID, err)
 	}
@@ -51,7 +51,7 @@ var getCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		response, err := getStore(clientConfig, fgaClient)
+		response, err := getStore(cmd.Context(), clientConfig, fgaClient)
 		if err != nil {
 			return err
 		}

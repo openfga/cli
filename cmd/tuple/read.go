@@ -17,6 +17,7 @@ limitations under the License.
 package tuple
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -89,6 +90,7 @@ func (r readResponse) toCsvDTO() ([]readResponseCSVDTO, error) {
 }
 
 func read(
+	ctx context.Context,
 	fgaClient client.SdkClient,
 	user string,
 	relation string,
@@ -111,7 +113,7 @@ func read(
 		body.Object = &object
 	}
 
-	response, err := tuple.Read(fgaClient, body, maxPages, consistency)
+	response, err := tuple.Read(ctx, fgaClient, body, maxPages, consistency)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -154,7 +156,7 @@ var readCmd = &cobra.Command{
 			return fmt.Errorf("error parsing consistency for check: %w", err)
 		}
 
-		response, err := read(fgaClient, user, relation, object, maxPages, consistency)
+		response, err := read(cmd.Context(), fgaClient, user, relation, object, maxPages, consistency)
 		if err != nil {
 			return err
 		}

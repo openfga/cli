@@ -33,7 +33,7 @@ import (
 var MaxReadChangesPagesLength = 20
 
 func readChanges(
-	fgaClient client.SdkClient, maxPages int, selectedType string, startTime string, continuationToken string,
+	ctx context.Context, fgaClient client.SdkClient, maxPages int, selectedType string, startTime string, continuationToken string,
 ) (*openfga.ReadChangesResponse, error) {
 	changes := []openfga.TupleChange{}
 	pageIndex := 0
@@ -61,7 +61,7 @@ func readChanges(
 			ContinuationToken: &continuationToken,
 		}
 
-		response, err := fgaClient.ReadChanges(context.Background()).Body(*body).Options(*options).Execute()
+		response, err := fgaClient.ReadChanges(ctx).Body(*body).Options(*options).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
@@ -116,7 +116,7 @@ var changesCmd = &cobra.Command{
 			return fmt.Errorf("failed to get tuple changes due to %w", err)
 		}
 
-		response, err := readChanges(fgaClient, maxPages, selectedType, startTime, continuationToken)
+		response, err := readChanges(cmd.Context(), fgaClient, maxPages, selectedType, startTime, continuationToken)
 		if err != nil {
 			return err
 		}

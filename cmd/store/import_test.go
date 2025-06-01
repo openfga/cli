@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -121,7 +120,7 @@ func TestImportStore(t *testing.T) {
 				setupCreateStoreMock(mockCtrl, mockFgaClient, storeID)
 			}
 
-			_, err := importStore(context.TODO(), &fga.ClientConfig{}, mockFgaClient, &test.testStore, "", "", 10, 1, "")
+			_, err := importStore(t.Context(), &fga.ClientConfig{}, mockFgaClient, &test.testStore, "", "", 10, 1, "")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}
@@ -223,7 +222,7 @@ func TestUpdateStore(t *testing.T) {
 				setupGetStoreMock(mockCtrl, mockFgaClient, storeID, sampleTime)
 			}
 
-			_, err := importStore(context.TODO(), &clientConfig, mockFgaClient, &test.testStore, "", storeID, 10, 1, "")
+			_, err := importStore(t.Context(), &clientConfig, mockFgaClient, &test.testStore, "", storeID, 10, 1, "")
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
 			}

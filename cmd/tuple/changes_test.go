@@ -1,7 +1,6 @@
 package tuple
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -42,9 +41,9 @@ func TestReadChangesError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ReadChanges(t.Context()).Return(mockBody)
 
-	_, err := readChanges(mockFgaClient, 5, "document", "", "")
+	_, err := readChanges(t.Context(), mockFgaClient, 5, "document", "", "")
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -80,9 +79,9 @@ func TestReadChangesEmpty(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ReadChanges(t.Context()).Return(mockBody)
 
-	output, err := readChanges(mockFgaClient, 5, "document", "", "")
+	output, err := readChanges(t.Context(), mockFgaClient, 5, "document", "", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -150,9 +149,9 @@ func TestReadChangesSinglePage(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ReadChanges(t.Context()).Return(mockBody)
 
-	output, err := readChanges(mockFgaClient, 5, "document", "2022-01-01T00:00:00Z", "")
+	output, err := readChanges(t.Context(), mockFgaClient, 5, "document", "2022-01-01T00:00:00Z", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -254,11 +253,11 @@ func TestReadChangesMultiPages(t *testing.T) {
 	)
 
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody1),
-		mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody2),
+		mockFgaClient.EXPECT().ReadChanges(t.Context()).Return(mockBody1),
+		mockFgaClient.EXPECT().ReadChanges(t.Context()).Return(mockBody2),
 	)
 
-	output, err := readChanges(mockFgaClient, 5, "document", "2022-01-01T00:00:00Z", "")
+	output, err := readChanges(t.Context(), mockFgaClient, 5, "document", "2022-01-01T00:00:00Z", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -326,9 +325,9 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ReadChanges(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ReadChanges(t.Context()).Return(mockBody)
 
-	output, err := readChanges(mockFgaClient, 1, "document", "2022-01-01T00:00:00Z", "")
+	output, err := readChanges(t.Context(), mockFgaClient, 1, "document", "2022-01-01T00:00:00Z", "")
 	if err != nil {
 		t.Error(err)
 	}

@@ -13,7 +13,7 @@ import (
 
 // ReadFromStore reads the model from the store with the given the AuthorizationModelID,
 // or the latest model if no ID was provided.
-func ReadFromStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*openfga.ReadAuthorizationModelResponse, error) { //nolint:lll
+func ReadFromStore(ctx context.Context, clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*openfga.ReadAuthorizationModelResponse, error) { //nolint:lll
 	authorizationModelID := clientConfig.AuthorizationModelID
 
 	var (
@@ -25,10 +25,10 @@ func ReadFromStore(clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*
 		options := client.ClientReadAuthorizationModelOptions{
 			AuthorizationModelId: openfga.PtrString(authorizationModelID),
 		}
-		model, err = fgaClient.ReadAuthorizationModel(context.Background()).Options(options).Execute()
+		model, err = fgaClient.ReadAuthorizationModel(ctx).Options(options).Execute()
 	} else {
 		options := client.ClientReadLatestAuthorizationModelOptions{}
-		model, err = fgaClient.ReadLatestAuthorizationModel(context.Background()).Options(options).Execute()
+		model, err = fgaClient.ReadLatestAuthorizationModel(ctx).Options(options).Execute()
 	}
 
 	if err != nil {

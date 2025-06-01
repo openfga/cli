@@ -30,7 +30,7 @@ func TestRampUpAPIRequests_Success(t *testing.T) {
 		}
 	}
 
-	err := requests.RampUpAPIRequests(context.Background(), 10, 20, 2, time.Second, 5, requestsList)
+	err := requests.RampUpAPIRequests(t.Context(), 10, 20, 2, time.Second, 5, requestsList)
 	if err != nil {
 		t.Fatalf("expected no error, got %v, %v", err, callCount)
 	}
@@ -43,7 +43,7 @@ func TestRampUpAPIRequests_Success(t *testing.T) {
 func TestRampUpAPIRequests_RampUpRate(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
 	defer cancel()
 
 	var (
@@ -80,7 +80,7 @@ func TestRampUpAPIRequests_RampUpRate(t *testing.T) {
 func TestRampUpAPIRequests_ContextCancelled(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), 1*time.Second)
 	defer cancel()
 
 	var (
@@ -113,7 +113,7 @@ func TestRampUpAPIRequests_ContextCancelled(t *testing.T) {
 func TestRampUpAPIRequests_RequestError(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 
 	var (

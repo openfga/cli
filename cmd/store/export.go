@@ -42,9 +42,9 @@ const (
 
 // buildStoreData compiles all the data necessary to output to file or stdout,
 // or returns an error if this was not successful.
-func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient, maxTupleCount uint) (*storetest.StoreData, error) { //nolint:lll
+func buildStoreData(ctx context.Context, config fga.ClientConfig, fgaClient client.SdkClient, maxTupleCount uint) (*storetest.StoreData, error) { //nolint:lll
 	// get the store
-	store, _ := fgaClient.GetStore(context.Background()).Execute()
+	store, _ := fgaClient.GetStore(ctx).Execute()
 
 	var storeName string
 	if store != nil {
@@ -52,7 +52,7 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient, maxTupl
 	}
 
 	// get the model
-	model, err := authorizationmodel.ReadFromStore(config, fgaClient)
+	model, err := authorizationmodel.ReadFromStore(ctx, config, fgaClient)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -68,7 +68,7 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient, maxTupl
 	// get the tuples
 	maxPages := int(math.Ceil(float64(maxTupleCount) / float64(tuple.DefaultReadPageSize)))
 
-	rawTuples, err := tuple.Read(fgaClient, &client.ClientReadRequest{}, maxPages, nil)
+	rawTuples, err := tuple.Read(ctx, fgaClient, &client.ClientReadRequest{}, maxPages, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read tuples: %w", err)
 	}
@@ -86,7 +86,7 @@ func buildStoreData(config fga.ClientConfig, fgaClient client.SdkClient, maxTupl
 		AuthorizationModelId: authModel.ID,
 	}
 
-	assertionResponse, err := fgaClient.ReadAssertions(context.Background()).Options(assertionOptions).Execute()
+	assertionResponse, err := fgaClient.ReadAssertions(ctx).Options(assertionOptions).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("unable to read assertions: %w", err)
 	}
@@ -144,7 +144,7 @@ var exportCmd = &cobra.Command{
 		}
 
 		maxTupleCount, _ := cmd.Flags().GetUint("max-tuples")
-		storeData, err := buildStoreData(clientConfig, fgaClient, maxTupleCount)
+		storeData, err := buildStoreData(cmd.Context(), clientConfig, fgaClient, maxTupleCount)
 		if err != nil {
 			return fmt.Errorf("failed to export store: %w", err)
 		}

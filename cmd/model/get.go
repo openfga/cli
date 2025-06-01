@@ -41,7 +41,7 @@ var getCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
-		response, err := authorizationmodel.ReadFromStore(clientConfig, fgaClient)
+		response, err := authorizationmodel.ReadFromStore(cmd.Context(), clientConfig, fgaClient)
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
