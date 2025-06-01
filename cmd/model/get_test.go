@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -39,7 +38,7 @@ func TestGetModelNoAuthModelID(t *testing.T) {
 	mockRequest := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
 	options := client.ClientReadLatestAuthorizationModelOptions{}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(t.Context()).Return(mockRequest)
 
 	var clientConfig fga.ClientConfig
 
@@ -75,7 +74,7 @@ func TestGetModelAuthModelID(t *testing.T) {
 		AuthorizationModelId: openfga.PtrString("01GXSA8YR785C4FYS3C0RTG7B1"),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ReadAuthorizationModel(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ReadAuthorizationModel(t.Context()).Return(mockRequest)
 
 	clientConfig := fga.ClientConfig{
 		AuthorizationModelID: "01GXSA8YR785C4FYS3C0RTG7B1",
@@ -106,7 +105,7 @@ func TestGetModelNoAuthModelIDError(t *testing.T) {
 	mockRequest := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
 	options := client.ClientReadLatestAuthorizationModelOptions{}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(t.Context()).Return(mockRequest)
 
 	var clientConfig fga.ClientConfig
 

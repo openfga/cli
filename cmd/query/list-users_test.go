@@ -1,7 +1,6 @@
 package query
 
 import (
-	"context"
 	"testing"
 
 	openfga "github.com/openfga/go-sdk"
@@ -58,7 +57,7 @@ func TestListUsersSimpleType(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ListUsers(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
 
 	output, err := listUsers(
 		mockFgaClient,
@@ -126,7 +125,7 @@ func TestListUsersSimpleTypeAndRelation(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ListUsers(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
 
 	output, err := listUsers(
 		mockFgaClient,
@@ -195,7 +194,7 @@ func TestListUsersWithConsistency(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ListUsers(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
 
 	output, err := listUsers(
 		mockFgaClient,

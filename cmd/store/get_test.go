@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -28,7 +27,7 @@ func TestGetError(t *testing.T) {
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, errMockGet)
 
-	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
+	mockFgaClient.EXPECT().GetStore(t.Context()).Return(mockExecute)
 
 	clientConfig := fga.ClientConfig{
 		StoreID: "12345",
@@ -59,7 +58,7 @@ func TestGetSuccess(t *testing.T) {
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
 
-	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
+	mockFgaClient.EXPECT().GetStore(t.Context()).Return(mockExecute)
 
 	clientConfig := fga.ClientConfig{
 		StoreID: "12345",

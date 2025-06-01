@@ -1,7 +1,6 @@
 package query
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -34,7 +33,7 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, errMockGet)
-	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockExecute)
+	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(t.Context()).Return(mockExecute)
 
 	var clientConfig fga.ClientConfig
 
@@ -70,7 +69,7 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 	var expectedResponse client.ClientReadAuthorizationModelResponse
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, errMockGet)
-	mockFgaClient.EXPECT().ReadAuthorizationModel(context.Background()).Return(mockExecute)
+	mockFgaClient.EXPECT().ReadAuthorizationModel(t.Context()).Return(mockExecute)
 
 	clientConfig := fga.ClientConfig{
 		AuthorizationModelID: "01GXSA8YR785C4FYS3C0RTG7B1",
@@ -141,8 +140,8 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockExecute),
-		mockFgaClient.EXPECT().ListRelations(context.Background()).Return(mockBody),
+		mockFgaClient.EXPECT().ReadLatestAuthorizationModel(t.Context()).Return(mockExecute),
+		mockFgaClient.EXPECT().ListRelations(t.Context()).Return(mockBody),
 	)
 
 	var clientConfig fga.ClientConfig
@@ -179,7 +178,7 @@ func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
 	}
 
 	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
-	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockExecute)
+	mockFgaClient.EXPECT().ReadLatestAuthorizationModel(t.Context()).Return(mockExecute)
 
 	relations := []string{}
 	contextualTuples := []client.ClientContextualTupleKey{
@@ -258,8 +257,8 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ReadLatestAuthorizationModel(context.Background()).Return(mockExecute),
-		mockFgaClient.EXPECT().ListRelations(context.Background()).Return(mockBody),
+		mockFgaClient.EXPECT().ReadLatestAuthorizationModel(t.Context()).Return(mockExecute),
+		mockFgaClient.EXPECT().ListRelations(t.Context()).Return(mockBody),
 	)
 
 	var clientConfig fga.ClientConfig
@@ -319,7 +318,7 @@ func TestListRelationsMultipleRelations(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ListRelations(context.Background()).Return(mockBody),
+		mockFgaClient.EXPECT().ListRelations(t.Context()).Return(mockBody),
 	)
 
 	var clientConfig fga.ClientConfig
@@ -379,7 +378,7 @@ func TestListRelationsWithConsistency(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockListRelationsRequest)
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ListRelations(context.Background()).Return(mockBody),
+		mockFgaClient.EXPECT().ListRelations(t.Context()).Return(mockBody),
 	)
 
 	var clientConfig fga.ClientConfig

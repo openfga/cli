@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 	"strings"
@@ -46,7 +45,7 @@ func TestExportSuccess(t *testing.T) {
 
 	mockExecute := mockclient.NewMockSdkClientGetStoreRequestInterface(mockCtrl)
 	mockExecute.EXPECT().Execute().Return(&storeResponse, nil)
-	mockFgaClient.EXPECT().GetStore(context.Background()).Return(mockExecute)
+	mockFgaClient.EXPECT().GetStore(t.Context()).Return(mockExecute)
 
 	// Mocking Authorization model GET...
 	var modelResponse client.ClientReadAuthorizationModelResponse
@@ -103,7 +102,7 @@ func TestExportSuccess(t *testing.T) {
 
 	mockGetModelRequest.EXPECT().Options(getModelOptions).Return(mockGetModelRequest)
 	mockGetModelRequest.EXPECT().Execute().Return(&modelResponse, nil)
-	mockFgaClient.EXPECT().ReadAuthorizationModel(context.Background()).Return(mockGetModelRequest)
+	mockFgaClient.EXPECT().ReadAuthorizationModel(t.Context()).Return(mockGetModelRequest)
 
 	// Mocking Tuples GET...
 	readResponse := client.ClientReadResponse{
@@ -142,7 +141,7 @@ func TestExportSuccess(t *testing.T) {
 	mockReadRequest.EXPECT().Body(readRequest).Return(mockReadRequest)
 	mockReadRequest.EXPECT().Options(readOptions).Return(mockReadRequest)
 	mockReadRequest.EXPECT().Execute().Return(&readResponse, nil)
-	mockFgaClient.EXPECT().Read(context.Background()).Return(mockReadRequest)
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockReadRequest)
 
 	// Mocking assertions GET...
 	assertionsResponse := client.ClientReadAssertionsResponse{
@@ -173,7 +172,7 @@ func TestExportSuccess(t *testing.T) {
 	mockAssertionsRequest := mockclient.NewMockSdkClientReadAssertionsRequestInterface(mockCtrl)
 	mockAssertionsRequest.EXPECT().Options(readAssertionsOptions).Return(mockAssertionsRequest)
 	mockAssertionsRequest.EXPECT().Execute().Return(&assertionsResponse, nil)
-	mockFgaClient.EXPECT().ReadAssertions(context.Background()).Return(mockAssertionsRequest)
+	mockFgaClient.EXPECT().ReadAssertions(t.Context()).Return(mockAssertionsRequest)
 
 	// Execute
 	output, err := buildStoreData(clientConfig, mockFgaClient, 50)

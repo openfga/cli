@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -39,7 +38,7 @@ func TestListModelsEmpty(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest)
 
 	output, err := listModels(mockFgaClient, 5)
 	if err != nil {
@@ -74,7 +73,7 @@ func TestListModelsFail(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest)
 
 	_, err := listModels(mockFgaClient, 5)
 	if err == nil {
@@ -112,7 +111,7 @@ func TestListModelsSinglePage(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest)
 
 	output, err := listModels(mockFgaClient, 5)
 	if err != nil {
@@ -191,8 +190,8 @@ func TestListModelsMultiPage(t *testing.T) {
 		mockRequest2.EXPECT().Options(options2).Return(mockExecute2),
 	)
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest1),
-		mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest2),
+		mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest1),
+		mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest2),
 	)
 
 	output, err := listModels(mockFgaClient, 2)
@@ -244,7 +243,7 @@ func TestListModelsMultiPageMaxPage(t *testing.T) {
 	mockExecute1.EXPECT().Execute().Return(&response1, nil)
 
 	mockRequest1.EXPECT().Options(options1).Return(mockExecute1)
-	mockFgaClient.EXPECT().ReadAuthorizationModels(context.Background()).Return(mockRequest1)
+	mockFgaClient.EXPECT().ReadAuthorizationModels(t.Context()).Return(mockRequest1)
 
 	output, err := listModels(mockFgaClient, 0)
 	if err != nil {

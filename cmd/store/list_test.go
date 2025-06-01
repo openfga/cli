@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -34,7 +33,7 @@ func TestListStoresError(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ListStores(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
 
 	_, err := listStores(mockFgaClient, 5)
 	if err == nil {
@@ -64,7 +63,7 @@ func TestListStoresEmpty(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ListStores(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
 
 	output, err := listStores(mockFgaClient, 5)
 	if err != nil {
@@ -114,7 +113,7 @@ func TestListStoresSinglePage(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
-	mockFgaClient.EXPECT().ListStores(context.Background()).Return(mockRequest)
+	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
 
 	output, err := listStores(mockFgaClient, 5)
 	if err != nil {
@@ -196,8 +195,8 @@ func TestListStoresMultiPage(t *testing.T) {
 		mockRequest2.EXPECT().Options(options2).Return(mockExecute2),
 	)
 	gomock.InOrder(
-		mockFgaClient.EXPECT().ListStores(context.Background()).Return(mockRequest1),
-		mockFgaClient.EXPECT().ListStores(context.Background()).Return(mockRequest2),
+		mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest1),
+		mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest2),
 	)
 
 	output, err := listStores(mockFgaClient, 5)
@@ -252,7 +251,7 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest1.EXPECT().Options(options1).Return(mockExecute1)
-	mockFgaClient.EXPECT().ListStores(context.Background()).Return(mockRequest1)
+	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest1)
 
 	output, err := listStores(mockFgaClient, 1)
 	if err != nil {
