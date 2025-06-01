@@ -60,6 +60,7 @@ func parseObject(rawObject string) openfga.FgaObject {
 }
 
 func listUsers(
+	ctx context.Context,
 	fgaClient client.SdkClient,
 	rawObject string,
 	relation string,
@@ -82,7 +83,7 @@ func listUsers(
 		options.Consistency = consistency
 	}
 
-	response, err := fgaClient.ListUsers(context.Background()).Body(*body).Options(*options).Execute()
+	response, err := fgaClient.ListUsers(ctx).Body(*body).Options(*options).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list users due to %w", err)
 	}
@@ -121,7 +122,7 @@ var listUsersCmd = &cobra.Command{
 		object, _ := cmd.Flags().GetString("object")
 		relation, _ := cmd.Flags().GetString("relation")
 
-		response, err := listUsers(fgaClient, object, relation, userFilter, contextualTuples, queryContext, consistency)
+		response, err := listUsers(cmd.Context(), fgaClient, object, relation, userFilter, contextualTuples, queryContext, consistency)
 		if err != nil {
 			return fmt.Errorf("failed to list users due to %w", err)
 		}

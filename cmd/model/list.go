@@ -33,7 +33,7 @@ import (
 // MaxModelsPagesLength Limit the models so that we are not paginating indefinitely.
 var MaxModelsPagesLength = 20
 
-func listModels(fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthorizationModelsResponse, error) {
+func listModels(ctx context.Context, fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthorizationModelsResponse, error) {
 	// This is needed to ensure empty array is marshaled as [] instead of nil
 	models := make([]openfga.AuthorizationModel, 0)
 
@@ -46,7 +46,7 @@ func listModels(fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthoriz
 			ContinuationToken: &continuationToken,
 		}
 
-		response, err := fgaClient.ReadAuthorizationModels(context.Background()).Options(options).Execute()
+		response, err := fgaClient.ReadAuthorizationModels(ctx).Options(options).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to list models due to %w", err)
 		}
@@ -83,7 +83,7 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
 
-		response, err := listModels(fgaClient, maxPages)
+		response, err := listModels(cmd.Context(), fgaClient, maxPages)
 		if err != nil {
 			return err
 		}

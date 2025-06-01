@@ -1,6 +1,7 @@
 package query
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -44,7 +45,7 @@ func TestListObjectsWithError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ListObjects(t.Context()).Return(mockBody)
+	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
 	_, err := listObjects(
 		mockFgaClient,
@@ -92,7 +93,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ListObjects(t.Context()).Return(mockBody)
+	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
 	output, err := listObjects(
 		mockFgaClient,
@@ -146,7 +147,7 @@ func TestListObjectsWithConsistency(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().ListObjects(t.Context()).Return(mockBody)
+	mockFgaClient.EXPECT().ListObjects(context.Background()).Return(mockBody)
 
 	output, err := listObjects(
 		mockFgaClient,
