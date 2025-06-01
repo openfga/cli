@@ -102,10 +102,12 @@ func initConfig() {
 		homeDir, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search for .fga.yaml in:
-		// 1- XDG_CONFIG/User Config Directory
-		// 2- fga directory under User Config Directory
-		// 3- Home directory
+		// Search for .fga.yml or .fga.yaml in:
+		// 1- The current working directory
+		// 2- The user-specific config directory
+		// 3- The fga subdirectory under the user-specific config directory
+		// 4- The current user's home directory
+		viperInstance.AddConfigPath(".")
 		viperInstance.AddConfigPath(configDir)
 		viperInstance.AddConfigPath(configDir + "/" + "fga")
 		viperInstance.AddConfigPath(homeDir)
