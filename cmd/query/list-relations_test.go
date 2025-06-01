@@ -195,6 +195,7 @@ func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
 	}
 
 	response, err := listRelations(
+		t.Context(),
 		clientConfig,
 		mockFgaClient,
 		"doc:doc1",
