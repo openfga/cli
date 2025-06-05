@@ -65,12 +65,13 @@ type ModelTest struct {
 }
 
 type StoreData struct {
-	Name      string                            `json:"name"       yaml:"name"`
-	Model     string                            `json:"model"      yaml:"model"`
-	ModelFile string                            `json:"model_file" yaml:"model_file,omitempty"` //nolint:tagliatelle
-	Tuples    []client.ClientContextualTupleKey `json:"tuples"     yaml:"tuples"`
-	TupleFile string                            `json:"tuple_file" yaml:"tuple_file,omitempty"` //nolint:tagliatelle
-	Tests     []ModelTest                       `json:"tests"      yaml:"tests"`
+	Name       string                            `json:"name"       yaml:"name"`
+	Model      string                            `json:"model"      yaml:"model"`
+	ModelFile  string                            `json:"model_file" yaml:"model_file,omitempty"` //nolint:tagliatelle
+	Tuples     []client.ClientContextualTupleKey `json:"tuples"     yaml:"tuples"`
+	TupleFile  string                            `json:"tuple_file" yaml:"tuple_file,omitempty"` //nolint:tagliatelle
+	TupleFiles []string                          `json:"tuple_files" yaml:"tuple_files,omitempty"`
+	Tests      []ModelTest                       `json:"tests"      yaml:"tests"`
 }
 
 func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.ModelFormat, error) {
@@ -112,6 +113,24 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 			storeData.Tuples = tuples
 		} else {
 			storeData.Tuples = append(storeData.Tuples, tuples...)
+		}
+	}
+
+	if storeData.TupleFiles != nil {
+		for _, tupleFile := range storeData.TupleFiles {
+			tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, tupleFile))
+			if err != nil {
+				errs = errors.Join(
+					errs,
+					fmt.Errorf("failed to process tuple file %s due to %w", tupleFile, err),
+				)
+				continue
+			}
+			if storeData.Tuples == nil {
+				storeData.Tuples = tuples
+			} else {
+				storeData.Tuples = append(storeData.Tuples, tuples...)
+			}
 		}
 	}
 
