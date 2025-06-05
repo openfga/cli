@@ -80,6 +80,21 @@ tests:
         object: group:admins
         assertions:
           member: true
+    list_objects:
+      - user: user:1
+        type: group
+        assertions:
+          member:
+            - group:admins
+            - group:employees
+    list_users:
+      - object: group:admins
+        user_filter:
+          - type: user
+        assertions:
+          member:
+            users:
+              - user:1
 ```
 
 Additional examples can be found in the [`example/`](../example/) directory and in the [sample-stores repository](https://github.com/openfga/sample-stores/).
