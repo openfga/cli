@@ -228,7 +228,7 @@ export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
 fga store **import**
 
 ###### Parameters
-* `--file`: File containing the store.
+* `--file`: File containing the store. See [STORE_FILE](docs/STORE_FILE.md) for the file format.
 * `--store-id`: Specifies the store id to import into
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
@@ -606,7 +606,7 @@ tests: # required
 ###### Example
 `fga model test --tests tests.fga.yaml`
 
-For more examples of `.fga.yaml` files, check the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+For a detailed description of the `.fga.yaml` format see [docs/STORE_FILE.md](docs/STORE_FILE.md). More examples are available in the [sample-stores repository](https://github.com/openfga/sample-stores/)/
 
 ###### Response
 
