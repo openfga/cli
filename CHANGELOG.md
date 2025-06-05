@@ -2,6 +2,9 @@
 
 #### [Unreleased](https://github.com/openfga/cli/compare/v0.6.6...HEAD)
 
+Added:
+- Failed tuples are now written to `stderr` in the format of the input file (#449)
+
 
 #### [0.6.6](https://github.com/openfga/cli/compare/v0.6.5...v0.6.6) (2025-04-23)
 
