@@ -2,6 +2,9 @@
 
 #### [Unreleased](https://github.com/openfga/cli/compare/v0.6.6...HEAD)
 
+Fixed:
+- Bump OpenFGA to v1.8.13 to resolve security vulnerability
+
 
 #### [0.6.6](https://github.com/openfga/cli/compare/v0.6.5...v0.6.6) (2025-04-23)
 
