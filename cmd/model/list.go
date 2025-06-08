@@ -33,7 +33,9 @@ import (
 // MaxModelsPagesLength Limit the models so that we are not paginating indefinitely.
 var MaxModelsPagesLength = 20
 
-func listModels(ctx context.Context, fgaClient client.SdkClient, maxPages int) (*openfga.ReadAuthorizationModelsResponse, error) {
+func listModels(
+	ctx context.Context, fgaClient client.SdkClient, maxPages int,
+) (*openfga.ReadAuthorizationModelsResponse, error) {
 	// This is needed to ensure empty array is marshaled as [] instead of nil
 	models := make([]openfga.AuthorizationModel, 0)
 

@@ -29,7 +29,9 @@ import (
 	"github.com/openfga/cli/internal/output"
 )
 
-func getStore(ctx context.Context, clientConfig fga.ClientConfig, fgaClient client.SdkClient) (*client.ClientGetStoreResponse, error) {
+func getStore(
+	ctx context.Context, clientConfig fga.ClientConfig, fgaClient client.SdkClient,
+) (*client.ClientGetStoreResponse, error) {
 	store, err := fgaClient.GetStore(ctx).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get store %v due to %w", clientConfig.StoreID, err)

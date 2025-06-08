@@ -37,7 +37,7 @@ func ReadFromStore(ctx context.Context, clientConfig fga.ClientConfig, fgaClient
 
 	if model.AuthorizationModel == nil {
 		// If there is no model, try to get the store
-		if _, err := fgaClient.GetStore(context.Background()).Execute(); err != nil {
+		if _, err := fgaClient.GetStore(ctx).Execute(); err != nil {
 			return nil, fmt.Errorf("failed to get model %v due to %w", clientConfig.AuthorizationModelID, err)
 		}
 

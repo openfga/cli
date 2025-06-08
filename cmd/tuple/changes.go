@@ -33,7 +33,12 @@ import (
 var MaxReadChangesPagesLength = 20
 
 func readChanges(
-	ctx context.Context, fgaClient client.SdkClient, maxPages int, selectedType string, startTime string, continuationToken string,
+	ctx context.Context,
+	fgaClient client.SdkClient,
+	maxPages int,
+	selectedType string,
+	startTime string,
+	continuationToken string,
 ) (*openfga.ReadChangesResponse, error) {
 	changes := []openfga.TupleChange{}
 	pageIndex := 0

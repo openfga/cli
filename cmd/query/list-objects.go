@@ -90,7 +90,9 @@ var listObjectsCmd = &cobra.Command{
 			return fmt.Errorf("error parsing consistency for listObjects: %w", err)
 		}
 
-		response, err := listObjects(cmd.Context(), fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency)
+		response, err := listObjects(
+			cmd.Context(), fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency,
+		)
 		if err != nil {
 			return fmt.Errorf("failed to list objects due to %w", err)
 		}

@@ -122,7 +122,9 @@ var listUsersCmd = &cobra.Command{
 		object, _ := cmd.Flags().GetString("object")
 		relation, _ := cmd.Flags().GetString("relation")
 
-		response, err := listUsers(cmd.Context(), fgaClient, object, relation, userFilter, contextualTuples, queryContext, consistency)
+		response, err := listUsers(
+			cmd.Context(), fgaClient, object, relation, userFilter, contextualTuples, queryContext, consistency,
+		)
 		if err != nil {
 			return fmt.Errorf("failed to list users due to %w", err)
 		}

@@ -49,7 +49,8 @@ func TestReadError(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
-	_, err := read(t.Context(), 
+	_, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -97,7 +98,8 @@ func TestReadEmpty(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
-	output, err := read(t.Context(), 
+	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -179,7 +181,8 @@ func TestReadSinglePage(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
-	output, err := read(t.Context(), 
+	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -301,7 +304,8 @@ func TestReadMultiPages(t *testing.T) {
 		mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody2),
 	)
 
-	output, err := read(t.Context(), 
+	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -383,7 +387,8 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
-	output, err := read(t.Context(), 
+	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",

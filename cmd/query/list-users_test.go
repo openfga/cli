@@ -59,7 +59,8 @@ func TestListUsersSimpleType(t *testing.T) {
 
 	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
 
-	output, err := listUsers(t.Context(), 
+	output, err := listUsers(
+		t.Context(),
 		mockFgaClient,
 		"doc:doc1",
 		"admin",
@@ -127,7 +128,8 @@ func TestListUsersSimpleTypeAndRelation(t *testing.T) {
 
 	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
 
-	output, err := listUsers(t.Context(), 
+	output, err := listUsers(
+		t.Context(),
 		mockFgaClient,
 		"doc:doc1",
 		"admin",
@@ -196,7 +198,8 @@ func TestListUsersWithConsistency(t *testing.T) {
 
 	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
 
-	output, err := listUsers(t.Context(), 
+	output, err := listUsers(
+		t.Context(),
 		mockFgaClient,
 		"doc:doc1",
 		"admin",
