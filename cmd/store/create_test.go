@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -36,7 +35,7 @@ func TestCreateError(t *testing.T) {
 
 	mockFgaClient.EXPECT().CreateStore(gomock.Any()).Return(mockBody)
 
-	_, err := create(context.TODO(), mockFgaClient, "foo")
+	_, err := create(t.Context(), mockFgaClient, "foo")
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -70,7 +69,7 @@ func TestCreateSuccess(t *testing.T) {
 
 	mockFgaClient.EXPECT().CreateStore(gomock.Any()).Return(mockBody)
 
-	output, err := create(context.TODO(), mockFgaClient, "foo")
+	output, err := create(t.Context(), mockFgaClient, "foo")
 	if err != nil {
 		t.Error(err)
 	}
