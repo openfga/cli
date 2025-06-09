@@ -12,6 +12,7 @@ linters:
     - gochecknoinits
     - mnd
     - testpackage
+    - usetesting
   settings:
     depguard:
       rules:
