@@ -1,7 +1,6 @@
 package tuple
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -48,9 +47,10 @@ func TestReadError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
 	_, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -96,9 +96,10 @@ func TestReadEmpty(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
 	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -178,9 +179,10 @@ func TestReadSinglePage(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
 	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -298,11 +300,12 @@ func TestReadMultiPages(t *testing.T) {
 	)
 
 	gomock.InOrder(
-		mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody1),
-		mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody2),
+		mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody1),
+		mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody2),
 	)
 
 	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
@@ -382,9 +385,10 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Read(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
 	output, err := read(
+		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",

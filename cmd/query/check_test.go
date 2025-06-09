@@ -1,7 +1,6 @@
 package query
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -45,9 +44,10 @@ func TestCheckWithError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Check(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Check(t.Context()).Return(mockBody)
 
 	_, err := check(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
@@ -97,9 +97,10 @@ func TestCheckWithNoError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Check(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Check(t.Context()).Return(mockBody)
 
 	output, err := check(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",
@@ -155,9 +156,10 @@ func TestCheckWithConsistency(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Check(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Check(t.Context()).Return(mockBody)
 
 	output, err := check(
+		t.Context(),
 		mockFgaClient,
 		"user:foo",
 		"writer",

@@ -31,6 +31,7 @@ import (
 )
 
 func getRelationsForType(
+	ctx context.Context,
 	clientConfig fga.ClientConfig,
 	fgaClient client.SdkClient,
 	object string,
@@ -38,14 +39,14 @@ func getRelationsForType(
 	var authorizationModel openfga.AuthorizationModel
 
 	if clientConfig.AuthorizationModelID != "" {
-		response, err := fgaClient.ReadAuthorizationModel(context.Background()).Execute()
+		response, err := fgaClient.ReadAuthorizationModel(ctx).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
 
 		authorizationModel = response.GetAuthorizationModel()
 	} else {
-		response, err := fgaClient.ReadLatestAuthorizationModel(context.Background()).Execute()
+		response, err := fgaClient.ReadLatestAuthorizationModel(ctx).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
@@ -71,7 +72,8 @@ func getRelationsForType(
 	return &relations, nil
 }
 
-func listRelations(clientConfig fga.ClientConfig,
+func listRelations(ctx context.Context,
+	clientConfig fga.ClientConfig,
 	fgaClient client.SdkClient,
 	user string,
 	object string,
@@ -81,7 +83,7 @@ func listRelations(clientConfig fga.ClientConfig,
 	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListRelationsResponse, error) {
 	if len(relations) < 1 {
-		relationsForType, err := getRelationsForType(clientConfig, fgaClient, object)
+		relationsForType, err := getRelationsForType(ctx, clientConfig, fgaClient, object)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list relations due to %w", err)
 		}
@@ -110,7 +112,7 @@ func listRelations(clientConfig fga.ClientConfig,
 		options.Consistency = consistency
 	}
 
-	response, err := fgaClient.ListRelations(context.Background()).Body(*body).Options(*options).Execute()
+	response, err := fgaClient.ListRelations(ctx).Body(*body).Options(*options).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list relations due to %w", err)
 	}
@@ -154,6 +156,7 @@ var listRelationsCmd = &cobra.Command{
 		relations, _ := cmd.Flags().GetStringArray("relation")
 
 		response, err := listRelations(
+			cmd.Context(),
 			clientConfig,
 			fgaClient,
 			args[0],
