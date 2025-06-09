@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -45,7 +44,7 @@ func TestWriteModelFail(t *testing.T) {
 		return
 	}
 
-	_, err = Write(context.TODO(), mockFgaClient, model)
+	_, err = Write(t.Context(), mockFgaClient, model)
 	if err == nil {
 		t.Fatalf("Expect error but there is none")
 	}
@@ -87,7 +86,7 @@ func TestWriteModel(t *testing.T) {
 		return
 	}
 
-	output, err := Write(context.TODO(), mockFgaClient, model)
+	output, err := Write(t.Context(), mockFgaClient, model)
 	if err != nil {
 		t.Fatal(err)
 	}
