@@ -24,55 +24,63 @@ func RunLocalCheckTest(
 	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
+
 	results := []ModelTestCheckSingleResult{}
 
-	for relation, expectation := range checkTest.Assertions {
-		result := ModelTestCheckSingleResult{
-			Request: client.ClientCheckRequest{
-				User:             checkTest.User,
-				Relation:         relation,
-				Object:           checkTest.Object,
-				ContextualTuples: tuples,
-				Context:          checkTest.Context,
-			},
-			Expected: expectation,
-		}
+	users := []string{checkTest.User}
+	if len(checkTest.Users) > 0 {
+		users = checkTest.Users
+	}
 
-		var (
-			ctx *structpb.Struct
-			err error
-		)
-
-		if checkTest.Context != nil {
-			ctx, err = structpb.NewStruct(*checkTest.Context)
-		}
-
-		if err != nil {
-			result.Error = err
-		} else {
-			response, err := RunSingleLocalCheckTest(fgaServer,
-				&pb.CheckRequest{
-					StoreId:              *options.StoreID,
-					AuthorizationModelId: *options.ModelID,
-					TupleKey: &pb.CheckRequestTupleKey{
-						User:     checkTest.User,
-						Relation: relation,
-						Object:   checkTest.Object,
-					},
-					Context: ctx,
+	for _, user := range users {
+		for relation, expectation := range checkTest.Assertions {
+			result := ModelTestCheckSingleResult{
+				Request: client.ClientCheckRequest{
+					User:             user,
+					Relation:         relation,
+					Object:           checkTest.Object,
+					ContextualTuples: tuples,
+					Context:          checkTest.Context,
 				},
+				Expected: expectation,
+			}
+
+			var (
+				ctx *structpb.Struct
+				err error
 			)
+
+			if checkTest.Context != nil {
+				ctx, err = structpb.NewStruct(*checkTest.Context)
+			}
+
 			if err != nil {
 				result.Error = err
+			} else {
+				response, err := RunSingleLocalCheckTest(fgaServer,
+					&pb.CheckRequest{
+						StoreId:              *options.StoreID,
+						AuthorizationModelId: *options.ModelID,
+						TupleKey: &pb.CheckRequestTupleKey{
+							User:     user,
+							Relation: relation,
+							Object:   checkTest.Object,
+						},
+						Context: ctx,
+					},
+				)
+				if err != nil {
+					result.Error = err
+				}
+
+				if response != nil {
+					result.Got = &response.Allowed
+					result.TestResult = result.IsPassing()
+				}
 			}
 
-			if response != nil {
-				result.Got = &response.Allowed
-				result.TestResult = result.IsPassing()
-			}
+			results = append(results, result)
 		}
-
-		results = append(results, result)
 	}
 
 	return results

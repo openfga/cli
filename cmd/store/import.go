@@ -232,13 +232,20 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 	var assertions []client.ClientAssertion
 
 	for _, checkTest := range checkTests {
-		for relation, expectation := range checkTest.Assertions {
-			assertions = append(assertions, client.ClientAssertion{
-				User:        checkTest.User,
-				Relation:    relation,
-				Object:      checkTest.Object,
-				Expectation: expectation,
-			})
+		users := []string{checkTest.User}
+		if len(checkTest.Users) > 0 {
+			users = checkTest.Users
+		}
+
+		for _, user := range users {
+			for relation, expectation := range checkTest.Assertions {
+				assertions = append(assertions, client.ClientAssertion{
+					User:        user,
+					Relation:    relation,
+					Object:      checkTest.Object,
+					Expectation: expectation,
+				})
+			}
 		}
 	}
 

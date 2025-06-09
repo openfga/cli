@@ -303,6 +303,13 @@ tests:
           assertions:
             member: true
             moderator: false
+      # checks can also be defined for multiple users sharing the same expectation
+      - object: group:employees
+        users:
+          - user: user:3
+          - user: user:4
+        assertions:
+          member: true
 ```
 
 If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
@@ -558,19 +565,26 @@ tests: # required
   - name: test-1
     description: testing that the model works # optional
     # tuple_file: ./tuples.json # tuples that would apply per test
-    tuples:
-      - user: user:anne
-        relation: owner
-        object: folder:1
-    check: # a set of checks to run
-      - user: user:anne
-        object: folder:1
-        assertions:
-          # a set of expected results for each relation
-          can_view: true
-          can_write: true
-          can_share: false
-    list_objects: # a set of list objects to run
+      tuples:
+        - user: user:anne
+          relation: owner
+          object: folder:1
+      check: # a set of checks to run
+        - user: user:anne
+          object: folder:1
+          assertions:
+            # a set of expected results for each relation
+            can_view: true
+            can_write: true
+            can_share: false
+        # checks can group multiple users that share the same expected results
+        - object: folder:2
+          users:
+            - user:beth
+            - user:carl
+          assertions:
+            can_view: false
+      list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
         assertions:

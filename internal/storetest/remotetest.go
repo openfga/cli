@@ -34,19 +34,26 @@ func RunRemoteCheckTest(
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
 
-	for relation, expectation := range checkTest.Assertions {
-		result := RunSingleRemoteCheckTest(
-			fgaClient,
-			client.ClientCheckRequest{
-				User:             checkTest.User,
-				Relation:         relation,
-				Object:           checkTest.Object,
-				Context:          checkTest.Context,
-				ContextualTuples: tuples,
-			},
-			expectation,
-		)
-		results = append(results, result)
+	users := []string{checkTest.User}
+	if len(checkTest.Users) > 0 {
+		users = checkTest.Users
+	}
+
+	for _, user := range users {
+		for relation, expectation := range checkTest.Assertions {
+			result := RunSingleRemoteCheckTest(
+				fgaClient,
+				client.ClientCheckRequest{
+					User:             user,
+					Relation:         relation,
+					Object:           checkTest.Object,
+					Context:          checkTest.Context,
+					ContextualTuples: tuples,
+				},
+				expectation,
+			)
+			results = append(results, result)
+		}
 	}
 
 	return results
