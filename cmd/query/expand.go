@@ -29,6 +29,7 @@ import (
 )
 
 func expand(
+	ctx context.Context,
 	fgaClient client.SdkClient,
 	relation string,
 	object string,
@@ -45,7 +46,7 @@ func expand(
 		options.Consistency = consistency
 	}
 
-	tuples, err := fgaClient.Expand(context.Background()).Body(*body).Options(*options).Execute()
+	tuples, err := fgaClient.Expand(ctx).Body(*body).Options(*options).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to expand tuples due to %w", err)
 	}
@@ -73,7 +74,7 @@ var expandCmd = &cobra.Command{
 			return fmt.Errorf("error parsing consistency for check: %w", err)
 		}
 
-		response, err := expand(fgaClient, args[0], args[1], consistency)
+		response, err := expand(cmd.Context(), fgaClient, args[0], args[1], consistency)
 		if err != nil {
 			return err
 		}

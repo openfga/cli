@@ -31,7 +31,7 @@ import (
 // MaxStoresPagesLength Limit the pages of stores so that we are not paginating indefinitely.
 var MaxStoresPagesLength = 20 // up to 1000 records
 
-func listStores(fgaClient client.SdkClient, maxPages int) (*openfga.ListStoresResponse, error) {
+func listStores(ctx context.Context, fgaClient client.SdkClient, maxPages int) (*openfga.ListStoresResponse, error) {
 	stores := []openfga.Store{}
 	continuationToken := ""
 	pageIndex := 0
@@ -41,7 +41,7 @@ func listStores(fgaClient client.SdkClient, maxPages int) (*openfga.ListStoresRe
 			ContinuationToken: &continuationToken,
 		}
 
-		response, err := fgaClient.ListStores(context.Background()).Options(options).Execute()
+		response, err := fgaClient.ListStores(ctx).Options(options).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to list stores due to %w", err)
 		}
@@ -77,7 +77,7 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
 
-		response, err := listStores(fgaClient, maxPages)
+		response, err := listStores(cmd.Context(), fgaClient, maxPages)
 		if err != nil {
 			return err
 		}

@@ -1,7 +1,6 @@
 package query
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"reflect"
@@ -41,9 +40,9 @@ func TestExpandWithError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Expand(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Expand(t.Context()).Return(mockBody)
 
-	_, err := expand(mockFgaClient, "writer", "doc:doc1", openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr())
+	_, err := expand(t.Context(), mockFgaClient, "writer", "doc:doc1", openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr())
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -79,9 +78,9 @@ func TestExpandWithNoError(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Expand(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Expand(t.Context()).Return(mockBody)
 
-	output, err := expand(mockFgaClient, "writer", "doc:doc1", openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr())
+	output, err := expand(t.Context(), mockFgaClient, "writer", "doc:doc1", openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr())
 	if err != nil {
 		t.Error(err)
 	}
@@ -123,9 +122,9 @@ func TestExpandWithConsistency(t *testing.T) {
 	}
 	mockBody.EXPECT().Body(body).Return(mockRequest)
 
-	mockFgaClient.EXPECT().Expand(context.Background()).Return(mockBody)
+	mockFgaClient.EXPECT().Expand(t.Context()).Return(mockBody)
 
-	output, err := expand(mockFgaClient, "writer", "doc:doc1", openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY.Ptr())
+	output, err := expand(t.Context(), mockFgaClient, "writer", "doc:doc1", openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY.Ptr())
 	if err != nil {
 		t.Error(err)
 	}
