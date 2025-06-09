@@ -150,6 +150,7 @@ func TestImportStore(t *testing.T) {
 				if test.name == "import store with multi user assertions" {
 					expected = multiUserAssertions
 				}
+
 				setupWriteAssertionsMock(mockCtrl, mockFgaClient, expected, expectedOptions)
 			} else {
 				mockFgaClient.EXPECT().WriteAssertions(gomock.Any()).Times(0)
