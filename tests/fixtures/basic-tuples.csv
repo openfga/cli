@@ -1,0 +1,2 @@
+user_type,user_id,user_relation,relation,object_type,object_id
+user,anne,,owner,group,foo
