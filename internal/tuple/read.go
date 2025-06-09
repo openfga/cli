@@ -11,6 +11,7 @@ import (
 const DefaultReadPageSize int32 = 50
 
 func Read(
+	ctx context.Context,
 	fgaClient client.SdkClient,
 	body *client.ClientReadRequest,
 	maxPages int,
@@ -32,7 +33,7 @@ func Read(
 	for {
 		options.ContinuationToken = &continuationToken
 
-		response, err := fgaClient.Read(context.Background()).Body(*body).Options(options).Execute()
+		response, err := fgaClient.Read(ctx).Body(*body).Options(options).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to read tuples due to %w", err)
 		}
