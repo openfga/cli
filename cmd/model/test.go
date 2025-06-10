@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -47,10 +48,15 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		format, storeData, err := storetest.ReadFromFile(testsFileName, path.Dir(testsFileName))
+		fileNames, err := filepath.Glob(testsFileName)
 		if err != nil {
-			return err //nolint:wrapcheck
+			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
 		}
+		if len(fileNames) == 0 {
+			fileNames = []string{testsFileName}
+		}
+
+		aggregateResults := storetest.TestResults{}
 
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
@@ -62,26 +68,35 @@ var testCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		test, err := storetest.RunTests(
-			fgaClient,
-			storeData,
-			format,
-		)
-		if err != nil {
-			return fmt.Errorf("error running tests due to %w", err)
+		for _, file := range fileNames {
+			format, storeData, err := storetest.ReadFromFile(file, path.Dir(file))
+			if err != nil {
+				return err //nolint:wrapcheck
+			}
+
+			test, err := storetest.RunTests(
+				fgaClient,
+				storeData,
+				format,
+			)
+			if err != nil {
+				return fmt.Errorf("error running tests for %s due to %w", file, err)
+			}
+
+			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 		}
 
-		passing := test.IsPassing()
+		passing := aggregateResults.IsPassing()
 
 		if verbose {
-			err = output.Display(test.Results)
+			err = output.Display(aggregateResults.Results)
 			if err != nil {
 				return fmt.Errorf("error displaying test results due to %w", err)
 			}
 		}
 
 		if !suppressSummary {
-			fmt.Fprintln(os.Stderr, test.FriendlyDisplay())
+			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
 		}
 
 		if !passing {

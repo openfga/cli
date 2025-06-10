@@ -5,6 +5,9 @@
 Fixed:
 - Bump OpenFGA to v1.8.13 to resolve a security vulnerability [GHSA-c72g-53hw-82q7](https://github.com/openfga/openfga/security/advisories/GHSA-c72g-53hw-82q7)
 
+Added:
+- Support running `fga model test` with multiple files using glob patterns (#423)
+
 
 #### [0.6.6](https://github.com/openfga/cli/compare/v0.6.5...v0.6.6) (2025-04-23)
 
