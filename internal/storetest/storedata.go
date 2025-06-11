@@ -22,11 +22,17 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/openfga/cli/internal/tuplefile"
+
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/tuplefile"
+)
+
+var (
+	errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
+	errFailedProcessingTupleFiles = errors.New("failed to process one or more tuple files")
 )
 
 type ModelTestCheck struct {
@@ -102,16 +108,15 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 	return format, nil
 }
 
-//nolint:gocognit,cyclop
 func (storeData *StoreData) LoadTuples(basePath string) error {
-	var errs error
-	var allTuples []client.ClientContextualTupleKey //nolint:wsl
+	var (
+		errs      error
+		allTuples []client.ClientContextualTupleKey
+		tupleSet  = make(map[string]struct{})
+	)
 
-	tupleSet := make(map[string]struct{})
-
-	// Deduplicate initial storeData.Tuples
-	if storeData.Tuples != nil {
-		for _, t := range storeData.Tuples {
+	addTuples := func(tuples []client.ClientContextualTupleKey) {
+		for _, t := range tuples {
 			key := fmt.Sprintf("%v", t)
 			if _, exists := tupleSet[key]; !exists {
 				tupleSet[key] = struct{}{}
@@ -121,72 +126,114 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 		}
 	}
 
-	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0 { //nolint:nestif
+	if storeData.Tuples != nil {
+		addTuples(storeData.Tuples)
+	}
+
+	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0 {
 		errs = errors.Join(
 			errs,
-			errors.New("either tuple_file or tuple_files or tuples must be provided")) //nolint:err113
-	} else {
-		if storeData.TupleFile != "" {
-			tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
-			if err != nil {
-				errs = errors.Join(
-					errs, fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err))
-			} else {
-				for _, t := range tuples {
-					key := fmt.Sprintf("%v", t)
-					if _, exists := tupleSet[key]; !exists {
-						tupleSet[key] = struct{}{}
-						allTuples = append(allTuples, t) //nolint:wsl
-					}
-				}
-			}
-		}
-
-		if storeData.TupleFiles != nil {
-			for _, tupleFile := range storeData.TupleFiles {
-				tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, tupleFile))
-				if err != nil {
-					errs = errors.Join(
-						errs,
-						fmt.Errorf("failed to process tuple file %s due to %w", tupleFile, err),
-					)
-
-					continue
-				}
-				for _, t := range tuples { //nolint:wsl
-					key := fmt.Sprintf("%v", t)
-					if _, exists := tupleSet[key]; !exists {
-						tupleSet[key] = struct{}{}
-						allTuples = append(allTuples, t) //nolint:wsl
-					}
-				}
-			}
-		}
-
-		if len(allTuples) > 0 {
-			storeData.Tuples = allTuples
-		}
+			errMissingTuple,
+		)
 	}
 
-	for index, test := range storeData.Tests {
-		if test.TupleFile == "" {
-			continue
-		}
+	errs = errors.Join(
+		errs,
+		storeData.loadAndAddTuplesFromFile(basePath, storeData.TupleFile, addTuples),
+	)
 
-		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, test.TupleFile))
-		if err != nil {
-			errs = errors.Join(
-				errs,
-				fmt.Errorf("failed to process tuple file %s for test %s due to %w", test.TupleFile, test.Name, err),
-			)
-		} else {
-			storeData.Tests[index].Tuples = tuples
-		}
+	errs = errors.Join(
+		errs,
+		storeData.loadAndAddTuplesFromFiles(basePath, storeData.TupleFiles, addTuples),
+	)
+
+	if len(allTuples) > 0 {
+		storeData.Tuples = allTuples
 	}
+
+	errs = errors.Join(
+		errs,
+		storeData.loadTestTuples(basePath),
+	)
 
 	if errs != nil {
-		return errors.Join(errors.New("failed to process one or more tuple files"), errs) //nolint:err113
+		return errors.Join(
+			errFailedProcessingTupleFiles,
+			errs,
+		)
 	}
 
 	return nil
+}
+
+func (storeData *StoreData) loadAndAddTuplesFromFile(
+	basePath string,
+	file string,
+	add func([]client.ClientContextualTupleKey),
+) error {
+	if file == "" {
+		return nil
+	}
+
+	tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, file))
+	if err != nil {
+		return fmt.Errorf("failed to process global tuple %s file due to %w", file, err)
+	}
+
+	add(tuples)
+
+	return nil
+}
+
+func (storeData *StoreData) loadAndAddTuplesFromFiles(
+	basePath string,
+	files []string,
+	add func([]client.ClientContextualTupleKey),
+) error {
+	var errs error
+
+	for _, file := range files {
+		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, file))
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf("failed to process tuple file %s due to %w", file, err),
+			)
+
+			continue
+		}
+
+		add(tuples)
+	}
+
+	return errs
+}
+
+func (storeData *StoreData) loadTestTuples(basePath string) error {
+	var errs error
+
+	for testIndex, testCase := range storeData.Tests {
+		if testCase.TupleFile == "" {
+			continue
+		}
+
+		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, testCase.TupleFile))
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf(
+					"failed to process tuple file %s for test %s due to %w",
+					testCase.TupleFile,
+					testCase.Name,
+					err,
+				),
+			)
+
+			continue
+		}
+
+		storeData.Tests[testIndex].Tuples = tuples
+	}
+
+	return errs
 }
