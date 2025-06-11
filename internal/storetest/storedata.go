@@ -65,13 +65,13 @@ type ModelTest struct {
 }
 
 type StoreData struct {
-	Name       string                            `json:"name"       yaml:"name"`
-	Model      string                            `json:"model"      yaml:"model"`
-	ModelFile  string                            `json:"model_file" yaml:"model_file,omitempty"` //nolint:tagliatelle
-	Tuples     []client.ClientContextualTupleKey `json:"tuples"     yaml:"tuples"`
-	TupleFile  string                            `json:"tuple_file" yaml:"tuple_file,omitempty"` //nolint:tagliatelle
-	TupleFiles []string                          `json:"tuple_files" yaml:"tuple_files,omitempty"`
-	Tests      []ModelTest                       `json:"tests"      yaml:"tests"`
+	Name       string                            `json:"name"        yaml:"name"`
+	Model      string                            `json:"model"       yaml:"model"`
+	ModelFile  string                            `json:"model_file"  yaml:"model_file,omitempty"` //nolint:tagliatelle
+	Tuples     []client.ClientContextualTupleKey `json:"tuples"      yaml:"tuples"`
+	TupleFile  string                            `json:"tuple_file"  yaml:"tuple_file,omitempty"`  //nolint:tagliatelle
+	TupleFiles []string                          `json:"tuple_files" yaml:"tuple_files,omitempty"` //nolint:tagliatelle
+	Tests      []ModelTest                       `json:"tests"       yaml:"tests"`
 }
 
 func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.ModelFormat, error) {
@@ -102,25 +102,29 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 	return format, nil
 }
 
+//nolint:gocognit,cyclop
 func (storeData *StoreData) LoadTuples(basePath string) error {
 	var errs error
 
-	if storeData.TupleFile == "" && (storeData.TupleFiles == nil || len(storeData.TupleFiles) == 0) {
-		errs = fmt.Errorf("either tuple_file or tuple_files must be provided")
+	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 { //nolint:nestif
+		errs = errors.Join(
+			errs,
+			errors.New("either tuple_file or tuple_files must be provided")) //nolint:err113
 	} else {
 		tupleSet := make(map[string]struct{})
-		var allTuples []client.ClientContextualTupleKey
+		var allTuples []client.ClientContextualTupleKey //nolint:wsl
 
 		if storeData.TupleFile != "" {
 			tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
 			if err != nil {
-				errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
+				errs = errors.Join(
+					errs, fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err))
 			} else {
 				for _, t := range tuples {
 					key := fmt.Sprintf("%v", t)
 					if _, exists := tupleSet[key]; !exists {
 						tupleSet[key] = struct{}{}
-						allTuples = append(allTuples, t)
+						allTuples = append(allTuples, t) //nolint:wsl
 					}
 				}
 			}
@@ -134,13 +138,14 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 						errs,
 						fmt.Errorf("failed to process tuple file %s due to %w", tupleFile, err),
 					)
+
 					continue
 				}
-				for _, t := range tuples {
+				for _, t := range tuples { //nolint:wsl
 					key := fmt.Sprintf("%v", t)
 					if _, exists := tupleSet[key]; !exists {
 						tupleSet[key] = struct{}{}
-						allTuples = append(allTuples, t)
+						allTuples = append(allTuples, t) //nolint:wsl
 					}
 				}
 			}
