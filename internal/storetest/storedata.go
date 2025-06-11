@@ -105,32 +105,49 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 func (storeData *StoreData) LoadTuples(basePath string) error {
 	var errs error
 
-	if storeData.TupleFile != "" {
-		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
-		if err != nil { //nolint:gocritic
-			errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
-		} else if storeData.Tuples == nil {
-			storeData.Tuples = tuples
-		} else {
-			storeData.Tuples = append(storeData.Tuples, tuples...)
-		}
-	}
+	if storeData.TupleFile == "" && (storeData.TupleFiles == nil || len(storeData.TupleFiles) == 0) {
+		errs = fmt.Errorf("either tuple_file or tuple_files must be provided")
+	} else {
+		tupleSet := make(map[string]struct{})
+		var allTuples []client.ClientContextualTupleKey
 
-	if storeData.TupleFiles != nil {
-		for _, tupleFile := range storeData.TupleFiles {
-			tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, tupleFile))
+		if storeData.TupleFile != "" {
+			tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
 			if err != nil {
-				errs = errors.Join(
-					errs,
-					fmt.Errorf("failed to process tuple file %s due to %w", tupleFile, err),
-				)
-				continue
-			}
-			if storeData.Tuples == nil {
-				storeData.Tuples = tuples
+				errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
 			} else {
-				storeData.Tuples = append(storeData.Tuples, tuples...)
+				for _, t := range tuples {
+					key := fmt.Sprintf("%v", t)
+					if _, exists := tupleSet[key]; !exists {
+						tupleSet[key] = struct{}{}
+						allTuples = append(allTuples, t)
+					}
+				}
 			}
+		}
+
+		if storeData.TupleFiles != nil {
+			for _, tupleFile := range storeData.TupleFiles {
+				tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, tupleFile))
+				if err != nil {
+					errs = errors.Join(
+						errs,
+						fmt.Errorf("failed to process tuple file %s due to %w", tupleFile, err),
+					)
+					continue
+				}
+				for _, t := range tuples {
+					key := fmt.Sprintf("%v", t)
+					if _, exists := tupleSet[key]; !exists {
+						tupleSet[key] = struct{}{}
+						allTuples = append(allTuples, t)
+					}
+				}
+			}
+		}
+
+		if len(allTuples) > 0 {
+			storeData.Tuples = allTuples
 		}
 	}
 

@@ -1,0 +1,6 @@
+- user: folder:6
+  relation: parent
+  object: folder:product-2022
+- user: folder:product-2022
+  relation: parent
+  object: folder:product-2022Q1
