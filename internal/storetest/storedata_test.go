@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/openfga/go-sdk/client"
 )
 
 func writeTempFile(t *testing.T, dir, name, content string) string {
@@ -117,6 +119,12 @@ func TestLoadTuples_Deduplicates(t *testing.T) {
 
 	store := StoreData{
 		TupleFiles: []string{filepath.Base(file)},
+		Tuples: []client.ClientContextualTupleKey{{
+			User:      "user:jon",
+			Relation:  "viewer",
+			Object:    "document:doc1",
+			Condition: nil,
+		}},
 	}
 
 	if err := store.LoadTuples(tempDir); err != nil {

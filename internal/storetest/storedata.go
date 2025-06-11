@@ -105,15 +105,27 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 //nolint:gocognit,cyclop
 func (storeData *StoreData) LoadTuples(basePath string) error {
 	var errs error
+	var allTuples []client.ClientContextualTupleKey //nolint:wsl
 
-	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 { //nolint:nestif
+	tupleSet := make(map[string]struct{})
+
+	// Deduplicate initial storeData.Tuples
+	if storeData.Tuples != nil {
+		for _, t := range storeData.Tuples {
+			key := fmt.Sprintf("%v", t)
+			if _, exists := tupleSet[key]; !exists {
+				tupleSet[key] = struct{}{}
+
+				allTuples = append(allTuples, t)
+			}
+		}
+	}
+
+	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0 { //nolint:nestif
 		errs = errors.Join(
 			errs,
-			errors.New("either tuple_file or tuple_files must be provided")) //nolint:err113
+			errors.New("either tuple_file or tuple_files or tuples must be provided")) //nolint:err113
 	} else {
-		tupleSet := make(map[string]struct{})
-		var allTuples []client.ClientContextualTupleKey //nolint:wsl
-
 		if storeData.TupleFile != "" {
 			tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
 			if err != nil {
