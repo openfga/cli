@@ -15,6 +15,9 @@
 Added:
 - Include current working directory in the config file resolution (#504) - thanks @OsmanMElsayed
 
+Added:
+- Failed tuples are now written to `stderr` in the format of the input file (#449)
+
 Fixed:
 - Bump OpenFGA to v1.8.13 to resolve a security vulnerability [GHSA-c72g-53hw-82q7](https://github.com/openfga/openfga/security/advisories/GHSA-c72g-53hw-82q7)
 

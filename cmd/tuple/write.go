@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/openfga/go-sdk/client"
@@ -189,6 +190,22 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 
 	if len(response.Failed) > 0 {
 		outputResponse["failed"] = response.Failed
+	}
+
+	if len(response.Failed) > 0 {
+		failedFormat := formatFromExtension(fileName)
+
+		failedTuples := make([]client.ClientTupleKey, 0, len(response.Failed))
+		for _, f := range response.Failed {
+			failedTuples = append(failedTuples, f.TupleKey)
+		}
+
+		out, errFmt2 := formatTuples(failedTuples, failedFormat)
+		if errFmt2 != nil {
+			return fmt.Errorf("failed to marshal failed tuples: %w", errFmt2)
+		}
+
+		fmt.Fprint(os.Stderr, out)
 	}
 
 	outputResponse["total_count"] = len(tuples)
