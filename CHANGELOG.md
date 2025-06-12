@@ -1,10 +1,22 @@
 # Changelog
 
-#### [Unreleased](https://github.com/openfga/cli/compare/v0.6.6...HEAD)
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.7.0...HEAD)
+
+#### [0.7.0](https://github.com/openfga/cli/compare/v0.6.6...v0.7.0) (2025-06-10)
+
+> [!NOTE]
+> This release includes a change to the configuration file (`.fga.yaml`) lookup order to simplify multi-project usage.
+> The lookup is now in the following order:
+> * Current working directory (New)
+> * OS-specific [user configuration directory](https://pkg.go.dev/os#UserConfigDir) (e.g. `~/.config`)
+> * `fga` directory within the OS-specific [user configuration directory](https://pkg.go.dev/os#UserConfigDir) (e.g. `~/.config/fga`)
+> * OS-specific [home directory](https://pkg.go.dev/os#UserHomeDir) (e.g. `~/`)
+
+Added:
+- Include current working directory in the config file resolution (#504) - thanks @OsmanMElsayed
 
 Fixed:
 - Bump OpenFGA to v1.8.13 to resolve a security vulnerability [GHSA-c72g-53hw-82q7](https://github.com/openfga/openfga/security/advisories/GHSA-c72g-53hw-82q7)
-
 
 #### [0.6.6](https://github.com/openfga/cli/compare/v0.6.5...v0.6.6) (2025-04-23)
 
