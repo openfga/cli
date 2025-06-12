@@ -19,6 +19,7 @@ package storetest
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 
@@ -31,7 +32,13 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 
 	var storeData StoreData
 
-	testFile, err := os.Open(fileName)
+	absFileName := fileName
+
+	if !filepath.IsAbs(fileName) && basePath != "" {
+		absFileName = filepath.Join(basePath, fileName)
+	}
+
+	testFile, err := os.Open(absFileName)
 	if err != nil {
 		return format, nil, fmt.Errorf("failed to read file %s due to %w", fileName, err)
 	}
