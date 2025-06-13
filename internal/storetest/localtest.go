@@ -25,11 +25,7 @@ func RunLocalCheckTest(
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
-	users := []string{checkTest.User}
-
-	if len(checkTest.Users) > 0 {
-		users = checkTest.Users
-	}
+	users := getEffectiveUsers(checkTest)
 
 	for _, user := range users {
 		for relation, expectation := range checkTest.Assertions {

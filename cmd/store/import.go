@@ -232,10 +232,7 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 	var assertions []client.ClientAssertion
 
 	for _, checkTest := range checkTests {
-		users := []string{checkTest.User}
-		if len(checkTest.Users) > 0 {
-			users = checkTest.Users
-		}
+		users := getEffectiveUsers(checkTest)
 
 		for _, user := range users {
 			for relation, expectation := range checkTest.Assertions {
@@ -250,6 +247,14 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 	}
 
 	return assertions
+}
+
+func getEffectiveUsers(checkTest storetest.ModelTestCheck) []string {
+	if len(checkTest.Users) > 0 {
+		return checkTest.Users
+	}
+
+	return []string{checkTest.User}
 }
 
 func createProgressBar(total int) *progressbar.ProgressBar {
