@@ -139,9 +139,17 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 		return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
 	}
 
+	if flags.Changed("max-tuples-per-write") && maxTuplesPerWrite <= 0 {
+		return errors.New("max-tuples-per-write must be greater than zero") //nolint:err113
+	}
+
 	maxParallelRequests, err := flags.GetInt("max-parallel-requests")
 	if err != nil {
 		return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
+	}
+
+	if flags.Changed("max-parallel-requests") && maxParallelRequests <= 0 {
+		return errors.New("max-parallel-requests must be greater than zero") //nolint:err113
 	}
 
 	maxRPS, err := flags.GetInt("max-rps")
@@ -149,9 +157,17 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 		return fmt.Errorf("failed to parse max-rps due to %w", err)
 	}
 
+	if flags.Changed("max-rps") && maxRPS <= 0 {
+		return errors.New("max-rps must be greater than zero") //nolint:err113
+	}
+
 	rampUpPeriodInSec, err := flags.GetInt("rampup-period-in-sec")
 	if err != nil {
 		return fmt.Errorf("failed to parse parallel requests due to %w", err)
+	}
+
+	if flags.Changed("rampup-period-in-sec") && rampUpPeriodInSec <= 0 {
+		return errors.New("rampup-period-in-sec must be greater than zero") //nolint:err113
 	}
 
 	if maxRPS > 0 && !flags.Changed("rampup-period-in-sec") {

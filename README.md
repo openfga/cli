@@ -676,6 +676,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
 * `--max-rps`: Max requests per second. When set, the CLI will ramp up requests from 1 RPS to the set value. If `--rampup-period-in-sec` is omitted it defaults to `max-rps*2`.
 * `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Only used if `--max-rps` is set.
+* All integer parameters must be greater than zero when provided.
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
