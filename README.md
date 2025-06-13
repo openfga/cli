@@ -306,8 +306,8 @@ tests:
       # checks can also be defined for multiple users sharing the same expectation
       - object: group:employees
         users:
-          - user: user:3
-          - user: user:4
+          - user:3
+          - user:4
         assertions:
           member: true
 ```
