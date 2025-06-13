@@ -154,6 +154,24 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 		return fmt.Errorf("failed to parse parallel requests due to %w", err)
 	}
 
+	if maxRPS > 0 && !flags.Changed("rampup-period-in-sec") {
+		rampUpPeriodInSec = maxRPS * 2
+	}
+
+	if maxRPS > 0 && !flags.Changed("max-parallel-requests") {
+		defaultParallel := maxRPS / 5
+
+		if defaultParallel < 1 {
+			defaultParallel = 1
+		}
+
+		maxParallelRequests = defaultParallel
+	}
+
+	if maxRPS > 0 && !flags.Changed("max-tuples-per-write") {
+		maxTuplesPerWrite = 40
+	}
+
 	debug, err := flags.GetBool("debug")
 	if err != nil {
 		return fmt.Errorf("failed to parse debug flag due to %w", err)
@@ -209,10 +227,6 @@ func init() {
 
 	writeCmd.Flags().Int("max-rps", 0, "The maximum requests per second.")
 	writeCmd.Flags().Int("rampup-period-in-sec", 0, "The period over which to ramp up the request rate.")
-	writeCmd.MarkFlagsRequiredTogether(
-		"max-rps",
-		"rampup-period-in-sec",
-	)
 
 	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
 }
