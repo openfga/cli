@@ -549,7 +549,13 @@ model: |
       define can_write: owner or can_write from parent
       define can_share: owner
 
-# tuple_file: ./tuples.yaml # global tuples that would apply to all tests, optional
+# You can use `tuples`, `tuple_file`, and `tuple_files` together or individually to provide global tuples for all tests.
+# Example using a single tuple file:
+# tuple_file: ./tuples.yaml
+# Example using multiple tuple files:
+# tuple_files:
+#   - ./model_tuples_2.yaml
+#   - ./model_tuples_3.yaml
 tuples: # global tuples that would apply to all tests, optional
   - user: folder:1
     relation: parent
