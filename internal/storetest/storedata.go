@@ -31,6 +31,7 @@ import (
 
 type ModelTestCheck struct {
 	User       string                  `json:"user"       yaml:"user"`
+	Users      []string                `json:"users"      yaml:"users"`
 	Object     string                  `json:"object"     yaml:"object"`
 	Context    *map[string]interface{} `json:"context"    yaml:"context,omitempty"`
 	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
