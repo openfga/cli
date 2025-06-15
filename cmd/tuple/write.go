@@ -74,7 +74,7 @@ var writeCmd = &cobra.Command{
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5
-  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`,
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -171,11 +171,11 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	}
 
 	if maxRPS > 0 && !flags.Changed("rampup-period-in-sec") {
-		rampUpPeriodInSec = maxRPS * 2
+		rampUpPeriodInSec = maxRPS * tuple.RPSToRampupPeriodMultiplier
 	}
 
 	if maxRPS > 0 && !flags.Changed("max-parallel-requests") {
-		defaultParallel := maxRPS / 5
+		defaultParallel := maxRPS / tuple.RPSToParallelRequestsDivisor
 
 		if defaultParallel < 1 {
 			defaultParallel = 1
@@ -185,7 +185,7 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	}
 
 	if maxRPS > 0 && !flags.Changed("max-tuples-per-write") {
-		maxTuplesPerWrite = 40
+		maxTuplesPerWrite = tuple.DefaultMaxTuplesPerWriteWithRPS
 	}
 
 	debug, err := flags.GetBool("debug")
