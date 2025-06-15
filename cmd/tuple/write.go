@@ -74,7 +74,7 @@ var writeCmd = &cobra.Command{
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5
-  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`,
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -95,6 +95,30 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 	condition, err := cmdutils.ParseTupleCondition(cmd)
 	if err != nil {
 		return err //nolint:wrapcheck
+	}
+
+	maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
+	}
+
+	maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
+	}
+
+	maxRPS, err := cmd.Flags().GetInt("max-rps")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-rps due to %w", err)
+	}
+
+	rampUpPeriodInSec, err := cmd.Flags().GetInt("rampup-period-in-sec")
+	if err != nil {
+		return fmt.Errorf("failed to parse rampup-period-in-sec due to %w", err)
+	}
+
+	if err := validateWriteFlags(cmd.Flags(), maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec); err != nil {
+		return err
 	}
 
 	body := client.ClientWriteTuplesBody{
@@ -120,6 +144,48 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 			"successful": body,
 		},
 	)
+}
+
+func validateWriteFlags(flags *flag.FlagSet, maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec int) error {
+	if flags.Changed("max-tuples-per-write") && maxTuplesPerWrite <= 0 {
+		return errors.New("max-tuples-per-write must be greater than zero") //nolint:err113
+	}
+
+	if flags.Changed("max-parallel-requests") && maxParallelRequests <= 0 {
+		return errors.New("max-parallel-requests must be greater than zero") //nolint:err113
+	}
+
+	if flags.Changed("max-rps") && maxRPS <= 0 {
+		return errors.New("max-rps must be greater than zero") //nolint:err113
+	}
+
+	if flags.Changed("rampup-period-in-sec") && rampUpPeriodInSec <= 0 {
+		return errors.New("rampup-period-in-sec must be greater than zero") //nolint:err113
+	}
+
+	return nil
+}
+
+func applyWriteDefaults(flags *flag.FlagSet, maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec int) (int, int, int, int) {
+	if maxRPS > 0 && !flags.Changed("rampup-period-in-sec") {
+		rampUpPeriodInSec = maxRPS * tuple.RPSToRampupPeriodMultiplier
+	}
+
+	if maxRPS > 0 && !flags.Changed("max-parallel-requests") {
+		defaultParallel := maxRPS / tuple.RPSToParallelRequestsDivisor
+
+		if defaultParallel < 1 {
+			defaultParallel = 1
+		}
+
+		maxParallelRequests = defaultParallel
+	}
+
+	if maxRPS > 0 && !flags.Changed("max-tuples-per-write") {
+		maxTuplesPerWrite = tuple.DefaultMaxTuplesPerWriteWithRPS
+	}
+
+	return maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec
 }
 
 func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *client.OpenFgaClient) error { //nolint:cyclop
@@ -153,6 +219,14 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	if err != nil {
 		return fmt.Errorf("failed to parse parallel requests due to %w", err)
 	}
+
+	if err := validateWriteFlags(flags, maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec); err != nil {
+		return err
+	}
+
+	maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec = applyWriteDefaults(
+		flags, maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec,
+	)
 
 	debug, err := flags.GetBool("debug")
 	if err != nil {
@@ -209,10 +283,6 @@ func init() {
 
 	writeCmd.Flags().Int("max-rps", 0, "The maximum requests per second.")
 	writeCmd.Flags().Int("rampup-period-in-sec", 0, "The period over which to ramp up the request rate.")
-	writeCmd.MarkFlagsRequiredTogether(
-		"max-rps",
-		"rampup-period-in-sec",
-	)
 
 	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
 }
