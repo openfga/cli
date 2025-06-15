@@ -97,6 +97,30 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 		return err //nolint:wrapcheck
 	}
 
+	maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-tuples-per-write due to %w", err)
+	}
+
+	maxParallelRequests, err := cmd.Flags().GetInt("max-parallel-requests")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-parallel-requests due to %w", err)
+	}
+
+	maxRPS, err := cmd.Flags().GetInt("max-rps")
+	if err != nil {
+		return fmt.Errorf("failed to parse max-rps due to %w", err)
+	}
+
+	rampUpPeriodInSec, err := cmd.Flags().GetInt("rampup-period-in-sec")
+	if err != nil {
+		return fmt.Errorf("failed to parse rampup-period-in-sec due to %w", err)
+	}
+
+	if err := validateWriteFlags(cmd.Flags(), maxTuplesPerWrite, maxParallelRequests, maxRPS, rampUpPeriodInSec); err != nil {
+		return err
+	}
+
 	body := client.ClientWriteTuplesBody{
 		client.ClientTupleKey{
 			User:      args[0],
