@@ -81,25 +81,26 @@ func TestLoadTuples(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
+for _, tc := range cases {
+    tc := tc // capture loop variable for this iteration
+    t.Run(tc.name, func(t *testing.T) {
+        t.Parallel()
 
-			err := testCase.storeData.LoadTuples(tempDir)
+        err := tc.storeData.LoadTuples(tempDir)
 
-			if testCase.expectErr {
-				if err == nil {
-					t.Errorf("expected error but got nil")
-				}
-			} else {
-				if err != nil {
-					t.Errorf("unexpected error: %v", err)
-				}
+        if tc.expectErr {
+            if err == nil {
+                t.Errorf("expected error but got nil")
+            }
+        } else {
+            if err != nil {
+                t.Errorf("unexpected error: %v", err)
+            }
 
-				if got := len(testCase.storeData.Tuples); got != testCase.expectTuples {
-					t.Errorf("expected %d tuples, got %d", testCase.expectTuples, got)
-				}
-			}
-		})
-	}
+            if got := len(tc.storeData.Tuples); got != tc.expectTuples {
+                t.Errorf("expected %d tuples, got %d", tc.expectTuples, got)
+            }
+        }
+    })
+}
 }
