@@ -785,15 +785,13 @@ If using a `json` file, the format should be:
 }
 ```
 
-In some cases you could want to retry failed tuples (e.g. network connectivity error). To achieve that, you can direct the output to a file:
+In some cases you may want to retry failed tuples (for example, due to network issues). Failed tuples are now written to `stderr` in the same format as the input file and can be redirected to another file:
 
-`fga tuple write --file tuples.json' --hide-imported-tuples > results.json`
+`fga tuple write --file tuples.json --hide-imported-tuples 2> failed_tuples.json > results.json`
 
-Then, process the file with `jq` to convert it to format that you can send the CLI again:
+You can then retry them with:
 
-`jq -c '[.failed[] | {user: .tuple_key.user, relation: .tuple_key.relation, object: .tuple_key.object}]' result.json > failed_tuples.json`
-
-`fga tuple write --file failed_tuples.json' --hide-imported-tuples `
+`fga tuple write --file failed_tuples.json --hide-imported-tuples`
 
 ##### Delete Relationship Tuples
 
