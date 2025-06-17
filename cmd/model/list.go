@@ -77,7 +77,7 @@ var listCmd = &cobra.Command{
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
-			return fmt.Errorf("failed to intialized FGA client due to %w", err)
+			return fmt.Errorf("failed to initialize FGA client due to %w", err)
 		}
 
 		maxPages, err := cmd.Flags().GetInt("max-pages")
