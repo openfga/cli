@@ -224,7 +224,7 @@ func (storeData *StoreData) loadTestTuples(basePath string) error {
 			continue
 		}
 
-        storeData.Tests[testIndex].Tuples = append(storeData.Tests[testIndex].Tuples, tuples...)
+		storeData.Tests[testIndex].Tuples = append(storeData.Tests[testIndex].Tuples, tuples...)
 	}
 
 	return errs
