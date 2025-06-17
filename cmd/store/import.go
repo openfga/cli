@@ -121,6 +121,10 @@ func importStore(
 	maxTuplesPerWrite, maxParallelRequests int,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
+	if err := storeData.Validate(); err != nil {
+		return nil, err //nolint:wrapcheck
+	}
+
 	response, err := createOrUpdateStore(ctx, clientConfig, fgaClient, storeData, format, storeID, fileName)
 	if err != nil {
 		return nil, err

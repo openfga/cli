@@ -26,6 +26,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
@@ -134,6 +135,28 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 
 	if errs != nil {
 		return errors.Join(errors.New("failed to process one or more tuple files"), errs) //nolint:err113
+	}
+
+	return nil
+}
+
+func (storeData *StoreData) Validate() error {
+	var errs error
+
+	for _, test := range storeData.Tests {
+		for index, check := range test.Check {
+			if check.User != "" && len(check.Users) > 0 {
+				msg := fmt.Sprintf("test %s check %d cannot contain both 'user' and 'users'", test.Name, index)
+				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+			} else if check.User == "" && len(check.Users) == 0 {
+				msg := fmt.Sprintf("test %s check %d must specify 'user' or 'users'", test.Name, index)
+				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+			}
+		}
+	}
+
+	if errs != nil {
+		return clierrors.ValidationError("storetests", errs.Error()) //nolint:wrapcheck
 	}
 
 	return nil

@@ -306,6 +306,7 @@ tests:
       # checks can also be defined for multiple users sharing the same expectation
       - object: group:employees
         users:
+      # either "user" or "users" may be provided, but not both
           - user:3
           - user:4
         assertions:
@@ -584,6 +585,7 @@ tests: # required
             - user:carl
           assertions:
             can_view: false
+        # either "user" or "users" may be provided, but not both
       list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
