@@ -4,8 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/openfga/go-sdk/client"
 )
 
 func writeTempFile(t *testing.T, dir, name, content string) string {
@@ -56,11 +54,11 @@ func TestLoadTuples(t *testing.T) {
 			expectTuples: 2,
 		},
 		{
-			name: "multiple tuple_files with deduplication",
+			name: "multiple tuple_files no dedup",
 			storeData: StoreData{
 				TupleFiles: []string{filepath.Base(tupleFile), filepath.Base(tupleFile2)},
 			},
-			expectTuples: 3,
+			expectTuples: 4,
 		},
 		{
 			name: "combined tuple_file and tuple_files",
@@ -68,7 +66,7 @@ func TestLoadTuples(t *testing.T) {
 				TupleFile:  filepath.Base(tupleFile),
 				TupleFiles: []string{filepath.Base(tupleFile2)},
 			},
-			expectTuples: 3,
+			expectTuples: 4,
 		},
 		{
 			name: "test-level tuple file with error",
@@ -103,35 +101,5 @@ func TestLoadTuples(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestLoadTuples_Deduplicates(t *testing.T) {
-	t.Parallel()
-	tempDir := t.TempDir()
-
-	tupleContent := `[
-  {"user": "user:jon", "relation": "viewer", "object": "document:doc1"},
-  {"user": "user:jon", "relation": "viewer", "object": "document:doc1"}
-]`
-
-	file := writeTempFile(t, tempDir, "dupes.json", tupleContent)
-
-	store := StoreData{
-		TupleFiles: []string{filepath.Base(file)},
-		Tuples: []client.ClientContextualTupleKey{{
-			User:      "user:jon",
-			Relation:  "viewer",
-			Object:    "document:doc1",
-			Condition: nil,
-		}},
-	}
-
-	if err := store.LoadTuples(tempDir); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(store.Tuples) != 1 {
-		t.Errorf("expected 1 unique tuple, got %d", len(store.Tuples))
 	}
 }

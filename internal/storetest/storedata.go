@@ -112,18 +112,10 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	var (
 		errs      error
 		allTuples []client.ClientContextualTupleKey
-		tupleSet  = make(map[string]struct{})
 	)
 
 	addTuples := func(tuples []client.ClientContextualTupleKey) {
-		for _, t := range tuples {
-			key := fmt.Sprintf("%v", t)
-			if _, exists := tupleSet[key]; !exists {
-				tupleSet[key] = struct{}{}
-
-				allTuples = append(allTuples, t)
-			}
-		}
+		allTuples = append(allTuples, tuples...)
 	}
 
 	if storeData.Tuples != nil {
