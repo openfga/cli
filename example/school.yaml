@@ -1,0 +1,74 @@
+
+model: |
+    model 
+        schema 1.1
+
+    type user
+
+    type school
+      relations
+        define member:[user]
+        define restricted_member:[user]
+        define approved_restricted_member:[user]
+        
+        define reader:member
+        define restricted_reader:approved_restricted_member
+
+    type repository
+      relations
+        define direct_reader:[user]
+        define school_reader:[school]
+        define restricted_school_reader:[school]
+        define reader: direct_reader or reader from school_reader or restricted_reader from restricted_school_reader
+
+tuples:
+    - user: user:alice
+      relation: direct_reader
+      object: repository:math-notes
+
+    - user: user:bob
+      relation: member
+      object: school:harvard
+
+    - user: school:harvard
+      relation: school_reader
+      object: repository:physics
+
+    - user: user:charlie
+      relation: restricted_member
+      object: school:mit
+
+    - user: user:charlie
+      relation: approved_restricted_member
+      object: school:mit
+
+    - user: school:mit
+      relation: restricted_school_reader
+      object: repository:confidential-lab        
+
+tests:
+    - check:
+        - user: user:alice
+          object: repository:math-notes
+          assertions:
+            reader : true
+            
+        - user: user:bob
+          object: repository:physics
+          assertions:
+            reader : true
+
+        - user: user:charlie
+          object: repository:confidential-lab
+          assertions:
+            reader : true
+
+        - user: user:bob
+          object: repository:confidential-lab
+          assertions:
+            reader : false
+
+        - user: user:alice
+          object: repository:physics
+          assertions:
+            reader : false

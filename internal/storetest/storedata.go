@@ -149,24 +149,24 @@ func (storeData *StoreData) Validate() error {
 		for index, check := range test.Check {
 			if check.User != "" && len(check.Users) > 0 {
 				msg := fmt.Sprintf("test %s check %d cannot contain both 'user' and 'users'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+				errs = errors.Join(errs, fmt.Errorf("%s", msg))
 			} else if check.User == "" && len(check.Users) == 0 {
 				msg := fmt.Sprintf("test %s check %d must specify 'user' or 'users'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+				errs = errors.Join(errs, fmt.Errorf("%s", msg))
 			}
 
 			if check.Object != "" && len(check.Objects) > 0 {
 				msg := fmt.Sprintf("test %s check %d cannot contain both 'object' and 'objects'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+				errs = errors.Join(errs, fmt.Errorf("%s", msg))
 			} else if check.Object == "" && len(check.Objects) == 0 {
 				msg := fmt.Sprintf("test %s check %d must specify 'object' or 'objects'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+				errs = errors.Join(errs, fmt.Errorf("%s", msg))
 			}
 		}
 	}
 
 	if errs != nil {
-		return clierrors.ValidationError("storetests", errs.Error()) //nolint:wrapcheck
+		return clierrors.ValidationError("StoreFormat", errs.Error()) //nolint:wrapcheck
 	}
 
 	return nil
