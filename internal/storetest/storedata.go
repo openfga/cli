@@ -34,6 +34,7 @@ type ModelTestCheck struct {
 	User       string                  `json:"user"       yaml:"user"`
 	Users      []string                `json:"users"      yaml:"users"`
 	Object     string                  `json:"object"     yaml:"object"`
+	Objects    []string                `json:"objects"    yaml:"objects"`
 	Context    *map[string]interface{} `json:"context"    yaml:"context,omitempty"`
 	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
 }
@@ -140,6 +141,7 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	return nil
 }
 
+//nolint:cyclop
 func (storeData *StoreData) Validate() error {
 	var errs error
 
@@ -150,6 +152,14 @@ func (storeData *StoreData) Validate() error {
 				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
 			} else if check.User == "" && len(check.Users) == 0 {
 				msg := fmt.Sprintf("test %s check %d must specify 'user' or 'users'", test.Name, index)
+				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+			}
+
+			if check.Object != "" && len(check.Objects) > 0 {
+				msg := fmt.Sprintf("test %s check %d cannot contain both 'object' and 'objects'", test.Name, index)
+				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
+			} else if check.Object == "" && len(check.Objects) == 0 {
+				msg := fmt.Sprintf("test %s check %d must specify 'object' or 'objects'", test.Name, index)
 				errs = errors.Join(errs, fmt.Errorf("%w: %s", clierrors.ErrValidation, msg))
 			}
 		}

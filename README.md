@@ -306,7 +306,15 @@ tests:
       # checks can also be defined for multiple users sharing the same expectation
       - object: group:employees
         users:
+      # checks can also target multiple objects with the same expectation
+      - objects:
+          - group:admins
+          - group:employees
+        user: user:1
+        assertions:
+          moderator: false
       # either "user" or "users" may be provided, but not both
+      # either "object" or "objects" may be provided, but not both
           - user:3
           - user:4
         assertions:
@@ -585,7 +593,15 @@ tests: # required
             - user:carl
           assertions:
             can_view: false
+        # checks can group multiple objects that share the same expected results
+        - objects:
+            - folder:1
+            - folder:2
+          user: user:beth
+          assertions:
+            can_write: false
         # either "user" or "users" may be provided, but not both
+        # either "object" or "objects" may be provided, but not both
       list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
