@@ -54,7 +54,7 @@ tests:
           - folder:product-2021Q1
         assertions:
           can_view: true
-          can_write: true          
+          can_write: true
     list_objects: # Each list objects test is made of: a user, an object type and the expected result for one or more relations
       - user: user:anne
         type: folder
