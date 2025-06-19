@@ -30,13 +30,21 @@ import (
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
+// Static error variables for validation.
+var (
+	ErrUserAndUsersConflict     = errors.New("cannot contain both 'user' and 'users'")
+	ErrUserRequired             = errors.New("must specify 'user' or 'users'")
+	ErrObjectAndObjectsConflict = errors.New("cannot contain both 'object' and 'objects'")
+	ErrObjectRequired           = errors.New("must specify 'object' or 'objects'")
+)
+
 type ModelTestCheck struct {
-	User       string                  `json:"user,omitempty"       yaml:"user,omitempty"`
-	Users      []string                `json:"users,omitempty"      yaml:"users,omitempty"`
-	Object     string                  `json:"object,omitempty"     yaml:"object,omitempty"`
-	Objects    []string                `json:"objects,omitempty"    yaml:"objects,omitempty"`
-	Context    *map[string]interface{} `json:"context"    yaml:"context,omitempty"`
-	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
+	User       string                  `json:"user,omitempty"    yaml:"user,omitempty"`
+	Users      []string                `json:"users,omitempty"   yaml:"users,omitempty"`
+	Object     string                  `json:"object,omitempty"  yaml:"object,omitempty"`
+	Objects    []string                `json:"objects,omitempty" yaml:"objects,omitempty"`
+	Context    *map[string]interface{} `json:"context"           yaml:"context,omitempty"`
+	Assertions map[string]bool         `json:"assertions"        yaml:"assertions"`
 }
 
 type ModelTestListObjects struct {
@@ -148,19 +156,19 @@ func (storeData *StoreData) Validate() error {
 	for _, test := range storeData.Tests {
 		for index, check := range test.Check {
 			if check.User != "" && len(check.Users) > 0 {
-				msg := fmt.Sprintf("test %s check %d cannot contain both 'user' and 'users'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%s", msg))
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserAndUsersConflict)
+				errs = errors.Join(errs, err)
 			} else if check.User == "" && len(check.Users) == 0 {
-				msg := fmt.Sprintf("test %s check %d must specify 'user' or 'users'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%s", msg))
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserRequired)
+				errs = errors.Join(errs, err)
 			}
 
 			if check.Object != "" && len(check.Objects) > 0 {
-				msg := fmt.Sprintf("test %s check %d cannot contain both 'object' and 'objects'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%s", msg))
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectAndObjectsConflict)
+				errs = errors.Join(errs, err)
 			} else if check.Object == "" && len(check.Objects) == 0 {
-				msg := fmt.Sprintf("test %s check %d must specify 'object' or 'objects'", test.Name, index)
-				errs = errors.Join(errs, fmt.Errorf("%s", msg))
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectRequired)
+				errs = errors.Join(errs, err)
 			}
 		}
 	}

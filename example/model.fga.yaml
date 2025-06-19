@@ -47,7 +47,6 @@ tests:
           can_view: true
           can_write: true
           can_share: false
-
       - users:
           - user:anne
         objects:
@@ -56,7 +55,6 @@ tests:
         assertions:
           can_view: true
           can_write: true          
-
     list_objects: # Each list objects test is made of: a user, an object type and the expected result for one or more relations
       - user: user:anne
         type: folder
