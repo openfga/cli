@@ -21,6 +21,36 @@ func TestImportStore(t *testing.T) {
 		Object:      "document:doc1",
 		Expectation: true,
 	}}
+
+	multiUserAssertions := []client.ClientAssertion{
+		{
+			User:        "user:anne",
+			Relation:    "reader",
+			Object:      "document:doc1",
+			Expectation: true,
+		},
+		{
+			User:        "user:peter",
+			Relation:    "reader",
+			Object:      "document:doc1",
+			Expectation: true,
+		},
+	}
+
+	multiObjectAssertions := []client.ClientAssertion{
+		{
+			User:        "user:peter",
+			Relation:    "reader",
+			Object:      "document:doc1",
+			Expectation: true,
+		},
+		{
+			User:        "user:peter",
+			Relation:    "reader",
+			Object:      "document:doc2",
+			Expectation: true,
+		},
+	}
 	modelID, storeID := "model-1", "store-1"
 	expectedOptions := client.ClientWriteAssertionsOptions{AuthorizationModelId: &modelID, StoreId: &storeID}
 
@@ -38,9 +68,9 @@ func TestImportStore(t *testing.T) {
 			mockCreateStore:     true,
 			testStore: storetest.StoreData{
 				Model: `type user
-					type document
-						relations
-							define reader: [user]`,
+                                        type document
+                                                relations
+                                                        define reader: [user]`,
 				Tests: []storetest.ModelTest{
 					{
 						Name: "Test",
@@ -48,6 +78,54 @@ func TestImportStore(t *testing.T) {
 							{
 								User:       "user:anne",
 								Object:     "document:doc1",
+								Assertions: map[string]bool{"reader": true},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:                "import store with multi user assertions",
+			mockWriteAssertions: true,
+			mockWriteModel:      true,
+			mockCreateStore:     true,
+			testStore: storetest.StoreData{
+				Model: `type user
+                                       type document
+                                               relations
+                                                       define reader: [user]`,
+				Tests: []storetest.ModelTest{
+					{
+						Name: "Test",
+						Check: []storetest.ModelTestCheck{
+							{
+								Users:      []string{"user:anne", "user:peter"},
+								Object:     "document:doc1",
+								Assertions: map[string]bool{"reader": true},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:                "import store with multi object assertions",
+			mockWriteAssertions: true,
+			mockWriteModel:      true,
+			mockCreateStore:     true,
+			testStore: storetest.StoreData{
+				Model: `type user
+                                        type document
+                                                relations
+                                                        define reader: [user]`,
+				Tests: []storetest.ModelTest{
+					{
+						Name: "Test",
+						Check: []storetest.ModelTestCheck{
+							{
+								User:       "user:peter",
+								Objects:    []string{"document:doc1", "document:doc2"},
 								Assertions: map[string]bool{"reader": true},
 							},
 						},
@@ -107,7 +185,16 @@ func TestImportStore(t *testing.T) {
 			defer mockCtrl.Finish()
 
 			if test.mockWriteAssertions {
-				setupWriteAssertionsMock(mockCtrl, mockFgaClient, expectedAssertions, expectedOptions)
+				expected := expectedAssertions
+
+				switch test.name {
+				case "import store with multi user assertions":
+					expected = multiUserAssertions
+				case "import store with multi object assertions":
+					expected = multiObjectAssertions
+				}
+
+				setupWriteAssertionsMock(mockCtrl, mockFgaClient, expected, expectedOptions)
 			} else {
 				mockFgaClient.EXPECT().WriteAssertions(gomock.Any()).Times(0)
 			}

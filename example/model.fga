@@ -21,4 +21,4 @@ type document
     define viewer: [user] or owner or parent_owner
     define can_share: owner
     define can_write: owner or parent_owner
-    define can_view: viewer or viewer from parent
+    define can_view: [user] or viewer or viewer from parent
