@@ -52,17 +52,17 @@ tests:
           - user:beth
         object: folder:product-2021
         assertions:
-          # These assertions are run for each user 
+          # These assertions are run for each user
           can_view: true
           can_share: false
-      - user: user:anne 
+      - user: user:anne
         objects:
           - folder:product-2021
           - folder:product-2021Q1
         assertions:
           # These assertions are run for each object
           can_view: true
-          can_write: true           
+          can_write: true
       - users:
           - user:peter
           - user:john
