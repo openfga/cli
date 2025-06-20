@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -87,7 +88,8 @@ var testCmd = &cobra.Command{
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 
 			if !suppressSummary {
-				summary := fmt.Sprintf("# %s\n%s", filepath.Base(file), test.FriendlyDisplay())
+				summaryText := strings.Replace(test.FriendlyDisplay(), "# Test Summary #\n", "", 1)
+				summary := fmt.Sprintf("# file: %s\n%s", filepath.Base(file), summaryText)
 				summaries = append(summaries, summary)
 			}
 		}
