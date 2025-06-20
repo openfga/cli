@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -57,6 +58,7 @@ var testCmd = &cobra.Command{
 		}
 
 		aggregateResults := storetest.TestResults{}
+		summaries := []string{}
 
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
@@ -84,6 +86,16 @@ var testCmd = &cobra.Command{
 			}
 
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
+
+			if !suppressSummary {
+				summary := strings.Replace(
+					test.FriendlyDisplay(),
+					"# Test Summary #",
+					fmt.Sprintf("# Test Summary  - %s #", filepath.Base(file)),
+					1,
+				)
+				summaries = append(summaries, summary)
+			}
 		}
 
 		passing := aggregateResults.IsPassing()
@@ -96,6 +108,9 @@ var testCmd = &cobra.Command{
 		}
 
 		if !suppressSummary {
+			for _, summary := range summaries {
+				fmt.Fprintln(os.Stderr, summary)
+			}
 			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
 		}
 
