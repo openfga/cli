@@ -89,7 +89,7 @@ var testCmd = &cobra.Command{
 
 			if !suppressSummary {
 				summaryText := strings.Replace(test.FriendlyDisplay(), "# Test Summary #\n", "", 1)
-				summary := fmt.Sprintf("# file: %s\n%s", filepath.Base(file), summaryText)
+				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
 			}
 		}
