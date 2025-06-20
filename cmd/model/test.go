@@ -57,6 +57,8 @@ var testCmd = &cobra.Command{
 			fileNames = []string{testsFileName}
 		}
 
+		multipleFiles := len(fileNames) > 1
+
 		aggregateResults := storetest.TestResults{}
 		summaries := []string{}
 
@@ -87,7 +89,7 @@ var testCmd = &cobra.Command{
 
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 
-			if !suppressSummary {
+			if !suppressSummary && multipleFiles {
 				summaryText := strings.Replace(test.FriendlyDisplay(), "# Test Summary #\n", "", 1)
 				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
@@ -104,8 +106,10 @@ var testCmd = &cobra.Command{
 		}
 
 		if !suppressSummary {
-			for _, summary := range summaries {
-				fmt.Fprintln(os.Stderr, summary)
+			if multipleFiles {
+				for _, summary := range summaries {
+					fmt.Fprintln(os.Stderr, summary)
+				}
 			}
 			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
 		}
