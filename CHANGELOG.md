@@ -2,6 +2,9 @@
 
 #### [Unreleased](https://github.com/openfga/cli/compare/v0.7.0...HEAD)
 
+Added:
+- Failed tuples are now written to `stderr` in the format of the input file (#449)
+
 #### [0.7.0](https://github.com/openfga/cli/compare/v0.6.6...v0.7.0) (2025-06-10)
 
 > [!NOTE]
@@ -14,9 +17,6 @@
 
 Added:
 - Include current working directory in the config file resolution (#504) - thanks @OsmanMElsayed
-
-Added:
-- Failed tuples are now written to `stderr` in the format of the input file (#449)
 
 Fixed:
 - Bump OpenFGA to v1.8.13 to resolve a security vulnerability [GHSA-c72g-53hw-82q7](https://github.com/openfga/openfga/security/advisories/GHSA-c72g-53hw-82q7)
