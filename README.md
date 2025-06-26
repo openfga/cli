@@ -228,7 +228,7 @@ export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
 fga store **import**
 
 ###### Parameters
-* `--file`: File containing the store.
+* `--file`: File containing the store. See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--store-id`: Specifies the store id to import into
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
@@ -525,7 +525,7 @@ fga model **test**
 
 ###### Parameters
 
-* `--tests`: Name of the tests file. Must be in yaml format (see below)
+* `--tests`: Name of the tests file. Must be in yaml format. See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--verbose`: Outputs the results in JSON
 
 If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
@@ -606,7 +606,7 @@ tests: # required
 ###### Example
 `fga model test --tests tests.fga.yaml`
 
-For more examples of `.fga.yaml` files, check the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/)/
 
 ###### Response
 
