@@ -2,8 +2,14 @@
 
 #### [Unreleased](https://github.com/openfga/cli/compare/v0.7.0...HEAD)
 
+<<<<<<< codex/implement-fix-for-issue-449
 Added:
 - Failed tuples are now written to `stderr` in the format of the input file (#449)
+=======
+Changed:
+- Adjusted defaults for `--max-tuples-per-write`, `--max-parallel-requests`, `--max-rps`, and `--rampup-period-in-sec` when `--max-rps` is specified (#517).
+
+>>>>>>> main
 
 #### [0.7.0](https://github.com/openfga/cli/compare/v0.6.6...v0.7.0) (2025-06-10)
 
