@@ -25,54 +25,60 @@ func RunLocalCheckTest(
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
+	users := GetEffectiveUsers(checkTest)
 
-	for relation, expectation := range checkTest.Assertions {
-		result := ModelTestCheckSingleResult{
-			Request: client.ClientCheckRequest{
-				User:             checkTest.User,
-				Relation:         relation,
-				Object:           checkTest.Object,
-				ContextualTuples: tuples,
-				Context:          checkTest.Context,
-			},
-			Expected: expectation,
-		}
-
-		var (
-			ctx *structpb.Struct
-			err error
-		)
-
-		if checkTest.Context != nil {
-			ctx, err = structpb.NewStruct(*checkTest.Context)
-		}
-
-		if err != nil {
-			result.Error = err
-		} else {
-			response, err := RunSingleLocalCheckTest(fgaServer,
-				&pb.CheckRequest{
-					StoreId:              *options.StoreID,
-					AuthorizationModelId: *options.ModelID,
-					TupleKey: &pb.CheckRequestTupleKey{
-						User:     checkTest.User,
-						Relation: relation,
-						Object:   checkTest.Object,
+	objects := GetEffectiveObjects(checkTest)
+	for _, user := range users {
+		for _, object := range objects {
+			for relation, expectation := range checkTest.Assertions {
+				result := ModelTestCheckSingleResult{
+					Request: client.ClientCheckRequest{
+						User:             user,
+						Relation:         relation,
+						Object:           object,
+						ContextualTuples: tuples,
+						Context:          checkTest.Context,
 					},
-					Context: ctx,
-				},
-			)
-			if err != nil {
-				result.Error = err
-			}
+					Expected: expectation,
+				}
 
-			if response != nil {
-				result.Got = &response.Allowed
-				result.TestResult = result.IsPassing()
+				var (
+					ctx *structpb.Struct
+					err error
+				)
+
+				if checkTest.Context != nil {
+					ctx, err = structpb.NewStruct(*checkTest.Context)
+				}
+
+				if err != nil {
+					result.Error = err
+				} else {
+					response, err := RunSingleLocalCheckTest(fgaServer,
+						&pb.CheckRequest{
+							StoreId:              *options.StoreID,
+							AuthorizationModelId: *options.ModelID,
+							TupleKey: &pb.CheckRequestTupleKey{
+								User:     user,
+								Relation: relation,
+								Object:   object,
+							},
+							Context: ctx,
+						},
+					)
+					if err != nil {
+						result.Error = err
+					}
+
+					if response != nil {
+						result.Got = &response.Allowed
+						result.TestResult = result.IsPassing()
+					}
+				}
+
+				results = append(results, result)
 			}
 		}
-
-		results = append(results, result)
 	}
 
 	return results
