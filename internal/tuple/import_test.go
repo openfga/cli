@@ -1,6 +1,7 @@
 package tuple
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -23,7 +24,7 @@ func TestProcessWrites(t *testing.T) {
 		},
 	}
 
-	successful, failed := processWrites(writes)
+	successful, failed := processWrites(context.Background(), writes)
 
 	assert.Len(t, successful, 1)
 	assert.Len(t, failed, 1)
@@ -45,7 +46,7 @@ func TestProcessDeletes(t *testing.T) {
 		},
 	}
 
-	successful, failed := processDeletes(deletes)
+	successful, failed := processDeletes(context.Background(), deletes)
 
 	assert.Len(t, successful, 1)
 	assert.Len(t, failed, 1)

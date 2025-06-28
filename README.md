@@ -708,6 +708,8 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
 * `--max-rps`: Max requests per second. When set, the CLI will ramp up requests from 1 RPS to the set value. If `--rampup-period-in-sec` is omitted it defaults to `max-rps*2`.
 * `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Only used if `--max-rps` is set.
+* `--success-log`: Filepath to append successful writes in JSONL format.
+* `--failure-log`: Filepath to append failed writes in JSONL format (includes reason).
 * All integer parameters must be greater than zero when provided.
 
 ###### Example (with arguments)
@@ -818,15 +820,15 @@ If using a `json` file, the format should be:
 }
 ```
 
-In some cases you could want to retry failed tuples (e.g. network connectivity error). To achieve that, you can direct the output to a file:
+In some cases you might want to retry failed tuples (for example after a network error). Use `--failure-log` to capture failures in real time:
 
-`fga tuple write --file tuples.json' --hide-imported-tuples > results.json`
+`fga tuple write --file tuples.json --failure-log failed.log --hide-imported-tuples`
 
-Then, process the file with `jq` to convert it to format that you can send the CLI again:
+Convert the log to a new file that can be re-imported:
 
-`jq -c '[.failed[] | {user: .tuple_key.user, relation: .tuple_key.relation, object: .tuple_key.object}]' result.json > failed_tuples.json`
+`jq -sc '[.[] | {user: .tuple_key.user, relation: .tuple_key.relation, object: .tuple_key.object}]' failed.log > failed_tuples.json`
 
-`fga tuple write --file failed_tuples.json' --hide-imported-tuples `
+`fga tuple write --file failed_tuples.json --hide-imported-tuples`
 
 ##### Delete Relationship Tuples
 
