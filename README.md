@@ -702,7 +702,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--condition-context`: Condition context (optional)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
+* `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported
 * When using a `json` file, tuples can be provided as an array or newline-delimited (`jsonl`) objects
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1, or 40 if `--max-rps` is set and this flag is omitted)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4, or `max-rps/5` if `--max-rps` is set and this flag is omitted)
@@ -773,7 +773,7 @@ If using a `json` file, the format should be:
   }
 ]
 ```
-JSON files can also be provided in JSONL format, with one JSON object per line.
+JSON files can also be provided in JSONL format (use the `.jsonl` extension), with one JSON object per line.
 
 ###### Response
 ```json5
