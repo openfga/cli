@@ -149,6 +149,27 @@ func TestParseTuplesFileData(t *testing.T) {
 			},
 		},
 		{
+			name: "it can correctly parse a jsonl file",
+			file: "testdata/tuples_jsonl.json",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+				},
+				{
+					User:     "user:beth",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
 			name: "it can correctly parse a yaml file",
 			file: "testdata/tuples.yaml",
 			expectedTuples: []client.ClientTupleKey{

@@ -21,7 +21,15 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	var tuples []client.ClientTupleKey
 
 	switch path.Ext(fileName) {
-	case ".json", ".yaml", ".yml":
+	case ".json":
+		err = yaml.Unmarshal(data, &tuples)
+		if err != nil {
+			err = parseTuplesFromJSONL(data, &tuples)
+		}
+		if err == nil && len(tuples) == 0 {
+			err = clierrors.EmptyTuplesFileError("json")
+		}
+	case ".yaml", ".yml":
 		err = yaml.Unmarshal(data, &tuples)
 		if err == nil && len(tuples) == 0 {
 			err = clierrors.EmptyTuplesFileError(strings.TrimPrefix(path.Ext(fileName), "."))
@@ -37,4 +45,27 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	}
 
 	return tuples, nil
+}
+
+func parseTuplesFromJSONL(data []byte, tuples *[]client.ClientTupleKey) error {
+	lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+	for index, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+
+		var tuple client.ClientTupleKey
+		if err := yaml.Unmarshal([]byte(trimmed), &tuple); err != nil {
+			return fmt.Errorf("failed to parse tuple on line %d: %w", index+1, err)
+		}
+
+		*tuples = append(*tuples, tuple)
+	}
+
+	if len(*tuples) == 0 {
+		return clierrors.EmptyTuplesFileError("json")
+	}
+
+	return nil
 }
