@@ -2,7 +2,6 @@ package tuple
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -17,6 +16,7 @@ import (
 	"github.com/rung/go-safecast"
 
 	"github.com/openfga/cli/internal/requests"
+	"github.com/openfga/cli/internal/tuplefile"
 	"github.com/openfga/cli/internal/utils"
 )
 
@@ -321,13 +321,17 @@ func processWrites(
 
 	successFile := utils.GetSuccessLog(ctx)
 	failureFile := utils.GetFailureLog(ctx)
+	format := utils.GetInputFormat(ctx)
 
 	for _, write := range writes {
 		if write.Status == client.SUCCESS {
 			successfulWrites = append(successfulWrites, write.TupleKey)
 			if successFile != nil {
-				if b, err := json.Marshal(write.TupleKey); err == nil {
-					_, _ = successFile.Write(append(b, '\n'))
+				if b, err := tuplefile.SerializeTuple(format, write.TupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = successFile.Write(b)
 					_ = successFile.Sync()
 				}
 			}
@@ -339,8 +343,11 @@ func processWrites(
 			}
 			failedWrites = append(failedWrites, failedTuple)
 			if failureFile != nil {
-				if b, err := json.Marshal(failedTuple); err == nil {
-					_, _ = failureFile.Write(append(b, '\n'))
+				if b, err := tuplefile.SerializeTuple(format, write.TupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = failureFile.Write(b)
 					_ = failureFile.Sync()
 				}
 			}
@@ -361,6 +368,7 @@ func processDeletes(
 
 	successFile := utils.GetSuccessLog(ctx)
 	failureFile := utils.GetFailureLog(ctx)
+	format := utils.GetInputFormat(ctx)
 
 	for _, del := range deletes {
 		deletedTupleKey := openfga.TupleKey{
@@ -372,8 +380,11 @@ func processDeletes(
 		if del.Status == client.SUCCESS {
 			successfulDeletes = append(successfulDeletes, deletedTupleKey)
 			if successFile != nil {
-				if b, err := json.Marshal(deletedTupleKey); err == nil {
-					_, _ = successFile.Write(append(b, '\n'))
+				if b, err := tuplefile.SerializeTuple(format, deletedTupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = successFile.Write(b)
 					_ = successFile.Sync()
 				}
 			}
@@ -385,8 +396,11 @@ func processDeletes(
 			}
 			failedDeletes = append(failedDeletes, failedTuple)
 			if failureFile != nil {
-				if b, err := json.Marshal(failedTuple); err == nil {
-					_, _ = failureFile.Write(append(b, '\n'))
+				if b, err := tuplefile.SerializeTuple(format, deletedTupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = failureFile.Write(b)
 					_ = failureFile.Sync()
 				}
 			}

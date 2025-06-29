@@ -22,8 +22,9 @@ func GetDebugContextValue(ctx context.Context) bool {
 }
 
 var (
-	keySuccessLog = contextKey{"successLog"}
-	keyFailureLog = contextKey{"failureLog"}
+	keySuccessLog  = contextKey{"successLog"}
+	keyFailureLog  = contextKey{"failureLog"}
+	keyInputFormat = contextKey{"inputFormat"}
 )
 
 // WithSuccessLog attaches a success log file to the context.
@@ -46,4 +47,19 @@ func GetSuccessLog(ctx context.Context) *os.File {
 func GetFailureLog(ctx context.Context) *os.File {
 	file, _ := ctx.Value(keyFailureLog).(*os.File)
 	return file
+}
+
+// WithInputFormat attaches the input format (json, yaml, csv) to the context.
+func WithInputFormat(ctx context.Context, format string) context.Context {
+	return context.WithValue(ctx, keyInputFormat, format)
+}
+
+// GetInputFormat retrieves the input format from the context. Defaults to json.
+func GetInputFormat(ctx context.Context) string {
+	format, _ := ctx.Value(keyInputFormat).(string)
+	if format == "" {
+		return "json"
+	}
+
+	return format
 }

@@ -18,10 +18,11 @@ package tuple
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/openfga/go-sdk/client"
@@ -164,12 +165,12 @@ func writeTuplesFromArgs(ctx context.Context, cmd *cobra.Command, args []string,
 		Execute()
 	if err != nil {
 		if f := utils.GetFailureLog(ctx); f != nil {
-			entry := map[string]any{
-				"tuple_key": body[0],
-				"reason":    err.Error(),
-			}
-			if b, mErr := json.Marshal(entry); mErr == nil {
-				_, _ = f.Write(append(b, '\n'))
+			format := utils.GetInputFormat(ctx)
+			if b, mErr := tuplefile.SerializeTuple(format, body[0]); mErr == nil {
+				if len(b) == 0 || b[len(b)-1] != '\n' {
+					b = append(b, '\n')
+				}
+				_, _ = f.Write(b)
 				_ = f.Sync()
 			}
 		}
@@ -177,8 +178,12 @@ func writeTuplesFromArgs(ctx context.Context, cmd *cobra.Command, args []string,
 	}
 
 	if f := utils.GetSuccessLog(ctx); f != nil {
-		if b, mErr := json.Marshal(body[0]); mErr == nil {
-			_, _ = f.Write(append(b, '\n'))
+		format := utils.GetInputFormat(ctx)
+		if b, mErr := tuplefile.SerializeTuple(format, body[0]); mErr == nil {
+			if len(b) == 0 || b[len(b)-1] != '\n' {
+				b = append(b, '\n')
+			}
+			_, _ = f.Write(b)
 			_ = f.Sync()
 		}
 	}
@@ -242,6 +247,24 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 
 	if fileName == "" {
 		return errors.New("file name cannot be empty") //nolint:err113
+	}
+
+	ext := strings.TrimPrefix(strings.ToLower(path.Ext(fileName)), ".")
+	ctx = utils.WithInputFormat(ctx, ext)
+
+	if ext == "csv" {
+		if f := utils.GetSuccessLog(ctx); f != nil {
+			if info, err := f.Stat(); err == nil && info.Size() == 0 {
+				_, _ = f.Write([]byte(tuplefile.CSVHeaderRow() + "\n"))
+				_ = f.Sync()
+			}
+		}
+		if f := utils.GetFailureLog(ctx); f != nil {
+			if info, err := f.Stat(); err == nil && info.Size() == 0 {
+				_, _ = f.Write([]byte(tuplefile.CSVHeaderRow() + "\n"))
+				_ = f.Sync()
+			}
+		}
 	}
 
 	maxTuplesPerWrite, err := flags.GetInt("max-tuples-per-write")
