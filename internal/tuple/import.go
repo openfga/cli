@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -14,8 +16,11 @@ import (
 	"github.com/rung/go-safecast"
 
 	"github.com/openfga/cli/internal/requests"
+	"github.com/openfga/cli/internal/tuplefile"
 	"github.com/openfga/cli/internal/utils"
 )
+
+var logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 const (
 	// MaxTuplesPerWrite Limit the tuples in a single batch.
@@ -140,7 +145,7 @@ func importTuplesWithoutRampUp(
 		return nil, fmt.Errorf("failed to import tuples due to %w", err)
 	}
 
-	successful, failed := processWritesAndDeletes(response)
+	successful, failed := processWritesAndDeletes(ctx, response)
 	result := ImportResponse{
 		Successful: successful,
 		Failed:     failed,
@@ -178,11 +183,11 @@ func importTuplesWithRampUp(ctx context.Context, fgaClient client.SdkClient,
 
 	isDebug := utils.GetDebugContextValue(ctx)
 	if isDebug {
-		fmt.Printf(
-			"Importing tuples: writing %d tuples and deleting %d tuples over %v requests\n",
-			len(writes),
-			len(deletes),
-			numRequests,
+		logger.Info(
+			"importing tuples",
+			"writes", len(writes),
+			"deletes", len(deletes),
+			"requests", numRequests,
 		)
 	}
 
@@ -193,7 +198,7 @@ func importTuplesWithRampUp(ctx context.Context, fgaClient client.SdkClient,
 	for requestIndex := range numRequests {
 		writeChunk, deleteChunk := getImportChunk(requestIndex, maxTuplesPerWrite, writes, deletes)
 		if len(writeChunk)+len(deleteChunk) == 0 {
-			fmt.Printf("Failed to import tuples due to empty write chunk index %v\n", requestIndex)
+			logger.Error("empty write chunk", "index", requestIndex)
 
 			reqs[requestIndex] = func() error { return nil }
 
@@ -209,14 +214,14 @@ func importTuplesWithRampUp(ctx context.Context, fgaClient client.SdkClient,
 			response, err := request.Execute()
 			if err != nil {
 				if isDebug {
-					fmt.Printf("Failed to import tuples due to error %v\n", err)
+					logger.Error("write failed", "error", err)
 				}
 
 				return err //nolint:wrapcheck
 			}
 
-			successfulWrites, failedWrites := processWrites(response.Writes)
-			successfulDeletes, failedDeletes := processDeletes(response.Deletes)
+			successfulWrites, failedWrites := processWrites(ctx, response.Writes)
+			successfulDeletes, failedDeletes := processDeletes(ctx, response.Deletes)
 
 			mutex.Lock()
 			result.Successful = append(result.Successful, successfulWrites...)
@@ -296,15 +301,17 @@ func extractErrMsg(err error) string {
 }
 
 func processWritesAndDeletes(
+	ctx context.Context,
 	response *client.ClientWriteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
-	successfulWrites, failedWrites := processWrites(response.Writes)
-	successfulDeletes, failedDeletes := processDeletes(response.Deletes)
+	successfulWrites, failedWrites := processWrites(ctx, response.Writes)
+	successfulDeletes, failedDeletes := processDeletes(ctx, response.Deletes)
 
 	return append(successfulWrites, successfulDeletes...), append(failedWrites, failedDeletes...)
 }
 
 func processWrites(
+	ctx context.Context,
 	writes []client.ClientWriteRequestWriteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
 	var (
@@ -312,15 +319,38 @@ func processWrites(
 		failedWrites     []failedWriteResponse
 	)
 
+	successFile := utils.GetSuccessLog(ctx)
+	failureFile := utils.GetFailureLog(ctx)
+	format := utils.GetInputFormat(ctx)
+
 	for _, write := range writes {
 		if write.Status == client.SUCCESS {
 			successfulWrites = append(successfulWrites, write.TupleKey)
+			if successFile != nil {
+				if b, err := tuplefile.SerializeTuple(format, write.TupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = successFile.Write(b)
+					_ = successFile.Sync()
+				}
+			}
 		} else {
 			reason := extractErrMsg(write.Error)
-			failedWrites = append(failedWrites, failedWriteResponse{
+			failedTuple := failedWriteResponse{
 				TupleKey: write.TupleKey,
 				Reason:   reason,
-			})
+			}
+			failedWrites = append(failedWrites, failedTuple)
+			if failureFile != nil {
+				if b, err := tuplefile.SerializeTuple(format, write.TupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = failureFile.Write(b)
+					_ = failureFile.Sync()
+				}
+			}
 		}
 	}
 
@@ -328,12 +358,17 @@ func processWrites(
 }
 
 func processDeletes(
+	ctx context.Context,
 	deletes []client.ClientWriteRequestDeleteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
 	var (
 		successfulDeletes []client.ClientTupleKey
 		failedDeletes     []failedWriteResponse
 	)
+
+	successFile := utils.GetSuccessLog(ctx)
+	failureFile := utils.GetFailureLog(ctx)
+	format := utils.GetInputFormat(ctx)
 
 	for _, del := range deletes {
 		deletedTupleKey := openfga.TupleKey{
@@ -344,12 +379,31 @@ func processDeletes(
 
 		if del.Status == client.SUCCESS {
 			successfulDeletes = append(successfulDeletes, deletedTupleKey)
+			if successFile != nil {
+				if b, err := tuplefile.SerializeTuple(format, deletedTupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = successFile.Write(b)
+					_ = successFile.Sync()
+				}
+			}
 		} else {
 			reason := extractErrMsg(del.Error)
-			failedDeletes = append(failedDeletes, failedWriteResponse{
+			failedTuple := failedWriteResponse{
 				TupleKey: deletedTupleKey,
 				Reason:   reason,
-			})
+			}
+			failedDeletes = append(failedDeletes, failedTuple)
+			if failureFile != nil {
+				if b, err := tuplefile.SerializeTuple(format, deletedTupleKey); err == nil {
+					if len(b) == 0 || b[len(b)-1] != '\n' {
+						b = append(b, '\n')
+					}
+					_, _ = failureFile.Write(b)
+					_ = failureFile.Sync()
+				}
+			}
 		}
 	}
 

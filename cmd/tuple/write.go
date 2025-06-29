@@ -20,6 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/openfga/go-sdk/client"
@@ -35,7 +38,11 @@ import (
 
 const writeCommandArgumentsCount = 3
 
-var hideImportedTuples bool
+var (
+	hideImportedTuples bool
+	successLogPath     string
+	failureLogPath     string
+)
 
 type ImportStats struct {
 	TotalTuples      int
@@ -83,15 +90,36 @@ var writeCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize fga client: %w", err)
 		}
 
-		if len(args) == writeCommandArgumentsCount {
-			return writeTuplesFromArgs(cmd, args, fgaClient)
+		ctx := cmd.Context()
+
+		var successFile, failureFile *os.File
+		if successLogPath != "" {
+			successFile, err = os.OpenFile(successLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+			if err != nil {
+				return fmt.Errorf("failed to open success log file: %w", err)
+			}
+			defer successFile.Close()
+			ctx = utils.WithSuccessLog(ctx, successFile)
 		}
 
-		return writeTuplesFromFile(cmd.Context(), cmd.Flags(), fgaClient)
+		if failureLogPath != "" {
+			failureFile, err = os.OpenFile(failureLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+			if err != nil {
+				return fmt.Errorf("failed to open failure log file: %w", err)
+			}
+			defer failureFile.Close()
+			ctx = utils.WithFailureLog(ctx, failureFile)
+		}
+
+		if len(args) == writeCommandArgumentsCount {
+			return writeTuplesFromArgs(ctx, cmd, args, fgaClient)
+		}
+
+		return writeTuplesFromFile(ctx, cmd.Flags(), fgaClient)
 	},
 }
 
-func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.OpenFgaClient) error {
+func writeTuplesFromArgs(ctx context.Context, cmd *cobra.Command, args []string, fgaClient *client.OpenFgaClient) error {
 	condition, err := cmdutils.ParseTupleCondition(cmd)
 	if err != nil {
 		return err //nolint:wrapcheck
@@ -131,12 +159,33 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 	}
 
 	_, err = fgaClient.
-		WriteTuples(context.Background()).
+		WriteTuples(ctx).
 		Body(body).
 		Options(client.ClientWriteOptions{}).
 		Execute()
 	if err != nil {
+		if f := utils.GetFailureLog(ctx); f != nil {
+			format := utils.GetInputFormat(ctx)
+			if b, mErr := tuplefile.SerializeTuple(format, body[0]); mErr == nil {
+				if len(b) == 0 || b[len(b)-1] != '\n' {
+					b = append(b, '\n')
+				}
+				_, _ = f.Write(b)
+				_ = f.Sync()
+			}
+		}
 		return fmt.Errorf("failed to write tuple: %w", err)
+	}
+
+	if f := utils.GetSuccessLog(ctx); f != nil {
+		format := utils.GetInputFormat(ctx)
+		if b, mErr := tuplefile.SerializeTuple(format, body[0]); mErr == nil {
+			if len(b) == 0 || b[len(b)-1] != '\n' {
+				b = append(b, '\n')
+			}
+			_, _ = f.Write(b)
+			_ = f.Sync()
+		}
 	}
 
 	return output.Display( //nolint:wrapcheck
@@ -198,6 +247,24 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 
 	if fileName == "" {
 		return errors.New("file name cannot be empty") //nolint:err113
+	}
+
+	ext := strings.TrimPrefix(strings.ToLower(path.Ext(fileName)), ".")
+	ctx = utils.WithInputFormat(ctx, ext)
+
+	if ext == "csv" {
+		if f := utils.GetSuccessLog(ctx); f != nil {
+			if info, err := f.Stat(); err == nil && info.Size() == 0 {
+				_, _ = f.Write([]byte(tuplefile.CSVHeaderRow() + "\n"))
+				_ = f.Sync()
+			}
+		}
+		if f := utils.GetFailureLog(ctx); f != nil {
+			if info, err := f.Stat(); err == nil && info.Size() == 0 {
+				_, _ = f.Write([]byte(tuplefile.CSVHeaderRow() + "\n"))
+				_ = f.Sync()
+			}
+		}
 	}
 
 	maxTuplesPerWrite, err := flags.GetInt("max-tuples-per-write")
@@ -285,4 +352,6 @@ func init() {
 	writeCmd.Flags().Int("rampup-period-in-sec", 0, "The period over which to ramp up the request rate.")
 
 	writeCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")
+	writeCmd.PersistentFlags().StringVar(&successLogPath, "success-log", "", "Filepath to log successful writes")
+	writeCmd.PersistentFlags().StringVar(&failureLogPath, "failure-log", "", "Filepath to log failed writes")
 }
