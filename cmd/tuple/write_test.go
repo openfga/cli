@@ -167,6 +167,17 @@ func TestParseTuplesFileData(t *testing.T) {
 					Relation: "viewer",
 					Object:   "folder:product-2021",
 				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+					Condition: &openfga.RelationshipCondition{
+						Name: "inOfficeIP",
+						Context: &map[string]interface{}{
+							"ip_addr": "10.0.0.1",
+						},
+					},
+				},
 			},
 		},
 		{
