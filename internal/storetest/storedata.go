@@ -167,6 +167,37 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	return nil
 }
 
+//nolint:cyclop
+func (storeData *StoreData) Validate() error {
+	var errs error
+
+	for _, test := range storeData.Tests {
+		for index, check := range test.Check {
+			if check.User != "" && len(check.Users) > 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserAndUsersConflict)
+				errs = errors.Join(errs, err)
+			} else if check.User == "" && len(check.Users) == 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserRequired)
+				errs = errors.Join(errs, err)
+			}
+
+			if check.Object != "" && len(check.Objects) > 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectAndObjectsConflict)
+				errs = errors.Join(errs, err)
+			} else if check.Object == "" && len(check.Objects) == 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectRequired)
+				errs = errors.Join(errs, err)
+			}
+		}
+	}
+
+	if errs != nil {
+		return clierrors.ValidationError("StoreFormat", errs.Error()) //nolint:wrapcheck
+	}
+
+	return nil
+}
+
 func (storeData *StoreData) loadAndAddTuplesFromFile(
 	basePath string,
 	file string,
@@ -237,35 +268,4 @@ func (storeData *StoreData) loadTestTuples(basePath string) error {
 	}
 
 	return errs
-}
-
-//nolint:cyclop
-func (storeData *StoreData) Validate() error {
-	var errs error
-
-	for _, test := range storeData.Tests {
-		for index, check := range test.Check {
-			if check.User != "" && len(check.Users) > 0 {
-				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserAndUsersConflict)
-				errs = errors.Join(errs, err)
-			} else if check.User == "" && len(check.Users) == 0 {
-				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserRequired)
-				errs = errors.Join(errs, err)
-			}
-
-			if check.Object != "" && len(check.Objects) > 0 {
-				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectAndObjectsConflict)
-				errs = errors.Join(errs, err)
-			} else if check.Object == "" && len(check.Objects) == 0 {
-				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectRequired)
-				errs = errors.Join(errs, err)
-			}
-		}
-	}
-
-	if errs != nil {
-		return clierrors.ValidationError("StoreFormat", errs.Error()) //nolint:wrapcheck
-	}
-
-	return nil
 }
