@@ -22,9 +22,8 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/tuplefile"
-  "github.com/openfga/cli/internal/clierrors"
-
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -38,8 +37,8 @@ var (
 	ErrUserRequired             = errors.New("must specify 'user' or 'users'")
 	ErrObjectAndObjectsConflict = errors.New("cannot contain both 'object' and 'objects'")
 	ErrObjectRequired           = errors.New("must specify 'object' or 'objects'")
-  
-  errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
+
+	errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
 	errFailedProcessingTupleFiles = errors.New("failed to process one or more tuple files")
 )
 

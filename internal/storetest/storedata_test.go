@@ -105,7 +105,7 @@ func TestLoadTuples(t *testing.T) {
 			}
 		})
 	}
-
+}
 
 func TestStoreDataValidate(t *testing.T) {
 	t.Parallel()
