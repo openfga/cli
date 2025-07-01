@@ -303,6 +303,22 @@ tests:
           assertions:
             member: true
             moderator: false
+      # checks can also be defined for multiple users sharing the same expectation
+      - object: group:employees
+        users:
+      # checks can also target multiple objects with the same expectation
+      - objects:
+          - group:admins
+          - group:employees
+        user: user:1
+        assertions:
+          moderator: false
+      # either "user" or "users" may be provided, but not both
+      # either "object" or "objects" may be provided, but not both
+          - user:3
+          - user:4
+        assertions:
+          member: true
 ```
 
 If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
@@ -564,19 +580,35 @@ tests: # required
   - name: test-1
     description: testing that the model works # optional
     # tuple_file: ./tuples.json # tuples that would apply per test
-    tuples:
-      - user: user:anne
-        relation: owner
-        object: folder:1
-    check: # a set of checks to run
-      - user: user:anne
-        object: folder:1
-        assertions:
-          # a set of expected results for each relation
-          can_view: true
-          can_write: true
-          can_share: false
-    list_objects: # a set of list objects to run
+      tuples:
+        - user: user:anne
+          relation: owner
+          object: folder:1
+      check: # a set of checks to run
+        - user: user:anne
+          object: folder:1
+          assertions:
+            # a set of expected results for each relation
+            can_view: true
+            can_write: true
+            can_share: false
+        # checks can group multiple users that share the same expected results
+        - object: folder:2
+          users:
+            - user:beth
+            - user:carl
+          assertions:
+            can_view: false
+        # checks can group multiple objects that share the same expected results
+        - objects:
+            - folder:1
+            - folder:2
+          user: user:beth
+          assertions:
+            can_write: false
+        # either "user" or "users" may be provided, but not both
+        # either "object" or "objects" may be provided, but not both
+      list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
         assertions:
@@ -677,17 +709,18 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
-* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1, or 40 if `--max-rps` is set and this flag is omitted)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4, or `max-rps/5` if `--max-rps` is set and this flag is omitted)
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
-* `--max-rps`: Max requests per second, when set the CLI will ramp up requests from 1RPS to the set value over the set period. Used in conjunction with `--rampup-period-in-sec` (optional)
-* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Used in conjunction with `--max-rps` (optional)
+* `--max-rps`: Max requests per second. When set, the CLI will ramp up requests from 1 RPS to the set value. If `--rampup-period-in-sec` is omitted it defaults to `max-rps*2`.
+* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Only used if `--max-rps` is set.
+* All integer parameters must be greater than zero when provided.
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`
 
 ###### Response
 ```json5

@@ -36,6 +36,10 @@ func RunTests(
 ) (TestResults, error) {
 	testResults := TestResults{}
 
+	if err := storeData.Validate(); err != nil {
+		return testResults, err
+	}
+
 	fgaServer, authModel, stopServerFn, err := getLocalServerModelAndTuples(storeData, format)
 	if err != nil {
 		return testResults, err

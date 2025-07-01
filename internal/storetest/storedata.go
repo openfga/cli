@@ -23,6 +23,8 @@ import (
 	"path"
 
 	"github.com/openfga/cli/internal/tuplefile"
+  "github.com/openfga/cli/internal/clierrors"
+
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -30,16 +32,24 @@ import (
 	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
+// Static error variables for validation.
 var (
-	errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
+	ErrUserAndUsersConflict     = errors.New("cannot contain both 'user' and 'users'")
+	ErrUserRequired             = errors.New("must specify 'user' or 'users'")
+	ErrObjectAndObjectsConflict = errors.New("cannot contain both 'object' and 'objects'")
+	ErrObjectRequired           = errors.New("must specify 'object' or 'objects'")
+  
+  errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
 	errFailedProcessingTupleFiles = errors.New("failed to process one or more tuple files")
 )
 
 type ModelTestCheck struct {
-	User       string                  `json:"user"       yaml:"user"`
-	Object     string                  `json:"object"     yaml:"object"`
-	Context    *map[string]interface{} `json:"context"    yaml:"context,omitempty"`
-	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
+	User       string                  `json:"user,omitempty"    yaml:"user,omitempty"`
+	Users      []string                `json:"users,omitempty"   yaml:"users,omitempty"`
+	Object     string                  `json:"object,omitempty"  yaml:"object,omitempty"`
+	Objects    []string                `json:"objects,omitempty" yaml:"objects,omitempty"`
+	Context    *map[string]interface{} `json:"context"           yaml:"context,omitempty"`
+	Assertions map[string]bool         `json:"assertions"        yaml:"assertions"`
 }
 
 type ModelTestListObjects struct {
@@ -228,4 +238,35 @@ func (storeData *StoreData) loadTestTuples(basePath string) error {
 	}
 
 	return errs
+}
+
+//nolint:cyclop
+func (storeData *StoreData) Validate() error {
+	var errs error
+
+	for _, test := range storeData.Tests {
+		for index, check := range test.Check {
+			if check.User != "" && len(check.Users) > 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserAndUsersConflict)
+				errs = errors.Join(errs, err)
+			} else if check.User == "" && len(check.Users) == 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserRequired)
+				errs = errors.Join(errs, err)
+			}
+
+			if check.Object != "" && len(check.Objects) > 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectAndObjectsConflict)
+				errs = errors.Join(errs, err)
+			} else if check.Object == "" && len(check.Objects) == 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectRequired)
+				errs = errors.Join(errs, err)
+			}
+		}
+	}
+
+	if errs != nil {
+		return clierrors.ValidationError("StoreFormat", errs.Error()) //nolint:wrapcheck
+	}
+
+	return nil
 }

@@ -9085,11 +9085,6 @@
     "user": "user:58"
   },
   {
-    "object": "document:578",
-    "relation": "can_view",
-    "user": "user:410"
-  },
-  {
     "object": "document:25",
     "relation": "can_view",
     "user": "user:351"
