@@ -149,6 +149,31 @@ func TestParseTuplesFileData(t *testing.T) {
 			},
 		},
 		{
+			name: "it can correctly parse a jsonl file",
+			file: "testdata/tuples.jsonl",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+					Condition: &openfga.RelationshipCondition{
+						Name:    "inOfficeIP",
+						Context: &map[string]interface{}{"ip_addr": "10.0.0.1"},
+					},
+				},
+				{
+					User:     "user:beth",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
 			name: "it can correctly parse a yaml file",
 			file: "testdata/tuples.yaml",
 			expectedTuples: []client.ClientTupleKey{
