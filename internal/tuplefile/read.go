@@ -1,6 +1,9 @@
 package tuplefile
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -26,6 +29,8 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 		if err == nil && len(tuples) == 0 {
 			err = clierrors.EmptyTuplesFileError(strings.TrimPrefix(path.Ext(fileName), "."))
 		}
+	case ".jsonl":
+		err = parseTuplesFromJSONL(data, &tuples)
 	case ".csv":
 		err = parseTuplesFromCSV(data, &tuples)
 	default:
@@ -37,4 +42,34 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 	}
 
 	return tuples, nil
+}
+
+func parseTuplesFromJSONL(data []byte, tuples *[]client.ClientTupleKey) error {
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+	lineNum := 0
+
+	for scanner.Scan() {
+		lineNum++
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+
+		var tuple client.ClientTupleKey
+		if err := json.Unmarshal([]byte(line), &tuple); err != nil {
+			return fmt.Errorf("failed to read tuple from jsonl file on line %d: %w", lineNum, err)
+		}
+
+		*tuples = append(*tuples, tuple)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("failed to read jsonl file: %w", err)
+	}
+
+	if len(*tuples) == 0 {
+		return clierrors.EmptyTuplesFileError("jsonl")
+	}
+
+	return nil
 }

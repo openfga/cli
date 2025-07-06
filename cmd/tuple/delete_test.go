@@ -121,6 +121,27 @@ func TestDeleteTuplesFileData(t *testing.T) {
 			},
 		},
 		{
+			name: "it can correctly parse a jsonl file",
+			file: "testdata/tuples.jsonl",
+			expectedTuples: []openfga.TupleKeyWithoutCondition{
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
+				},
+				{
+					User:     "folder:product",
+					Relation: "parent",
+					Object:   "folder:product-2021",
+				},
+				{
+					User:     "user:beth",
+					Relation: "viewer",
+					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
 			name: "it can correctly parse a yaml file",
 			file: "testdata/tuples.yaml",
 			expectedTuples: []openfga.TupleKeyWithoutCondition{
@@ -178,6 +199,11 @@ func TestDeleteTuplesFileData(t *testing.T) {
 			name:          "empty json file should throw a warning",
 			file:          "testdata/tuples_empty.json",
 			expectedError: "failed to parse input tuples: tuples file is empty (json)",
+		},
+		{
+			name:          "empty jsonl file should throw a warning",
+			file:          "testdata/tuples_empty.jsonl",
+			expectedError: "failed to parse input tuples: tuples file is empty (jsonl)",
 		},
 		{
 			name:          "empty yaml file should throw a warning",
