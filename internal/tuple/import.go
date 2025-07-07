@@ -219,10 +219,12 @@ func importTuplesWithRampUp(ctx context.Context, fgaClient client.SdkClient,
 			successfulDeletes, failedDeletes := processDeletes(response.Deletes)
 
 			mutex.Lock()
+
 			result.Successful = append(result.Successful, successfulWrites...)
 			result.Successful = append(result.Successful, successfulDeletes...)
 			result.Failed = append(result.Failed, failedWrites...)
 			result.Failed = append(result.Failed, failedDeletes...)
+
 			mutex.Unlock()
 
 			return nil
