@@ -66,9 +66,9 @@ func (l *TupleLogger) LogSuccess(key client.ClientTupleKey) {
 	case ".csv":
 		l.writeCSV([]string{key.User, key.Relation, key.Object})
 	case ".yaml", ".yml":
-		b, _ := yaml.Marshal(key)
+		record := []client.ClientTupleKey{key}
+		b, _ := yaml.Marshal(record)
 		l.writer.Write(b)
-		l.writer.Write([]byte("---\n"))
 	default: // json and jsonl
 		b, _ := json.Marshal(key)
 		l.writer.Write(append(b, '\n'))
@@ -77,19 +77,26 @@ func (l *TupleLogger) LogSuccess(key client.ClientTupleKey) {
 }
 
 // LogFailure writes a failed tuple key.
-func (l *TupleLogger) LogFailure(key client.ClientTupleKey) {
+func (l *TupleLogger) LogFailure(key client.ClientTupleKey, reason string) {
 	if l == nil {
 		return
 	}
 	switch l.format {
 	case ".csv":
-		l.writeCSV([]string{key.User, key.Relation, key.Object})
+		l.writeCSV([]string{key.User, key.Relation, key.Object, reason})
 	case ".yaml", ".yml":
-		b, _ := yaml.Marshal(key)
+		entry := []struct {
+			client.ClientTupleKey `yaml:",inline"`
+			Reason                string `yaml:"reason"`
+		}{{key, reason}}
+		b, _ := yaml.Marshal(entry)
 		l.writer.Write(b)
-		l.writer.Write([]byte("---\n"))
 	default:
-		b, _ := json.Marshal(key)
+		entry := struct {
+			client.ClientTupleKey
+			Reason string `json:"reason"`
+		}{key, reason}
+		b, _ := json.Marshal(entry)
 		l.writer.Write(append(b, '\n'))
 	}
 	l.flush()
@@ -98,7 +105,11 @@ func (l *TupleLogger) LogFailure(key client.ClientTupleKey) {
 func (l *TupleLogger) writeCSV(record []string) {
 	w := csv.NewWriter(l.writer)
 	if !l.headerWritten {
-		w.Write([]string{"user", "relation", "object"})
+		header := []string{"user", "relation", "object"}
+		if len(record) == 4 {
+			header = append(header, "reason")
+		}
+		w.Write(header)
 		l.headerWritten = true
 	}
 	_ = w.Write(record)
