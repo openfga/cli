@@ -19,6 +19,7 @@ func TestWriteModelFail(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}`
@@ -55,6 +56,7 @@ func TestWriteModel(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	modelJSONTxt := `{"schema_version":"1.1","type_definitions":[{"relations":{"viewer":{"this":{}}},"type":"github-repo"}],"conditions":{}}`

@@ -38,6 +38,7 @@ func init() {
 	TupleCmd.AddCommand(deleteCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
+
 	err := TupleCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
 		fmt.Print(err)

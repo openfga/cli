@@ -73,6 +73,7 @@ func RampUpAPIRequests( //nolint:cyclop
 				}
 
 				req := requests[idx]
+
 				semaphore <- struct{}{}
 
 				waitGroup.Add(1)
@@ -109,6 +110,7 @@ func RampUpAPIRequests( //nolint:cyclop
 				}
 
 				req := requests[idx]
+
 				semaphore <- struct{}{}
 
 				waitGroup.Add(1)

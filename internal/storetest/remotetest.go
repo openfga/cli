@@ -18,7 +18,6 @@ func RunSingleRemoteCheckTest(
 		Expected: expectation,
 		Error:    err,
 	}
-
 	if err == nil && res != nil {
 		result.Got = res.Allowed
 		result.TestResult = result.IsPassing()
