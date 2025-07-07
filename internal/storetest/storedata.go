@@ -156,7 +156,6 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 		errs,
 		storeData.loadTestTuples(basePath),
 	)
-
 	if errs != nil {
 		return errors.Join(
 			errFailedProcessingTupleFiles,
