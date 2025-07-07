@@ -22,6 +22,48 @@ type TupleLogger struct {
 	headerWritten bool
 }
 
+func splitUser(user string) (string, string, string) {
+	relation := ""
+	if parts := strings.Split(user, "#"); len(parts) > 1 {
+		relation = parts[1]
+		user = parts[0]
+	}
+	userParts := strings.SplitN(user, ":", 2)
+	userType := userParts[0]
+	userID := ""
+	if len(userParts) > 1 {
+		userID = userParts[1]
+	}
+	return userType, userID, relation
+}
+
+func splitObject(object string) (string, string) {
+	parts := strings.SplitN(object, ":", 2)
+	objectType := parts[0]
+	objectID := ""
+	if len(parts) > 1 {
+		objectID = parts[1]
+	}
+	return objectType, objectID
+}
+
+func toCSVRecord(key client.ClientTupleKey) []string {
+	uType, uID, uRel := splitUser(key.User)
+	oType, oID := splitObject(key.Object)
+
+	var condName string
+	var condContext string
+	if key.Condition != nil {
+		condName = key.Condition.Name
+		if key.Condition.Context != nil {
+			b, _ := json.Marshal(*key.Condition.Context)
+			condContext = string(b)
+		}
+	}
+
+	return []string{uType, uID, uRel, key.Relation, oType, oID, condName, condContext}
+}
+
 // NewTupleLogger creates a logger for the given file path.
 func NewTupleLogger(path string) (*TupleLogger, error) {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
@@ -64,7 +106,7 @@ func (l *TupleLogger) LogSuccess(key client.ClientTupleKey) {
 	}
 	switch l.format {
 	case ".csv":
-		l.writeCSV([]string{key.User, key.Relation, key.Object})
+		l.writeCSV(toCSVRecord(key))
 	case ".yaml", ".yml":
 		record := []client.ClientTupleKey{key}
 		b, _ := yaml.Marshal(record)
@@ -83,7 +125,7 @@ func (l *TupleLogger) LogFailure(key client.ClientTupleKey) {
 	}
 	switch l.format {
 	case ".csv":
-		l.writeCSV([]string{key.User, key.Relation, key.Object})
+		l.writeCSV(toCSVRecord(key))
 	case ".yaml", ".yml":
 		record := []client.ClientTupleKey{key}
 		b, _ := yaml.Marshal(record)
@@ -98,11 +140,17 @@ func (l *TupleLogger) LogFailure(key client.ClientTupleKey) {
 func (l *TupleLogger) writeCSV(record []string) {
 	w := csv.NewWriter(l.writer)
 	if !l.headerWritten {
-		header := []string{"user", "relation", "object"}
-		if len(record) == 4 {
-			header = append(header, "reason")
+		header := []string{
+			"user_type",
+			"user_id",
+			"user_relation",
+			"relation",
+			"object_type",
+			"object_id",
+			"condition_name",
+			"condition_context",
 		}
-		w.Write(header)
+		_ = w.Write(header)
 		l.headerWritten = true
 	}
 	_ = w.Write(record)
