@@ -333,7 +333,7 @@ func processWrites(
 			}
 			failedWrites = append(failedWrites, failed)
 			if failureLogger != nil {
-				failureLogger.LogFailure(failed)
+				failureLogger.LogFailure(write.TupleKey)
 			}
 		}
 	}
@@ -373,7 +373,7 @@ func processDeletes(
 			}
 			failedDeletes = append(failedDeletes, failed)
 			if failureLogger != nil {
-				failureLogger.LogFailure(failed)
+				failureLogger.LogFailure(deletedTupleKey)
 			}
 		}
 	}

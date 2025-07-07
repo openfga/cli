@@ -238,7 +238,7 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 
 	var successLogger, failureLogger *tuple.TupleLogger
 	if successPath != "" {
-		successLogger, err = tuple.NewTupleLogger(successPath, false)
+		successLogger, err = tuple.NewTupleLogger(successPath)
 		if err != nil {
 			return err
 		}
@@ -246,7 +246,7 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	}
 
 	if failurePath != "" {
-		failureLogger, err = tuple.NewTupleLogger(failurePath, true)
+		failureLogger, err = tuple.NewTupleLogger(failurePath)
 		if err != nil {
 			return err
 		}

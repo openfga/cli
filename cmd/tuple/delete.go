@@ -53,14 +53,14 @@ var deleteCmd = &cobra.Command{
 			failurePath, _ := cmd.Flags().GetString("failure-log")
 			var successLogger, failureLogger *tuple.TupleLogger
 			if successPath != "" {
-				successLogger, err = tuple.NewTupleLogger(successPath, false)
+				successLogger, err = tuple.NewTupleLogger(successPath)
 				if err != nil {
 					return err
 				}
 				defer successLogger.Close()
 			}
 			if failurePath != "" {
-				failureLogger, err = tuple.NewTupleLogger(failurePath, true)
+				failureLogger, err = tuple.NewTupleLogger(failurePath)
 				if err != nil {
 					return err
 				}

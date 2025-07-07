@@ -20,11 +20,10 @@ type TupleLogger struct {
 	writer        *bufio.Writer
 	format        string
 	headerWritten bool
-	isFailure     bool
 }
 
 // NewTupleLogger creates a logger for the given file path.
-func NewTupleLogger(path string, isFailure bool) (*TupleLogger, error) {
+func NewTupleLogger(path string) (*TupleLogger, error) {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file %s: %w", path, err)
@@ -41,7 +40,6 @@ func NewTupleLogger(path string, isFailure bool) (*TupleLogger, error) {
 		writer:        bufio.NewWriter(f),
 		format:        strings.ToLower(filepath.Ext(path)),
 		headerWritten: info.Size() > 0,
-		isFailure:     isFailure,
 	}, nil
 }
 
@@ -78,20 +76,20 @@ func (l *TupleLogger) LogSuccess(key client.ClientTupleKey) {
 	l.flush()
 }
 
-// LogFailure writes a failed tuple with reason.
-func (l *TupleLogger) LogFailure(failed failedWriteResponse) {
+// LogFailure writes a failed tuple key.
+func (l *TupleLogger) LogFailure(key client.ClientTupleKey) {
 	if l == nil {
 		return
 	}
 	switch l.format {
 	case ".csv":
-		l.writeCSV([]string{failed.TupleKey.User, failed.TupleKey.Relation, failed.TupleKey.Object, failed.Reason})
+		l.writeCSV([]string{key.User, key.Relation, key.Object})
 	case ".yaml", ".yml":
-		b, _ := yaml.Marshal(failed)
+		b, _ := yaml.Marshal(key)
 		l.writer.Write(b)
 		l.writer.Write([]byte("---\n"))
 	default:
-		b, _ := json.Marshal(failed)
+		b, _ := json.Marshal(key)
 		l.writer.Write(append(b, '\n'))
 	}
 	l.flush()
@@ -100,11 +98,7 @@ func (l *TupleLogger) LogFailure(failed failedWriteResponse) {
 func (l *TupleLogger) writeCSV(record []string) {
 	w := csv.NewWriter(l.writer)
 	if !l.headerWritten {
-		if l.isFailure {
-			w.Write([]string{"user", "relation", "object", "reason"})
-		} else {
-			w.Write([]string{"user", "relation", "object"})
-		}
+		w.Write([]string{"user", "relation", "object"})
 		l.headerWritten = true
 	}
 	_ = w.Write(record)
