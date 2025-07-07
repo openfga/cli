@@ -18,6 +18,7 @@ func TestCheckWithError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)
@@ -66,6 +67,7 @@ func TestCheckWithNoError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)
@@ -123,6 +125,7 @@ func TestCheckWithConsistency(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientCheckRequestInterface(mockCtrl)

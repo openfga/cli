@@ -20,6 +20,7 @@ func TestListStoresError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)
@@ -46,6 +47,7 @@ func TestListStoresEmpty(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)
@@ -87,6 +89,7 @@ func TestListStoresSinglePage(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)

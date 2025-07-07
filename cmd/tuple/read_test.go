@@ -23,6 +23,7 @@ func TestReadError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
@@ -68,11 +69,13 @@ func TestReadEmpty(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
 
 	var tuples []openfga.Tuple
+
 	response := openfga.ReadResponse{
 		Tuples:            tuples,
 		ContinuationToken: "",
@@ -138,6 +141,7 @@ func TestReadSinglePage(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
@@ -221,6 +225,7 @@ func TestReadMultiPages(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	const continuationToken = "01GXSA8YR785C4FYS3C0RTG7B2" //nolint:gosec
@@ -344,6 +349,7 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)

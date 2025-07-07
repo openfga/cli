@@ -18,6 +18,7 @@ func TestListObjectsWithError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
@@ -66,6 +67,7 @@ func TestListObjectsWithNoError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)
@@ -119,6 +121,7 @@ func TestListObjectsWithConsistency(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientListObjectsRequestInterface(mockCtrl)

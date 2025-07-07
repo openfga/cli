@@ -62,7 +62,6 @@ func TestGetConsistency(t *testing.T) {
 			t.Parallel()
 
 			consistency, err := cmdutils.ParseConsistency(test.stringVal)
-
 			if err == nil {
 				assert.Equal(t, test.expected, consistency)
 			} else {
