@@ -26,6 +26,7 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
@@ -41,6 +42,7 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
+
 	_, err := listRelations(
 		t.Context(),
 		clientConfig,
@@ -52,7 +54,6 @@ func TestListRelationsLatestAuthModelError(t *testing.T) {
 		queryContext,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
-
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -63,6 +64,7 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadAuthorizationModelRequestInterface(mockCtrl)
@@ -80,6 +82,7 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 	contextualTuples := []client.ClientContextualTupleKey{
 		{User: "user:foo", Relation: "admin", Object: "doc:doc1"},
 	}
+
 	_, err := listRelations(
 		t.Context(),
 		clientConfig,
@@ -91,7 +94,6 @@ func TestListRelationsAuthModelSpecifiedError(t *testing.T) {
 		queryContext,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
-
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -102,6 +104,7 @@ func TestListRelationsLatestAuthModelListError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
@@ -169,6 +172,7 @@ func TestListRelationsLatestAuthModelEmpty(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
@@ -219,6 +223,7 @@ func TestListRelationsLatestAuthModelList(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
@@ -292,6 +297,7 @@ func TestListRelationsMultipleRelations(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	// after reading the latest auth model, expect to call list relations but failure
@@ -353,6 +359,7 @@ func TestListRelationsWithConsistency(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockListRelationsExecute := mock_client.NewMockSdkClientListRelationsRequestInterface(mockCtrl)
