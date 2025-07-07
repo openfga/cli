@@ -49,6 +49,23 @@ var deleteCmd = &cobra.Command{
 		}
 		if fileName != "" {
 			startTime := time.Now()
+			successPath, _ := cmd.Flags().GetString("success-log")
+			failurePath, _ := cmd.Flags().GetString("failure-log")
+			var successLogger, failureLogger *tuple.TupleLogger
+			if successPath != "" {
+				successLogger, err = tuple.NewTupleLogger(successPath, false)
+				if err != nil {
+					return err
+				}
+				defer successLogger.Close()
+			}
+			if failurePath != "" {
+				failureLogger, err = tuple.NewTupleLogger(failurePath, true)
+				if err != nil {
+					return err
+				}
+				defer failureLogger.Close()
+			}
 
 			clientTupleKeys, err := tuplefile.ReadTupleFile(fileName)
 			if err != nil {
@@ -70,8 +87,10 @@ var deleteCmd = &cobra.Command{
 				Deletes: clientTupleKeyWithoutCondition,
 			}
 
+			newCtx := tuple.WithSuccessLogger(cmd.Context(), successLogger)
+			newCtx = tuple.WithFailureLogger(newCtx, failureLogger)
 			response, err := tuple.ImportTuplesWithoutRampUp(
-				cmd.Context(), fgaClient,
+				newCtx, fgaClient,
 				maxTuplesPerWrite, maxParallelRequests,
 				writeRequest)
 			if err != nil {
@@ -83,11 +102,11 @@ var deleteCmd = &cobra.Command{
 
 			outputResponse := make(map[string]interface{})
 
-			if !hideImportedTuples && len(response.Successful) > 0 {
+			if !hideImportedTuples && successPath == "" && len(response.Successful) > 0 {
 				outputResponse["successful"] = response.Successful
 			}
 
-			if len(response.Failed) > 0 {
+			if failurePath == "" && len(response.Failed) > 0 {
 				outputResponse["failed"] = response.Failed
 			}
 
