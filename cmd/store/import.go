@@ -34,6 +34,7 @@ import (
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 	"github.com/openfga/cli/internal/tuple"
@@ -339,8 +340,8 @@ func init() {
 	importCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
 	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 
-	if err := importCmd.MarkFlagRequired("file"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
+	if err := flags.SetFlagRequired(importCmd, "file", "cmd/store/import", false); err != nil {
+		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }

@@ -30,6 +30,7 @@ import (
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/confirmation"
 	"github.com/openfga/cli/internal/fga"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 	"github.com/openfga/cli/internal/tuple"
@@ -193,9 +194,8 @@ func init() {
 	exportCmd.Flags().String("model-id", "", "Authorization Model ID")
 	exportCmd.Flags().Uint("max-tuples", defaultMaxTupleCount, "max number of tuples to return in the output")
 
-	err := exportCmd.MarkFlagRequired("store-id")
-	if err != nil {
-		fmt.Print(err)
+	if err := flags.SetFlagRequired(exportCmd, "store-id", "cmd/store/export", false); err != nil {
+		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }

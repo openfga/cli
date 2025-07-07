@@ -22,6 +22,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/flags"
 )
 
 // TupleCmd represents the tuple command.
@@ -39,9 +41,8 @@ func init() {
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
 
-	err := TupleCmd.MarkPersistentFlagRequired("store-id")
-	if err != nil { //nolint:wsl
-		fmt.Print(err)
+	if err := flags.SetFlagRequired(TupleCmd, "store-id", "cmd/tuple/tuple", true); err != nil {
+		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }

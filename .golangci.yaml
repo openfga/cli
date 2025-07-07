@@ -50,11 +50,11 @@ linters:
             - $test
           allow:
             - $gostd
-            - github.com/golang/mock/gomock
             - github.com/openfga/api/proto
             - github.com/openfga/cli
             - github.com/openfga/go-sdk
             - github.com/openfga/openfga
+            - github.com/spf13/cobra
             - github.com/stretchr
             - go.uber.org/mock/gomock
     funlen:

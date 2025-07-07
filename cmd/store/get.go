@@ -26,6 +26,7 @@ import (
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/fga"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -65,9 +66,8 @@ var getCmd = &cobra.Command{
 func init() {
 	getCmd.Flags().String("store-id", "", "Store ID")
 
-	err := getCmd.MarkFlagRequired("store-id")
-	if err != nil {
-		fmt.Print(err)
+	if err := flags.SetFlagRequired(getCmd, "store-id", "cmd/store/get", false); err != nil {
+		fmt.Printf("%v\n", err)
 		os.Exit(1)
 	}
 }
