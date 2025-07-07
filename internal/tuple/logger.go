@@ -77,26 +77,19 @@ func (l *TupleLogger) LogSuccess(key client.ClientTupleKey) {
 }
 
 // LogFailure writes a failed tuple key.
-func (l *TupleLogger) LogFailure(key client.ClientTupleKey, reason string) {
+func (l *TupleLogger) LogFailure(key client.ClientTupleKey) {
 	if l == nil {
 		return
 	}
 	switch l.format {
 	case ".csv":
-		l.writeCSV([]string{key.User, key.Relation, key.Object, reason})
+		l.writeCSV([]string{key.User, key.Relation, key.Object})
 	case ".yaml", ".yml":
-		entry := []struct {
-			client.ClientTupleKey `yaml:",inline"`
-			Reason                string `yaml:"reason"`
-		}{{key, reason}}
-		b, _ := yaml.Marshal(entry)
+		record := []client.ClientTupleKey{key}
+		b, _ := yaml.Marshal(record)
 		l.writer.Write(b)
 	default:
-		entry := struct {
-			client.ClientTupleKey
-			Reason string `json:"reason"`
-		}{key, reason}
-		b, _ := json.Marshal(entry)
+		b, _ := json.Marshal(key)
 		l.writer.Write(append(b, '\n'))
 	}
 	l.flush()
