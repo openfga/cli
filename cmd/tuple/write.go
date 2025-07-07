@@ -233,6 +233,26 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 		return fmt.Errorf("failed to parse debug flag due to %w", err)
 	}
 
+	successPath, _ := flags.GetString("success-log")
+	failurePath, _ := flags.GetString("failure-log")
+
+	var successLogger, failureLogger *tuple.TupleLogger
+	if successPath != "" {
+		successLogger, err = tuple.NewTupleLogger(successPath, false)
+		if err != nil {
+			return err
+		}
+		defer successLogger.Close()
+	}
+
+	if failurePath != "" {
+		failureLogger, err = tuple.NewTupleLogger(failurePath, true)
+		if err != nil {
+			return err
+		}
+		defer failureLogger.Close()
+	}
+
 	tuples, err := tuplefile.ReadTupleFile(fileName)
 	if err != nil {
 		return err //nolint:wrapcheck
@@ -243,6 +263,8 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	}
 
 	newCtx := utils.WithDebugContext(ctx, debug)
+	newCtx = tuple.WithSuccessLogger(newCtx, successLogger)
+	newCtx = tuple.WithFailureLogger(newCtx, failureLogger)
 
 	response, err := tuple.ImportTuples(
 		newCtx, fgaClient,
@@ -257,11 +279,11 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 
 	outputResponse := make(map[string]interface{})
 
-	if !hideImportedTuples && len(response.Successful) > 0 {
+	if !hideImportedTuples && successPath == "" && len(response.Successful) > 0 {
 		outputResponse["successful"] = response.Successful
 	}
 
-	if len(response.Failed) > 0 {
+	if failurePath == "" && len(response.Failed) > 0 {
 		outputResponse["failed"] = response.Failed
 	}
 

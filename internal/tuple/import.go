@@ -140,7 +140,7 @@ func importTuplesWithoutRampUp(
 		return nil, fmt.Errorf("failed to import tuples due to %w", err)
 	}
 
-	successful, failed := processWritesAndDeletes(response)
+	successful, failed := processWritesAndDeletes(ctx, response)
 	result := ImportResponse{
 		Successful: successful,
 		Failed:     failed,
@@ -215,8 +215,8 @@ func importTuplesWithRampUp(ctx context.Context, fgaClient client.SdkClient,
 				return err //nolint:wrapcheck
 			}
 
-			successfulWrites, failedWrites := processWrites(response.Writes)
-			successfulDeletes, failedDeletes := processDeletes(response.Deletes)
+			successfulWrites, failedWrites := processWrites(ctx, response.Writes)
+			successfulDeletes, failedDeletes := processDeletes(ctx, response.Deletes)
 
 			mutex.Lock()
 
@@ -298,15 +298,17 @@ func extractErrMsg(err error) string {
 }
 
 func processWritesAndDeletes(
+	ctx context.Context,
 	response *client.ClientWriteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
-	successfulWrites, failedWrites := processWrites(response.Writes)
-	successfulDeletes, failedDeletes := processDeletes(response.Deletes)
+	successfulWrites, failedWrites := processWrites(ctx, response.Writes)
+	successfulDeletes, failedDeletes := processDeletes(ctx, response.Deletes)
 
 	return append(successfulWrites, successfulDeletes...), append(failedWrites, failedDeletes...)
 }
 
 func processWrites(
+	ctx context.Context,
 	writes []client.ClientWriteRequestWriteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
 	var (
@@ -314,15 +316,25 @@ func processWrites(
 		failedWrites     []failedWriteResponse
 	)
 
+	successLogger := getSuccessLogger(ctx)
+	failureLogger := getFailureLogger(ctx)
+
 	for _, write := range writes {
 		if write.Status == client.SUCCESS {
 			successfulWrites = append(successfulWrites, write.TupleKey)
+			if successLogger != nil {
+				successLogger.LogSuccess(write.TupleKey)
+			}
 		} else {
 			reason := extractErrMsg(write.Error)
-			failedWrites = append(failedWrites, failedWriteResponse{
+			failed := failedWriteResponse{
 				TupleKey: write.TupleKey,
 				Reason:   reason,
-			})
+			}
+			failedWrites = append(failedWrites, failed)
+			if failureLogger != nil {
+				failureLogger.LogFailure(failed)
+			}
 		}
 	}
 
@@ -330,12 +342,16 @@ func processWrites(
 }
 
 func processDeletes(
+	ctx context.Context,
 	deletes []client.ClientWriteRequestDeleteResponse,
 ) ([]client.ClientTupleKey, []failedWriteResponse) {
 	var (
 		successfulDeletes []client.ClientTupleKey
 		failedDeletes     []failedWriteResponse
 	)
+
+	successLogger := getSuccessLogger(ctx)
+	failureLogger := getFailureLogger(ctx)
 
 	for _, del := range deletes {
 		deletedTupleKey := openfga.TupleKey{
@@ -346,12 +362,19 @@ func processDeletes(
 
 		if del.Status == client.SUCCESS {
 			successfulDeletes = append(successfulDeletes, deletedTupleKey)
+			if successLogger != nil {
+				successLogger.LogSuccess(deletedTupleKey)
+			}
 		} else {
 			reason := extractErrMsg(del.Error)
-			failedDeletes = append(failedDeletes, failedWriteResponse{
+			failed := failedWriteResponse{
 				TupleKey: deletedTupleKey,
 				Reason:   reason,
-			})
+			}
+			failedDeletes = append(failedDeletes, failed)
+			if failureLogger != nil {
+				failureLogger.LogFailure(failed)
+			}
 		}
 	}
 

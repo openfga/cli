@@ -38,6 +38,8 @@ func init() {
 	TupleCmd.AddCommand(deleteCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
+	TupleCmd.PersistentFlags().String("success-log", "", "Filepath to log successful writes")
+	TupleCmd.PersistentFlags().String("failure-log", "", "Filepath to log failed writes")
 
 	err := TupleCmd.MarkPersistentFlagRequired("store-id")
 	if err != nil { //nolint:wsl
