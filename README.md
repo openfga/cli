@@ -570,6 +570,20 @@ tests: # required
           can_view: true
           can_write: true
           can_share: false
+      # checks can group multiple users that share the same expected results
+      - object: folder:2
+        users:
+          - user:beth
+          - user:carl
+        assertions:
+          can_view: false
+      # checks can group multiple objects that share the same expected results
+      - objects:
+          - folder:1
+          - folder:2
+        user: user:beth
+        assertions:
+          can_write: false
     list_objects: # a set of list objects to run
       - user: user:anne
         type: folder

@@ -37,6 +37,12 @@ tests:                                # Test definitions
         assertions:
           viewer: true
           editor: false
+      - users:                        # Group users with same expected results
+          - user:bob
+          - user:charlie
+        object: document:2
+        assertions:
+          viewer: true
     list_objects:                     # List objects tests
       - user: user:anne
         type: document
@@ -151,6 +157,34 @@ check:
       editor: false
       owner: false
 ```
+
+##### Condensed Users/Objects Feature
+You can group multiple users or objects that share the same expected results:
+
+```yaml
+check:
+  # Group multiple users with the same expected results
+  - object: document:1
+    users:
+      - user:alice
+      - user:bob
+      - user:charlie
+    assertions:
+      viewer: true
+      editor: false
+  
+  # Group multiple objects with the same expected results  
+  - user: user:alice
+    objects:
+      - document:1
+      - document:2
+      - document:3
+    assertions:
+      viewer: true
+      editor: false
+```
+
+**Note:** You can specify either `user` or `users` (but not both), and either `object` or `objects` (but not both). The CLI will run checks for all combinations of users and objects when arrays are used.
 
 #### List Objects Tests
 Validate which objects a user can access:
@@ -364,6 +398,29 @@ tests:
             users:
               - user:john
               - user:jane
+
+  - name: "condensed-checks"
+    description: "Demonstrate condensed users/objects feature"
+    check:
+      # Test multiple users against the same object
+      - object: document:shared
+        users:
+          - user:alice
+          - user:bob
+          - user:charlie
+        assertions:
+          viewer: true
+          editor: false
+      
+      # Test single user against multiple objects
+      - user: user:alice
+        objects:
+          - document:1
+          - document:2
+          - document:3
+        assertions:
+          viewer: true
+          editor: false
 ```
 
 ## Best Practices
