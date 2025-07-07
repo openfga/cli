@@ -24,7 +24,7 @@ type TupleLogger struct {
 
 // NewTupleLogger creates a logger for the given file path.
 func NewTupleLogger(path string) (*TupleLogger, error) {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file %s: %w", path, err)
 	}
