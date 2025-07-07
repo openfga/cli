@@ -50,25 +50,29 @@ func parseTuplesFromJSONL(data []byte, tuples *[]client.ClientTupleKey) error {
 
 	for scanner.Scan() {
 		lineNum++
+
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
 			continue
 		}
 
 		var tuple client.ClientTupleKey
-		if err := json.Unmarshal([]byte(line), &tuple); err != nil {
+
+		err := json.Unmarshal([]byte(line), &tuple)
+		if err != nil {
 			return fmt.Errorf("failed to read tuple from jsonl file on line %d: %w", lineNum, err)
 		}
 
 		*tuples = append(*tuples, tuple)
 	}
 
-	if err := scanner.Err(); err != nil {
+	err := scanner.Err()
+	if err != nil {
 		return fmt.Errorf("failed to read jsonl file: %w", err)
 	}
 
 	if len(*tuples) == 0 {
-		return clierrors.EmptyTuplesFileError("jsonl")
+		return clierrors.EmptyTuplesFileError("jsonl") //nolint:wrapcheck
 	}
 
 	return nil
