@@ -13,6 +13,8 @@ linters:
     - mnd
     - testpackage
     - usetesting
+    - noinlineerr
+    - wsl
   settings:
     depguard:
       rules:
@@ -63,6 +65,10 @@ linters:
         rules:
           json: snake
         use-field-name: true
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
   exclusions:
     generated: lax
     presets:

@@ -228,7 +228,7 @@ export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
 fga store **import**
 
 ###### Parameters
-* `--file`: File containing the store.
+* `--file`: File containing the store. See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--store-id`: Specifies the store id to import into
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
@@ -541,7 +541,7 @@ fga model **test**
 
 ###### Parameters
 
-* `--tests`: Name of the tests file. Must be in yaml format (see below)
+* `--tests`: Name of the tests file. Must be in yaml format. See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--verbose`: Outputs the results in JSON
 
 If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
@@ -580,35 +580,35 @@ tests: # required
   - name: test-1
     description: testing that the model works # optional
     # tuple_file: ./tuples.json # tuples that would apply per test
-      tuples:
-        - user: user:anne
-          relation: owner
-          object: folder:1
-      check: # a set of checks to run
-        - user: user:anne
-          object: folder:1
-          assertions:
-            # a set of expected results for each relation
-            can_view: true
-            can_write: true
-            can_share: false
-        # checks can group multiple users that share the same expected results
-        - object: folder:2
-          users:
-            - user:beth
-            - user:carl
-          assertions:
-            can_view: false
-        # checks can group multiple objects that share the same expected results
-        - objects:
-            - folder:1
-            - folder:2
-          user: user:beth
-          assertions:
-            can_write: false
-        # either "user" or "users" may be provided, but not both
-        # either "object" or "objects" may be provided, but not both
-      list_objects: # a set of list objects to run
+    tuples:
+      - user: user:anne
+        relation: owner
+        object: folder:1
+    check: # a set of checks to run
+      - user: user:anne
+        object: folder:1
+        assertions:
+          # a set of expected results for each relation
+          can_view: true
+          can_write: true
+          can_share: false
+      # checks can group multiple users that share the same expected results
+      - object: folder:2
+        users:
+          - user:beth
+          - user:carl
+        assertions:
+          can_view: false
+      # checks can group multiple objects that share the same expected results
+      - objects:
+          - folder:1
+          - folder:2
+        user: user:beth
+        assertions:
+          can_write: false
+      # either "user" or "users" may be provided, but not both
+      # either "object" or "objects" may be provided, but not both
+    list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
         assertions:
@@ -644,7 +644,7 @@ tests: # required
 ###### Example
 `fga model test --tests tests.fga.yaml`
 
-For more examples of `.fga.yaml` files, check the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/)/
 
 ###### Response
 
