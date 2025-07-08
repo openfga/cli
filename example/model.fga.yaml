@@ -7,6 +7,9 @@ model_file: ./model.fga # a global model that would apply to all tests
 #  type user
 #  ...
 tuple_file: ./model_tuples.yaml  # global tuples that would apply to all tests
+tuple_files: # global tuples to add multiple tuple files that would apply to all tests
+  - ./model_tuples_2.yaml
+  - ./model_tuples_3.yaml
 # tuples can also be used instead of tuple_file
 #tuples:
 #   - user: folder:5
