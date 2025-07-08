@@ -175,3 +175,52 @@ func TestSetFlagsRequired_MixedPersistentAndNonPersistent(t *testing.T) {
 	assert.Contains(t, err.Error(), "error setting flag as required - (flag: persistent, file: TestLocation):")
 	assert.NotContains(t, err.Error(), "error setting flag as required - (flag: regular, file: TestLocation):")
 }
+
+func TestSetFlagRequired_NilCommand(t *testing.T) {
+	t.Parallel()
+
+	err := SetFlagRequired(nil, "foo", "TestLocation", false)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid input: command cannot be nil")
+}
+
+func TestSetFlagRequired_EmptyFlag(t *testing.T) {
+	t.Parallel()
+
+	cmd := &cobra.Command{Use: "test"}
+	err := SetFlagRequired(cmd, "", "TestLocation", false)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid input: flag name cannot be empty")
+}
+
+func TestSetFlagRequired_WhitespaceFlag(t *testing.T) {
+	t.Parallel()
+
+	cmd := &cobra.Command{Use: "test"}
+	err := SetFlagRequired(cmd, "   ", "TestLocation", false)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid input: flag name cannot be empty")
+}
+
+func TestSetFlagsRequired_NilCommand(t *testing.T) {
+	t.Parallel()
+
+	err := SetFlagsRequired(nil, []string{"foo"}, "TestLocation", false)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid input: command cannot be nil")
+}
+
+func TestSetFlagsRequired_EmptyFlagInSlice(t *testing.T) {
+	t.Parallel()
+
+	cmd := &cobra.Command{Use: "test"}
+	flags := []string{"valid", "", "also-valid"}
+	err := SetFlagsRequired(cmd, flags, "TestLocation", false)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid input: flag name cannot be empty")
+}
