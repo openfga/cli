@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -76,8 +77,8 @@ var testCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
-
 			test, err := storetest.RunTests(
+				cmd.Context(),
 				fgaClient,
 				storeData,
 				format,
@@ -89,7 +90,7 @@ var testCmd = &cobra.Command{
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 
 			if !suppressSummary && multipleFiles {
-				summaryText := test.FriendlyBody()
+				summaryText := strings.Replace(test.FriendlyDisplay(), "# Test Summary #\n", "", 1)
 				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
 			}
