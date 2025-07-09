@@ -57,6 +57,10 @@ var modelTestCmd = &cobra.Command{
 			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
 		}
 		if len(fileNames) == 0 {
+			// Check if the literal path exists
+			if _, err := os.Stat(testsFileName); err != nil {
+				return fmt.Errorf("test file %s does not exist: %w", testsFileName, err)
+			}
 			fileNames = []string{testsFileName}
 		}
 		multipleFiles := len(fileNames) > 1
