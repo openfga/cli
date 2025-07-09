@@ -350,6 +350,16 @@ func (test TestResults) FriendlyDisplay() string { //nolint:cyclop
 	return summary
 }
 
+// FriendlyBody returns the test output without the summary header
+func (test TestResults) FriendlyBody() string {
+	fullOutput := test.FriendlyDisplay()
+	headerIndex := strings.Index(fullOutput, "# Test Summary #")
+	if headerIndex == -1 {
+		return fullOutput
+	}
+	return strings.TrimSpace(fullOutput[:headerIndex])
+}
+
 func buildTestSummary(failedTestCount int, summary string, totalTestCount int,
 	totalCheckCount int, failedCheckCount int,
 	totalListObjectsCount int, failedListObjectsCount int,
