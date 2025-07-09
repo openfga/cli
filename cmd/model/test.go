@@ -29,8 +29,8 @@ import (
 	"github.com/openfga/cli/internal/storetest"
 )
 
-// testCmd represents the test command.
-var testCmd = &cobra.Command{
+// modelTestCmd represents the test command.
+var modelTestCmd = &cobra.Command{
 	Use:     "test",
 	Short:   "Test an Authorization Model",
 	Long:    "Run a set of tests against a particular Authorization Model.",
@@ -122,13 +122,13 @@ var testCmd = &cobra.Command{
 }
 
 func init() {
-	testCmd.Flags().String("store-id", "", "Store ID")
-	testCmd.Flags().String("model-id", "", "Model ID")
-	testCmd.Flags().String("tests", "", "Path or glob of YAML test files") //nolint:lll
-	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
-	testCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
+	modelTestCmd.Flags().String("store-id", "", "Store ID")
+	modelTestCmd.Flags().String("model-id", "", "Model ID")
+	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files") //nolint:lll
+	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
+	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 
-	if err := testCmd.MarkFlagRequired("tests"); err != nil {
+	if err := modelTestCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
 		os.Exit(1)
 	}
