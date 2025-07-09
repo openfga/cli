@@ -350,6 +350,15 @@ func (test TestResults) FriendlyDisplay() string { //nolint:cyclop
 	return summary
 }
 
+func (test TestResults) FriendlyBody() string {
+	fullDisplay := test.FriendlyDisplay()
+	// Remove the "# Test Summary #\n" header if present
+	if strings.HasPrefix(fullDisplay, "# Test Summary #\n") {
+		return strings.TrimPrefix(fullDisplay, "# Test Summary #\n")
+	}
+	return fullDisplay
+}
+
 func buildTestSummary(failedTestCount int, summary string, totalTestCount int,
 	totalCheckCount int, failedCheckCount int,
 	totalListObjectsCount int, failedListObjectsCount int,
