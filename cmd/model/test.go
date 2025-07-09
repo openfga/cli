@@ -101,13 +101,6 @@ var modelTestCmd = &cobra.Command{
 
 		passing := aggregateResults.IsPassing()
 
-		if verbose {
-			err = output.Display(aggregateResults.Results)
-			if err != nil {
-				return fmt.Errorf("error displaying test results due to %w", err)
-			}
-		}
-
 		if !suppressSummary {
 			if multipleFiles {
 				for _, summary := range summaries {
@@ -115,6 +108,13 @@ var modelTestCmd = &cobra.Command{
 				}
 			}
 			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
+		}
+
+		if verbose {
+			err = output.Display(aggregateResults.Results)
+			if err != nil {
+				return fmt.Errorf("error displaying test results due to %w", err)
+			}
 		}
 
 		if !passing {
