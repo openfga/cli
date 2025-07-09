@@ -37,30 +37,11 @@ var testCmd = &cobra.Command{
 	Long:    "Run a set of tests against a particular Authorization Model.",
 	Example: `fga model test --tests model.fga.yaml`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
-		clientConfig := cmdutils.GetClientConfig(cmd)
-
-		fgaClient, err := clientConfig.GetFgaClient()
-		if err != nil {
-			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
-		}
-
+		// Read and validate all flags
 		testsFileName, err := cmd.Flags().GetString("tests")
 		if err != nil {
 			return fmt.Errorf("failed to get tests flag: %w", err)
 		}
-
-		fileNames, err := filepath.Glob(testsFileName)
-		if err != nil {
-			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
-		}
-		if len(fileNames) == 0 {
-			fileNames = []string{testsFileName}
-		}
-
-		multipleFiles := len(fileNames) > 1
-
-		aggregateResults := storetest.TestResults{}
-		summaries := []string{}
 
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
@@ -71,6 +52,25 @@ var testCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to get suppress-summary flag: %w", err)
 		}
+
+		fileNames, err := filepath.Glob(testsFileName)
+		if err != nil {
+			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
+		}
+		if len(fileNames) == 0 {
+			fileNames = []string{testsFileName}
+		}
+		multipleFiles := len(fileNames) > 1
+
+		clientConfig := cmdutils.GetClientConfig(cmd)
+
+		fgaClient, err := clientConfig.GetFgaClient()
+		if err != nil {
+			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		}
+
+		aggregateResults := storetest.TestResults{}
+		summaries := []string{}
 
 		for _, file := range fileNames {
 			format, storeData, err := storetest.ReadFromFile(file, path.Dir(file))
@@ -125,7 +125,7 @@ var testCmd = &cobra.Command{
 func init() {
 	testCmd.Flags().String("store-id", "", "Store ID")
 	testCmd.Flags().String("model-id", "", "Model ID")
-	testCmd.Flags().String("tests", "", "Tests file Name. The file should have the OpenFGA tests in a valid YAML or JSON format") //nolint:lll
+	testCmd.Flags().String("tests", "", "Path or glob of YAML test files") //nolint:lll
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	testCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 
