@@ -143,7 +143,7 @@ func init() {
 		listUsersCmd,
 		[]string{"object", "relation", "user-filter"},
 		"cmd/query/list-users", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

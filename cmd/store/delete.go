@@ -74,7 +74,7 @@ func init() {
 	deleteCmd.Flags().Bool("force", false, "Force delete without confirmation")
 
 	if err := flags.SetFlagRequired(deleteCmd, "store-id", "cmd/store/delete", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

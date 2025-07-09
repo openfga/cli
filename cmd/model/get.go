@@ -79,7 +79,7 @@ func init() {
 	getCmd.Flags().Var(&getOutputFormat, "format", `Authorization model output format. Can be "fga" or "json"`)
 
 	if err := flags.SetFlagRequired(getCmd, "store-id", "cmd/models/get", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

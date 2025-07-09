@@ -341,7 +341,7 @@ func init() {
 	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
 
 	if err := flags.SetFlagRequired(importCmd, "file", "cmd/store/import", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

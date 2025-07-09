@@ -114,7 +114,7 @@ func init() {
 	listCmd.Flags().StringArray("field", []string{"id", "created_at"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
 
 	if err := flags.SetFlagRequired(listCmd, "store-id", "cmd/models/list", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

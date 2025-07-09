@@ -101,7 +101,7 @@ func init() {
 	testCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 
 	if err := flags.SetFlagRequired(testCmd, "tests", "cmd/models/test", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

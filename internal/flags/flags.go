@@ -25,7 +25,7 @@ func buildFlagRequiredError(flag, location string, err error) error {
 		return nil
 	}
 
-	return fmt.Errorf("%w - (flag: %s, file: %s): %w", ErrFlagRequired, flag, location, err)
+	return fmt.Errorf("%w - (flag: %s, file: %s): %v", ErrFlagRequired, flag, location, err)
 }
 
 // SetFlagRequired marks a single flag as required for a cobra command.

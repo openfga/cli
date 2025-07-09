@@ -42,7 +42,7 @@ func init() {
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
 
 	if err := flags.SetFlagRequired(TupleCmd, "store-id", "cmd/tuple/tuple", true); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

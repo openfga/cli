@@ -108,7 +108,7 @@ func init() {
 	writeCmd.Flags().Var(&writeInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular"`) //nolint:lll
 
 	if err := flags.SetFlagRequired(writeCmd, "store-id", "cmd/model/write", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

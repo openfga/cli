@@ -51,7 +51,7 @@ func init() {
 	)
 
 	if err := flags.SetFlagRequired(QueryCmd, "store-id", "cmd/query/query", true); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

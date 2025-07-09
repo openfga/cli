@@ -67,7 +67,7 @@ func init() {
 	getCmd.Flags().String("store-id", "", "Store ID")
 
 	if err := flags.SetFlagRequired(getCmd, "store-id", "cmd/store/get", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

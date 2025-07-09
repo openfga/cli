@@ -195,7 +195,7 @@ func init() {
 	exportCmd.Flags().Uint("max-tuples", defaultMaxTupleCount, "max number of tuples to return in the output")
 
 	if err := flags.SetFlagRequired(exportCmd, "store-id", "cmd/store/export", false); err != nil {
-		fmt.Printf("%v\n", err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
