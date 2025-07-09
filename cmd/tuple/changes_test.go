@@ -20,6 +20,7 @@ func TestReadChangesError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
@@ -54,6 +55,7 @@ func TestReadChangesEmpty(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
@@ -103,6 +105,7 @@ func TestReadChangesSinglePage(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)
@@ -279,6 +282,7 @@ func TestReadChangesMultiPagesLimit(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadChangesRequestInterface(mockCtrl)

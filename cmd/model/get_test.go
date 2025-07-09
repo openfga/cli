@@ -22,6 +22,7 @@ func TestGetModelNoAuthModelID(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)
@@ -56,6 +57,7 @@ func TestGetModelAuthModelID(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadAuthorizationModelRequestInterface(mockCtrl)
@@ -94,6 +96,7 @@ func TestGetModelNoAuthModelIDError(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientReadLatestAuthorizationModelRequestInterface(mockCtrl)

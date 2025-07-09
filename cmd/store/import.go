@@ -121,6 +121,10 @@ func importStore(
 	maxTuplesPerWrite, maxParallelRequests int,
 	fileName string,
 ) (*CreateStoreAndModelResponse, error) {
+	if err := storeData.Validate(); err != nil {
+		return nil, err //nolint:wrapcheck
+	}
+
 	response, err := createOrUpdateStore(ctx, clientConfig, fgaClient, storeData, format, storeID, fileName)
 	if err != nil {
 		return nil, err
@@ -232,13 +236,20 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 	var assertions []client.ClientAssertion
 
 	for _, checkTest := range checkTests {
-		for relation, expectation := range checkTest.Assertions {
-			assertions = append(assertions, client.ClientAssertion{
-				User:        checkTest.User,
-				Relation:    relation,
-				Object:      checkTest.Object,
-				Expectation: expectation,
-			})
+		users := storetest.GetEffectiveUsers(checkTest)
+		objects := storetest.GetEffectiveObjects(checkTest)
+
+		for _, user := range users {
+			for _, object := range objects {
+				for relation, expectation := range checkTest.Assertions {
+					assertions = append(assertions, client.ClientAssertion{
+						User:        user,
+						Relation:    relation,
+						Object:      object,
+						Expectation: expectation,
+					})
+				}
+			}
 		}
 	}
 

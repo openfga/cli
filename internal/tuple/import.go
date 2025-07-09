@@ -26,6 +26,15 @@ const (
 
 	// DefaultMinRPS Default minimum requests per second.
 	DefaultMinRPS = 1
+
+	// DefaultMaxTuplesPerWriteWithRPS is the tuples per write when --max-rps is set but --max-tuples-per-write is omitted.
+	DefaultMaxTuplesPerWriteWithRPS = 40
+
+	// RPSToParallelRequestsDivisor defines how max-rps translates to max parallel requests.
+	RPSToParallelRequestsDivisor = 5
+
+	// RPSToRampupPeriodMultiplier defines how max-rps translates to ramp-up period.
+	RPSToRampupPeriodMultiplier = 2
 )
 
 type failedWriteResponse struct {
@@ -210,10 +219,12 @@ func importTuplesWithRampUp(ctx context.Context, fgaClient client.SdkClient,
 			successfulDeletes, failedDeletes := processDeletes(response.Deletes)
 
 			mutex.Lock()
+
 			result.Successful = append(result.Successful, successfulWrites...)
 			result.Successful = append(result.Successful, successfulDeletes...)
 			result.Failed = append(result.Failed, failedWrites...)
 			result.Failed = append(result.Failed, failedDeletes...)
+
 			mutex.Unlock()
 
 			return nil

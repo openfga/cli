@@ -7,6 +7,9 @@ model_file: ./model.fga # a global model that would apply to all tests
 #  type user
 #  ...
 tuple_file: ./model_tuples.yaml  # global tuples that would apply to all tests
+tuple_files: # global tuples to add multiple tuple files that would apply to all tests
+  - ./model_tuples_2.yaml
+  - ./model_tuples_3.yaml
 # tuples can also be used instead of tuple_file
 #tuples:
 #   - user: folder:5
@@ -47,6 +50,33 @@ tests:
           can_view: true
           can_write: true
           can_share: false
+      - users:
+          - user:anne
+          - user:beth
+        object: folder:product-2021
+        assertions:
+          # These assertions are run for each user
+          can_view: true
+          can_share: false
+      - user: user:anne
+        objects:
+          - folder:product-2021
+          - folder:product-2021Q1
+        assertions:
+          # These assertions are run for each object
+          can_view: true
+          can_write: true
+      - users:
+          - user:peter
+          - user:john
+        objects:
+          - folder:product-2021
+          - folder:product-2021Q1
+        assertions:
+          # These assertions are run for each user and each object
+          can_view: false
+          can_write: false
+
     list_objects: # Each list objects test is made of: a user, an object type and the expected result for one or more relations
       - user: user:anne
         type: folder
@@ -69,6 +99,7 @@ tests:
             - folder:product-2021Q1
           can_write: []
           can_share: []
+
     list_users: # Each list user test is made of: an object, a user filter and the expected result for one or more relations
       - object: folder:product-2021
         user_filter:

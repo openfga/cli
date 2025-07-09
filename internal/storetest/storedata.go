@@ -22,18 +22,33 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/openfga/cli/internal/clierrors"
+	"github.com/openfga/cli/internal/tuplefile"
+
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/tuplefile"
+)
+
+// Static error variables for validation.
+var (
+	ErrUserAndUsersConflict     = errors.New("cannot contain both 'user' and 'users'")
+	ErrUserRequired             = errors.New("must specify 'user' or 'users'")
+	ErrObjectAndObjectsConflict = errors.New("cannot contain both 'object' and 'objects'")
+	ErrObjectRequired           = errors.New("must specify 'object' or 'objects'")
+
+	errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
+	errFailedProcessingTupleFiles = errors.New("failed to process one or more tuple files")
 )
 
 type ModelTestCheck struct {
-	User       string                  `json:"user"       yaml:"user"`
-	Object     string                  `json:"object"     yaml:"object"`
-	Context    *map[string]interface{} `json:"context"    yaml:"context,omitempty"`
-	Assertions map[string]bool         `json:"assertions" yaml:"assertions"`
+	User       string                  `json:"user,omitempty"    yaml:"user,omitempty"`
+	Users      []string                `json:"users,omitempty"   yaml:"users,omitempty"`
+	Object     string                  `json:"object,omitempty"  yaml:"object,omitempty"`
+	Objects    []string                `json:"objects,omitempty" yaml:"objects,omitempty"`
+	Context    *map[string]interface{} `json:"context"           yaml:"context,omitempty"`
+	Assertions map[string]bool         `json:"assertions"        yaml:"assertions"`
 }
 
 type ModelTestListObjects struct {
@@ -65,12 +80,13 @@ type ModelTest struct {
 }
 
 type StoreData struct {
-	Name      string                            `json:"name"       yaml:"name"`
-	Model     string                            `json:"model"      yaml:"model"`
-	ModelFile string                            `json:"model_file" yaml:"model_file,omitempty"` //nolint:tagliatelle
-	Tuples    []client.ClientContextualTupleKey `json:"tuples"     yaml:"tuples"`
-	TupleFile string                            `json:"tuple_file" yaml:"tuple_file,omitempty"` //nolint:tagliatelle
-	Tests     []ModelTest                       `json:"tests"      yaml:"tests"`
+	Name       string                            `json:"name"        yaml:"name"`
+	Model      string                            `json:"model"       yaml:"model"`
+	ModelFile  string                            `json:"model_file"  yaml:"model_file,omitempty"` //nolint:tagliatelle
+	Tuples     []client.ClientContextualTupleKey `json:"tuples"      yaml:"tuples"`
+	TupleFile  string                            `json:"tuple_file"  yaml:"tuple_file,omitempty"`  //nolint:tagliatelle
+	TupleFiles []string                          `json:"tuple_files" yaml:"tuple_files,omitempty"` //nolint:tagliatelle
+	Tests      []ModelTest                       `json:"tests"       yaml:"tests"`
 }
 
 func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.ModelFormat, error) {
@@ -102,38 +118,153 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 }
 
 func (storeData *StoreData) LoadTuples(basePath string) error {
-	var errs error
+	var (
+		errs      error
+		allTuples []client.ClientContextualTupleKey
+	)
 
-	if storeData.TupleFile != "" {
-		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, storeData.TupleFile))
-		if err != nil { //nolint:gocritic
-			errs = fmt.Errorf("failed to process global tuple %s file due to %w", storeData.TupleFile, err)
-		} else if storeData.Tuples == nil {
-			storeData.Tuples = tuples
-		} else {
-			storeData.Tuples = append(storeData.Tuples, tuples...)
-		}
+	addTuples := func(tuples []client.ClientContextualTupleKey) {
+		allTuples = append(allTuples, tuples...)
 	}
 
-	for index, test := range storeData.Tests {
-		if test.TupleFile == "" {
-			continue
-		}
+	if storeData.Tuples != nil {
+		addTuples(storeData.Tuples)
+	}
 
-		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, test.TupleFile))
-		if err != nil {
-			errs = errors.Join(
-				errs,
-				fmt.Errorf("failed to process tuple file %s for test %s due to %w", test.TupleFile, test.Name, err),
-			)
-		} else {
-			storeData.Tests[index].Tuples = tuples
+	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0 {
+		errs = errors.Join(
+			errs,
+			errMissingTuple,
+		)
+	}
+
+	errs = errors.Join(
+		errs,
+		storeData.loadAndAddTuplesFromFile(basePath, storeData.TupleFile, addTuples),
+	)
+
+	errs = errors.Join(
+		errs,
+		storeData.loadAndAddTuplesFromFiles(basePath, storeData.TupleFiles, addTuples),
+	)
+
+	if len(allTuples) > 0 {
+		storeData.Tuples = allTuples
+	}
+
+	errs = errors.Join(
+		errs,
+		storeData.loadTestTuples(basePath),
+	)
+	if errs != nil {
+		return errors.Join(
+			errFailedProcessingTupleFiles,
+			errs,
+		)
+	}
+
+	return nil
+}
+
+//nolint:cyclop
+func (storeData *StoreData) Validate() error {
+	var errs error
+
+	for _, test := range storeData.Tests {
+		for index, check := range test.Check {
+			if check.User != "" && len(check.Users) > 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserAndUsersConflict)
+				errs = errors.Join(errs, err)
+			} else if check.User == "" && len(check.Users) == 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrUserRequired)
+				errs = errors.Join(errs, err)
+			}
+
+			if check.Object != "" && len(check.Objects) > 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectAndObjectsConflict)
+				errs = errors.Join(errs, err)
+			} else if check.Object == "" && len(check.Objects) == 0 {
+				err := fmt.Errorf("test %s check %d: %w", test.Name, index, ErrObjectRequired)
+				errs = errors.Join(errs, err)
+			}
 		}
 	}
 
 	if errs != nil {
-		return errors.Join(errors.New("failed to process one or more tuple files"), errs) //nolint:err113
+		return clierrors.ValidationError("StoreFormat", errs.Error()) //nolint:wrapcheck
 	}
 
 	return nil
+}
+
+func (storeData *StoreData) loadAndAddTuplesFromFile(
+	basePath string,
+	file string,
+	add func([]client.ClientContextualTupleKey),
+) error {
+	if file == "" {
+		return nil
+	}
+
+	tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, file))
+	if err != nil {
+		return fmt.Errorf("failed to process global tuple %s file due to %w", file, err)
+	}
+
+	add(tuples)
+
+	return nil
+}
+
+func (storeData *StoreData) loadAndAddTuplesFromFiles(
+	basePath string,
+	files []string,
+	add func([]client.ClientContextualTupleKey),
+) error {
+	var errs error
+
+	for _, file := range files {
+		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, file))
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf("failed to process tuple file %s due to %w", file, err),
+			)
+
+			continue
+		}
+
+		add(tuples)
+	}
+
+	return errs
+}
+
+func (storeData *StoreData) loadTestTuples(basePath string) error {
+	var errs error
+
+	for testIndex, testCase := range storeData.Tests {
+		if testCase.TupleFile == "" {
+			continue
+		}
+
+		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, testCase.TupleFile))
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf(
+					"failed to process tuple file %s for test %s due to %w",
+					testCase.TupleFile,
+					testCase.Name,
+					err,
+				),
+			)
+
+			continue
+		}
+
+		storeData.Tests[testIndex].Tuples = append(storeData.Tests[testIndex].Tuples, tuples...)
+	}
+
+	return errs
 }
