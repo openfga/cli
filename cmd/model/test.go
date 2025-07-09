@@ -46,7 +46,7 @@ var testCmd = &cobra.Command{
 
 		testsFileName, err := cmd.Flags().GetString("tests")
 		if err != nil {
-			return err //nolint:wrapcheck
+			return fmt.Errorf("failed to get tests flag: %w", err)
 		}
 
 		fileNames, err := filepath.Glob(testsFileName)
@@ -64,18 +64,18 @@ var testCmd = &cobra.Command{
 
 		verbose, err := cmd.Flags().GetBool("verbose")
 		if err != nil {
-			return err //nolint:wrapcheck
+			return fmt.Errorf("failed to get verbose flag: %w", err)
 		}
 
 		suppressSummary, err := cmd.Flags().GetBool("suppress-summary")
 		if err != nil {
-			return err //nolint:wrapcheck
+			return fmt.Errorf("failed to get suppress-summary flag: %w", err)
 		}
 
 		for _, file := range fileNames {
 			format, storeData, err := storetest.ReadFromFile(file, path.Dir(file))
 			if err != nil {
-				return err //nolint:wrapcheck
+				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
 
 			test, err := storetest.RunTests(
