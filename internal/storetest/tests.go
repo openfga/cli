@@ -1,6 +1,8 @@
 package storetest
 
 import (
+	"context"
+
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 
@@ -14,12 +16,16 @@ type ModelTestOptions struct {
 }
 
 func RunTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	fgaServer *server.Server,
 	test ModelTest,
 	globalTuples []client.ClientContextualTupleKey,
 	model *authorizationmodel.AuthzModel,
 ) (TestResult, error) {
+	if ctx.Err() != nil {
+		return TestResult{}, ctx.Err()
+	}
 	testTuples := append(append([]client.ClientContextualTupleKey{}, globalTuples...), test.Tuples...)
 
 	if model == nil {
@@ -30,6 +36,7 @@ func RunTest(
 }
 
 func RunTests(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	storeData *StoreData,
 	format authorizationmodel.ModelFormat,
@@ -44,7 +51,12 @@ func RunTests(
 	defer stopServerFn()
 
 	for _, test := range storeData.Tests {
+		if ctx.Err() != nil {
+			return testResults, ctx.Err()
+		}
+
 		result, err := RunTest(
+			ctx,
 			fgaClient,
 			fgaServer,
 			test,
