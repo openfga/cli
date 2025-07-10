@@ -1,10 +1,23 @@
 # Changelog
 
-#### [Unreleased](https://github.com/openfga/cli/compare/v0.7.0...HEAD)
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.7.1...HEAD)
+
+
+
+#### [0.7.1](https://github.com/openfga/cli/compare/v0.7.0...v0.7.1) (2025-07-10)
+
+Added:
+- Added `jsonl` tuple import support (https://github.com/openfga/cli/pull/530)
+- Added support for multiple tuple files in the store file (https://github.com/openfga/cli/pull/506)
+  - Note: Support for this feature in the OpenFGA IDE plugins is not yet available
+- Added support for grouping user/object in store tests (https://github.com/openfga/cli/pull/513)
+  - Note: Support for this feature in the OpenFGA IDE plugins is not yet available
 
 Changed:
 - Adjusted defaults for `--max-tuples-per-write`, `--max-parallel-requests`, `--max-rps`, and `--rampup-period-in-sec` when `--max-rps` is specified (#517).
 
+Documentation:
+- Improved documentation for the store file format (https://github.com/openfga/cli/pull/518)
 
 #### [0.7.0](https://github.com/openfga/cli/compare/v0.6.6...v0.7.0) (2025-06-10)
 
