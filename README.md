@@ -708,7 +708,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--condition-context`: Condition context (optional)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
+* `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1, or 40 if `--max-rps` is set and this flag is omitted)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4, or `max-rps/5` if `--max-rps` is set and this flag is omitted)
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
@@ -755,6 +755,14 @@ If using a `yaml` file, the format should be:
 - user: folder:product-2021
   relation: parent
   object: folder:product-2021Q1
+```
+
+If using a `jsonl` file, the format should be:
+
+```jsonl
+{"user": "user:anne", "relation": "owner", "object": "folder:product"}
+{"user": "folder:product", "relation": "parent", "object": "folder:product-2021", "condition": {"name": "inOfficeIP", "context": {"ip_addr": "10.0.0.1"}}}
+{"user": "user:beth", "relation": "viewer", "object": "folder:product-2021"}
 ```
 
 If using a `json` file, the format should be:
@@ -845,7 +853,7 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 * `<object>`: Object
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `yaml` and `json` files are supported
+* `--file`: Specifies the file name, `yaml`, `json`, and `jsonl` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 

@@ -38,7 +38,6 @@ var (
 	ErrObjectAndObjectsConflict = errors.New("cannot contain both 'object' and 'objects'")
 	ErrObjectRequired           = errors.New("must specify 'object' or 'objects'")
 
-	errMissingTuple               = errors.New("either tuple_file or tuple_files or tuples must be provided")
 	errFailedProcessingTupleFiles = errors.New("failed to process one or more tuple files")
 )
 
@@ -131,22 +130,19 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 		addTuples(storeData.Tuples)
 	}
 
-	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0 {
+	if storeData.TupleFile != "" {
 		errs = errors.Join(
 			errs,
-			errMissingTuple,
+			storeData.loadAndAddTuplesFromFile(basePath, storeData.TupleFile, addTuples),
 		)
 	}
 
-	errs = errors.Join(
-		errs,
-		storeData.loadAndAddTuplesFromFile(basePath, storeData.TupleFile, addTuples),
-	)
-
-	errs = errors.Join(
-		errs,
-		storeData.loadAndAddTuplesFromFiles(basePath, storeData.TupleFiles, addTuples),
-	)
+	if len(storeData.TupleFiles) > 0 {
+		errs = errors.Join(
+			errs,
+			storeData.loadAndAddTuplesFromFiles(basePath, storeData.TupleFiles, addTuples),
+		)
+	}
 
 	if len(allTuples) > 0 {
 		storeData.Tuples = allTuples
