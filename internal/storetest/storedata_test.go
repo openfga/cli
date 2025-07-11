@@ -45,9 +45,9 @@ func TestLoadTuples(t *testing.T) {
 		expectTuples int
 	}{
 		{
-			name:      "no tuple file or tuple files",
-			storeData: StoreData{},
-			expectErr: true,
+			name:         "no tuple file or tuple files",
+			storeData:    StoreData{},
+			expectTuples: 0,
 		},
 		{
 			name: "single tuple_file",
