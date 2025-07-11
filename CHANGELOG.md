@@ -2,6 +2,9 @@
 
 #### [Unreleased](https://github.com/openfga/cli/compare/v0.7.2...HEAD)
 
+Added:
+- Support running `fga model test` with multiple files using glob patterns (#423)
+
 #### [0.7.2](https://github.com/openfga/cli/compare/v0.7.1...v0.7.2) (2025-07-11)
 
 Fixed:
@@ -18,9 +21,6 @@ Added:
 
 Changed:
 - Adjusted defaults for `--max-tuples-per-write`, `--max-parallel-requests`, `--max-rps`, and `--rampup-period-in-sec` when `--max-rps` is specified (#517).
-
-Documentation:
-- Improved documentation for the store file format (https://github.com/openfga/cli/pull/518)
 
 #### [0.7.0](https://github.com/openfga/cli/compare/v0.6.6...v0.7.0) (2025-06-10)
 

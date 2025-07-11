@@ -1,6 +1,8 @@
 package storetest
 
 import (
+	"context"
+
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 
@@ -14,6 +16,7 @@ type ModelTestOptions struct {
 }
 
 func RunTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	fgaServer *server.Server,
 	test ModelTest,
@@ -30,6 +33,7 @@ func RunTest(
 }
 
 func RunTests(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	storeData *StoreData,
 	format authorizationmodel.ModelFormat,
@@ -49,6 +53,7 @@ func RunTests(
 
 	for _, test := range storeData.Tests {
 		result, err := RunTest(
+			ctx,
 			fgaClient,
 			fgaServer,
 			test,
