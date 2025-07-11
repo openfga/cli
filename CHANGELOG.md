@@ -1,8 +1,11 @@
 # Changelog
 
-#### [Unreleased](https://github.com/openfga/cli/compare/v0.7.1...HEAD)
+#### [Unreleased](https://github.com/openfga/cli/compare/v0.7.2...HEAD)
 
+#### [0.7.2](https://github.com/openfga/cli/compare/v0.7.1...v0.7.2) (2025-07-11)
 
+Fixed:
+- Store tuple files being required ([#539](https://github.com/openfga/cli/issues/539))
 
 #### [0.7.1](https://github.com/openfga/cli/compare/v0.7.0...v0.7.1) (2025-07-10)
 
@@ -54,7 +57,6 @@ Added:
 
 Changed:
 - The deprecated `fga tuple import` has now been aliased to `fga tuple write` (#463)
-
 
 #### [0.6.4](https://github.com/openfga/cli/compare/v0.6.3...v0.6.4) (2025-02-07)
 
