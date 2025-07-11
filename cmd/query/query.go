@@ -22,6 +22,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/flags"
 )
 
 // QueryCmd represents the query command.
@@ -48,9 +50,8 @@ func init() {
 		"Consistency preference for the request. Valid options are HIGHER_CONSISTENCY and MINIMIZE_LATENCY.",
 	)
 
-	err := QueryCmd.MarkPersistentFlagRequired("store-id")
-	if err != nil {
-		fmt.Print(err)
+	if err := flags.SetFlagRequired(QueryCmd, "store-id", "cmd/query/query", true); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

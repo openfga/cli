@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 )
@@ -99,8 +100,8 @@ func init() {
 	testCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	testCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 
-	if err := testCmd.MarkFlagRequired("tests"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
+	if err := flags.SetFlagRequired(testCmd, "tests", "cmd/models/test", false); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

@@ -25,6 +25,7 @@ import (
 
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/confirmation"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -72,9 +73,8 @@ func init() {
 	deleteCmd.Flags().String("store-id", "", "Store ID")
 	deleteCmd.Flags().Bool("force", false, "Force delete without confirmation")
 
-	err := deleteCmd.MarkFlagRequired("store-id")
-	if err != nil {
-		fmt.Print(err)
+	if err := flags.SetFlagRequired(deleteCmd, "store-id", "cmd/store/delete", false); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
