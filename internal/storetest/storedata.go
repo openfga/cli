@@ -131,7 +131,17 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 		addTuples(storeData.Tuples)
 	}
 
-	if storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0 {
+	missingTuples := storeData.TupleFile == "" && len(storeData.TupleFiles) == 0 && len(allTuples) == 0
+	if missingTuples {
+		for _, test := range storeData.Tests {
+			if test.TupleFile != "" || len(test.Tuples) > 0 {
+				missingTuples = false
+				break
+			}
+		}
+	}
+
+	if missingTuples {
 		errs = errors.Join(
 			errs,
 			errMissingTuple,

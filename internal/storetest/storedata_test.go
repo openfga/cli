@@ -39,29 +39,33 @@ func TestLoadTuples(t *testing.T) {
 ]`)
 
 	cases := []struct {
-		name         string
-		storeData    StoreData
-		expectErr    bool
-		expectTuples int
+		name             string
+		storeData        StoreData
+		expectErr        bool
+		expectTuples     int
+		expectTestTuples int
 	}{
 		{
-			name:      "no tuple file or tuple files",
-			storeData: StoreData{},
-			expectErr: true,
+			name:             "no tuple file or tuple files",
+			storeData:        StoreData{},
+			expectErr:        true,
+			expectTestTuples: 0,
 		},
 		{
 			name: "single tuple_file",
 			storeData: StoreData{
 				TupleFile: filepath.Base(tupleFile),
 			},
-			expectTuples: 2,
+			expectTuples:     2,
+			expectTestTuples: 0,
 		},
 		{
 			name: "multiple tuple_files no dedup",
 			storeData: StoreData{
 				TupleFiles: []string{filepath.Base(tupleFile), filepath.Base(tupleFile2)},
 			},
-			expectTuples: 4,
+			expectTuples:     4,
+			expectTestTuples: 0,
 		},
 		{
 			name: "combined tuple_file and tuple_files",
@@ -69,7 +73,8 @@ func TestLoadTuples(t *testing.T) {
 				TupleFile:  filepath.Base(tupleFile),
 				TupleFiles: []string{filepath.Base(tupleFile2)},
 			},
-			expectTuples: 4,
+			expectTuples:     4,
+			expectTestTuples: 0,
 		},
 		{
 			name: "test-level tuple file with error",
@@ -80,7 +85,19 @@ func TestLoadTuples(t *testing.T) {
 					TupleFile: "invalid.json",
 				}},
 			},
-			expectErr: true,
+			expectErr:        true,
+			expectTestTuples: 0,
+		},
+		{
+			name: "test-level tuple file only",
+			storeData: StoreData{
+				Tests: []ModelTest{{
+					Name:      "test1",
+					TupleFile: filepath.Base(tupleFile),
+				}},
+			},
+			expectTuples:     0,
+			expectTestTuples: 2,
 		},
 	}
 
@@ -101,6 +118,12 @@ func TestLoadTuples(t *testing.T) {
 
 				if got := len(testCase.storeData.Tuples); got != testCase.expectTuples {
 					t.Errorf("expected %d tuples, got %d", testCase.expectTuples, got)
+				}
+
+				if len(testCase.storeData.Tests) > 0 {
+					if got := len(testCase.storeData.Tests[0].Tuples); got != testCase.expectTestTuples {
+						t.Errorf("expected %d test tuples, got %d", testCase.expectTestTuples, got)
+					}
 				}
 			}
 		})
