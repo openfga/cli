@@ -1,6 +1,12 @@
 package authorizationmodel_test
 
 import (
+	"fmt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	openfga "github.com/openfga/go-sdk"
@@ -123,4 +129,124 @@ func TestDisplayAsJsonWithFields(t *testing.T) {
 	if jsonModel2.GetTypeDefinitions() != nil {
 		t.Errorf("Expected %v to equal nil", jsonModel2.GetTypeDefinitions())
 	}
+}
+
+func TestAuthzModel_WildcardSupport(t *testing.T) {
+	t.Parallel()
+
+	typeFragment := func(typeName string) string {
+		return fmt.Sprintf(`type %s
+  relations
+    define owner: [user]`, typeName)
+	}
+
+	type testCase struct {
+		name             string
+		setupFiles       func(t *testing.T, dir string)
+		modContent       string
+		expectError      bool
+		expectedErrMsg   string
+		expectedTypeDefs []string
+	}
+
+	tests := []testCase{
+		{
+			name: "Wildcard expansion loads all module files",
+			setupFiles: func(t *testing.T, dir string) {
+				subdir := filepath.Join(dir, "subdir")
+				require.NoError(t, os.MkdirAll(subdir, 0755))
+				writeModuleFragment(t, subdir, "foo", typeFragment("foo"))
+				writeModuleFragment(t, subdir, "bar", typeFragment("bar"))
+				writeModuleFragment(t, subdir, "baz", typeFragment("baz"))
+			},
+			modContent: `schema: "1.2"
+contents:
+  - "subdir/*.fga"
+`,
+			expectError:      false,
+			expectedTypeDefs: []string{"foo", "bar", "baz"},
+		},
+		{
+			name: "Wildcard pattern matches no files",
+			setupFiles: func(t *testing.T, dir string) {
+				// No files created
+			},
+			modContent: `schema: "1.2"
+contents:
+  - "subdir/*.fga"
+`,
+			expectError:    true,
+			expectedErrMsg: "no files matched",
+		},
+		{
+			name: "Wildcard combined with direct file reference",
+			setupFiles: func(t *testing.T, dir string) {
+				subdir := filepath.Join(dir, "subdir")
+				require.NoError(t, os.MkdirAll(subdir, 0755))
+				writeModuleFragment(t, subdir, "foo", typeFragment("foo"))
+				writeModuleFragment(t, dir, "core", typeFragment("core"))
+			},
+			modContent: `schema: "1.2"
+contents:
+  - "core.fga"
+  - "subdir/*.fga"
+`,
+			expectError:      false,
+			expectedTypeDefs: []string{"core", "foo"},
+		},
+		{
+			name: "No files referenced at all",
+			setupFiles: func(t *testing.T, dir string) {
+				// No files created
+			},
+			modContent: `schema: "1.2"
+contents: []
+`,
+			expectError:    false,
+			expectedErrMsg: "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+
+			tc.setupFiles(t, dir)
+
+			modPath := filepath.Join(dir, "fga.mod")
+			require.NoError(t, os.WriteFile(modPath, []byte(tc.modContent), 0644))
+
+			model := authorizationmodel.AuthzModel{}
+			err := model.ReadModelFromModFGA(modPath)
+
+			if tc.expectError {
+				require.Error(t, err)
+				if tc.expectedErrMsg != "" {
+					assert.Contains(t, err.Error(), tc.expectedErrMsg)
+				}
+				return
+			}
+
+			require.NoError(t, err)
+
+			types := model.GetTypeDefinitions()
+			got := map[string]bool{}
+			for _, td := range types {
+				got[td.Type] = true
+			}
+
+			for _, want := range tc.expectedTypeDefs {
+				assert.True(t, got[want], "expected type %q to be loaded", want)
+			}
+			// Also check that no unexpected types are loaded
+			assert.Equal(t, len(tc.expectedTypeDefs), len(got), "unexpected number of types loaded")
+		})
+	}
+}
+
+func writeModuleFragment(t *testing.T, dir, name, content string) {
+	t.Helper()
+	fullPath := filepath.Join(dir, name+".fga")
+	fragment := "model\n  schema 1.2\n\n" + strings.TrimSpace(content) + "\n"
+	require.NoError(t, os.WriteFile(fullPath, []byte(fragment), 0644))
 }

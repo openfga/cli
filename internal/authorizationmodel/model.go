@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -211,22 +212,36 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 	directory := path.Dir(modFile)
 
 	for _, fileName := range parsedModFile.Contents.Value {
-		filePath := path.Join(directory, fileName.Value)
-
-		fileContents, err := os.ReadFile(filePath)
+		pattern := path.Join(directory, fileName.Value)
+		matches, err := filepath.Glob(pattern)
 		if err != nil {
 			fileReadErrors = *multierror.Append(
 				&fileReadErrors,
-				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
+				fmt.Errorf("failed to expand glob pattern %s due to %w", fileName.Value, err),
 			)
-
 			continue
 		}
-
-		moduleFiles = append(moduleFiles, language.ModuleFile{
-			Name:     fileName.Value,
-			Contents: string(fileContents),
-		})
+		if len(matches) == 0 {
+			fileReadErrors = *multierror.Append(
+				&fileReadErrors,
+				fmt.Errorf("no files matched pattern %s", fileName.Value),
+			)
+			continue
+		}
+		for _, filePath := range matches {
+			fileContents, err := os.ReadFile(filePath)
+			if err != nil {
+				fileReadErrors = *multierror.Append(
+					&fileReadErrors,
+					fmt.Errorf("failed to read module file %s due to %w", filePath, err),
+				)
+				continue
+			}
+			moduleFiles = append(moduleFiles, language.ModuleFile{
+				Name:     filePath,
+				Contents: string(fileContents),
+			})
+		}
 	}
 
 	if len(fileReadErrors.Errors) != 0 {
