@@ -246,7 +246,14 @@ contents: []
 
 func writeModuleFragment(t *testing.T, dir, name, content string) {
 	t.Helper()
-	fullPath := filepath.Join(dir, name+".fga")
+	tempDir := dir
+	if dir == "" {
+		var err error
+		tempDir, err = os.MkdirTemp("", "fga_test")
+		require.NoError(t, err)
+		t.Cleanup(func() { os.RemoveAll(tempDir) })
+	}
+	fullPath := filepath.Join(tempDir, name+".fga")
 	fragment := "model\n  schema 1.2\n\n" + strings.TrimSpace(content) + "\n"
 	require.NoError(t, os.WriteFile(fullPath, []byte(fragment), 0644))
 }
