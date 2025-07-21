@@ -1,0 +1,93 @@
+header:
+  schema-version: 2.0.0
+  last-updated: '2025-07-21'
+  last-reviewed: '2025-07-21'
+  url: https://github.com/openfga/cli
+  project-si-source: https://raw.githubusercontent.com/openfga/openfga/main/SECURITY-INSIGHTS.yml
+  comment: |
+    OpenFGA CLI is a cross-platform command-line interface to interact with an OpenFGA server.
+    This file references the main OpenFGA project security insights.
+
+repository:
+  url: https://github.com/openfga/cli
+  status: active
+  bug-fixes-only: false
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  no-third-party-packages: false
+  core-team:
+    - name: Ewan Harris
+      affiliation: OpenFGA
+      email: ewan.harris@okta.com
+      social: https://github.com/ewanharris
+      primary: true
+    - name: Raghd Hamzeh
+      affiliation: OpenFGA
+      email: raghd.hamzeh@okta.com
+      social: https://github.com/rhamzeh
+      primary: true
+    - name: Sergiu Githea
+      affiliation: OpenFGA
+      email: sergiu.githea@okta.com
+      social: https://github.com/sergiught
+      primary: true
+    - name: Siddhant Khare
+      affiliation: Independent
+      email: siddhantkhare2694@gmail.com
+      social: https://github.com/Siddhant-K-code
+      primary: true
+    - name: Steve Hobbs
+      affiliation: OpenFGA
+      email: steve.hobbs@okta.com
+      social: https://github.com/stevehobbsdev
+      primary: true
+  documentation:
+    contributing-guide: https://github.com/openfga/.github/blob/main/CONTRIBUTING.md
+    review-policy: https://github.com/openfga/.github/blob/main/CONTRIBUTING.md
+    security-policy: https://github.com/openfga/openfga/security/policy
+    governance: https://github.com/openfga/.github/blob/main/CONTRIBUTING.md
+    dependency-management-policy: https://github.com/openfga/openfga/blob/main/docs/dependencies-policy.md
+  license:
+    url: https://raw.githubusercontent.com/openfga/openfga/main/LICENSE
+    expression: Apache-2.0
+  release:
+    changelog: https://github.com/openfga/cli/releases
+    automated-pipeline: true
+    distribution-points:
+      - uri: https://github.com/openfga/cli/releases
+        comment: GitHub Release Page
+    license:
+      url: https://raw.githubusercontent.com/openfga/openfga/main/LICENSE
+      expression: Apache-2.0
+  security:
+    assessments:
+      self:
+        comment: |
+          Security assessment information is inherited from the main OpenFGA project.
+    champions:
+      - name: OpenFGA Security Team
+        email: security@openfga.dev
+        primary: true
+    tools:
+      - name: Dependabot
+        type: SCA
+        version: latest
+        rulesets:
+          - built-in
+        integration:
+          adhoc: false
+          ci: true
+          release: true
+        comment: |
+          Dependabot is enabled for this repo to automatically update dependencies.
+      - name: Snyk
+        type: SCA
+        version: latest
+        rulesets:
+          - built-in
+        integration:
+          adhoc: false
+          ci: true
+          release: true
+        comment: |
+          Snyk is enabled for this repo to scan for vulnerabilities.
