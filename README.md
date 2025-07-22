@@ -9,6 +9,7 @@ A cross-platform CLI to interact with an OpenFGA server
 [![Join our community](https://img.shields.io/badge/slack-cncf_%23openfga-40abb8.svg?logo=slack)](https://openfga.dev/community)
 [![Twitter](https://img.shields.io/twitter/follow/openfga?color=%23179CF0&logo=twitter&style=flat-square "@openfga on Twitter")](https://twitter.com/openfga)
 
+
 ## Table of Contents
 - [About OpenFGA](#about)
 - [Resources](#resources)
