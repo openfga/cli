@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -138,18 +139,11 @@ func init() {
 	listUsersCmd.Flags().String("relation", "", "Relation to evaluate on")
 	listUsersCmd.Flags().String("user-filter", "", "Filter the responses can be in the formats <type> (to filter objects and typed public bound access) or <type>#<relation> (to filter usersets)") //nolint:lll
 
-	if err := listUsersCmd.MarkFlagRequired("object"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/query/list-users", err)
-		os.Exit(1)
-	}
-
-	if err := listUsersCmd.MarkFlagRequired("relation"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/query/list-users", err)
-		os.Exit(1)
-	}
-
-	if err := listUsersCmd.MarkFlagRequired("user-filter"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/query/list-users", err)
+	if err := flags.SetFlagsRequired(
+		listUsersCmd,
+		[]string{"object", "relation", "user-filter"},
+		"cmd/query/list-users", false); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

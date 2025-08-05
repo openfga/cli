@@ -27,6 +27,7 @@ import (
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 )
 
@@ -112,8 +113,8 @@ func init() {
 	listCmd.Flags().String("store-id", "", "Store ID")
 	listCmd.Flags().StringArray("field", []string{"id", "created_at"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
 
-	if err := listCmd.MarkFlagRequired("store-id"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/list", err)
+	if err := flags.SetFlagRequired(listCmd, "store-id", "cmd/models/list", false); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

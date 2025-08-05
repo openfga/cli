@@ -27,6 +27,7 @@ import (
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/flags"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/utils"
 )
@@ -106,8 +107,8 @@ func init() {
 	writeCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format")
 	writeCmd.Flags().Var(&writeInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular"`) //nolint:lll
 
-	if err := writeCmd.MarkFlagRequired("store-id"); err != nil {
-		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
+	if err := flags.SetFlagRequired(writeCmd, "store-id", "cmd/model/write", false); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
