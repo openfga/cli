@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -93,7 +94,20 @@ var modelTestCmd = &cobra.Command{
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 
 			if !suppressSummary && multipleFiles {
-				summaryText := test.FriendlyBody()
+				fullDisplay := test.FriendlyDisplay()
+				// Extract just the summary part (after "# Test Summary #")
+				headerIndex := strings.Index(fullDisplay, "# Test Summary #")
+				var summaryText string
+				if headerIndex != -1 {
+					// Get the summary part and remove the "# Test Summary #" header
+					summaryPart := fullDisplay[headerIndex:]
+					lines := strings.Split(summaryPart, "\n")
+					if len(lines) > 1 {
+						summaryText = strings.Join(lines[1:], "\n") // Skip the header line
+					}
+				} else {
+					summaryText = fullDisplay
+				}
 				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
 			}
@@ -128,7 +142,7 @@ var modelTestCmd = &cobra.Command{
 func init() {
 	modelTestCmd.Flags().String("store-id", "", "Store ID")
 	modelTestCmd.Flags().String("model-id", "", "Model ID")
-	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files") //nolint:lll
+	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files")
 	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 

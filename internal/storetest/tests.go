@@ -26,10 +26,10 @@ func RunTest(
 	testTuples := append(append([]client.ClientContextualTupleKey{}, globalTuples...), test.Tuples...)
 
 	if model == nil {
-		return RunRemoteTest(fgaClient, test, testTuples), nil
+		return RunRemoteTest(ctx, fgaClient, test, testTuples), nil
 	}
 
-	return RunLocalTest(fgaServer, test, testTuples, model)
+	return RunLocalTest(ctx, fgaServer, test, testTuples, model)
 }
 
 func RunTests(
