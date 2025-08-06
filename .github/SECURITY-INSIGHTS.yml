@@ -14,35 +14,35 @@ repository:
   accepts-automated-change-request: true
   no-third-party-packages: false
   core-team:
-  - name: Raghd Hamzeh
-    affiliation: Okta
-    email: raghd.hamzeh@okta.com
-    social: https://github.com/rhamzeh
-    primary: true
-  - name: Adrian Tam
-    affiliation: Okta
-    email: adrian.tam@okta.com
-    social: https://github.com/adriantam
-  - name: Andres Aguiar
-    affiliation: Okta
-    email: andres.aguiar@okta.com
-    social: https://github.com/aaguiarz
-  - name: Ewan Harris
-    affiliation: Okta
-    email: ewan.harris@okta.com
-    social: https://github.com/ewanharris
-  - name: Sergiu Githea
-    affiliation: Okta
-    email: sergiu.githea@okta.com
-    social: https://github.com/sergiught
-  - name: Siddhant Khare
-    affiliation: Independent
-    email: siddhantkhare2694@gmail.com
-    social: https://github.com/Siddhant-K-code
-  - name: Steve Hobbs
-    affiliation: Okta
-    email: steve.hobbs@okta.com
-    social: https://github.com/stevehobbsdev
+    - name: Raghd Hamzeh
+      affiliation: Okta
+      email: raghd.hamzeh@okta.com
+      social: https://github.com/rhamzeh
+      primary: true
+    - name: Adrian Tam
+      affiliation: Okta
+      email: adrian.tam@okta.com
+      social: https://github.com/adriantam
+    - name: Andres Aguiar
+      affiliation: Okta
+      email: andres.aguiar@okta.com
+      social: https://github.com/aaguiarz
+    - name: Ewan Harris
+      affiliation: Okta
+      email: ewan.harris@okta.com
+      social: https://github.com/ewanharris
+    - name: Sergiu Githea
+      affiliation: Okta
+      email: sergiu.githea@okta.com
+      social: https://github.com/sergiught
+    - name: Siddhant Khare
+      affiliation: Independent
+      email: siddhantkhare2694@gmail.com
+      social: https://github.com/Siddhant-K-code
+    - name: Steve Hobbs
+      affiliation: Okta
+      email: steve.hobbs@okta.com
+      social: https://github.com/stevehobbsdev
 
   license:
     url: https://raw.githubusercontent.com/openfga/cli/main/LICENSE
