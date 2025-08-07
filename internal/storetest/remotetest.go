@@ -7,11 +7,12 @@ import (
 )
 
 func RunSingleRemoteCheckTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	checkRequest client.ClientCheckRequest,
 	expectation bool,
 ) ModelTestCheckSingleResult {
-	res, err := fgaClient.Check(context.Background()).Body(checkRequest).Execute()
+	res, err := fgaClient.Check(ctx).Body(checkRequest).Execute()
 
 	result := ModelTestCheckSingleResult{
 		Request:  checkRequest,
@@ -27,6 +28,7 @@ func RunSingleRemoteCheckTest(
 }
 
 func RunRemoteCheckTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	checkTest ModelTestCheck,
 	tuples []client.ClientContextualTupleKey,
@@ -40,6 +42,7 @@ func RunRemoteCheckTest(
 		for _, object := range objects {
 			for relation, expectation := range checkTest.Assertions {
 				result := RunSingleRemoteCheckTest(
+					ctx,
 					fgaClient,
 					client.ClientCheckRequest{
 						User:             user,
@@ -59,11 +62,12 @@ func RunRemoteCheckTest(
 }
 
 func RunSingleRemoteListObjectsTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	listObjectsRequest client.ClientListObjectsRequest,
 	expectation []string,
 ) ModelTestListObjectsSingleResult {
-	response, err := fgaClient.ListObjects(context.Background()).Body(listObjectsRequest).Execute()
+	response, err := fgaClient.ListObjects(ctx).Body(listObjectsRequest).Execute()
 
 	result := ModelTestListObjectsSingleResult{
 		Request:  listObjectsRequest,
@@ -80,6 +84,7 @@ func RunSingleRemoteListObjectsTest(
 }
 
 func RunRemoteListObjectsTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	listObjectsTest ModelTestListObjects,
 	tuples []client.ClientContextualTupleKey,
@@ -87,7 +92,7 @@ func RunRemoteListObjectsTest(
 	results := []ModelTestListObjectsSingleResult{}
 
 	for relation, expectation := range listObjectsTest.Assertions {
-		result := RunSingleRemoteListObjectsTest(fgaClient,
+		result := RunSingleRemoteListObjectsTest(ctx, fgaClient,
 			client.ClientListObjectsRequest{
 				User:             listObjectsTest.User,
 				Type:             listObjectsTest.Type,
@@ -104,11 +109,12 @@ func RunRemoteListObjectsTest(
 }
 
 func RunSingleRemoteListUsersTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	listUsersRequest client.ClientListUsersRequest,
 	expectation ModelTestListUsersAssertion,
 ) ModelTestListUsersSingleResult {
-	response, err := fgaClient.ListUsers(context.Background()).Body(listUsersRequest).Execute()
+	response, err := fgaClient.ListUsers(ctx).Body(listUsersRequest).Execute()
 
 	result := ModelTestListUsersSingleResult{
 		Request:  listUsersRequest,
@@ -127,6 +133,7 @@ func RunSingleRemoteListUsersTest(
 }
 
 func RunRemoteListUsersTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	listUsersTest ModelTestListUsers,
 	tuples []client.ClientContextualTupleKey,
@@ -135,7 +142,7 @@ func RunRemoteListUsersTest(
 
 	object, _ := convertStoreObjectToObject(listUsersTest.Object)
 	for relation, expectation := range listUsersTest.Assertions {
-		result := RunSingleRemoteListUsersTest(fgaClient,
+		result := RunSingleRemoteListUsersTest(ctx, fgaClient,
 			client.ClientListUsersRequest{
 				Object:           object,
 				Relation:         relation,
@@ -153,6 +160,7 @@ func RunRemoteListUsersTest(
 }
 
 func RunRemoteTest(
+	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
 	test ModelTest,
 	testTuples []client.ClientContextualTupleKey,
@@ -160,21 +168,21 @@ func RunRemoteTest(
 	checkResults := []ModelTestCheckSingleResult{}
 
 	for index := range test.Check {
-		results := RunRemoteCheckTest(fgaClient, test.Check[index], testTuples)
+		results := RunRemoteCheckTest(ctx, fgaClient, test.Check[index], testTuples)
 		checkResults = append(checkResults, results...)
 	}
 
 	listObjectResults := []ModelTestListObjectsSingleResult{}
 
 	for index := range test.ListObjects {
-		results := RunRemoteListObjectsTest(fgaClient, test.ListObjects[index], testTuples)
+		results := RunRemoteListObjectsTest(ctx, fgaClient, test.ListObjects[index], testTuples)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
 	listUserResults := []ModelTestListUsersSingleResult{}
 
 	for index := range test.ListUsers {
-		results := RunRemoteListUsersTest(fgaClient, test.ListUsers[index], testTuples)
+		results := RunRemoteListUsersTest(ctx, fgaClient, test.ListUsers[index], testTuples)
 		listUserResults = append(listUserResults, results...)
 	}
 
