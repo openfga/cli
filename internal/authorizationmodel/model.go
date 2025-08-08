@@ -201,30 +201,30 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 		return fmt.Errorf("failed to read fga.mod file due to %w", err)
 	}
 
-	parsedModFile, err := language.TransformModFile(string(modFileContents))
+	parsedModFile, err := parseModFile(modFileContents)
 	if err != nil {
-		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
+		return fmt.Errorf("failed to parse fga.mod file due to %w", err)
 	}
 
 	moduleFiles := []language.ModuleFile{}
 	fileReadErrors := multierror.Error{}
 	directory := path.Dir(modFile)
 
-	for _, fileName := range parsedModFile.Contents.Value {
-		filePath := path.Join(directory, fileName.Value)
+	for _, fileName := range parsedModFile.Contents {
+		filePath := path.Clean(path.Join(directory, fileName))
 
 		fileContents, err := os.ReadFile(filePath)
 		if err != nil {
 			fileReadErrors = *multierror.Append(
 				&fileReadErrors,
-				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
+				fmt.Errorf("failed to read module file %s due to %w", fileName, err),
 			)
 
 			continue
 		}
 
 		moduleFiles = append(moduleFiles, language.ModuleFile{
-			Name:     fileName.Value,
+			Name:     fileName,
 			Contents: string(fileContents),
 		})
 	}
@@ -233,7 +233,7 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 		return &fileReadErrors
 	}
 
-	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
+	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema)
 	if err != nil {
 		return fmt.Errorf("failed to transform module to model due to %w", err)
 	}
