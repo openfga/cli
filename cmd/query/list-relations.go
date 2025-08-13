@@ -167,7 +167,7 @@ var listRelationsCmd = &cobra.Command{
 			consistency,
 		)
 		if err != nil {
-			return fmt.Errorf("failed to list relations due to %w", err)
+			return err
 		}
 
 		return output.Display(*response)

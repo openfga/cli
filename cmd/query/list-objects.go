@@ -94,7 +94,7 @@ var listObjectsCmd = &cobra.Command{
 			cmd.Context(), fgaClient, args[0], args[1], args[2], contextualTuples, queryContext, consistency,
 		)
 		if err != nil {
-			return fmt.Errorf("failed to list objects due to %w", err)
+			return err
 		}
 
 		return output.Display(*response)
