@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 Fixed:
-- Remove duplicate error messages in query commands (`list-objects`, `list-users`, `list-relations`) by fixing error handling pattern (#559)
+- Remove duplicate error messages in query commands (`list-objects`, `list-users`, `list-relations`) by fixing error handling pattern ([#559](https://github.com/openfga/cli/pull/559))
 
 ## [0.7.3] - 2025-08-12
 
