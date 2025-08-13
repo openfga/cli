@@ -394,7 +394,7 @@ fga store **delete**
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 | [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
-| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests \"tests/*.fga.yaml\"`                                                     |
+| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     | 
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
 
@@ -541,7 +541,7 @@ fga model **test**
 
 ###### Parameters
 
-* `--tests`: Name of the tests file, or a glob pattern to multiple files (for example `tests/*.fga.yaml`). Each file must be in yaml format.  See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
+* `--tests`: Name of the tests file, or a glob pattern to multiple files (for example `"tests/*.fga.yaml"`,  or `"**/*.fga.yaml"`). Each file must be in yaml format.  See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--verbose`: Outputs the results in JSON
 
 If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
