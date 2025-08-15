@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.4] - 2025-08-15
+
+Changed:
+- Update OpenFGA to v1.9.5
+
 Fixed:
 - Remove duplicate error messages in query commands (`list-objects`, `list-users`, `list-relations`) by fixing error handling pattern ([#559](https://github.com/openfga/cli/pull/559))
 
@@ -314,8 +319,9 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.3...HEAD
-[0.7.2]: https://github.com/openfga/cli/compare/v0.7.2...v0.7.3
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.4...HEAD
+[0.7.4]: https://github.com/openfga/cli/compare/v0.7.3...v0.7.4
+[0.7.3]: https://github.com/openfga/cli/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/openfga/cli/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/openfga/cli/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/openfga/cli/compare/v0.6.6...v0.7.0

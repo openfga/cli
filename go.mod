@@ -15,7 +15,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20250806222926-60b2b183a749
 	github.com/openfga/go-sdk v0.7.1
 	github.com/openfga/language/pkg/go v0.2.0-beta.2.0.20250812011519-a7cd7602df5d
-	github.com/openfga/openfga v1.9.4
+	github.com/openfga/openfga v1.9.5
 	github.com/rung/go-safecast v1.0.1
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/cobra v1.9.1
