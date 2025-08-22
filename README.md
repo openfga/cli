@@ -6,9 +6,10 @@ A cross-platform CLI to interact with an OpenFGA server
 [![Release](https://img.shields.io/github/v/release/openfga/cli?sort=semver&color=green)](https://github.com/openfga/cli/releases)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenfga%2Fcli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenfga%2Fcli?ref=badge_shield)
+[![X](https://img.shields.io/twitter/follow/openfga?color=%23179CF0&logo=x "@openfga on X")](https://x.com/openfga)
+orecards.dev/viewer/?uri=github.com/openfga/cli)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/openfga/cli/badge?label=OpenSSF%20Scorecard)](https://securityscorecards.dev/viewer/?uri=github.com/openfga/cli)
 [![Join our community](https://img.shields.io/badge/slack-cncf_%23openfga-40abb8.svg?logo=slack)](https://openfga.dev/community)
-[![X](https://img.shields.io/twitter/follow/openfga?color=%23179CF0&logo=twitter&style=flat-square "@openfga on X")](https://x.com/openfga)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/openfga/cli/badge)](https://securityscorecards.dev/viewer/?uri=github.com/openfga/cli)
 
 ## Table of Contents
 - [About OpenFGA](#about)
@@ -57,8 +58,6 @@ OpenFGA is designed to make it easy for application builders to model their perm
 
 - [OpenFGA Documentation](https://openfga.dev/docs)
 - [OpenFGA API Documentation](https://openfga.dev/api/service)
-- [Twitter](https://twitter.com/openfga)
-- [OpenFGA Community](https://openfga.dev/community)
 - [Zanzibar Academy](https://zanzibar.academy)
 - [Google's Zanzibar Paper (2019)](https://research.google/pubs/pub48190/)
 
@@ -251,7 +250,7 @@ fga store **export**
 * `--store-id`: Specifies the store to export
 * `--output-file`: The file to output the store to (optional, writes to the terminal if omitted)
 * `--model-id`: Specifies the model to export (optional, exports the latest model if omitted)
-* `--max-tuples`: Specifies the max number of tuples to include in the output (option, defaults to 100)
+* `--max-tuples`: Specifies the max number of tuples to include in the output (optional, defaults to 100)
 
 ###### Example
 `fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4`
@@ -645,7 +644,7 @@ tests: # required
 ###### Example
 `fga model test --tests "tests/*.fga.yaml"`
 
-For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/).
 
 ###### Response
 
