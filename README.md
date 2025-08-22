@@ -660,6 +660,8 @@ ListObjects 3/3 passing
 
 ##### Transform an Authorization Model
 
+The **transform** command lets you convert between different authorization model formats (`.fga`, `.json`, `.mod`).
+
 ###### Command
 fga model **transform** 
 
