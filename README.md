@@ -7,7 +7,6 @@ A cross-platform CLI to interact with an OpenFGA server
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenfga%2Fcli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenfga%2Fcli?ref=badge_shield)
 [![X](https://img.shields.io/twitter/follow/openfga?color=%23179CF0&logo=x "@openfga on X")](https://x.com/openfga)
-orecards.dev/viewer/?uri=github.com/openfga/cli)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/openfga/cli/badge?label=OpenSSF%20Scorecard)](https://securityscorecards.dev/viewer/?uri=github.com/openfga/cli)
 [![Join our community](https://img.shields.io/badge/slack-cncf_%23openfga-40abb8.svg?logo=slack)](https://openfga.dev/community)
 
