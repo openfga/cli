@@ -676,7 +676,8 @@ func TestReadWithInvalidPageSize(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for page size > 100, but got none")
 	}
-	if err != nil && err.Error() != "pageSize must be between 1 and 100, got 101" {
+
+	if err != nil && err.Error() != "pageSize must be between 1 and 100: got 101" {
 		t.Errorf("Expected specific error message, got: %v", err)
 	}
 
@@ -694,7 +695,8 @@ func TestReadWithInvalidPageSize(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for page size < 1, but got none")
 	}
-	if err != nil && err.Error() != "pageSize must be between 1 and 100, got 0" {
+
+	if err != nil && err.Error() != "pageSize must be between 1 and 100: got 0" {
 		t.Errorf("Expected specific error message, got: %v", err)
 	}
 }

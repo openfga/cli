@@ -2,6 +2,7 @@ package tuple
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	openfga "github.com/openfga/go-sdk"
@@ -9,6 +10,11 @@ import (
 )
 
 const DefaultReadPageSize int32 = 50
+
+var (
+	// ErrInvalidPageSize is returned when page size is outside valid range.
+	ErrInvalidPageSize = errors.New("pageSize must be between 1 and 100")
+)
 
 func Read(
 	ctx context.Context,
@@ -21,7 +27,7 @@ func Read(
 	*openfga.ReadResponse, error,
 ) {
 	if pageSize < 1 || pageSize > 100 {
-		return nil, fmt.Errorf("pageSize must be between 1 and 100, got %d", pageSize)
+		return nil, fmt.Errorf("%w: got %d", ErrInvalidPageSize, pageSize)
 	}
 
 	tuples := make([]openfga.Tuple, 0)

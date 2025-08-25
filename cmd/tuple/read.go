@@ -19,6 +19,7 @@ package tuple
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,6 +34,13 @@ import (
 
 // MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
 var MaxReadPagesLength = 20
+
+var (
+	// ErrPageSizeNegative is returned when page size is negative.
+	ErrPageSizeNegative = errors.New("page-size must be non-negative")
+	// ErrPageSizeExceedsMax is returned when page size exceeds maximum.
+	ErrPageSizeExceedsMax = errors.New("page-size cannot exceed 100")
+)
 
 type readResponse struct {
 	complete *openfga.ReadResponse
@@ -156,10 +164,10 @@ var readCmd = &cobra.Command{
 
 		// Validate page-size if explicitly provided
 		if pageSize < 0 {
-			return fmt.Errorf("page-size must be non-negative, got %d", pageSize)
+			return fmt.Errorf("%w: got %d", ErrPageSizeNegative, pageSize)
 		}
 		if pageSize > 100 {
-			return fmt.Errorf("page-size cannot exceed 100, got %d", pageSize)
+			return fmt.Errorf("%w: got %d", ErrPageSizeExceedsMax, pageSize)
 		}
 
 		// Apply the new page-size logic based on max-pages
