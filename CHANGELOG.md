@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+Added:
+- Add configurable `--page-size` parameter to `fga tuple read` command with intelligent defaults ([#571](https://github.com/openfga/cli/pull/571))
+  * When `--max-pages=0` (read all tuples), defaults to 100 for better efficiency
+  * When `--max-pages!=0` (limited pages), defaults to 50 to maintain backward compatibility
+  * Custom page size can be specified with `--page-size` flag
+
 ## [0.7.4] - 2025-08-15
 
 Changed:
