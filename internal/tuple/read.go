@@ -11,10 +11,8 @@ import (
 
 const DefaultReadPageSize int32 = 50
 
-var (
-	// ErrInvalidPageSize is returned when page size is outside valid range.
-	ErrInvalidPageSize = errors.New("pageSize must be between 1 and 100")
-)
+// ErrInvalidPageSize is returned when page size is outside valid range.
+var ErrInvalidPageSize = errors.New("pageSize must be between 1 and 100")
 
 func Read(
 	ctx context.Context,
