@@ -20,6 +20,10 @@ func Read(
 ) (
 	*openfga.ReadResponse, error,
 ) {
+	if pageSize < 1 || pageSize > 100 {
+		return nil, fmt.Errorf("pageSize must be between 1 and 100, got %d", pageSize)
+	}
+
 	tuples := make([]openfga.Tuple, 0)
 	continuationToken := ""
 	pageIndex := 0

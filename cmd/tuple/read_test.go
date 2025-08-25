@@ -653,3 +653,48 @@ func TestReadWithCustomPageSize(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestReadWithInvalidPageSize(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	// Test page size > 100
+	_, err := read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		0,
+		101, // invalid page size > 100
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err == nil {
+		t.Error("Expected error for page size > 100, but got none")
+	}
+	if err != nil && err.Error() != "pageSize must be between 1 and 100, got 101" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
+
+	// Test page size < 1
+	_, err = read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		0,
+		0, // invalid page size < 1
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err == nil {
+		t.Error("Expected error for page size < 1, but got none")
+	}
+	if err != nil && err.Error() != "pageSize must be between 1 and 100, got 0" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
+}

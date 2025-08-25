@@ -154,6 +154,14 @@ var readCmd = &cobra.Command{
 
 		pageSize, _ := cmd.Flags().GetInt32("page-size")
 
+		// Validate page-size if explicitly provided
+		if pageSize < 0 {
+			return fmt.Errorf("page-size must be non-negative, got %d", pageSize)
+		}
+		if pageSize > 100 {
+			return fmt.Errorf("page-size cannot exceed 100, got %d", pageSize)
+		}
+
 		// Apply the new page-size logic based on max-pages
 		if pageSize == 0 {
 			// No page-size specified, apply default logic
