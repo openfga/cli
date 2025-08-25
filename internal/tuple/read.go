@@ -15,6 +15,7 @@ func Read(
 	fgaClient client.SdkClient,
 	body *client.ClientReadRequest,
 	maxPages int,
+	pageSize int32,
 	consistency *openfga.ConsistencyPreference,
 ) (
 	*openfga.ReadResponse, error,
@@ -23,7 +24,7 @@ func Read(
 	continuationToken := ""
 	pageIndex := 0
 	options := client.ClientReadOptions{
-		PageSize: openfga.PtrInt32(DefaultReadPageSize),
+		PageSize: openfga.PtrInt32(pageSize),
 	}
 
 	if consistency != nil && *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {
