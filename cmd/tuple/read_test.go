@@ -491,7 +491,7 @@ func toPointer[T any](p T) *T {
 	return &p
 }
 
-// Test page size behavior based on max-pages parameter
+// Test page size behavior based on max-pages parameter.
 func TestReadWithPageSize100WhenMaxPagesIsZero(t *testing.T) {
 	t.Parallel()
 

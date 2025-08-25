@@ -207,7 +207,8 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get. Set to 0 to get all pages.")
-	readCmd.Flags().Int32("page-size", 0, "Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.")
+	readCmd.Flags().Int32("page-size", 0, "Number of tuples to return per page. "+
+		"Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.")
 	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
 		"json, simple-json, csv, and yaml.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
