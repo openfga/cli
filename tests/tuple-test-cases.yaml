@@ -8,6 +8,12 @@ tests:
     stdout:
       json:
         successful.0.user: "user:anne"
+  001b - it successfully writes tuples to a store using jsonl:
+    command: fga tuple write --file=./tests/fixtures/basic-tuples.jsonl --max-tuples-per-write=1 --max-parallel-requests=1 --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh)
+    exit-code: 0
+    stdout:
+      json:
+        successful.0.user: "user:bob"
   002 - it successfully deletes tuples from a store:
     command: fga tuple delete --file=./tests/fixtures/basic-tuples.json --max-tuples-per-write=1 --max-parallel-requests=1 --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh)
     exit-code: 0

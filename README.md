@@ -228,7 +228,7 @@ export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
 fga store **import**
 
 ###### Parameters
-* `--file`: File containing the store.
+* `--file`: File containing the store. See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--store-id`: Specifies the store id to import into
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
@@ -303,6 +303,22 @@ tests:
           assertions:
             member: true
             moderator: false
+      # checks can also be defined for multiple users sharing the same expectation
+      - object: group:employees
+        users:
+      # checks can also target multiple objects with the same expectation
+      - objects:
+          - group:admins
+          - group:employees
+        user: user:1
+        assertions:
+          moderator: false
+      # either "user" or "users" may be provided, but not both
+      # either "object" or "objects" may be provided, but not both
+          - user:3
+          - user:4
+        assertions:
+          member: true
 ```
 
 If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
@@ -378,7 +394,7 @@ fga store **delete**
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 | [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
-| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests tests.fga.yaml`                                                     |
+| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     | 
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
 
@@ -525,7 +541,7 @@ fga model **test**
 
 ###### Parameters
 
-* `--tests`: Name of the tests file. Must be in yaml format (see below)
+* `--tests`: Name of the tests file, or a glob pattern to multiple files (for example `"tests/*.fga.yaml"`,  or `"**/*.fga.yaml"`). Each file must be in yaml format.  See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--verbose`: Outputs the results in JSON
 
 If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
@@ -549,7 +565,13 @@ model: |
       define can_write: owner or can_write from parent
       define can_share: owner
 
-# tuple_file: ./tuples.yaml # global tuples that would apply to all tests, optional
+# You can use `tuples`, `tuple_file`, and `tuple_files` together or individually to provide global tuples for all tests.
+# Example using a single tuple file:
+# tuple_file: ./tuples.yaml
+# Example using multiple tuple files:
+# tuple_files:
+#   - ./model_tuples_2.yaml
+#   - ./model_tuples_3.yaml
 tuples: # global tuples that would apply to all tests, optional
   - user: folder:1
     relation: parent
@@ -570,6 +592,22 @@ tests: # required
           can_view: true
           can_write: true
           can_share: false
+      # checks can group multiple users that share the same expected results
+      - object: folder:2
+        users:
+          - user:beth
+          - user:carl
+        assertions:
+          can_view: false
+      # checks can group multiple objects that share the same expected results
+      - objects:
+          - folder:1
+          - folder:2
+        user: user:beth
+        assertions:
+          can_write: false
+      # either "user" or "users" may be provided, but not both
+      # either "object" or "objects" may be provided, but not both
     list_objects: # a set of list objects to run
       - user: user:anne
         type: folder
@@ -604,9 +642,9 @@ tests: # required
 ```
 
 ###### Example
-`fga model test --tests tests.fga.yaml`
+`fga model test --tests "tests/*.fga.yaml"`
 
-For more examples of `.fga.yaml` files, check the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/)/
 
 ###### Response
 
@@ -621,6 +659,8 @@ ListObjects 3/3 passing
 ```
 
 ##### Transform an Authorization Model
+
+The **transform** command lets you convert between different authorization model formats (`.fga`, `.json`, `.mod`).
 
 ###### Command
 fga model **transform** 
@@ -670,18 +710,19 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--condition-context`: Condition context (optional)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `json`, `yaml` and `csv` files are supported
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
-* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported
+* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1, or 40 if `--max-rps` is set and this flag is omitted)
+* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4, or `max-rps/5` if `--max-rps` is set and this flag is omitted)
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
-* `--max-rps`: Max requests per second, when set the CLI will ramp up requests from 1RPS to the set value over the set period. Used in conjunction with `--rampup-period-in-sec` (optional)
-* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Used in conjunction with `--max-rps` (optional)
+* `--max-rps`: Max requests per second. When set, the CLI will ramp up requests from 1 RPS to the set value. If `--rampup-period-in-sec` is omitted it defaults to `max-rps*2`.
+* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Only used if `--max-rps` is set.
+* All integer parameters must be greater than zero when provided.
 
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5 --max-rps 10 --rampup-period-in-sec 10`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`
 
 ###### Response
 ```json5
@@ -716,6 +757,14 @@ If using a `yaml` file, the format should be:
 - user: folder:product-2021
   relation: parent
   object: folder:product-2021Q1
+```
+
+If using a `jsonl` file, the format should be:
+
+```jsonl
+{"user": "user:anne", "relation": "owner", "object": "folder:product"}
+{"user": "folder:product", "relation": "parent", "object": "folder:product-2021", "condition": {"name": "inOfficeIP", "context": {"ip_addr": "10.0.0.1"}}}
+{"user": "user:beth", "relation": "viewer", "object": "folder:product-2021"}
 ```
 
 If using a `json` file, the format should be:
@@ -806,7 +855,7 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 * `<object>`: Object
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `yaml` and `json` files are supported
+* `--file`: Specifies the file name, `yaml`, `json`, and `jsonl` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 

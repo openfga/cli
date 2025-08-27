@@ -61,5 +61,9 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 		return format, nil, err
 	}
 
+	if err = storeData.Validate(); err != nil {
+		return format, nil, err
+	}
+
 	return format, &storeData, nil
 }

@@ -5,4 +5,8 @@ type user
 
 type group
   relations
-    define owner: [user]
+    define owner: [user, user with inOfficeIP]
+
+condition inOfficeIP(ip_addr: ipaddress) {
+  ip_addr.in_cidr("192.168.0.0/24")
+}

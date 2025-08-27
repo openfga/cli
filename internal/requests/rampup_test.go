@@ -132,6 +132,7 @@ func TestRampUpAPIRequests_RequestError(t *testing.T) {
 
 				return errors.New("request error")
 			}
+
 			mutex.Unlock()
 
 			return nil

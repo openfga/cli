@@ -21,6 +21,7 @@ func TestListModelsEmpty(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
@@ -62,6 +63,7 @@ func TestListModelsFail(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
@@ -86,6 +88,7 @@ func TestListModelsSinglePage(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
@@ -134,6 +137,7 @@ func TestListModelsMultiPage(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute1 := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)
@@ -216,6 +220,7 @@ func TestListModelsMultiPageMaxPage(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	mockExecute1 := mockclient.NewMockSdkClientReadAuthorizationModelsRequestInterface(mockCtrl)

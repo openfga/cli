@@ -1,0 +1,2 @@
+{"user": "user:bob", "relation": "owner", "object": "group:foo", "condition": {"name": "inOfficeIP", "context": {"ip_addr": "10.0.0.1"}}}
+

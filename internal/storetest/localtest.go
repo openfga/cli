@@ -12,80 +12,90 @@ import (
 )
 
 func RunSingleLocalCheckTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	checkRequest *pb.CheckRequest,
 ) (*pb.CheckResponse, error) {
-	return fgaServer.Check(context.Background(), checkRequest) //nolint:wrapcheck
+	return fgaServer.Check(ctx, checkRequest) //nolint:wrapcheck
 }
 
 func RunLocalCheckTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	checkTest ModelTestCheck,
 	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
 	results := []ModelTestCheckSingleResult{}
+	users := GetEffectiveUsers(checkTest)
 
-	for relation, expectation := range checkTest.Assertions {
-		result := ModelTestCheckSingleResult{
-			Request: client.ClientCheckRequest{
-				User:             checkTest.User,
-				Relation:         relation,
-				Object:           checkTest.Object,
-				ContextualTuples: tuples,
-				Context:          checkTest.Context,
-			},
-			Expected: expectation,
-		}
-
-		var (
-			ctx *structpb.Struct
-			err error
-		)
-
-		if checkTest.Context != nil {
-			ctx, err = structpb.NewStruct(*checkTest.Context)
-		}
-
-		if err != nil {
-			result.Error = err
-		} else {
-			response, err := RunSingleLocalCheckTest(fgaServer,
-				&pb.CheckRequest{
-					StoreId:              *options.StoreID,
-					AuthorizationModelId: *options.ModelID,
-					TupleKey: &pb.CheckRequestTupleKey{
-						User:     checkTest.User,
-						Relation: relation,
-						Object:   checkTest.Object,
+	objects := GetEffectiveObjects(checkTest)
+	for _, user := range users {
+		for _, object := range objects {
+			for relation, expectation := range checkTest.Assertions {
+				result := ModelTestCheckSingleResult{
+					Request: client.ClientCheckRequest{
+						User:             user,
+						Relation:         relation,
+						Object:           object,
+						ContextualTuples: tuples,
+						Context:          checkTest.Context,
 					},
-					Context: ctx,
-				},
-			)
-			if err != nil {
-				result.Error = err
-			}
+					Expected: expectation,
+				}
 
-			if response != nil {
-				result.Got = &response.Allowed
-				result.TestResult = result.IsPassing()
+				var (
+					reqCtx *structpb.Struct
+					err    error
+				)
+
+				if checkTest.Context != nil {
+					reqCtx, err = structpb.NewStruct(*checkTest.Context)
+				}
+
+				if err != nil {
+					result.Error = err
+				} else {
+					response, err := RunSingleLocalCheckTest(ctx, fgaServer,
+						&pb.CheckRequest{
+							StoreId:              *options.StoreID,
+							AuthorizationModelId: *options.ModelID,
+							TupleKey: &pb.CheckRequestTupleKey{
+								User:     user,
+								Relation: relation,
+								Object:   object,
+							},
+							Context: reqCtx,
+						},
+					)
+					if err != nil {
+						result.Error = err
+					}
+
+					if response != nil {
+						result.Got = &response.Allowed
+						result.TestResult = result.IsPassing()
+					}
+				}
+
+				results = append(results, result)
 			}
 		}
-
-		results = append(results, result)
 	}
 
 	return results
 }
 
 func RunSingleLocalListObjectsTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	listObjectsRequest *pb.ListObjectsRequest,
 ) (*pb.ListObjectsResponse, error) {
-	return fgaServer.ListObjects(context.Background(), listObjectsRequest) //nolint:wrapcheck
+	return fgaServer.ListObjects(ctx, listObjectsRequest) //nolint:wrapcheck
 }
 
 func RunLocalListObjectsTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	listObjectsTest ModelTestListObjects,
 	tuples []client.ClientContextualTupleKey,
@@ -106,25 +116,25 @@ func RunLocalListObjectsTest(
 		}
 
 		var (
-			ctx *structpb.Struct
-			err error
+			reqCtx *structpb.Struct
+			err    error
 		)
 
 		if listObjectsTest.Context != nil {
-			ctx, err = structpb.NewStruct(*listObjectsTest.Context)
+			reqCtx, err = structpb.NewStruct(*listObjectsTest.Context)
 		}
 
 		if err != nil {
 			result.Error = err
 		} else {
-			response, err := RunSingleLocalListObjectsTest(fgaServer,
+			response, err := RunSingleLocalListObjectsTest(ctx, fgaServer,
 				&pb.ListObjectsRequest{
 					StoreId:              *options.StoreID,
 					AuthorizationModelId: *options.ModelID,
 					User:                 listObjectsTest.User,
 					Type:                 listObjectsTest.Type,
 					Relation:             relation,
-					Context:              ctx,
+					Context:              reqCtx,
 				},
 			)
 			if err != nil {
@@ -144,13 +154,15 @@ func RunLocalListObjectsTest(
 }
 
 func RunSingleLocalListUsersTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	listUsersRequest *pb.ListUsersRequest,
 ) (*pb.ListUsersResponse, error) {
-	return fgaServer.ListUsers(context.Background(), listUsersRequest) //nolint:wrapcheck
+	return fgaServer.ListUsers(ctx, listUsersRequest) //nolint:wrapcheck
 }
 
 func RunLocalListUsersTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	listUsersTest ModelTestListUsers,
 	tuples []client.ClientContextualTupleKey,
@@ -178,25 +190,25 @@ func RunLocalListUsersTest(
 		}
 
 		var (
-			ctx *structpb.Struct
-			err error
+			reqCtx *structpb.Struct
+			err    error
 		)
 
 		if listUsersTest.Context != nil {
-			ctx, err = structpb.NewStruct(*listUsersTest.Context)
+			reqCtx, err = structpb.NewStruct(*listUsersTest.Context)
 		}
 
 		if err != nil {
 			result.Error = err
 		} else {
-			response, err := RunSingleLocalListUsersTest(fgaServer,
+			response, err := RunSingleLocalListUsersTest(ctx, fgaServer,
 				&pb.ListUsersRequest{
 					StoreId:              *options.StoreID,
 					AuthorizationModelId: *options.ModelID,
 					Object:               pbObject,
 					Relation:             relation,
 					UserFilters:          []*pb.UserTypeFilter{userFilter},
-					Context:              ctx,
+					Context:              reqCtx,
 				},
 			)
 			if err != nil {
@@ -218,6 +230,7 @@ func RunLocalListUsersTest(
 }
 
 func RunLocalTest(
+	ctx context.Context,
 	fgaServer *server.Server,
 	test ModelTest,
 	tuples []client.ClientContextualTupleKey,
@@ -227,7 +240,7 @@ func RunLocalTest(
 	listObjectResults := []ModelTestListObjectsSingleResult{}
 	listUsersResults := []ModelTestListUsersSingleResult{}
 
-	storeID, modelID, err := initLocalStore(fgaServer, model.GetProtoModel(), tuples)
+	storeID, modelID, err := initLocalStore(ctx, fgaServer, model.GetProtoModel(), tuples)
 	if err != nil {
 		return TestResult{}, err
 	}
@@ -238,17 +251,17 @@ func RunLocalTest(
 	}
 
 	for index := range test.Check {
-		results := RunLocalCheckTest(fgaServer, test.Check[index], tuples, testOptions)
+		results := RunLocalCheckTest(ctx, fgaServer, test.Check[index], tuples, testOptions)
 		checkResults = append(checkResults, results...)
 	}
 
 	for index := range test.ListObjects {
-		results := RunLocalListObjectsTest(fgaServer, test.ListObjects[index], tuples, testOptions)
+		results := RunLocalListObjectsTest(ctx, fgaServer, test.ListObjects[index], tuples, testOptions)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
 	for index := range test.ListUsers {
-		results := RunLocalListUsersTest(fgaServer, test.ListUsers[index], tuples, testOptions)
+		results := RunLocalListUsersTest(ctx, fgaServer, test.ListUsers[index], tuples, testOptions)
 		listUsersResults = append(listUsersResults, results...)
 	}
 

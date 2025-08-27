@@ -15,6 +15,7 @@ func TestListUsersSimpleType(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientListUsersRequestInterface(mockCtrl)
@@ -83,6 +84,7 @@ func TestListUsersSimpleTypeAndRelation(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientListUsersRequestInterface(mockCtrl)
@@ -152,6 +154,7 @@ func TestListUsersWithConsistency(t *testing.T) {
 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
 	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
 
 	mockExecute := mock_client.NewMockSdkClientListUsersRequestInterface(mockCtrl)
