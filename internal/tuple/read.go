@@ -2,6 +2,7 @@ package tuple
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	openfga "github.com/openfga/go-sdk"
@@ -10,20 +11,28 @@ import (
 
 const DefaultReadPageSize int32 = 50
 
+// ErrInvalidPageSize is returned when page size is outside valid range.
+var ErrInvalidPageSize = errors.New("pageSize must be between 1 and 100")
+
 func Read(
 	ctx context.Context,
 	fgaClient client.SdkClient,
 	body *client.ClientReadRequest,
 	maxPages int,
+	pageSize int32,
 	consistency *openfga.ConsistencyPreference,
 ) (
 	*openfga.ReadResponse, error,
 ) {
+	if pageSize < 1 || pageSize > 100 {
+		return nil, fmt.Errorf("%w: got %d", ErrInvalidPageSize, pageSize)
+	}
+
 	tuples := make([]openfga.Tuple, 0)
 	continuationToken := ""
 	pageIndex := 0
 	options := client.ClientReadOptions{
-		PageSize: openfga.PtrInt32(DefaultReadPageSize),
+		PageSize: openfga.PtrInt32(pageSize),
 	}
 
 	if consistency != nil && *consistency != openfga.CONSISTENCYPREFERENCE_UNSPECIFIED {

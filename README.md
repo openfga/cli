@@ -183,7 +183,7 @@ store-id: 01H0H015178Y2V4CX10C2KGHF4
 fga store **create**
 
 ###### Parameters
-* `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name. 
+* `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name.
 * `--model`: File with the authorization model. Can be in JSON, OpenFGA format, or fga.mod file (optional).
 * `--format` : Authorization model input format. Can be "fga", "json", or "modular" (optional, defaults to the model file extension if present).
 
@@ -394,11 +394,11 @@ fga store **delete**
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 | [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
-| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     | 
+| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     |
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
 
-##### Read Authorization Models 
+##### Read Authorization Models
 
 List all authorization models for a store, in descending order by creation date. The first model in the list is the latest one.
 
@@ -429,7 +429,7 @@ fga model **list**
 }
 ```
 
-##### Write Authorization Model 
+##### Write Authorization Model
 
 ###### Command
 fga model **write**
@@ -451,7 +451,7 @@ fga model **write**
 }
 ```
 
-##### Read a Single Authorization Model 
+##### Read a Single Authorization Model
 
 ###### Command
 fga model **get**
@@ -477,7 +477,7 @@ type document
     define can_view: [user]
 ```
 
-##### Read the Latest Authorization Model 
+##### Read the Latest Authorization Model
 
 If `model-id` is not specified when using the `get` command, the latest authorization model will be returned.
 
@@ -559,7 +559,7 @@ model: |
   type user
   type folder
     relations
-      define owner: [user] 
+      define owner: [user]
       define parent: [folder]
       define can_view: owner or can_view from parent
       define can_write: owner or can_write from parent
@@ -663,7 +663,7 @@ ListObjects 3/3 passing
 The **transform** command lets you convert between different authorization model formats (`.fga`, `.json`, `.mod`).
 
 ###### Command
-fga model **transform** 
+fga model **transform**
 
 ###### Parameters
 * `--file`: File containing the authorization model
@@ -910,7 +910,8 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 * `--user`: User
 * `--relation`: Relation
 * `--object`: Object
-* `--max-pages`: Max number of pages to get. (default 20)
+* `--max-pages`: Max number of pages to get. Set to 0 to get all pages. (default 20)
+* `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
 * `--output-format`: Can be `csv`, `yaml`, `json` or `simple-json`. Use `simple-json` for a simpler json format that can be piped to the write and delete commands
 
 ###### Example
