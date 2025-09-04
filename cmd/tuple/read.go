@@ -177,8 +177,8 @@ var readCmd = &cobra.Command{
 				// When max-pages=0, default page-size should be 100
 				pageSize = 100
 			} else {
-				// When max-pages!=0, default page-size should be 50
-				pageSize = 50
+				// When max-pages!=0, use the default page size
+				pageSize = tuple.DefaultReadPageSize
 			}
 		}
 		// If page-size is specified (non-zero), use whatever is specified
