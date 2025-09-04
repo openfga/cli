@@ -566,9 +566,9 @@ func TestReadWithPageSize50WhenMaxPagesIsNonZero(t *testing.T) {
 	mockExecute.EXPECT().Execute().Return(&response, nil)
 
 	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
-	// Expect page size to be 50 when max-pages is non-zero
+	// Expect page size to be DefaultReadPageSize when max-pages is non-zero
 	options := client.ClientReadOptions{
-		PageSize:          openfga.PtrInt32(50),
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
 		ContinuationToken: openfga.PtrString(""),
 	}
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
@@ -584,15 +584,15 @@ func TestReadWithPageSize50WhenMaxPagesIsNonZero(t *testing.T) {
 
 	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
 
-	// When max-pages is non-zero, page size should be 50
+	// When max-pages is non-zero, page size should be DefaultReadPageSize
 	_, err := read(
 		t.Context(),
 		mockFgaClient,
 		"user:user1",
 		"reader",
 		"document:doc1",
-		5,  // max-pages = 5 (non-zero)
-		50, // expected page size
+		5,                            // max-pages = 5 (non-zero)
+		tuple.DefaultReadPageSize,    // expected page size
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
 	if err != nil {
