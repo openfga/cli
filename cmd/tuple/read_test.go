@@ -591,7 +591,7 @@ func TestReadWithPageSize50WhenMaxPagesIsNonZero(t *testing.T) {
 		"user:user1",
 		"reader",
 		"document:doc1",
-		5,                          // max-pages = 5 (non-zero)
+		5,                         // max-pages = 5 (non-zero)
 		tuple.DefaultReadPageSize, // expected page size
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
