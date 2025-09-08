@@ -18,12 +18,12 @@ require (
 	github.com/openfga/openfga v1.9.5
 	github.com/rung/go-safecast v1.0.1
 	github.com/schollz/progressbar/v3 v3.18.0
-	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.7
+	github.com/spf13/cobra v1.10.1
+	github.com/spf13/pflag v1.0.9
 	github.com/spf13/viper v1.20.1
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	go.uber.org/mock v0.6.0
-	golang.org/x/time v0.12.0
+	golang.org/x/time v0.13.0
 	google.golang.org/protobuf v1.36.8
 	gopkg.in/yaml.v3 v3.0.1
 )
