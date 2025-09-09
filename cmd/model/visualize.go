@@ -17,17 +17,16 @@ limitations under the License.
 package model
 
 import (
-	"fmt"
-
-	"github.com/spf13/cobra"
-
 	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/output"
 
@@ -147,6 +146,7 @@ func transformModelDSLToWeightedGraph(dsl string) (*WeightedAuthorizationModelGr
 	}
 
 	wgb := graph.NewWeightedAuthorizationModelGraphBuilder()
+
 	weightedGraph, err := wgb.Build(authorizationModel)
 	if err != nil {
 		return nil, fmt.Errorf("error building weighted graph: %w", err)
@@ -157,6 +157,7 @@ func transformModelDSLToWeightedGraph(dsl string) (*WeightedAuthorizationModelGr
 
 func translateNode(node *graph.WeightedAuthorizationModelNode) *WeightedAuthorizationModelNode {
 	var nodeType string
+
 	switch node.GetNodeType() {
 	case graph.SpecificType:
 		nodeType = "SpecificType"
@@ -167,6 +168,7 @@ func translateNode(node *graph.WeightedAuthorizationModelNode) *WeightedAuthoriz
 	case graph.SpecificTypeWildcard:
 		nodeType = "SpecificTypeWildcard"
 	}
+
 	return &WeightedAuthorizationModelNode{
 		Weights:     node.GetWeights(),
 		NodeType:    nodeType,
@@ -178,6 +180,7 @@ func translateNode(node *graph.WeightedAuthorizationModelNode) *WeightedAuthoriz
 
 func translateEdge(e *graph.WeightedAuthorizationModelEdge) *WeightedAuthorizationModelEdge {
 	var edgeType string
+
 	switch e.GetEdgeType() {
 	case graph.DirectEdge:
 		edgeType = "Direct Edge"
@@ -212,6 +215,7 @@ func translate(weightedGraph *graph.WeightedAuthorizationModelGraph) *WeightedAu
 		for _, e := range edgeSlice {
 			transformedEdges = append(transformedEdges, translateEdge(e))
 		}
+
 		edges[key] = transformedEdges
 	}
 
@@ -256,6 +260,7 @@ func convertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
 	}
 
 	sb.WriteString("}\n")
+
 	return sb.String()
 }
 
@@ -269,6 +274,7 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 	} else {
 		label = node.UniqueLabel
 	}
+
 	labelParts = append(labelParts, fmt.Sprintf("<B>%s</B>", escapeHTML(label)))
 
 	// Node type
@@ -279,28 +285,35 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 	// Node weights
 	if len(node.Weights) > 0 {
 		var weightStrs []string
+
 		for key, weight := range node.Weights {
 			weightStr := strconv.Itoa(weight)
 			if weight == 2147483647 { // Max int32, representing infinity
 				weightStr = "∞"
 			}
+
 			weightStrs = append(weightStrs, fmt.Sprintf("<B>%s</B>: %s", escapeHTML(key), weightStr))
 		}
+
 		labelParts = append(labelParts, strings.Join(weightStrs, ", "))
 	}
 
 	// Node wildcards
 	if len(node.Wildcards) > 0 {
-		labelParts = append(labelParts, fmt.Sprintf("<B>Wildcards:</B> %s", escapeHTML(strings.Join(node.Wildcards, ", "))))
+		labelParts = append(labelParts, "<B>Wildcards:</B> "+escapeHTML(strings.Join(node.Wildcards, ", ")))
 	}
 
 	// Node attributes
 	shape := "ellipse"
-	var fillColor string
-	var fontColor string = "black"
+
+	var (
+		fillColor string
+		fontColor string = "black"
+	)
 
 	// Only color nodes based on weight if they are NOT specific types or wildcards
 	// Specific types (like user, organization, etc.) and wildcards should remain uncolored
+
 	if node.NodeType == "SpecificType" || node.NodeType == "SpecificTypeWildcard" {
 		// Specific types and wildcards get default coloring
 		fillColor = "lightgray"
@@ -320,6 +333,7 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 	}
 
 	nodeLabel := strings.Join(labelParts, "<BR/>")
+
 	return fmt.Sprintf("  \"%s\" [label=<%s>, shape=%s, fillcolor=\"%s\", style=filled, fontcolor=\"%s\"];\n",
 		escapeNodeName(node.UniqueLabel), nodeLabel, shape, fillColor, fontColor)
 }
@@ -330,13 +344,16 @@ func generateEdgeDOT(edge *WeightedAuthorizationModelEdge) string {
 	// Edge weights
 	if len(edge.Weights) > 0 {
 		var weightStrs []string
+
 		for key, weight := range edge.Weights {
 			weightStr := strconv.Itoa(weight)
 			if weight == 2147483647 { // Max int32, representing infinity
 				weightStr = "∞"
 			}
+
 			weightStrs = append(weightStrs, fmt.Sprintf("<B>%s</B>: %s", escapeHTML(key), weightStr))
 		}
+
 		labelParts = append(labelParts, strings.Join(weightStrs, ", "))
 	}
 
@@ -347,10 +364,11 @@ func generateEdgeDOT(edge *WeightedAuthorizationModelEdge) string {
 
 	// Edge wildcards
 	if len(edge.Wildcards) > 0 {
-		labelParts = append(labelParts, fmt.Sprintf("<B>Wildcards:</B> %s", escapeHTML(strings.Join(edge.Wildcards, ", "))))
+		labelParts = append(labelParts, "<B>Wildcards:</B> "+escapeHTML(strings.Join(edge.Wildcards, ", ")))
 	}
 
 	edgeLabel := strings.Join(labelParts, "<BR/>")
+
 	labelAttr := ""
 	if edgeLabel != "" {
 		labelAttr = fmt.Sprintf(" [label=<%s>]", edgeLabel)
@@ -365,6 +383,7 @@ func escapeHTML(s string) string {
 	s = strings.ReplaceAll(s, "<", "&lt;")
 	s = strings.ReplaceAll(s, ">", "&gt;")
 	s = strings.ReplaceAll(s, "\"", "&quot;")
+
 	return s
 }
 
@@ -372,7 +391,7 @@ func escapeNodeName(s string) string {
 	return strings.ReplaceAll(s, "\"", "\\\"")
 }
 
-// getMaxWeight returns the highest weight value from a weights map
+// getMaxWeight returns the highest weight value from a weights map.
 func getMaxWeight(weights map[string]int) int {
 	if len(weights) == 0 {
 		return 1 // Default weight if no weights are present
@@ -392,6 +411,7 @@ func getMaxWeight(weights map[string]int) int {
 				return 100 // Use high value for infinity in color calculation
 			}
 		}
+
 		return 1 // Default to minimum weight
 	}
 
@@ -399,7 +419,7 @@ func getMaxWeight(weights map[string]int) int {
 }
 
 // getWeightColor returns a color based on weight value
-// Light green for low weights (1-2) to dark red for high weights (20+)
+// Light green for low weights (1-2) to dark red for high weights (20+).
 func getWeightColor(weight int) string {
 	// Handle special cases
 	if weight >= 100 { // Infinity or very high weights
@@ -412,6 +432,7 @@ func getWeightColor(weight int) string {
 	if normalizedWeight > 1.0 {
 		normalizedWeight = 1.0
 	}
+
 	if normalizedWeight < 0.0 {
 		normalizedWeight = 0.0
 	}
@@ -431,11 +452,13 @@ func getWeightColor(weight int) string {
 	} else if r > 255 {
 		r = 255
 	}
+
 	if g < 0 {
 		g = 0
 	} else if g > 255 {
 		g = 255
 	}
+
 	if b < 0 {
 		b = 0
 	} else if b > 255 {
@@ -449,12 +472,13 @@ func generateDiagram(dotContent, outputFile, format string) error {
 	// Create output directory if it doesn't exist
 	outputDir := filepath.Dir(outputFile)
 	if outputDir != "." {
-		if err := os.MkdirAll(outputDir, 0755); err != nil {
+		if err := os.MkdirAll(outputDir, 0o755); err != nil {
 			return fmt.Errorf("failed to create output directory: %w", err)
 		}
 	}
 
 	ctx := context.Background()
+
 	g, err := graphviz.New(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create graphviz instance: %w", err)
@@ -469,6 +493,7 @@ func generateDiagram(dotContent, outputFile, format string) error {
 
 	// Determine output format
 	var gvFormat graphviz.Format
+
 	switch strings.ToLower(format) {
 	case "png":
 		gvFormat = graphviz.PNG
@@ -485,7 +510,7 @@ func generateDiagram(dotContent, outputFile, format string) error {
 	}
 
 	// Write to file
-	return os.WriteFile(outputFile, buf.Bytes(), 0644)
+	return os.WriteFile(outputFile, buf.Bytes(), 0o644)
 }
 
 func init() {
