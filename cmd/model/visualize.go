@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -30,6 +31,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/output"
+	"github.com/openfga/cli/internal/storetest"
 
 	"github.com/openfga/language/pkg/go/graph"
 	language "github.com/openfga/language/pkg/go/transformer"
@@ -41,6 +43,11 @@ const (
 	SpecificType            = "SpecificType"
 	SpecificTypeAndRelation = "SpecificTypeAndRelation"
 	SpecificTypeWildcard    = "SpecificTypeWildcard"
+)
+
+// Static error variables.
+var (
+	ErrNoModelInStoreData = errors.New("no model found in StoreData file")
 )
 
 type Config struct {
@@ -117,15 +124,45 @@ func CalculateOutputParameters(modelFile, outputFile, formatFlag string) (string
 	return format, finalOutputFile
 }
 
+// LoadModelContent loads the model content from a file, handling both direct .fga files
+// and .fga.yaml files that contain StoreData format.
+func LoadModelContent(filePath string) (string, error) {
+	// Check if this is a .fga.yaml file
+	if strings.HasSuffix(strings.ToLower(filePath), ".fga.yaml") {
+		// Load as StoreData format
+		_, storeData, err := storetest.ReadFromFile(filePath, filepath.Dir(filePath))
+		if err != nil {
+			return "", fmt.Errorf("failed to load StoreData from %s: %w", filePath, err)
+		}
+
+		if storeData.Model == "" {
+			return "", fmt.Errorf("%w: %s", ErrNoModelInStoreData, filePath)
+		}
+
+		return storeData.Model, nil
+	}
+
+	// Load as regular file
+	inputBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file %s: %w", filePath, err)
+	}
+
+	return string(inputBytes), nil
+}
+
 // visualizeCmd represents the visualize command.
 var visualizeCmd = &cobra.Command{
 	Use:   "visualize",
 	Short: "Visualize an Authorization Model",
-	Long:  "Create a visual representation of an authorization model as an SVG or PNG image.",
+	Long: "Create a visual representation of an authorization model as an SVG or PNG image. " +
+		"Supports both .fga model files and .fga.yaml store files.",
 	Example: `fga model visualize --file=model.fga
 fga model visualize --file=model.fga --format=png
 fga model visualize --file=model.fga --output-file=custom-name.svg
-fga model visualize --file=model.fga --output-file=diagram.png`,
+fga model visualize --file=model.fga --output-file=diagram.png
+fga model visualize --file=store.fga.yaml
+fga model visualize --file=store.fga.yaml --format=png`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// Get command flags
 		model, err := cmd.Flags().GetString("file")
@@ -146,12 +183,11 @@ fga model visualize --file=model.fga --output-file=diagram.png`,
 		// Calculate the final format and output filename
 		format, outputFile = CalculateOutputParameters(model, outputFile, format)
 
-		// Read from file
-		inputBytes, err := os.ReadFile(model)
+		// Load model content (handles both .fga and .fga.yaml files)
+		input, err := LoadModelContent(model)
 		if err != nil {
-			log.Fatalf("Error reading file %s: %v", model, err)
+			log.Fatalf("Error loading model: %v", err)
 		}
-		input := string(inputBytes)
 
 		// Transform DSL to weighted graph
 		weightedGraph, err := TransformModelDSLToWeightedGraph(input)
@@ -566,7 +602,7 @@ func GenerateDiagram(dotContent, outputFile, format string) error {
 }
 
 func init() {
-	visualizeCmd.Flags().String("file", "", "Authorization model file path")
+	visualizeCmd.Flags().String("file", "", "Authorization model file path (.fga or .fga.yaml)")
 	visualizeCmd.Flags().String("output-file", "", "Output file path for the visualization"+
 		"(defaults to model filename with format extension)")
 	visualizeCmd.Flags().String("format", "svg", "Output format (svg or png)")

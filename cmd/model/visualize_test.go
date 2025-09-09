@@ -329,3 +329,110 @@ func normalizeXML(content string) string {
 
 	return strings.Join(normalized, "\n")
 }
+
+// TestLoadModelContent tests the model content loading logic for both .fga and .fga.yaml files.
+func TestLoadModelContent(t *testing.T) {
+	t.Parallel()
+
+	// Test regular .fga file
+	t.Run("Regular FGA file", func(t *testing.T) {
+		t.Parallel()
+
+		tmpDir := t.TempDir()
+		fgaFile := filepath.Join(tmpDir, "test.fga")
+		testModel := `
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define viewer: [user]
+`
+		err := os.WriteFile(fgaFile, []byte(testModel), 0600)
+		if err != nil {
+			t.Fatalf("Failed to write test FGA file: %v", err)
+		}
+
+		content, err := LoadModelContent(fgaFile)
+		if err != nil {
+			t.Fatalf("LoadModelContent failed: %v", err)
+		}
+
+		if content != testModel {
+			t.Errorf("Content mismatch. Expected %q, got %q", testModel, content)
+		}
+	})
+
+	// Test .fga.yaml file
+	t.Run("FGA YAML file", func(t *testing.T) {
+		t.Parallel()
+
+		tmpDir := t.TempDir()
+		yamlFile := filepath.Join(tmpDir, "test.fga.yaml")
+		
+		yamlContent := `
+name: test
+model: |-
+  model
+    schema 1.1
+
+  type user
+
+  type document
+    relations
+      define viewer: [user]
+tests: []
+`
+		err := os.WriteFile(yamlFile, []byte(yamlContent), 0600)
+		if err != nil {
+			t.Fatalf("Failed to write test YAML file: %v", err)
+		}
+
+		content, err := LoadModelContent(yamlFile)
+		if err != nil {
+			t.Fatalf("LoadModelContent failed: %v", err)
+		}
+
+		if !strings.Contains(content, "type user") || !strings.Contains(content, "type document") {
+			t.Errorf("Content doesn't contain expected model elements. Got: %q", content)
+		}
+	})
+
+	// Test non-existent file
+	t.Run("Non-existent file", func(t *testing.T) {
+		t.Parallel()
+
+		_, err := LoadModelContent("/non/existent/file.fga")
+		if err == nil {
+			t.Fatal("Expected error for non-existent file, got nil")
+		}
+	})
+
+	// Test .fga.yaml file without model
+	t.Run("FGA YAML file without model", func(t *testing.T) {
+		t.Parallel()
+
+		tmpDir := t.TempDir()
+		yamlFile := filepath.Join(tmpDir, "no-model.fga.yaml")
+		
+		yamlContent := `
+name: test
+tests: []
+`
+		err := os.WriteFile(yamlFile, []byte(yamlContent), 0600)
+		if err != nil {
+			t.Fatalf("Failed to write test YAML file: %v", err)
+		}
+
+		_, err = LoadModelContent(yamlFile)
+		if err == nil {
+			t.Fatal("Expected error for YAML file without model, got nil")
+		}
+
+		if !strings.Contains(err.Error(), "no model found") {
+			t.Errorf("Expected 'no model found' error, got: %v", err)
+		}
+	})
+}
