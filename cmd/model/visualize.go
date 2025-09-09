@@ -30,6 +30,7 @@ import (
 	"github.com/goccy/go-graphviz"
 	"github.com/spf13/cobra"
 
+	"github.com/openfga/cli/internal/authorizationmodel"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 
@@ -129,17 +130,7 @@ func CalculateOutputParameters(modelFile, outputFile, formatFlag string) (string
 func LoadModelContent(filePath string) (string, error) {
 	// Check if this is a .fga.yaml file
 	if strings.HasSuffix(strings.ToLower(filePath), ".fga.yaml") {
-		// Load as StoreData format
-		_, storeData, err := storetest.ReadFromFile(filePath, filepath.Dir(filePath))
-		if err != nil {
-			return "", fmt.Errorf("failed to load StoreData from %s: %w", filePath, err)
-		}
-
-		if storeData.Model == "" {
-			return "", fmt.Errorf("%w: %s", ErrNoModelInStoreData, filePath)
-		}
-
-		return storeData.Model, nil
+		return loadStoreDataModel(filePath)
 	}
 
 	// Load as regular file
@@ -149,6 +140,44 @@ func LoadModelContent(filePath string) (string, error) {
 	}
 
 	return string(inputBytes), nil
+}
+
+// loadStoreDataModel loads a model from a .fga.yaml store file.
+func loadStoreDataModel(filePath string) (string, error) {
+	// Load as StoreData format
+	format, storeData, err := storetest.ReadFromFile(filePath, filepath.Dir(filePath))
+	if err != nil {
+		return "", fmt.Errorf("failed to load StoreData from %s: %w", filePath, err)
+	}
+
+	if storeData.Model == "" {
+		return "", fmt.Errorf("%w: %s", ErrNoModelInStoreData, filePath)
+	}
+
+	// Check if this is a modular model (format indicates modular and Model contains a file path)
+	if format == authorizationmodel.ModelFormatModular {
+		return convertModularModelToDSL(storeData.Model)
+	}
+
+	return storeData.Model, nil
+}
+
+// convertModularModelToDSL converts a modular model file to DSL format.
+func convertModularModelToDSL(modFilePath string) (string, error) {
+	// For modular models, storeData.Model contains the file path, not the content
+	// We need to load the modular model and convert it to DSL
+	model := &authorizationmodel.AuthzModel{}
+	if err := model.ReadModelFromModFGA(modFilePath); err != nil {
+		return "", fmt.Errorf("failed to read modular model from %s: %w", modFilePath, err)
+	}
+
+	// Convert the model to DSL format
+	dslContent, err := model.DisplayAsDSL([]string{"model"})
+	if err != nil {
+		return "", fmt.Errorf("failed to convert modular model to DSL: %w", err)
+	}
+
+	return *dslContent, nil
 }
 
 // visualizeCmd represents the visualize command.

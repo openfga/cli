@@ -371,7 +371,7 @@ type document
 
 		tmpDir := t.TempDir()
 		yamlFile := filepath.Join(tmpDir, "test.fga.yaml")
-		
+
 		yamlContent := `
 name: test
 model: |-
@@ -416,7 +416,7 @@ tests: []
 
 		tmpDir := t.TempDir()
 		yamlFile := filepath.Join(tmpDir, "no-model.fga.yaml")
-		
+
 		yamlContent := `
 name: test
 tests: []
