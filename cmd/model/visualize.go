@@ -35,6 +35,14 @@ import (
 	language "github.com/openfga/language/pkg/go/transformer"
 )
 
+const (
+	// Node type constants.
+	OperatorNodeType        = "OperatorNodeType"
+	SpecificType            = "SpecificType"
+	SpecificTypeAndRelation = "SpecificTypeAndRelation"
+	SpecificTypeWildcard    = "SpecificTypeWildcard"
+)
+
 type Config struct {
 	InputFile         string
 	OutputFile        string
@@ -160,13 +168,13 @@ func translateNode(node *graph.WeightedAuthorizationModelNode) *WeightedAuthoriz
 
 	switch node.GetNodeType() {
 	case graph.SpecificType:
-		nodeType = "SpecificType"
+		nodeType = SpecificType
 	case graph.SpecificTypeAndRelation:
-		nodeType = "SpecificTypeAndRelation"
+		nodeType = SpecificTypeAndRelation
 	case graph.OperatorNode:
-		nodeType = "OperatorNodeType"
+		nodeType = OperatorNodeType
 	case graph.SpecificTypeWildcard:
-		nodeType = "SpecificTypeWildcard"
+		nodeType = SpecificTypeWildcard
 	}
 
 	return &WeightedAuthorizationModelNode{
@@ -178,10 +186,10 @@ func translateNode(node *graph.WeightedAuthorizationModelNode) *WeightedAuthoriz
 	}
 }
 
-func translateEdge(e *graph.WeightedAuthorizationModelEdge) *WeightedAuthorizationModelEdge {
+func translateEdge(edge *graph.WeightedAuthorizationModelEdge) *WeightedAuthorizationModelEdge {
 	var edgeType string
 
-	switch e.GetEdgeType() {
+	switch edge.GetEdgeType() {
 	case graph.DirectEdge:
 		edgeType = "Direct Edge"
 	case graph.RewriteEdge:
@@ -193,13 +201,13 @@ func translateEdge(e *graph.WeightedAuthorizationModelEdge) *WeightedAuthorizati
 	}
 
 	return &WeightedAuthorizationModelEdge{
-		Weights:          e.GetWeights(),
+		Weights:          edge.GetWeights(),
 		EdgeType:         edgeType,
-		TuplesetRelation: e.GetTuplesetRelation(),
-		From:             translateNode(e.GetFrom()),
-		To:               translateNode(e.GetTo()),
-		Wildcards:        e.GetWildcards(),
-		Conditions:       e.GetConditions(),
+		TuplesetRelation: edge.GetTuplesetRelation(),
+		From:             translateNode(edge.GetFrom()),
+		To:               translateNode(edge.GetTo()),
+		Wildcards:        edge.GetWildcards(),
+		Conditions:       edge.GetConditions(),
 	}
 }
 
@@ -226,13 +234,13 @@ func translate(weightedGraph *graph.WeightedAuthorizationModelGraph) *WeightedAu
 }
 
 func convertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
-	var sb strings.Builder
+	var dotBuilder strings.Builder
 
-	sb.WriteString("digraph G {\n")
-	sb.WriteString("  rankdir=TB;\n")
-	sb.WriteString("  node [fontname=\"Arial\", fontsize=10];\n")
-	sb.WriteString("  edge [fontname=\"Arial\", fontsize=8];\n")
-	sb.WriteString("  graph [fontname=\"Arial\"];\n\n")
+	dotBuilder.WriteString("digraph G {\n")
+	dotBuilder.WriteString("  rankdir=TB;\n")
+	dotBuilder.WriteString("  node [fontname=\"Arial\", fontsize=10];\n")
+	dotBuilder.WriteString("  edge [fontname=\"Arial\", fontsize=8];\n")
+	dotBuilder.WriteString("  graph [fontname=\"Arial\"];\n\n")
 
 	// Track processed nodes to avoid duplicates
 	processedNodes := make(map[string]bool)
@@ -242,26 +250,26 @@ func convertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
 		for _, edge := range edgeGroup {
 			// Process From node
 			if edge.From != nil && !processedNodes[edge.From.UniqueLabel] {
-				sb.WriteString(generateNodeDOT(edge.From))
+				dotBuilder.WriteString(generateNodeDOT(edge.From))
 				processedNodes[edge.From.UniqueLabel] = true
 			}
 
 			// Process To node
 			if edge.To != nil && !processedNodes[edge.To.UniqueLabel] {
-				sb.WriteString(generateNodeDOT(edge.To))
+				dotBuilder.WriteString(generateNodeDOT(edge.To))
 				processedNodes[edge.To.UniqueLabel] = true
 			}
 
 			// Process edge
 			if edge.From != nil && edge.To != nil {
-				sb.WriteString(generateEdgeDOT(edge))
+				dotBuilder.WriteString(generateEdgeDOT(edge))
 			}
 		}
 	}
 
-	sb.WriteString("}\n")
+	dotBuilder.WriteString("}\n")
 
-	return sb.String()
+	return dotBuilder.String()
 }
 
 func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
@@ -269,7 +277,7 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 
 	// Node label (name)
 	var label string
-	if node.NodeType == "OperatorNodeType" {
+	if node.NodeType == OperatorNodeType {
 		label = node.Label
 	} else {
 		label = node.UniqueLabel
@@ -305,16 +313,14 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 
 	// Node attributes
 	shape := "ellipse"
+	fontColor := "black"
 
-	var (
-		fillColor string
-		fontColor string = "black"
-	)
+	var fillColor string
 
 	// Only color nodes based on weight if they are NOT specific types or wildcards
 	// Specific types (like user, organization, etc.) and wildcards should remain uncolored
 
-	if node.NodeType == "SpecificType" || node.NodeType == "SpecificTypeWildcard" {
+	if node.NodeType == SpecificType || node.NodeType == SpecificTypeWildcard {
 		// Specific types and wildcards get default coloring
 		fillColor = "lightgray"
 	} else {
@@ -328,7 +334,7 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 		}
 	}
 
-	if node.NodeType == "OperatorNodeType" {
+	if node.NodeType == OperatorNodeType {
 		shape = "box"
 	}
 
@@ -378,13 +384,13 @@ func generateEdgeDOT(edge *WeightedAuthorizationModelEdge) string {
 		escapeNodeName(edge.From.UniqueLabel), escapeNodeName(edge.To.UniqueLabel), labelAttr)
 }
 
-func escapeHTML(s string) string {
-	s = strings.ReplaceAll(s, "&", "&amp;")
-	s = strings.ReplaceAll(s, "<", "&lt;")
-	s = strings.ReplaceAll(s, ">", "&gt;")
-	s = strings.ReplaceAll(s, "\"", "&quot;")
+func escapeHTML(content string) string {
+	content = strings.ReplaceAll(content, "&", "&amp;")
+	content = strings.ReplaceAll(content, "<", "&lt;")
+	content = strings.ReplaceAll(content, ">", "&gt;")
+	content = strings.ReplaceAll(content, "\"", "&quot;")
 
-	return s
+	return content
 }
 
 func escapeNodeName(s string) string {
@@ -442,30 +448,30 @@ func getWeightColor(weight int) string {
 	// Dark red: #8B0000 (RGB: 139, 0, 0)
 
 	// Calculate RGB values
-	r := int(144 + (139-144)*normalizedWeight)
-	g := int(238 + (0-238)*normalizedWeight)
-	b := int(144 + (0-144)*normalizedWeight)
+	red := int(144 + (139-144)*normalizedWeight)
+	green := int(238 + (0-238)*normalizedWeight)
+	blue := int(144 + (0-144)*normalizedWeight)
 
 	// Ensure values are in valid range
-	if r < 0 {
-		r = 0
-	} else if r > 255 {
-		r = 255
+	if red < 0 {
+		red = 0
+	} else if red > 255 {
+		red = 255
 	}
 
-	if g < 0 {
-		g = 0
-	} else if g > 255 {
-		g = 255
+	if green < 0 {
+		green = 0
+	} else if green > 255 {
+		green = 255
 	}
 
-	if b < 0 {
-		b = 0
-	} else if b > 255 {
-		b = 255
+	if blue < 0 {
+		blue = 0
+	} else if blue > 255 {
+		blue = 255
 	}
 
-	return fmt.Sprintf("#%02X%02X%02X", r, g, b)
+	return fmt.Sprintf("#%02X%02X%02X", red, green, blue)
 }
 
 func generateDiagram(dotContent, outputFile, format string) error {
@@ -479,11 +485,11 @@ func generateDiagram(dotContent, outputFile, format string) error {
 
 	ctx := context.Background()
 
-	g, err := graphviz.New(ctx)
+	graphInstance, err := graphviz.New(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create graphviz instance: %w", err)
 	}
-	defer g.Close()
+	defer graphInstance.Close()
 
 	graph, err := graphviz.ParseBytes([]byte(dotContent))
 	if err != nil {
@@ -505,17 +511,22 @@ func generateDiagram(dotContent, outputFile, format string) error {
 
 	// Render to buffer
 	var buf bytes.Buffer
-	if err := g.Render(ctx, graph, gvFormat, &buf); err != nil {
+	if err := graphInstance.Render(ctx, graph, gvFormat, &buf); err != nil {
 		return fmt.Errorf("failed to render %s: %w", format, err)
 	}
 
-	// Write to file
-	return os.WriteFile(outputFile, buf.Bytes(), 0o644)
+	err = os.WriteFile(outputFile, buf.Bytes(), 0o600)
+	if err != nil {
+		return fmt.Errorf("failed to write output file file: %w", err)
+	}
+
+	return nil
 }
 
 func init() {
 	visualizeCmd.Flags().String("model", "", "Authorization model file path")
-	visualizeCmd.Flags().String("output-file", "", "Output file path for the visualization (defaults to model filename with format extension)")
+	visualizeCmd.Flags().String("output-file", "", "Output file path for the visualization"+
+		"(defaults to model filename with format extension)")
 	visualizeCmd.Flags().String("format", "svg", "Output format (svg or png)")
 
 	if err := visualizeCmd.MarkFlagRequired("model"); err != nil {
