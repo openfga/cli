@@ -78,6 +78,45 @@ type WeightedAuthorizationModelNode struct {
 	Wildcards   []string
 }
 
+// DetectFormatFromExtension determines the format based on the output file extension.
+// If the extension is .svg or .png, it returns that format, otherwise returns the original format.
+func DetectFormatFromExtension(outputFile, originalFormat string) string {
+	if outputFile == "" {
+		return originalFormat
+	}
+
+	ext := strings.ToLower(filepath.Ext(outputFile))
+	if ext == ".svg" || ext == ".png" {
+		return strings.TrimPrefix(ext, ".")
+	}
+
+	return originalFormat
+}
+
+// GenerateOutputFileName creates an output filename based on the model filename and format.
+// If outputFile is provided, it returns that. Otherwise, it derives the name from the model file.
+func GenerateOutputFileName(modelFile, outputFile, format string) string {
+	if outputFile != "" {
+		return outputFile
+	}
+
+	// Remove the extension from the model filename and add the format extension
+	modelBase := strings.TrimSuffix(modelFile, filepath.Ext(modelFile))
+
+	return modelBase + "." + format
+}
+
+// CalculateOutputParameters determines the final format and output filename based on inputs.
+func CalculateOutputParameters(modelFile, outputFile, formatFlag string) (string, string) {
+	// First, detect format from extension if output file is provided
+	format := DetectFormatFromExtension(outputFile, formatFlag)
+
+	// Then, generate the final output filename
+	finalOutputFile := GenerateOutputFileName(modelFile, outputFile, format)
+
+	return format, finalOutputFile
+}
+
 // visualizeCmd represents the visualize command.
 var visualizeCmd = &cobra.Command{
 	Use:   "visualize",
@@ -104,20 +143,8 @@ fga model visualize --model=model.fga --output-file=diagram.png`,
 			return fmt.Errorf("failed to get format parameter: %w", err)
 		}
 
-		// If output-file is provided and has a valid extension, use that as the format
-		if outputFile != "" {
-			ext := strings.ToLower(filepath.Ext(outputFile))
-			if ext == ".svg" || ext == ".png" {
-				format = strings.TrimPrefix(ext, ".")
-			}
-		}
-
-		// If output-file is not provided, derive it from the model filename and format
-		if outputFile == "" {
-			// Remove the extension from the model filename and add the format extension
-			modelBase := strings.TrimSuffix(model, filepath.Ext(model))
-			outputFile = modelBase + "." + format
-		}
+		// Calculate the final format and output filename
+		format, outputFile = CalculateOutputParameters(model, outputFile, format)
 
 		// Read from file
 		inputBytes, err := os.ReadFile(model)
@@ -127,16 +154,16 @@ fga model visualize --model=model.fga --output-file=diagram.png`,
 		input := string(inputBytes)
 
 		// Transform DSL to weighted graph
-		weightedGraph, err := transformModelDSLToWeightedGraph(input)
+		weightedGraph, err := TransformModelDSLToWeightedGraph(input)
 		if err != nil {
 			log.Fatalf("Error transforming model: %v", err)
 		}
 
 		// Generate DOT format
-		dotContent := convertToGraphvizDOT(weightedGraph)
+		dotContent := ConvertToGraphvizDOT(weightedGraph)
 
 		// Generate diagram using Graphviz
-		err = generateDiagram(dotContent, outputFile, format)
+		err = GenerateDiagram(dotContent, outputFile, format)
 		if err != nil {
 			log.Fatalf("Error generating diagram: %v", err)
 		}
@@ -147,7 +174,8 @@ fga model visualize --model=model.fga --output-file=diagram.png`,
 	},
 }
 
-func transformModelDSLToWeightedGraph(dsl string) (*WeightedAuthorizationModelGraph, error) {
+// TransformModelDSLToWeightedGraph transforms a DSL string into a weighted graph structure.
+func TransformModelDSLToWeightedGraph(dsl string) (*WeightedAuthorizationModelGraph, error) {
 	authorizationModel, err := language.TransformDSLToProto(dsl)
 	if err != nil {
 		return nil, fmt.Errorf("invalid authorization model DSL: %w", err)
@@ -233,7 +261,8 @@ func translate(weightedGraph *graph.WeightedAuthorizationModelGraph) *WeightedAu
 	}
 }
 
-func convertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
+// ConvertToGraphvizDOT converts a weighted graph to DOT format for graphviz.
+func ConvertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
 	var dotBuilder strings.Builder
 
 	dotBuilder.WriteString("digraph G {\n")
@@ -485,7 +514,8 @@ func getWeightColor(weight int) string {
 	return fmt.Sprintf("#%02X%02X%02X", red, green, blue)
 }
 
-func generateDiagram(dotContent, outputFile, format string) error {
+// GenerateDiagram generates a visual diagram from DOT content in the specified format.
+func GenerateDiagram(dotContent, outputFile, format string) error {
 	// Create output directory if it doesn't exist
 	outputDir := filepath.Dir(outputFile)
 	if outputDir != "." {
