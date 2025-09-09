@@ -122,15 +122,15 @@ var visualizeCmd = &cobra.Command{
 	Use:   "visualize",
 	Short: "Visualize an Authorization Model",
 	Long:  "Create a visual representation of an authorization model as an SVG or PNG image.",
-	Example: `fga model visualize --model=model.fga
-fga model visualize --model=model.fga --format=png
-fga model visualize --model=model.fga --output-file=custom-name.svg
-fga model visualize --model=model.fga --output-file=diagram.png`,
+	Example: `fga model visualize --file=model.fga
+fga model visualize --file=model.fga --format=png
+fga model visualize --file=model.fga --output-file=custom-name.svg
+fga model visualize --file=model.fga --output-file=diagram.png`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// Get command flags
-		model, err := cmd.Flags().GetString("model")
+		model, err := cmd.Flags().GetString("file")
 		if err != nil {
-			return fmt.Errorf("failed to get model parameter: %w", err)
+			return fmt.Errorf("failed to get file parameter: %w", err)
 		}
 
 		outputFile, err := cmd.Flags().GetString("output-file")
@@ -566,12 +566,12 @@ func GenerateDiagram(dotContent, outputFile, format string) error {
 }
 
 func init() {
-	visualizeCmd.Flags().String("model", "", "Authorization model file path")
+	visualizeCmd.Flags().String("file", "", "Authorization model file path")
 	visualizeCmd.Flags().String("output-file", "", "Output file path for the visualization"+
 		"(defaults to model filename with format extension)")
 	visualizeCmd.Flags().String("format", "svg", "Output format (svg or png)")
 
-	if err := visualizeCmd.MarkFlagRequired("model"); err != nil {
+	if err := visualizeCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/model/visualize", err)
 	}
 }
