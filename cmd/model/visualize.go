@@ -26,11 +26,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goccy/go-graphviz"
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/output"
 
-	"github.com/goccy/go-graphviz"
 	"github.com/openfga/language/pkg/go/graph"
 	language "github.com/openfga/language/pkg/go/transformer"
 )
@@ -273,6 +273,14 @@ func convertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
 }
 
 func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
+	nodeLabel := generateNodeLabel(node)
+	shape, fillColor, fontColor := getNodeAttributes(node)
+
+	return fmt.Sprintf("  \"%s\" [label=<%s>, shape=%s, fillcolor=\"%s\", style=filled, fontcolor=\"%s\"];\n",
+		escapeNodeName(node.UniqueLabel), nodeLabel, shape, fillColor, fontColor)
+}
+
+func generateNodeLabel(node *WeightedAuthorizationModelNode) string {
 	var labelParts []string
 
 	// Node label (name)
@@ -292,18 +300,7 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 
 	// Node weights
 	if len(node.Weights) > 0 {
-		var weightStrs []string
-
-		for key, weight := range node.Weights {
-			weightStr := strconv.Itoa(weight)
-			if weight == 2147483647 { // Max int32, representing infinity
-				weightStr = "∞"
-			}
-
-			weightStrs = append(weightStrs, fmt.Sprintf("<B>%s</B>: %s", escapeHTML(key), weightStr))
-		}
-
-		labelParts = append(labelParts, strings.Join(weightStrs, ", "))
+		labelParts = append(labelParts, generateWeightLabel(node.Weights))
 	}
 
 	// Node wildcards
@@ -311,15 +308,32 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 		labelParts = append(labelParts, "<B>Wildcards:</B> "+escapeHTML(strings.Join(node.Wildcards, ", ")))
 	}
 
-	// Node attributes
+	return strings.Join(labelParts, "<BR/>")
+}
+
+func generateWeightLabel(weights map[string]int) string {
+	weightStrs := make([]string, 0, len(weights))
+
+	for key, weight := range weights {
+		weightStr := strconv.Itoa(weight)
+		if weight == 2147483647 { // Max int32, representing infinity
+			weightStr = "∞"
+		}
+
+		weightStrs = append(weightStrs, fmt.Sprintf("<B>%s</B>: %s", escapeHTML(key), weightStr))
+	}
+
+	return strings.Join(weightStrs, ", ")
+}
+
+func getNodeAttributes(node *WeightedAuthorizationModelNode) (string, string, string) {
+	// Default values
 	shape := "ellipse"
 	fontColor := "black"
 
 	var fillColor string
 
 	// Only color nodes based on weight if they are NOT specific types or wildcards
-	// Specific types (like user, organization, etc.) and wildcards should remain uncolored
-
 	if node.NodeType == SpecificType || node.NodeType == SpecificTypeWildcard {
 		// Specific types and wildcards get default coloring
 		fillColor = "lightgray"
@@ -338,10 +352,7 @@ func generateNodeDOT(node *WeightedAuthorizationModelNode) string {
 		shape = "box"
 	}
 
-	nodeLabel := strings.Join(labelParts, "<BR/>")
-
-	return fmt.Sprintf("  \"%s\" [label=<%s>, shape=%s, fillcolor=\"%s\", style=filled, fontcolor=\"%s\"];\n",
-		escapeNodeName(node.UniqueLabel), nodeLabel, shape, fillColor, fontColor)
+	return shape, fillColor, fontColor
 }
 
 func generateEdgeDOT(edge *WeightedAuthorizationModelEdge) string {
@@ -506,7 +517,8 @@ func generateDiagram(dotContent, outputFile, format string) error {
 	case "svg":
 		gvFormat = graphviz.SVG
 	default:
-		return fmt.Errorf("unsupported format: %s. Supported formats: png, svg", format)
+		return fmt.Errorf( //nolint:err113
+			"unsupported format: %s. Supported formats: png, svg", format)
 	}
 
 	// Render to buffer

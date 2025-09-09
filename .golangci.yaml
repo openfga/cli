@@ -24,6 +24,7 @@ linters:
             - '!$test'
           allow:
             - $gostd
+            - github.com/goccy/go-graphviz
             - github.com/gocarina/gocsv
             - github.com/hashicorp/go-multierror
             - github.com/mattn/go-isatty
