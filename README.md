@@ -303,22 +303,21 @@ tests:
           assertions:
             member: true
             moderator: false
-      # checks can also be defined for multiple users sharing the same expectation
-      - object: group:employees
-        users:
-      # checks can also target multiple objects with the same expectation
-      - objects:
-          - group:admins
-          - group:employees
-        user: user:1
-        assertions:
-          moderator: false
-      # either "user" or "users" may be provided, but not both
-      # either "object" or "objects" may be provided, but not both
-          - user:3
-          - user:4
-        assertions:
-          member: true
+        # checks can also be defined for multiple users sharing the same expectation
+        - object: group:employees
+          users:
+            - user:1
+            - user:2
+          assertions:
+            member: true
+
+        # checks can also target multiple objects with the same expectation
+        - objects:
+            - group:admins
+            - group:employees
+          user: user:1
+          assertions:
+             member: true
 ```
 
 If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
