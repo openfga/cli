@@ -180,6 +180,156 @@ func convertModularModelToDSL(modFilePath string) (string, error) {
 	return *dslContent, nil
 }
 
+// FilterGraphByRelation filters the graph to show only nodes involved in evaluating a specific relation.
+func FilterGraphByRelation(
+	graph *WeightedAuthorizationModelGraph,
+	relationKey string,
+) *WeightedAuthorizationModelGraph {
+	if relationKey == "" {
+		return graph
+	}
+
+	// Find all nodes that are reachable from the target relation
+	visitedNodes := findRelevantNodes(graph, relationKey)
+	relevantEdges := findRelevantEdges(graph, visitedNodes)
+
+	// Build filtered nodes map
+	filteredNodes := make(map[string]*WeightedAuthorizationModelNode)
+
+	for nodeKey := range visitedNodes {
+		if node, exists := graph.Nodes[nodeKey]; exists {
+			filteredNodes[nodeKey] = node
+		}
+	}
+
+	return &WeightedAuthorizationModelGraph{
+		Nodes: filteredNodes,
+		Edges: relevantEdges,
+	}
+}
+
+// findRelevantNodes performs DFS to find all nodes reachable from the target relation.
+func findRelevantNodes(graph *WeightedAuthorizationModelGraph, relationKey string) map[string]bool {
+	visitedNodes := make(map[string]bool)
+
+	// Start DFS from the target relation node
+	var dfs func(nodeKey string)
+
+	dfs = func(nodeKey string) {
+		if visitedNodes[nodeKey] {
+			return
+		}
+
+		visitedNodes[nodeKey] = true
+
+		// Find all edges that start from this node and traverse to their destinations
+		for _, edges := range graph.Edges {
+			for _, edge := range edges {
+				if edge.From != nil && edge.From.UniqueLabel == nodeKey {
+					// Continue DFS to the destination node
+					if edge.To != nil {
+						dfs(edge.To.UniqueLabel)
+					}
+				}
+			}
+		}
+	}
+
+	dfs(relationKey)
+
+	return visitedNodes
+}
+
+// findRelevantEdges finds all edges that connect the relevant nodes.
+func findRelevantEdges(
+	graph *WeightedAuthorizationModelGraph,
+	visitedNodes map[string]bool,
+) map[string][]*WeightedAuthorizationModelEdge {
+	relevantEdges := make(map[string][]*WeightedAuthorizationModelEdge)
+
+	for edgeKey, edges := range graph.Edges {
+		for _, edge := range edges {
+			// Include edge if both From and To nodes are in our visited set
+			if edge.From != nil && edge.To != nil &&
+				visitedNodes[edge.From.UniqueLabel] && visitedNodes[edge.To.UniqueLabel] {
+				if relevantEdges[edgeKey] == nil {
+					relevantEdges[edgeKey] = []*WeightedAuthorizationModelEdge{}
+				}
+
+				relevantEdges[edgeKey] = append(relevantEdges[edgeKey], edge)
+			}
+		}
+	}
+
+	return relevantEdges
+}
+
+// DisplayWeightSummary displays a summary of weight distribution across all nodes in the graph.
+func DisplayWeightSummary(graph *WeightedAuthorizationModelGraph) {
+	if graph == nil || len(graph.Nodes) == 0 {
+		return
+	}
+
+	// Count relations by weight across all weight types
+	weightCounts := make(map[string]map[int]int) // weightType -> weight -> count
+
+	for _, node := range graph.Nodes {
+		// Only count nodes that represent relations (type#relation format)
+		if node.NodeType == SpecificTypeAndRelation {
+			for weightType, weight := range node.Weights {
+				if weightCounts[weightType] == nil {
+					weightCounts[weightType] = make(map[int]int)
+				}
+				weightCounts[weightType][weight]++
+			}
+		}
+	}
+
+	// Display the summary for each weight type in alphabetical order
+	var weightTypes []string
+	for weightType := range weightCounts {
+		weightTypes = append(weightTypes, weightType)
+	}
+
+	// Sort weight types alphabetically
+	for i := 0; i < len(weightTypes); i++ {
+		for j := i + 1; j < len(weightTypes); j++ {
+			if weightTypes[i] > weightTypes[j] {
+				weightTypes[i], weightTypes[j] = weightTypes[j], weightTypes[i]
+			}
+		}
+	}
+
+	for _, weightType := range weightTypes {
+		counts := weightCounts[weightType]
+		fmt.Printf("\nWeight distribution (%s):\n", weightType)
+
+		// Sort weights for consistent output
+		var weights []int
+		for weight := range counts {
+			weights = append(weights, weight)
+		}
+
+		// Simple sort since Go doesn't have a built-in sort for small slices
+		for i := 0; i < len(weights); i++ {
+			for j := i + 1; j < len(weights); j++ {
+				if weights[i] > weights[j] {
+					weights[i], weights[j] = weights[j], weights[i]
+				}
+			}
+		}
+
+		for _, weight := range weights {
+			count := counts[weight]
+			if weight == 2147483647 {
+				fmt.Printf("  weight ∞: %d relations\n", count)
+			} else {
+				fmt.Printf("  weight %d: %d relations\n", weight, count)
+			}
+		}
+	}
+}
+
 // visualizeCmd represents the visualize command.
 var visualizeCmd = &cobra.Command{
 	Use:   "visualize",
@@ -191,7 +341,9 @@ fga model visualize --file=model.fga --format=png
 fga model visualize --file=model.fga --output-file=custom-name.svg
 fga model visualize --file=model.fga --output-file=diagram.png
 fga model visualize --file=store.fga.yaml
-fga model visualize --file=store.fga.yaml --format=png`,
+fga model visualize --file=store.fga.yaml --format=png
+fga model visualize --file=model.fga --relation="document#viewer"
+fga model visualize --file=model.fga --relation="folder#owner" --format=png`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// Get command flags
 		model, err := cmd.Flags().GetString("file")
@@ -209,6 +361,11 @@ fga model visualize --file=store.fga.yaml --format=png`,
 			return fmt.Errorf("failed to get format parameter: %w", err)
 		}
 
+		relationFilter, err := cmd.Flags().GetString("relation")
+		if err != nil {
+			return fmt.Errorf("failed to get relation parameter: %w", err)
+		}
+
 		// Calculate the final format and output filename
 		format, outputFile = CalculateOutputParameters(model, outputFile, format)
 
@@ -224,6 +381,11 @@ fga model visualize --file=store.fga.yaml --format=png`,
 			log.Fatalf("Error transforming model: %v", err)
 		}
 
+		// Apply relation filter if specified
+		if relationFilter != "" {
+			weightedGraph = FilterGraphByRelation(weightedGraph, relationFilter)
+		}
+
 		// Generate DOT format
 		dotContent := ConvertToGraphvizDOT(weightedGraph)
 
@@ -232,6 +394,9 @@ fga model visualize --file=store.fga.yaml --format=png`,
 		if err != nil {
 			log.Fatalf("Error generating diagram: %v", err)
 		}
+
+		// Display weight distribution summary
+		DisplayWeightSummary(weightedGraph)
 
 		fmt.Printf("Successfully generated diagram: %s\n", outputFile)
 
@@ -635,6 +800,8 @@ func init() {
 	visualizeCmd.Flags().String("output-file", "", "Output file path for the visualization"+
 		"(defaults to model filename with format extension)")
 	visualizeCmd.Flags().String("format", "svg", "Output format (svg or png)")
+	visualizeCmd.Flags().String("relation", "",
+		"Filter graph to show only nodes involved in evaluating this relation (format: type#relation)")
 
 	if err := visualizeCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/model/visualize", err)

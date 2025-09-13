@@ -436,3 +436,188 @@ tests: []
 		}
 	})
 }
+
+// TestFilterGraphByRelation tests the graph filtering functionality.
+func TestFilterGraphByRelation(t *testing.T) {
+	t.Parallel()
+
+	// Create a simple test graph
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"document#viewer": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "viewer",
+			UniqueLabel: "document#viewer",
+			Weights:     map[string]int{"test": 1},
+		},
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+			Weights:     map[string]int{"test": 2},
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+			Weights:     map[string]int{"test": 3},
+		},
+		"group#member": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "member",
+			UniqueLabel: "group#member",
+			Weights:     map[string]int{"test": 4},
+		},
+	}
+
+	edges := map[string][]*WeightedAuthorizationModelEdge{
+		"edge1": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["document#viewer"],
+				To:       nodes["user"],
+				Weights:  map[string]int{"test": 1},
+			},
+		},
+		"edge2": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["document#viewer"],
+				To:       nodes["folder#owner"],
+				Weights:  map[string]int{"test": 2},
+			},
+		},
+		"edge3": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["folder#owner"],
+				To:       nodes["group#member"],
+				Weights:  map[string]int{"test": 3},
+			},
+		},
+	}
+
+	originalGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	tests := []struct {
+		name           string
+		relationFilter string
+		expectedNodes  []string
+		expectedEdges  int
+	}{
+		{
+			name:           "No filter",
+			relationFilter: "",
+			expectedNodes:  []string{"document#viewer", "user", "folder#owner", "group#member"},
+			expectedEdges:  3,
+		},
+		{
+			name:           "Filter by document#viewer",
+			relationFilter: "document#viewer",
+			expectedNodes:  []string{"document#viewer", "user", "folder#owner", "group#member"},
+			expectedEdges:  3, // All nodes are reachable from document#viewer
+		},
+		{
+			name:           "Filter by folder#owner",
+			relationFilter: "folder#owner",
+			expectedNodes:  []string{"folder#owner", "group#member"},
+			expectedEdges:  1, // Only edge3 from folder#owner to group#member
+		},
+		{
+			name:           "Filter by user (leaf node)",
+			relationFilter: "user",
+			expectedNodes:  []string{"user"},
+			expectedEdges:  0, // No outgoing edges from user
+		},
+		{
+			name:           "Non-existent relation",
+			relationFilter: "nonexistent#relation",
+			expectedNodes:  []string{},
+			expectedEdges:  0,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			filteredGraph := FilterGraphByRelation(originalGraph, testCase.relationFilter)
+
+			// Check nodes
+			if len(filteredGraph.Nodes) != len(testCase.expectedNodes) {
+				t.Errorf("Expected %d nodes, got %d", len(testCase.expectedNodes), len(filteredGraph.Nodes))
+			}
+
+			for _, expectedNode := range testCase.expectedNodes {
+				if _, exists := filteredGraph.Nodes[expectedNode]; !exists {
+					t.Errorf("Expected node %s not found in filtered graph", expectedNode)
+				}
+			}
+
+			// Check edges
+			totalEdges := 0
+			for _, edgeList := range filteredGraph.Edges {
+				totalEdges += len(edgeList)
+			}
+
+			if totalEdges != testCase.expectedEdges {
+				t.Errorf("Expected %d edges, got %d", testCase.expectedEdges, totalEdges)
+			}
+		})
+	}
+}
+
+// TestDisplayWeightSummary tests the weight summary display functionality.
+func TestDisplayWeightSummary(t *testing.T) {
+	t.Parallel()
+
+	// Test with nil graph
+	DisplayWeightSummary(nil)
+
+	// Test with empty graph
+	emptyGraph := &WeightedAuthorizationModelGraph{
+		Nodes: make(map[string]*WeightedAuthorizationModelNode),
+		Edges: make(map[string][]*WeightedAuthorizationModelEdge),
+	}
+	DisplayWeightSummary(emptyGraph)
+
+	// Test with graph containing various node types and weights
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"document#viewer": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "viewer",
+			UniqueLabel: "document#viewer",
+			Weights:     map[string]int{"user": 1, "admin": 5},
+		},
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+			Weights:     map[string]int{"user": 2}, // Should be ignored (not a relation)
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+			Weights:     map[string]int{"user": 1, "admin": 3},
+		},
+		"document#can_view": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "can_view",
+			UniqueLabel: "document#can_view",
+			Weights:     map[string]int{"user": 2147483647}, // Test infinity weight
+		},
+	}
+
+	testGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: make(map[string][]*WeightedAuthorizationModelEdge),
+	}
+
+	// This will print to stdout, which is fine for testing
+	DisplayWeightSummary(testGraph)
+
+	// Test passes if no panic occurs
+}
