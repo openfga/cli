@@ -643,6 +643,15 @@ fga model visualize --file=model.fga --graph-type=type --exclude-types="folder"`
 			return fmt.Errorf("invalid graph-type '%s': must be 'weighted' or 'type'", graphType)
 		}
 
+		// Validate flag combinations
+		if graphType == "type" && len(includeRelations) > 0 {
+			return fmt.Errorf("--include-relations cannot be used with --graph-type=type")
+		}
+
+		if graphType == "weighted" && (len(includeTypes) > 0 || len(excludeTypes) > 0) {
+			return fmt.Errorf("--include-types and --exclude-types can only be used with --graph-type=type")
+		}
+
 		// Calculate the final format and output filename
 		format, outputFile = CalculateOutputParameters(model, outputFile, format)
 

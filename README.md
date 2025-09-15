@@ -32,6 +32,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Validate an Authorization Model](#validate-an-authorization-model)
       - [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model)
       - [Transform an Authorization Model](#transform-an-authorization-model)
+      - [Visualize an Authorization Model](#visualize-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
       - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
       - [Read Relationship Tuples](#read-relationship-tuples)
@@ -684,6 +685,88 @@ type user
 type document
   relations
     define can_view: [user]
+```
+
+##### Visualize an Authorization Model
+
+The **visualize** command creates a visual representation of an authorization model as an SVG or PNG image. It supports both `.fga` model files and `.fga.yaml` store files, offering multiple visualization modes and filtering options.
+
+###### Command
+fga model **visualize**
+
+###### Parameters
+* `--file`: Authorization model file path (`.fga` or `.fga.yaml`) (required)
+* `--format`: Output format - `svg` or `png` (optional, default: `svg`)
+* `--output-file`: Output file path for the visualization (optional, defaults to model filename with format extension)
+* `--graph-type`: Type of graph to generate (optional, default: `weighted`)
+  - `weighted`: Shows full model with relationship weights and detailed node information
+  - `type`: Simplified diagram showing only types and their relationships as nodes
+* `--include-relations`: Filter graph to show only nodes involved in evaluating specific relations (optional, comma-separated list, format: `type#relation`)
+* `--include-types`: Include only specific types in the type diagram (optional, comma-separated list, only applies to `type` graph)
+* `--exclude-types`: Exclude specific types from the type diagram (optional, comma-separated list, only applies to `type` graph)
+
+###### Examples
+
+**Basic visualization:**
+```bash
+fga model visualize --file=model.fga
+```
+
+**Generate PNG format:**
+```bash
+fga model visualize --file=model.fga --format=png
+```
+
+**Custom output file:**
+```bash
+fga model visualize --file=model.fga --output-file=diagram.png
+```
+
+**Visualize from YAML store file:**
+```bash
+fga model visualize --file=store.fga.yaml
+```
+
+**Filter by specific relations:**
+```bash
+fga model visualize --file=model.fga --include-relations="document#viewer"
+fga model visualize --file=model.fga --include-relations="document#viewer,folder#owner"
+```
+
+**Type diagram mode:**
+```bash
+fga model visualize --file=model.fga --graph-type=type
+```
+
+**Type diagram with filtering:**
+```bash
+fga model visualize --file=model.fga --graph-type=type --include-types="user,document"
+fga model visualize --file=model.fga --graph-type=type --exclude-types="folder"
+```
+
+###### Output
+The command generates a visual diagram showing:
+
+**Weighted Graph Mode (default):**
+- Authorization model nodes with their types and weights
+- Relationship edges showing connections between nodes
+- Weight distribution summary displayed in the console
+- Detailed node information including conditions and wildcards
+
+**Type Diagram Mode:**
+- Simplified view showing only types as nodes
+- Direct assignable relationships as labeled edges
+- Clean, high-level view of the authorization model structure
+
+###### Response
+```
+Weight distribution (folder):
+  weight 1: 2 relations
+
+Weight distribution (user):
+  weight 1: 4 relations
+  weight ∞: 8 relations
+Successfully generated diagram: model.svg
 ```
 
 #### Relationship Tuples

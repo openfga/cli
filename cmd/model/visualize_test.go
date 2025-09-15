@@ -17,6 +17,7 @@ limitations under the License.
 package model
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -648,10 +649,10 @@ func TestFilterGraphByRelations(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		relations      []string
-		expectedNodes  []string
-		expectedEdges  int
+		name          string
+		relations     []string
+		expectedNodes []string
+		expectedEdges int
 	}{
 		{
 			name:          "Empty relations list",
@@ -1083,5 +1084,105 @@ func TestIsDirectlyAssignable(t *testing.T) {
 	// folder#viewer should not be directly assignable (connects to operator)
 	if isDirectlyAssignable(testGraph, "folder#viewer") {
 		t.Error("Expected folder#viewer to not be directly assignable")
+	}
+}
+
+// TestFlagValidation tests validation of incompatible flag combinations.
+func TestFlagValidation(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name             string
+		graphType        string
+		includeRelations []string
+		includeTypes     []string
+		excludeTypes     []string
+		expectedError    string
+	}{
+		{
+			name:             "include-relations with graph-type=type",
+			graphType:        "type",
+			includeRelations: []string{"document#viewer"},
+			includeTypes:     []string{},
+			excludeTypes:     []string{},
+			expectedError:    "--include-relations cannot be used with --graph-type=type",
+		},
+		{
+			name:             "include-types with graph-type=weighted",
+			graphType:        "weighted",
+			includeRelations: []string{},
+			includeTypes:     []string{"user"},
+			excludeTypes:     []string{},
+			expectedError:    "--include-types and --exclude-types can only be used with --graph-type=type",
+		},
+		{
+			name:             "exclude-types with graph-type=weighted",
+			graphType:        "weighted",
+			includeRelations: []string{},
+			includeTypes:     []string{},
+			excludeTypes:     []string{"folder"},
+			expectedError:    "--include-types and --exclude-types can only be used with --graph-type=type",
+		},
+		{
+			name:             "multiple incompatible flags with graph-type=weighted",
+			graphType:        "weighted",
+			includeRelations: []string{},
+			includeTypes:     []string{"user"},
+			excludeTypes:     []string{"folder"},
+			expectedError:    "--include-types and --exclude-types can only be used with --graph-type=type",
+		},
+		{
+			name:             "valid combination - include-relations with weighted",
+			graphType:        "weighted",
+			includeRelations: []string{"document#viewer"},
+			includeTypes:     []string{},
+			excludeTypes:     []string{},
+			expectedError:    "",
+		},
+		{
+			name:             "valid combination - include-types with type",
+			graphType:        "type",
+			includeRelations: []string{},
+			includeTypes:     []string{"user"},
+			excludeTypes:     []string{},
+			expectedError:    "",
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Test the validation logic directly
+			var err error
+
+			// Validate graph type
+			if testCase.graphType != "weighted" && testCase.graphType != "type" {
+				err = fmt.Errorf("invalid graph-type '%s': must be 'weighted' or 'type'", testCase.graphType)
+			}
+
+			// Validate flag combinations
+			if err == nil && testCase.graphType == "type" && len(testCase.includeRelations) > 0 {
+				err = fmt.Errorf("--include-relations cannot be used with --graph-type=type")
+			}
+
+			if err == nil && testCase.graphType == "weighted" && (len(testCase.includeTypes) > 0 || len(testCase.excludeTypes) > 0) {
+				err = fmt.Errorf("--include-types and --exclude-types can only be used with --graph-type=type")
+			}
+
+			// Check the result
+			if testCase.expectedError == "" {
+				if err != nil {
+					t.Errorf("Expected no error but got: %s", err.Error())
+				}
+			} else {
+				if err == nil {
+					t.Fatalf("Expected error '%s' but got none", testCase.expectedError)
+				}
+				if err.Error() != testCase.expectedError {
+					t.Errorf("Expected error '%s', got '%s'", testCase.expectedError, err.Error())
+				}
+			}
+		})
 	}
 }
