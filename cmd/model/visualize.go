@@ -86,6 +86,26 @@ type WeightedAuthorizationModelNode struct {
 	Wildcards   []string
 }
 
+// TypeDiagram represents a simplified graph with types as nodes and relations as edges.
+type TypeDiagram struct {
+	Types     map[string]*TypeNode
+	Relations []*TypeRelation
+}
+
+// TypeNode represents a type in the type diagram.
+type TypeNode struct {
+	Name  string
+	Label string
+}
+
+// TypeRelation represents a direct assignable relation between types.
+type TypeRelation struct {
+	FromType      string
+	ToType        string
+	RelationName  string
+	RelationLabel string
+}
+
 // DetectFormatFromExtension determines the format based on the output file extension.
 // If the extension is .svg or .png, it returns that format, otherwise returns the original format.
 func DetectFormatFromExtension(outputFile, originalFormat string) string {
@@ -180,6 +200,163 @@ func convertModularModelToDSL(modFilePath string) (string, error) {
 	return *dslContent, nil
 }
 
+// CreateTypeDiagram creates a simplified type diagram from a weighted graph.
+func CreateTypeDiagram(graph *WeightedAuthorizationModelGraph, includeTypes []string, excludeTypes []string) *TypeDiagram {
+	typeDiagram := &TypeDiagram{
+		Types:     make(map[string]*TypeNode),
+		Relations: []*TypeRelation{},
+	}
+
+	// Helper function to check if a type should be included
+	shouldIncludeType := func(typeName string) bool {
+		// If includeTypes is specified, only include types in that list
+		if len(includeTypes) > 0 {
+			found := false
+			for _, includeType := range includeTypes {
+				if typeName == includeType {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
+		}
+
+		// If excludeTypes is specified, exclude types in that list
+		if len(excludeTypes) > 0 {
+			for _, excludeType := range excludeTypes {
+				if typeName == excludeType {
+					return false
+				}
+			}
+		}
+
+		return true
+	}
+
+	// Collect all types (filtered)
+	for _, node := range graph.Nodes {
+		if node.NodeType == SpecificType && shouldIncludeType(node.UniqueLabel) {
+			typeDiagram.Types[node.UniqueLabel] = &TypeNode{
+				Name:  node.UniqueLabel,
+				Label: node.Label,
+			}
+		}
+	}
+
+	// Find direct assignable relations between types
+	for _, node := range graph.Nodes {
+		if node.NodeType == SpecificTypeAndRelation {
+			// Check if this relation is directly assignable
+			if isDirectlyAssignable(graph, node.UniqueLabel) {
+				// Find what types this relation connects to
+				relationParts := strings.Split(node.UniqueLabel, "#")
+				if len(relationParts) == 2 {
+					fromType := relationParts[0]
+					relationName := relationParts[1]
+
+					// Only proceed if fromType should be included
+					if !shouldIncludeType(fromType) {
+						continue
+					}
+
+					// Find target types by following edges
+					for _, edges := range graph.Edges {
+						for _, edge := range edges {
+							if edge.From != nil && edge.From.UniqueLabel == node.UniqueLabel &&
+								edge.To != nil && edge.To.NodeType == SpecificType {
+
+								toType := edge.To.UniqueLabel
+
+								// Only proceed if toType should be included
+								if !shouldIncludeType(toType) {
+									continue
+								}
+
+								// Add both types if they don't exist
+								if _, exists := typeDiagram.Types[fromType]; !exists {
+									typeDiagram.Types[fromType] = &TypeNode{
+										Name:  fromType,
+										Label: fromType,
+									}
+								}
+								if _, exists := typeDiagram.Types[toType]; !exists {
+									typeDiagram.Types[toType] = &TypeNode{
+										Name:  toType,
+										Label: toType,
+									}
+								}
+
+								// Add the relation
+								typeDiagram.Relations = append(typeDiagram.Relations, &TypeRelation{
+									FromType:      fromType,
+									ToType:        toType,
+									RelationName:  relationName,
+									RelationLabel: relationName,
+								})
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return typeDiagram
+}
+
+// ConvertTypeDiagramToGraphvizDOT converts a type diagram to Graphviz DOT format.
+func ConvertTypeDiagramToGraphvizDOT(typeDiagram *TypeDiagram) string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString("digraph TypeDiagram {\n")
+	buffer.WriteString("  rankdir=TB;\n")
+	buffer.WriteString("  node [shape=box, style=filled, fillcolor=lightblue];\n")
+	buffer.WriteString("  edge [fontsize=10];\n\n")
+
+	// Add type nodes
+	for _, typeNode := range typeDiagram.Types {
+		buffer.WriteString(fmt.Sprintf("  \"%s\" [label=\"%s\"];\n",
+			typeNode.Name, typeNode.Label))
+	}
+
+	buffer.WriteString("\n")
+
+	// Add relation edges
+	for _, relation := range typeDiagram.Relations {
+		buffer.WriteString(fmt.Sprintf("  \"%s\" -> \"%s\" [label=\"%s\"];\n",
+			relation.ToType, relation.FromType, relation.RelationLabel))
+	}
+
+	buffer.WriteString("}\n")
+	return buffer.String()
+}
+
+// isDirectlyAssignable determines if a relation is directly assignable.
+func isDirectlyAssignable(graph *WeightedAuthorizationModelGraph, relationKey string) bool {
+	hasDirectTypeConnection := false
+	hasOperatorConnection := false
+
+	for _, edges := range graph.Edges {
+		for _, edge := range edges {
+			if edge.From != nil && edge.From.UniqueLabel == relationKey && edge.To != nil {
+				targetNode := graph.Nodes[edge.To.UniqueLabel]
+				if targetNode != nil {
+					switch targetNode.NodeType {
+					case SpecificType:
+						hasDirectTypeConnection = true
+					case OperatorNodeType:
+						hasOperatorConnection = true
+					}
+				}
+			}
+		}
+	}
+
+	return hasDirectTypeConnection && !hasOperatorConnection
+}
+
 // FilterGraphByRelation filters the graph to show only nodes involved in evaluating a specific relation.
 func FilterGraphByRelation(
 	graph *WeightedAuthorizationModelGraph,
@@ -264,6 +441,43 @@ func findRelevantEdges(
 	return relevantEdges
 }
 
+// FilterGraphByRelations filters the graph to show only nodes involved in evaluating any of the specified relations.
+func FilterGraphByRelations(
+	graph *WeightedAuthorizationModelGraph,
+	relationKeys []string,
+) *WeightedAuthorizationModelGraph {
+	if len(relationKeys) == 0 {
+		return graph
+	}
+
+	// Find all nodes that are reachable from any of the target relations
+	allVisitedNodes := make(map[string]bool)
+
+	for _, relationKey := range relationKeys {
+		visitedNodes := findRelevantNodes(graph, relationKey)
+		// Merge visited nodes from this relation into the overall set
+		for nodeKey := range visitedNodes {
+			allVisitedNodes[nodeKey] = true
+		}
+	}
+
+	relevantEdges := findRelevantEdges(graph, allVisitedNodes)
+
+	// Build filtered nodes map
+	filteredNodes := make(map[string]*WeightedAuthorizationModelNode)
+
+	for nodeKey := range allVisitedNodes {
+		if node, exists := graph.Nodes[nodeKey]; exists {
+			filteredNodes[nodeKey] = node
+		}
+	}
+
+	return &WeightedAuthorizationModelGraph{
+		Nodes: filteredNodes,
+		Edges: relevantEdges,
+	}
+}
+
 // DisplayWeightSummary displays a summary of weight distribution across all nodes in the graph.
 func DisplayWeightSummary(graph *WeightedAuthorizationModelGraph) {
 	if graph == nil || len(graph.Nodes) == 0 {
@@ -342,8 +556,12 @@ fga model visualize --file=model.fga --output-file=custom-name.svg
 fga model visualize --file=model.fga --output-file=diagram.png
 fga model visualize --file=store.fga.yaml
 fga model visualize --file=store.fga.yaml --format=png
-fga model visualize --file=model.fga --relation="document#viewer"
-fga model visualize --file=model.fga --relation="folder#owner" --format=png`,
+fga model visualize --file=model.fga --include-relations="document#viewer"
+fga model visualize --file=model.fga --include-relations="folder#owner" --format=png
+fga model visualize --file=model.fga --include-relations="document#viewer,folder#owner"
+fga model visualize --file=model.fga --graph-type=type
+fga model visualize --file=model.fga --graph-type=type --include-types="user,document"
+fga model visualize --file=model.fga --graph-type=type --exclude-types="folder"`,
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// Get command flags
 		model, err := cmd.Flags().GetString("file")
@@ -361,9 +579,29 @@ fga model visualize --file=model.fga --relation="folder#owner" --format=png`,
 			return fmt.Errorf("failed to get format parameter: %w", err)
 		}
 
-		relationFilter, err := cmd.Flags().GetString("relation")
+		includeRelations, err := cmd.Flags().GetStringSlice("include-relations")
 		if err != nil {
-			return fmt.Errorf("failed to get relation parameter: %w", err)
+			return fmt.Errorf("failed to get include-relations parameter: %w", err)
+		}
+
+		graphType, err := cmd.Flags().GetString("graph-type")
+		if err != nil {
+			return fmt.Errorf("failed to get graph-type parameter: %w", err)
+		}
+
+		includeTypes, err := cmd.Flags().GetStringSlice("include-types")
+		if err != nil {
+			return fmt.Errorf("failed to get include-types parameter: %w", err)
+		}
+
+		excludeTypes, err := cmd.Flags().GetStringSlice("exclude-types")
+		if err != nil {
+			return fmt.Errorf("failed to get exclude-types parameter: %w", err)
+		}
+
+		// Validate graph type
+		if graphType != "weighted" && graphType != "type" {
+			return fmt.Errorf("invalid graph-type '%s': must be 'weighted' or 'type'", graphType)
 		}
 
 		// Calculate the final format and output filename
@@ -381,9 +619,23 @@ fga model visualize --file=model.fga --relation="folder#owner" --format=png`,
 			log.Fatalf("Error transforming model: %v", err)
 		}
 
+		// Handle type diagram mode
+		if graphType == "type" {
+			typeDiagramGraph := CreateTypeDiagram(weightedGraph, includeTypes, excludeTypes)
+			dotContent := ConvertTypeDiagramToGraphvizDOT(typeDiagramGraph)
+
+			err = GenerateDiagram(dotContent, outputFile, format)
+			if err != nil {
+				log.Fatalf("Error generating diagram: %v", err)
+			}
+
+			fmt.Printf("Successfully generated type diagram: %s\n", outputFile)
+			return output.Display(output.EmptyStruct{})
+		}
+
 		// Apply relation filter if specified
-		if relationFilter != "" {
-			weightedGraph = FilterGraphByRelation(weightedGraph, relationFilter)
+		if len(includeRelations) > 0 {
+			weightedGraph = FilterGraphByRelations(weightedGraph, includeRelations)
 		}
 
 		// Generate DOT format
@@ -800,8 +1052,14 @@ func init() {
 	visualizeCmd.Flags().String("output-file", "", "Output file path for the visualization"+
 		"(defaults to model filename with format extension)")
 	visualizeCmd.Flags().String("format", "svg", "Output format (svg or png)")
-	visualizeCmd.Flags().String("relation", "",
-		"Filter graph to show only nodes involved in evaluating this relation (format: type#relation)")
+	visualizeCmd.Flags().StringSlice("include-relations", []string{},
+		"Filter graph to show only nodes involved in evaluating these relations (comma-separated list, format: type#relation)")
+	visualizeCmd.Flags().String("graph-type", "weighted",
+		"Type of graph to generate: 'weighted' (default, shows full model with weights) or 'type' (simplified diagram with types as nodes)")
+	visualizeCmd.Flags().StringSlice("include-types", []string{},
+		"Include only these types in the type diagram (comma-separated list, only applies to 'type' graph)")
+	visualizeCmd.Flags().StringSlice("exclude-types", []string{},
+		"Exclude these types from the type diagram (comma-separated list, only applies to 'type' graph)")
 
 	if err := visualizeCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/model/visualize", err)

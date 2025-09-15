@@ -569,6 +569,164 @@ func TestFilterGraphByRelation(t *testing.T) {
 	}
 }
 
+// TestFilterGraphByRelations tests the multiple relations filtering functionality.
+func TestFilterGraphByRelations(t *testing.T) {
+	t.Parallel()
+
+	// Create a simple test graph
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"document#viewer": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "viewer",
+			UniqueLabel: "document#viewer",
+			Weights:     map[string]int{"test": 1},
+		},
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+			Weights:     map[string]int{"test": 2},
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+			Weights:     map[string]int{"test": 3},
+		},
+		"group#member": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "member",
+			UniqueLabel: "group#member",
+			Weights:     map[string]int{"test": 4},
+		},
+		"role#assignee": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "assignee",
+			UniqueLabel: "role#assignee",
+			Weights:     map[string]int{"test": 5},
+		},
+	}
+
+	edges := map[string][]*WeightedAuthorizationModelEdge{
+		"edge1": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["document#viewer"],
+				To:       nodes["user"],
+				Weights:  map[string]int{"test": 1},
+			},
+		},
+		"edge2": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["document#viewer"],
+				To:       nodes["folder#owner"],
+				Weights:  map[string]int{"test": 2},
+			},
+		},
+		"edge3": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["folder#owner"],
+				To:       nodes["group#member"],
+				Weights:  map[string]int{"test": 3},
+			},
+		},
+		"edge4": {
+			{
+				EdgeType: "Direct Edge",
+				From:     nodes["role#assignee"],
+				To:       nodes["user"],
+				Weights:  map[string]int{"test": 4},
+			},
+		},
+	}
+
+	originalGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	tests := []struct {
+		name           string
+		relations      []string
+		expectedNodes  []string
+		expectedEdges  int
+	}{
+		{
+			name:          "Empty relations list",
+			relations:     []string{},
+			expectedNodes: []string{"document#viewer", "user", "folder#owner", "group#member", "role#assignee"},
+			expectedEdges: 4,
+		},
+		{
+			name:          "Single relation",
+			relations:     []string{"document#viewer"},
+			expectedNodes: []string{"document#viewer", "user", "folder#owner", "group#member"},
+			expectedEdges: 3, // All nodes reachable from document#viewer
+		},
+		{
+			name:          "Multiple relations - overlapping",
+			relations:     []string{"document#viewer", "folder#owner"},
+			expectedNodes: []string{"document#viewer", "user", "folder#owner", "group#member"},
+			expectedEdges: 3, // Same as single document#viewer since folder#owner is reachable from it
+		},
+		{
+			name:          "Multiple relations - non-overlapping",
+			relations:     []string{"folder#owner", "role#assignee"},
+			expectedNodes: []string{"folder#owner", "group#member", "role#assignee", "user"},
+			expectedEdges: 2, // edge3 and edge4
+		},
+		{
+			name:          "Single leaf relation",
+			relations:     []string{"user"},
+			expectedNodes: []string{"user"},
+			expectedEdges: 0, // No outgoing edges from user
+		},
+		{
+			name:          "Non-existent relation",
+			relations:     []string{"nonexistent#relation"},
+			expectedNodes: []string{},
+			expectedEdges: 0,
+		},
+		{
+			name:          "Mix of existing and non-existent relations",
+			relations:     []string{"user", "nonexistent#relation"},
+			expectedNodes: []string{"user"},
+			expectedEdges: 0,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			filteredGraph := FilterGraphByRelations(originalGraph, testCase.relations)
+
+			// Check nodes
+			if len(filteredGraph.Nodes) != len(testCase.expectedNodes) {
+				t.Errorf("Expected %d nodes, got %d", len(testCase.expectedNodes), len(filteredGraph.Nodes))
+			}
+
+			for _, expectedNode := range testCase.expectedNodes {
+				if _, exists := filteredGraph.Nodes[expectedNode]; !exists {
+					t.Errorf("Expected node %s not found in filtered graph", expectedNode)
+				}
+			}
+
+			// Check edges
+			totalEdges := 0
+			for _, edgeList := range filteredGraph.Edges {
+				totalEdges += len(edgeList)
+			}
+
+			if totalEdges != testCase.expectedEdges {
+				t.Errorf("Expected %d edges, got %d", testCase.expectedEdges, totalEdges)
+			}
+		})
+	}
+}
+
 // TestDisplayWeightSummary tests the weight summary display functionality.
 func TestDisplayWeightSummary(t *testing.T) {
 	t.Parallel()
@@ -620,4 +778,310 @@ func TestDisplayWeightSummary(t *testing.T) {
 	DisplayWeightSummary(testGraph)
 
 	// Test passes if no panic occurs
+}
+
+// TestCreateTypeDiagram tests the type diagram creation functionality.
+func TestCreateTypeDiagram(t *testing.T) {
+	t.Parallel()
+
+	// Create a simple test graph
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+		},
+		"folder": {
+			NodeType:    SpecificType,
+			Label:       "folder",
+			UniqueLabel: "folder",
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+		},
+		"folder#parent": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "parent",
+			UniqueLabel: "folder#parent",
+		},
+		"union:test": {
+			NodeType:    OperatorNodeType,
+			Label:       "union",
+			UniqueLabel: "union:test",
+		},
+	}
+
+	edges := map[string][]*WeightedAuthorizationModelEdge{
+		"folder#owner": {
+			{
+				From: nodes["folder#owner"],
+				To:   nodes["user"],
+			},
+		},
+		"folder#parent": {
+			{
+				From: nodes["folder#parent"],
+				To:   nodes["folder"],
+			},
+		},
+		"folder#viewer": {
+			{
+				From: nodes["folder#viewer"],
+				To:   nodes["union:test"],
+			},
+		},
+	}
+
+	testGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	typeDiagram := CreateTypeDiagram(testGraph, []string{}, []string{})
+
+	// Check that we have the expected types
+	if len(typeDiagram.Types) != 2 {
+		t.Errorf("Expected 2 types, got %d", len(typeDiagram.Types))
+	}
+
+	if _, exists := typeDiagram.Types["user"]; !exists {
+		t.Error("Expected 'user' type to exist")
+	}
+
+	if _, exists := typeDiagram.Types["folder"]; !exists {
+		t.Error("Expected 'folder' type to exist")
+	}
+
+	// Check that we have some relations
+	if len(typeDiagram.Relations) == 0 {
+		t.Error("Expected at least one relation in type diagram")
+	}
+}
+
+// TestCreateTypeDiagramWithIncludeTypes tests type diagram creation with include filter.
+func TestCreateTypeDiagramWithIncludeTypes(t *testing.T) {
+	t.Parallel()
+
+	// Create a test graph with multiple types
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+		},
+		"folder": {
+			NodeType:    SpecificType,
+			Label:       "folder",
+			UniqueLabel: "folder",
+		},
+		"document": {
+			NodeType:    SpecificType,
+			Label:       "document",
+			UniqueLabel: "document",
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+		},
+	}
+
+	edges := map[string][]*WeightedAuthorizationModelEdge{
+		"folder#owner": {
+			{
+				From: nodes["folder#owner"],
+				To:   nodes["user"],
+			},
+		},
+	}
+
+	testGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	// Test with include filter for only "user" and "folder"
+	typeDiagram := CreateTypeDiagram(testGraph, []string{"user", "folder"}, []string{})
+
+	// Should only have user and folder types
+	if len(typeDiagram.Types) != 2 {
+		t.Errorf("Expected 2 types with include filter, got %d", len(typeDiagram.Types))
+	}
+
+	if _, exists := typeDiagram.Types["user"]; !exists {
+		t.Error("Expected 'user' type to exist with include filter")
+	}
+
+	if _, exists := typeDiagram.Types["folder"]; !exists {
+		t.Error("Expected 'folder' type to exist with include filter")
+	}
+
+	if _, exists := typeDiagram.Types["document"]; exists {
+		t.Error("Expected 'document' type to be excluded with include filter")
+	}
+}
+
+// TestCreateTypeDiagramWithExcludeTypes tests type diagram creation with exclude filter.
+func TestCreateTypeDiagramWithExcludeTypes(t *testing.T) {
+	t.Parallel()
+
+	// Create a test graph with multiple types
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+		},
+		"folder": {
+			NodeType:    SpecificType,
+			Label:       "folder",
+			UniqueLabel: "folder",
+		},
+		"document": {
+			NodeType:    SpecificType,
+			Label:       "document",
+			UniqueLabel: "document",
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+		},
+	}
+
+	edges := map[string][]*WeightedAuthorizationModelEdge{
+		"folder#owner": {
+			{
+				From: nodes["folder#owner"],
+				To:   nodes["user"],
+			},
+		},
+	}
+
+	testGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	// Test with exclude filter for "document"
+	typeDiagram := CreateTypeDiagram(testGraph, []string{}, []string{"document"})
+
+	// Should have user and folder, but not document
+	if _, exists := typeDiagram.Types["user"]; !exists {
+		t.Error("Expected 'user' type to exist with exclude filter")
+	}
+
+	if _, exists := typeDiagram.Types["folder"]; !exists {
+		t.Error("Expected 'folder' type to exist with exclude filter")
+	}
+
+	if _, exists := typeDiagram.Types["document"]; exists {
+		t.Error("Expected 'document' type to be excluded with exclude filter")
+	}
+}
+
+// TestConvertTypeDiagramToGraphvizDOT tests the DOT format conversion.
+func TestConvertTypeDiagramToGraphvizDOT(t *testing.T) {
+	t.Parallel()
+
+	typeDiagram := &TypeDiagram{
+		Types: map[string]*TypeNode{
+			"user": {
+				Name:  "user",
+				Label: "user",
+			},
+			"folder": {
+				Name:  "folder",
+				Label: "folder",
+			},
+		},
+		Relations: []*TypeRelation{
+			{
+				FromType:      "folder",
+				ToType:        "user",
+				RelationName:  "owner",
+				RelationLabel: "owner",
+			},
+		},
+	}
+
+	dotOutput := ConvertTypeDiagramToGraphvizDOT(typeDiagram)
+
+	// Check that the output contains expected elements
+	if !strings.Contains(dotOutput, "digraph TypeDiagram") {
+		t.Error("Expected DOT output to contain 'digraph TypeDiagram'")
+	}
+
+	if !strings.Contains(dotOutput, "\"user\"") {
+		t.Error("Expected DOT output to contain user node")
+	}
+
+	if !strings.Contains(dotOutput, "\"folder\"") {
+		t.Error("Expected DOT output to contain folder node")
+	}
+
+	if !strings.Contains(dotOutput, "\"user\" -> \"folder\" [label=\"owner\"]") {
+		t.Error("Expected DOT output to contain user->folder edge with owner label")
+	}
+}
+
+// TestIsDirectlyAssignable tests the direct assignability check.
+func TestIsDirectlyAssignable(t *testing.T) {
+	t.Parallel()
+
+	// Create a test graph
+	nodes := map[string]*WeightedAuthorizationModelNode{
+		"user": {
+			NodeType:    SpecificType,
+			Label:       "user",
+			UniqueLabel: "user",
+		},
+		"folder#owner": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "owner",
+			UniqueLabel: "folder#owner",
+		},
+		"folder#viewer": {
+			NodeType:    SpecificTypeAndRelation,
+			Label:       "viewer",
+			UniqueLabel: "folder#viewer",
+		},
+		"union:test": {
+			NodeType:    OperatorNodeType,
+			Label:       "union",
+			UniqueLabel: "union:test",
+		},
+	}
+
+	edges := map[string][]*WeightedAuthorizationModelEdge{
+		"folder#owner": {
+			{
+				From: nodes["folder#owner"],
+				To:   nodes["user"],
+			},
+		},
+		"folder#viewer": {
+			{
+				From: nodes["folder#viewer"],
+				To:   nodes["union:test"],
+			},
+		},
+	}
+
+	testGraph := &WeightedAuthorizationModelGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	// folder#owner should be directly assignable (connects directly to user type)
+	if !isDirectlyAssignable(testGraph, "folder#owner") {
+		t.Error("Expected folder#owner to be directly assignable")
+	}
+
+	// folder#viewer should not be directly assignable (connects to operator)
+	if isDirectlyAssignable(testGraph, "folder#viewer") {
+		t.Error("Expected folder#viewer to not be directly assignable")
+	}
 }
