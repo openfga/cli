@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -235,8 +236,15 @@ func CreateTypeDiagram(graph *WeightedAuthorizationModelGraph, includeTypes []st
 		return true
 	}
 
-	// Collect all types (filtered)
-	for _, node := range graph.Nodes {
+	// Collect all types (filtered) in deterministic order
+	nodeKeys := make([]string, 0, len(graph.Nodes))
+	for nodeKey := range graph.Nodes {
+		nodeKeys = append(nodeKeys, nodeKey)
+	}
+	sort.Strings(nodeKeys)
+
+	for _, nodeKey := range nodeKeys {
+		node := graph.Nodes[nodeKey]
 		if node.NodeType == SpecificType && shouldIncludeType(node.UniqueLabel) {
 			typeDiagram.Types[node.UniqueLabel] = &TypeNode{
 				Name:  node.UniqueLabel,
@@ -245,8 +253,9 @@ func CreateTypeDiagram(graph *WeightedAuthorizationModelGraph, includeTypes []st
 		}
 	}
 
-	// Find direct assignable relations between types
-	for _, node := range graph.Nodes {
+	// Find direct assignable relations between types in deterministic order
+	for _, nodeKey := range nodeKeys {
+		node := graph.Nodes[nodeKey]
 		if node.NodeType == SpecificTypeAndRelation {
 			// Check if this relation is directly assignable
 			if isDirectlyAssignable(graph, node.UniqueLabel) {
@@ -261,8 +270,15 @@ func CreateTypeDiagram(graph *WeightedAuthorizationModelGraph, includeTypes []st
 						continue
 					}
 
-					// Find target types by following edges
-					for _, edges := range graph.Edges {
+					// Find target types by following edges in deterministic order
+					edgeKeys := make([]string, 0, len(graph.Edges))
+					for edgeKey := range graph.Edges {
+						edgeKeys = append(edgeKeys, edgeKey)
+					}
+					sort.Strings(edgeKeys)
+
+					for _, edgeKey := range edgeKeys {
+						edges := graph.Edges[edgeKey]
 						for _, edge := range edges {
 							if edge.From != nil && edge.From.UniqueLabel == node.UniqueLabel &&
 								edge.To != nil && edge.To.NodeType == SpecificType {
@@ -315,16 +331,39 @@ func ConvertTypeDiagramToGraphvizDOT(typeDiagram *TypeDiagram) string {
 	buffer.WriteString("  node [shape=box, style=filled, fillcolor=lightblue];\n")
 	buffer.WriteString("  edge [fontsize=10];\n\n")
 
-	// Add type nodes
+	// Sort types by name for deterministic output
+	typeNames := make([]string, 0, len(typeDiagram.Types))
+	typeMap := make(map[string]*TypeNode)
 	for _, typeNode := range typeDiagram.Types {
+		typeNames = append(typeNames, typeNode.Name)
+		typeMap[typeNode.Name] = typeNode
+	}
+	sort.Strings(typeNames)
+
+	// Add type nodes in sorted order
+	for _, typeName := range typeNames {
+		typeNode := typeMap[typeName]
 		buffer.WriteString(fmt.Sprintf("  \"%s\" [label=\"%s\"];\n",
 			typeNode.Name, typeNode.Label))
 	}
 
 	buffer.WriteString("\n")
 
-	// Add relation edges
-	for _, relation := range typeDiagram.Relations {
+	// Sort relations for deterministic output
+	sortedRelations := make([]*TypeRelation, len(typeDiagram.Relations))
+	copy(sortedRelations, typeDiagram.Relations)
+	sort.Slice(sortedRelations, func(i, j int) bool {
+		if sortedRelations[i].FromType != sortedRelations[j].FromType {
+			return sortedRelations[i].FromType < sortedRelations[j].FromType
+		}
+		if sortedRelations[i].ToType != sortedRelations[j].ToType {
+			return sortedRelations[i].ToType < sortedRelations[j].ToType
+		}
+		return sortedRelations[i].RelationLabel < sortedRelations[j].RelationLabel
+	})
+
+	// Add relation edges in sorted order
+	for _, relation := range sortedRelations {
 		buffer.WriteString(fmt.Sprintf("  \"%s\" -> \"%s\" [label=\"%s\"];\n",
 			relation.ToType, relation.FromType, relation.RelationLabel))
 	}
@@ -756,8 +795,16 @@ func ConvertToGraphvizDOT(graph *WeightedAuthorizationModelGraph) string {
 	// Track processed nodes to avoid duplicates
 	processedNodes := make(map[string]bool)
 
-	// Process edges and their connected nodes
-	for _, edgeGroup := range graph.Edges {
+	// Get edge keys and sort them for deterministic output
+	edgeKeys := make([]string, 0, len(graph.Edges))
+	for edgeKey := range graph.Edges {
+		edgeKeys = append(edgeKeys, edgeKey)
+	}
+	sort.Strings(edgeKeys)
+
+	// Process edges in sorted order
+	for _, edgeKey := range edgeKeys {
+		edgeGroup := graph.Edges[edgeKey]
 		for _, edge := range edgeGroup {
 			// Process From node
 			if edge.From != nil && !processedNodes[edge.From.UniqueLabel] {
