@@ -758,6 +758,31 @@ The command generates a visual diagram showing:
 - Direct assignable relationships as labeled edges
 - Clean, high-level view of the authorization model structure
 
+###### Understanding Weights
+
+In OpenFGA authorization models, **weights** represent the computational complexity of evaluating relationships. The visualize command calculates and displays weight distribution to help you understand the performance characteristics of your model. 
+
+**What are weights?**
+- Weights measure how many steps are required to evaluate a relationship
+- Lower weights indicate simpler, more direct relationships
+- Higher weights suggest more complex relationship chains or computations
+- Weight ∞ (infinity) indicates relationships that can potentially lead to infinite loops or very complex evaluations
+
+**How weights are calculated:**
+- **Weight 1**: Direct assignments (e.g., `define owner: [user]`)
+- **Weight 2+**: Computed relationships involving unions, intersections, or references to other relations
+- **Weight ∞**: Relations that could lead to cycles or unbounded computations (e.g., recursive parent-child relationships)
+
+**Using weight information:**
+- **Performance optimization**: Focus on reducing high-weight relations for better query performance
+- **Model complexity analysis**: Identify overly complex relationship definitions
+- **Debugging**: High weights may indicate unintended complexity in your authorization logic
+- **Capacity planning**: Models with many high-weight relations may need more computational resources
+
+**Weights and Performance:**
+
+Performance is impacted by relation weight and tuple distribution. Is not the same a two-level recursive relation than a ten-level one, or a `relation from parent` relation when there's one parent or 100k parents.
+
 ###### Response
 ```
 Weight distribution (folder):
