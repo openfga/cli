@@ -259,65 +259,65 @@ fga store **export**
 ```yaml
 name: Test
 model: |+
-    model
-      schema 1.1
+  model
+    schema 1.1
 
-    type user
+  type user
 
-    type group
-      relations
-        define member: [user]
-        define moderator: [user]
+  type group
+    relations
+      define member: [user]
+      define moderator: [user]
 
 tuples:
-    - user: user:1
-      relation: member
-      object: group:admins
-    - user: user:1
-      relation: member
-      object: group:employees
-    - user: user:2
-      relation: member
-      object: group:employees
-    - user: user:1
-      relation: moderator
-      object: group:employees
+  - user: user:1
+    relation: member
+    object: group:admins
+  - user: user:1
+    relation: member
+    object: group:employees
+  - user: user:2
+    relation: member
+    object: group:employees
+  - user: user:1
+    relation: moderator
+    object: group:employees
 tests:
-    - name: Tests
-      check:
-        - user: user:1
-          object: group:admins
-          assertions:
-            member: true
-        - user: user:2
-          object: group:admins
-          assertions:
-            member: false
-        - user: user:1
-          object: group:employees
-          assertions:
-            member: true
-            moderator: true
-        - user: user:2
-          object: group:employees
-          assertions:
-            member: true
-            moderator: false
-        # checks can also be defined for multiple users sharing the same expectation
-        - object: group:employees
-          users:
-            - user:1
-            - user:2
-          assertions:
-            member: true
+  - name: Tests
+    check:
+      - user: user:1
+        object: group:admins
+        assertions:
+          member: true
+      - user: user:2
+        object: group:admins
+        assertions:
+          member: false
+      - user: user:1
+        object: group:employees
+        assertions:
+          member: true
+          moderator: true
+      - user: user:2
+        object: group:employees
+        assertions:
+          member: true
+          moderator: false
+      # checks can also be defined for multiple users sharing the same expectation
+      - object: group:employees
+        users:
+          - user:1
+          - user:2
+        assertions:
+          member: true
 
-        # checks can also target multiple objects with the same expectation
-        - objects:
-            - group:admins
-            - group:employees
-          user: user:1
-          assertions:
-             member: true
+      # checks can also target multiple objects with the same expectation
+      - objects:
+          - group:admins
+          - group:employees
+        user: user:1
+        assertions:
+          member: true
 ```
 
 If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
