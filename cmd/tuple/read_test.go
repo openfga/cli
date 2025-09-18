@@ -57,6 +57,7 @@ func TestReadError(t *testing.T) {
 		"reader",
 		"document:doc1",
 		5,
+		tuple.DefaultReadPageSize,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
 	if err == nil {
@@ -108,6 +109,7 @@ func TestReadEmpty(t *testing.T) {
 		"reader",
 		"document:doc1",
 		5,
+		tuple.DefaultReadPageSize,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
 	if err != nil {
@@ -192,6 +194,7 @@ func TestReadSinglePage(t *testing.T) {
 		"reader",
 		"document:doc1",
 		5,
+		tuple.DefaultReadPageSize,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
 	if err != nil {
@@ -316,6 +319,7 @@ func TestReadMultiPages(t *testing.T) {
 		"reader",
 		"document:doc1",
 		5,
+		tuple.DefaultReadPageSize,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
 	if err != nil {
@@ -400,6 +404,7 @@ func TestReadMultiPagesMaxLimit(t *testing.T) {
 		"reader",
 		"document:doc1",
 		1,
+		tuple.DefaultReadPageSize,
 		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
 	)
 	if err != nil {
@@ -484,4 +489,214 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 
 func toPointer[T any](p T) *T {
 	return &p
+}
+
+// Test page size behavior based on max-pages parameter.
+func TestReadWithPageSize100WhenMaxPagesIsZero(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+
+	var tuples []openfga.Tuple
+
+	response := openfga.ReadResponse{
+		Tuples:            tuples,
+		ContinuationToken: "",
+	}
+
+	mockExecute.EXPECT().Execute().Return(&response, nil)
+
+	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+	// Expect page size to be 100 when max-pages is 0
+	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(100),
+		ContinuationToken: openfga.PtrString(""),
+	}
+	mockRequest.EXPECT().Options(options).Return(mockExecute)
+
+	mockBody := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+
+	body := client.ClientReadRequest{
+		User:     openfga.PtrString("user:user1"),
+		Relation: openfga.PtrString("reader"),
+		Object:   openfga.PtrString("document:doc1"),
+	}
+	mockBody.EXPECT().Body(body).Return(mockRequest)
+
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
+
+	// When max-pages is 0, page size should be 100
+	_, err := read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		0,   // max-pages = 0
+		100, // expected page size
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestReadWithPageSize50WhenMaxPagesIsNonZero(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+
+	var tuples []openfga.Tuple
+
+	response := openfga.ReadResponse{
+		Tuples:            tuples,
+		ContinuationToken: "",
+	}
+
+	mockExecute.EXPECT().Execute().Return(&response, nil)
+
+	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+	// Expect page size to be DefaultReadPageSize when max-pages is non-zero
+	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(tuple.DefaultReadPageSize),
+		ContinuationToken: openfga.PtrString(""),
+	}
+	mockRequest.EXPECT().Options(options).Return(mockExecute)
+
+	mockBody := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+
+	body := client.ClientReadRequest{
+		User:     openfga.PtrString("user:user1"),
+		Relation: openfga.PtrString("reader"),
+		Object:   openfga.PtrString("document:doc1"),
+	}
+	mockBody.EXPECT().Body(body).Return(mockRequest)
+
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
+
+	// When max-pages is non-zero, page size should be DefaultReadPageSize
+	_, err := read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		5,                         // max-pages = 5 (non-zero)
+		tuple.DefaultReadPageSize, // expected page size
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestReadWithCustomPageSize(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+
+	var tuples []openfga.Tuple
+
+	response := openfga.ReadResponse{
+		Tuples:            tuples,
+		ContinuationToken: "",
+	}
+
+	mockExecute.EXPECT().Execute().Return(&response, nil)
+
+	mockRequest := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+	// Expect custom page size to be used
+	options := client.ClientReadOptions{
+		PageSize:          openfga.PtrInt32(75),
+		ContinuationToken: openfga.PtrString(""),
+	}
+	mockRequest.EXPECT().Options(options).Return(mockExecute)
+
+	mockBody := mock_client.NewMockSdkClientReadRequestInterface(mockCtrl)
+
+	body := client.ClientReadRequest{
+		User:     openfga.PtrString("user:user1"),
+		Relation: openfga.PtrString("reader"),
+		Object:   openfga.PtrString("document:doc1"),
+	}
+	mockBody.EXPECT().Body(body).Return(mockRequest)
+
+	mockFgaClient.EXPECT().Read(t.Context()).Return(mockBody)
+
+	// When a custom page size is specified, it should be used regardless of max-pages
+	_, err := read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		0,  // max-pages = 0
+		75, // custom page size
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestReadWithInvalidPageSize(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	// Test page size > 100
+	_, err := read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		0,
+		101, // invalid page size > 100
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err == nil {
+		t.Error("Expected error for page size > 100, but got none")
+	}
+
+	if err != nil && err.Error() != "pageSize must be between 1 and 100: got 101" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
+
+	// Test page size < 1
+	_, err = read(
+		t.Context(),
+		mockFgaClient,
+		"user:user1",
+		"reader",
+		"document:doc1",
+		0,
+		0, // invalid page size < 1
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err == nil {
+		t.Error("Expected error for page size < 1, but got none")
+	}
+
+	if err != nil && err.Error() != "pageSize must be between 1 and 100: got 0" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
 }

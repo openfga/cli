@@ -6,8 +6,9 @@ A cross-platform CLI to interact with an OpenFGA server
 [![Release](https://img.shields.io/github/v/release/openfga/cli?sort=semver&color=green)](https://github.com/openfga/cli/releases)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fopenfga%2Fcli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fopenfga%2Fcli?ref=badge_shield)
+[![X](https://img.shields.io/twitter/follow/openfga?color=%23179CF0&logo=x "@openfga on X")](https://x.com/openfga)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/openfga/cli/badge?label=OpenSSF%20Scorecard)](https://securityscorecards.dev/viewer/?uri=github.com/openfga/cli)
 [![Join our community](https://img.shields.io/badge/slack-cncf_%23openfga-40abb8.svg?logo=slack)](https://openfga.dev/community)
-[![Twitter](https://img.shields.io/twitter/follow/openfga?color=%23179CF0&logo=twitter&style=flat-square "@openfga on Twitter")](https://twitter.com/openfga)
 
 ## Table of Contents
 - [About OpenFGA](#about)
@@ -56,8 +57,6 @@ OpenFGA is designed to make it easy for application builders to model their perm
 
 - [OpenFGA Documentation](https://openfga.dev/docs)
 - [OpenFGA API Documentation](https://openfga.dev/api/service)
-- [Twitter](https://twitter.com/openfga)
-- [OpenFGA Community](https://openfga.dev/community)
 - [Zanzibar Academy](https://zanzibar.academy)
 - [Google's Zanzibar Paper (2019)](https://research.google/pubs/pub48190/)
 
@@ -183,7 +182,7 @@ store-id: 01H0H015178Y2V4CX10C2KGHF4
 fga store **create**
 
 ###### Parameters
-* `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name. 
+* `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name.
 * `--model`: File with the authorization model. Can be in JSON, OpenFGA format, or fga.mod file (optional).
 * `--format` : Authorization model input format. Can be "fga", "json", or "modular" (optional, defaults to the model file extension if present).
 
@@ -250,7 +249,7 @@ fga store **export**
 * `--store-id`: Specifies the store to export
 * `--output-file`: The file to output the store to (optional, writes to the terminal if omitted)
 * `--model-id`: Specifies the model to export (optional, exports the latest model if omitted)
-* `--max-tuples`: Specifies the max number of tuples to include in the output (option, defaults to 100)
+* `--max-tuples`: Specifies the max number of tuples to include in the output (optional, defaults to 100)
 
 ###### Example
 `fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4`
@@ -394,11 +393,11 @@ fga store **delete**
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 | [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
-| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     | 
+| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     |
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
 
-##### Read Authorization Models 
+##### Read Authorization Models
 
 List all authorization models for a store, in descending order by creation date. The first model in the list is the latest one.
 
@@ -429,7 +428,7 @@ fga model **list**
 }
 ```
 
-##### Write Authorization Model 
+##### Write Authorization Model
 
 ###### Command
 fga model **write**
@@ -451,7 +450,7 @@ fga model **write**
 }
 ```
 
-##### Read a Single Authorization Model 
+##### Read a Single Authorization Model
 
 ###### Command
 fga model **get**
@@ -477,7 +476,7 @@ type document
     define can_view: [user]
 ```
 
-##### Read the Latest Authorization Model 
+##### Read the Latest Authorization Model
 
 If `model-id` is not specified when using the `get` command, the latest authorization model will be returned.
 
@@ -559,7 +558,7 @@ model: |
   type user
   type folder
     relations
-      define owner: [user] 
+      define owner: [user]
       define parent: [folder]
       define can_view: owner or can_view from parent
       define can_write: owner or can_write from parent
@@ -644,7 +643,7 @@ tests: # required
 ###### Example
 `fga model test --tests "tests/*.fga.yaml"`
 
-For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/)/
+For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/).
 
 ###### Response
 
@@ -663,7 +662,7 @@ ListObjects 3/3 passing
 The **transform** command lets you convert between different authorization model formats (`.fga`, `.json`, `.mod`).
 
 ###### Command
-fga model **transform** 
+fga model **transform**
 
 ###### Parameters
 * `--file`: File containing the authorization model
@@ -910,7 +909,8 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 * `--user`: User
 * `--relation`: Relation
 * `--object`: Object
-* `--max-pages`: Max number of pages to get. (default 20)
+* `--max-pages`: Max number of pages to get. Set to 0 to get all pages. (default 20)
+* `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
 * `--output-format`: Can be `csv`, `yaml`, `json` or `simple-json`. Use `simple-json` for a simpler json format that can be piped to the write and delete commands
 
 ###### Example

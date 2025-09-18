@@ -19,6 +19,7 @@ package tuple
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,6 +34,13 @@ import (
 
 // MaxReadPagesLength Limit the tuples so that we are not paginating indefinitely.
 var MaxReadPagesLength = 20
+
+var (
+	// ErrPageSizeNegative is returned when page size is negative.
+	ErrPageSizeNegative = errors.New("page-size must be non-negative")
+	// ErrPageSizeExceedsMax is returned when page size exceeds maximum.
+	ErrPageSizeExceedsMax = errors.New("page-size cannot exceed 100")
+)
 
 type readResponse struct {
 	complete *openfga.ReadResponse
@@ -96,6 +104,7 @@ func read(
 	relation string,
 	object string,
 	maxPages int,
+	pageSize int32,
 	consistency *openfga.ConsistencyPreference,
 ) (
 	*readResponse, error,
@@ -113,7 +122,7 @@ func read(
 		body.Object = &object
 	}
 
-	response, err := tuple.Read(ctx, fgaClient, body, maxPages, consistency)
+	response, err := tuple.Read(ctx, fgaClient, body, maxPages, pageSize, consistency)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -151,12 +160,35 @@ var readCmd = &cobra.Command{
 			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
 
+		pageSize, _ := cmd.Flags().GetInt32("page-size")
+
+		// Validate page-size if explicitly provided
+		if pageSize < 0 {
+			return fmt.Errorf("%w: got %d", ErrPageSizeNegative, pageSize)
+		}
+		if pageSize > 100 {
+			return fmt.Errorf("%w: got %d", ErrPageSizeExceedsMax, pageSize)
+		}
+
+		// Apply the new page-size logic based on max-pages
+		if pageSize == 0 {
+			// No page-size specified, apply default logic
+			if maxPages == 0 {
+				// When max-pages=0, default page-size should be 100
+				pageSize = 100
+			} else {
+				// When max-pages!=0, use the default page size
+				pageSize = tuple.DefaultReadPageSize
+			}
+		}
+		// If page-size is specified (non-zero), use whatever is specified
+
 		consistency, err := cmdutils.ParseConsistencyFromCmd(cmd)
 		if err != nil {
 			return fmt.Errorf("error parsing consistency for check: %w", err)
 		}
 
-		response, err := read(cmd.Context(), fgaClient, user, relation, object, maxPages, consistency)
+		response, err := read(cmd.Context(), fgaClient, user, relation, object, maxPages, pageSize, consistency)
 		if err != nil {
 			return err
 		}
@@ -191,6 +223,8 @@ func init() {
 	readCmd.Flags().String("relation", "", "Relation")
 	readCmd.Flags().String("object", "", "Object")
 	readCmd.Flags().Int("max-pages", MaxReadPagesLength, "Max number of pages to get. Set to 0 to get all pages.")
+	readCmd.Flags().Int32("page-size", 0, "Number of tuples to return per page. "+
+		"Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.")
 	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
 		"json, simple-json, csv, and yaml.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
