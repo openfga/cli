@@ -38,10 +38,14 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 		absFileName = filepath.Join(basePath, fileName)
 	}
 
-	testFile, err := os.Open(absFileName)
-	if err != nil {
-		return format, nil, fmt.Errorf("failed to read file %s due to %w", fileName, err)
-	}
+        testFile, err := os.Open(absFileName)
+        if err != nil {
+            return format, nil, fmt.Errorf(
+                "failed to read file %q (resolved path: %q): %w",
+                fileName, absFileName, err,
+            )
+        }
+        defer testFile.Close()
 
 	decoder := yaml.NewDecoder(testFile)
 	decoder.KnownFields(true)
