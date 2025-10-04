@@ -36,9 +36,10 @@ var modelTestCmd = &cobra.Command{
 	Short:   "Test an Authorization Model",
 	Long:    "Run a set of tests against a particular Authorization Model.",
 	Example: `fga model test --tests model.fga.yaml`,
-	RunE: func(cmd *cobra.Command, _ []string) error {
+	Args:    cobra.MinimumNArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// Read and validate all flags
-		testsFileName, err := cmd.Flags().GetString("tests")
+		testsFilePatterns, err := cmd.Flags().GetStringArray("tests")
 		if err != nil {
 			return fmt.Errorf("failed to get tests flag: %w", err)
 		}
@@ -53,17 +54,12 @@ var modelTestCmd = &cobra.Command{
 			return fmt.Errorf("failed to get suppress-summary flag: %w", err)
 		}
 
-		fileNames, err := filepath.Glob(testsFileName)
+		// Expand test file patterns (handles both glob patterns and shell-expanded files)
+		fileNames, err := expandTestFilePatterns(testsFilePatterns, args)
 		if err != nil {
-			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
+			return err
 		}
-		if len(fileNames) == 0 {
-			// Check if the literal path exists
-			if _, err := os.Stat(testsFileName); err != nil {
-				return fmt.Errorf("test file %s does not exist: %w", testsFileName, err)
-			}
-			fileNames = []string{testsFileName}
-		}
+
 		multipleFiles := len(fileNames) > 1
 
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -139,10 +135,54 @@ var modelTestCmd = &cobra.Command{
 	},
 }
 
+// expandTestFilePatterns takes test file patterns (which can be literal file paths or glob patterns)
+// and positional arguments (from shell expansion), and returns a list of resolved file paths.
+// It handles both quoted glob patterns (where the CLI does the expansion) and shell-expanded
+// arguments (where the shell expands the glob before passing to the CLI).
+func expandTestFilePatterns(patterns []string, posArgs []string) ([]string, error) {
+	// Combine flag values and positional args
+	// This handles shell expansion: when the shell expands ./example/*.fga.yaml to
+	// ./example/file1.yaml ./example/file2.yaml, the first file goes to the --tests flag
+	// and the rest end up as positional arguments
+	allPatterns := append(patterns, posArgs...)
+
+	if len(allPatterns) == 0 {
+		return nil, fmt.Errorf("no test files specified")
+	}
+
+	fileNames := []string{}
+	for _, pattern := range allPatterns {
+		// First, check if it's a literal file that exists
+		if _, err := os.Stat(pattern); err == nil {
+			fileNames = append(fileNames, pattern)
+			continue
+		}
+
+		// Otherwise, try to expand it as a glob pattern
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			return nil, fmt.Errorf("invalid tests pattern %s due to %w", pattern, err)
+		}
+
+		if len(matches) > 0 {
+			fileNames = append(fileNames, matches...)
+		} else {
+			// If glob didn't match and file doesn't exist, report error
+			return nil, fmt.Errorf("test file %s does not exist", pattern)
+		}
+	}
+
+	if len(fileNames) == 0 {
+		return nil, fmt.Errorf("no test files found")
+	}
+
+	return fileNames, nil
+}
+
 func init() {
 	modelTestCmd.Flags().String("store-id", "", "Store ID")
 	modelTestCmd.Flags().String("model-id", "", "Model ID")
-	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files")
+	modelTestCmd.Flags().StringArray("tests", []string{}, "Path or glob of YAML test files. Can be specified multiple times or use glob patterns")
 	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 

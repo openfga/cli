@@ -35,3 +35,4 @@ dist/
 
 # Test files
 /tests/fixtures/identifiers
+.DS_Store
