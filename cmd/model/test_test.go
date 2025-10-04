@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,8 +26,8 @@ func TestExpandTestFilePatterns_MultipleFilesWithFlag(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
-	assert.True(t, containsPath(files, "example/model.fga.yaml"))
-	assert.True(t, containsPath(files, "example/store_abac.fga.yaml"))
+	assert.True(t, anyContains(files, "example/model.fga.yaml"))
+	assert.True(t, anyContains(files, "example/store_abac.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_GlobPattern(t *testing.T) {
@@ -35,8 +36,8 @@ func TestExpandTestFilePatterns_GlobPattern(t *testing.T) {
 	files, err := expandTestFilePatterns([]string{"../../example/*.fga.yaml"}, []string{})
 	require.NoError(t, err)
 	assert.GreaterOrEqual(t, len(files), 2, "should match at least model.fga.yaml and store_abac.fga.yaml")
-	assert.True(t, containsPath(files, "example/model.fga.yaml"))
-	assert.True(t, containsPath(files, "example/store_abac.fga.yaml"))
+	assert.True(t, anyContains(files, "example/model.fga.yaml"))
+	assert.True(t, anyContains(files, "example/store_abac.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_ShellExpandedFiles(t *testing.T) {
@@ -50,8 +51,8 @@ func TestExpandTestFilePatterns_ShellExpandedFiles(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
-	assert.True(t, containsPath(files, "example/model.fga.yaml"))
-	assert.True(t, containsPath(files, "example/store_abac.fga.yaml"))
+	assert.True(t, anyContains(files, "example/model.fga.yaml"))
+	assert.True(t, anyContains(files, "example/store_abac.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_MixedGlobAndLiteral(t *testing.T) {
@@ -64,8 +65,8 @@ func TestExpandTestFilePatterns_MixedGlobAndLiteral(t *testing.T) {
 	require.NoError(t, err)
 	// Should include model.fga.yaml and store_abac.fga.yaml
 	assert.GreaterOrEqual(t, len(files), 2, "should have at least 2 files")
-	assert.True(t, containsPath(files, "example/model.fga.yaml"))
-	assert.True(t, containsPath(files, "example/store_abac.fga.yaml"))
+	assert.True(t, anyContains(files, "example/model.fga.yaml"))
+	assert.True(t, anyContains(files, "example/store_abac.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_SubdirectoryGlob(t *testing.T) {
@@ -74,7 +75,7 @@ func TestExpandTestFilePatterns_SubdirectoryGlob(t *testing.T) {
 	files, err := expandTestFilePatterns([]string{"../../example/subdir/*.fga.yaml"}, []string{})
 	require.NoError(t, err)
 	assert.Len(t, files, 1)
-	assert.True(t, containsPath(files, "example/subdir/simple.fga.yaml"))
+	assert.True(t, anyContains(files, "example/subdir/simple.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_NonExistentFile(t *testing.T) {
@@ -114,9 +115,9 @@ func TestExpandTestFilePatterns_ShellExpandedThreeFiles(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Len(t, files, 3)
-	assert.True(t, containsPath(files, "example/model.fga.yaml"))
-	assert.True(t, containsPath(files, "example/store_abac.fga.yaml"))
-	assert.True(t, containsPath(files, "example/subdir/simple.fga.yaml"))
+	assert.True(t, anyContains(files, "example/model.fga.yaml"))
+	assert.True(t, anyContains(files, "example/store_abac.fga.yaml"))
+	assert.True(t, anyContains(files, "example/subdir/simple.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_GlobPatternNotExpandedByShell(t *testing.T) {
@@ -139,8 +140,8 @@ func TestExpandTestFilePatterns_CombineGlobAndShellExpanded(t *testing.T) {
 	)
 	require.NoError(t, err)
 	assert.Len(t, files, 2)
-	assert.True(t, containsPath(files, "example/model.fga.yaml"))
-	assert.True(t, containsPath(files, "example/subdir/simple.fga.yaml"))
+	assert.True(t, anyContains(files, "example/model.fga.yaml"))
+	assert.True(t, anyContains(files, "example/subdir/simple.fga.yaml"))
 }
 
 func TestExpandTestFilePatterns_InvalidGlobPattern(t *testing.T) {
@@ -153,25 +154,13 @@ func TestExpandTestFilePatterns_InvalidGlobPattern(t *testing.T) {
 	assert.Contains(t, err.Error(), "invalid tests pattern")
 }
 
-// containsPath checks if any file in the slice contains the given path substring
-func containsPath(files []string, pathSubstring string) bool {
-	for _, file := range files {
-		if containsSubstring(file, pathSubstring) {
+// anyContains checks if any string in the slice contains the given substring.
+func anyContains(slice []string, substr string) bool {
+	for _, s := range slice {
+		if strings.Contains(s, substr) {
 			return true
 		}
 	}
-	return false
-}
 
-func containsSubstring(s, substr string) bool {
-	return len(s) >= len(substr) && (s[len(s)-len(substr):] == substr || contains(s, substr))
-}
-
-func contains(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
 	return false
 }

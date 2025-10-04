@@ -17,6 +17,7 @@ limitations under the License.
 package model
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -28,6 +29,12 @@ import (
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
+)
+
+var (
+	errNoTestFilesSpecified = errors.New("no test files specified")
+	errNoTestFilesFound     = errors.New("no test files found")
+	errTestFileDoesNotExist = errors.New("test file does not exist")
 )
 
 // modelTestCmd represents the test command.
@@ -144,17 +151,21 @@ func expandTestFilePatterns(patterns []string, posArgs []string) ([]string, erro
 	// This handles shell expansion: when the shell expands ./example/*.fga.yaml to
 	// ./example/file1.yaml ./example/file2.yaml, the first file goes to the --tests flag
 	// and the rest end up as positional arguments
-	allPatterns := append(patterns, posArgs...)
+	allPatterns := make([]string, 0, len(patterns)+len(posArgs))
+	allPatterns = append(allPatterns, patterns...)
+	allPatterns = append(allPatterns, posArgs...)
 
 	if len(allPatterns) == 0 {
-		return nil, fmt.Errorf("no test files specified")
+		return nil, errNoTestFilesSpecified
 	}
 
 	fileNames := []string{}
+
 	for _, pattern := range allPatterns {
 		// First, check if it's a literal file that exists
 		if _, err := os.Stat(pattern); err == nil {
 			fileNames = append(fileNames, pattern)
+
 			continue
 		}
 
@@ -168,12 +179,12 @@ func expandTestFilePatterns(patterns []string, posArgs []string) ([]string, erro
 			fileNames = append(fileNames, matches...)
 		} else {
 			// If glob didn't match and file doesn't exist, report error
-			return nil, fmt.Errorf("test file %s does not exist", pattern)
+			return nil, fmt.Errorf("%w: %s", errTestFileDoesNotExist, pattern)
 		}
 	}
 
 	if len(fileNames) == 0 {
-		return nil, fmt.Errorf("no test files found")
+		return nil, errNoTestFilesFound
 	}
 
 	return fileNames, nil
@@ -182,7 +193,8 @@ func expandTestFilePatterns(patterns []string, posArgs []string) ([]string, erro
 func init() {
 	modelTestCmd.Flags().String("store-id", "", "Store ID")
 	modelTestCmd.Flags().String("model-id", "", "Model ID")
-	modelTestCmd.Flags().StringArray("tests", []string{}, "Path or glob of YAML test files. Can be specified multiple times or use glob patterns")
+	modelTestCmd.Flags().StringArray("tests", []string{},
+		"Path or glob of YAML test files. Can be specified multiple times or use glob patterns")
 	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 
