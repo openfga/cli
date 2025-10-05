@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+Fixed:
+- Fix relative path resolution in `model test` to resolve paths relative to test file location instead of CWD ([#516](https://github.com/openfga/cli/pull/516)) - fixes #349
+
 
 Added:
 - Add configurable `--page-size` parameter to `fga tuple read` command with intelligent defaults ([#571](https://github.com/openfga/cli/pull/571))
