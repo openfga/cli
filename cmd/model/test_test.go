@@ -169,14 +169,16 @@ func TestExpandTestFilePatterns_Deduplication(t *testing.T) {
 	require.NoError(t, err)
 	// Should have at least 2 files (model.fga.yaml and store_abac.fga.yaml)
 	assert.GreaterOrEqual(t, len(files), 2)
-	
+
 	// Count occurrences of model.fga.yaml - should only appear once
 	count := 0
+
 	for _, file := range files {
 		if strings.Contains(file, "example/model.fga.yaml") {
 			count++
 		}
 	}
+
 	assert.Equal(t, 1, count, "model.fga.yaml should only appear once despite being matched multiple times")
 }
 
