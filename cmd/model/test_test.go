@@ -154,6 +154,32 @@ func TestExpandTestFilePatterns_InvalidGlobPattern(t *testing.T) {
 	assert.Contains(t, err.Error(), "invalid tests pattern")
 }
 
+func TestExpandTestFilePatterns_Deduplication(t *testing.T) {
+	t.Parallel()
+
+	// Test that duplicate files from overlapping patterns are deduplicated
+	files, err := expandTestFilePatterns(
+		[]string{
+			"../../example/model.fga.yaml",
+			"../../example/*.fga.yaml", // This will also match model.fga.yaml
+			"../../example/model.fga.yaml",
+		},
+		[]string{},
+	)
+	require.NoError(t, err)
+	// Should have at least 2 files (model.fga.yaml and store_abac.fga.yaml)
+	assert.GreaterOrEqual(t, len(files), 2)
+	
+	// Count occurrences of model.fga.yaml - should only appear once
+	count := 0
+	for _, file := range files {
+		if strings.Contains(file, "example/model.fga.yaml") {
+			count++
+		}
+	}
+	assert.Equal(t, 1, count, "model.fga.yaml should only appear once despite being matched multiple times")
+}
+
 // anyContains checks if any string in the slice contains the given substring.
 func anyContains(slice []string, substr string) bool {
 	for _, s := range slice {

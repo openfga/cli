@@ -159,12 +159,13 @@ func expandTestFilePatterns(patterns []string, posArgs []string) ([]string, erro
 		return nil, errNoTestFilesSpecified
 	}
 
-	fileNames := []string{}
+	// Use a map to deduplicate file names (different globs might match the same files)
+	uniqueFiles := make(map[string]bool)
 
 	for _, pattern := range allPatterns {
 		// First, check if it's a literal file that exists
 		if _, err := os.Stat(pattern); err == nil {
-			fileNames = append(fileNames, pattern)
+			uniqueFiles[pattern] = true
 
 			continue
 		}
@@ -176,15 +177,23 @@ func expandTestFilePatterns(patterns []string, posArgs []string) ([]string, erro
 		}
 
 		if len(matches) > 0 {
-			fileNames = append(fileNames, matches...)
+			for _, match := range matches {
+				uniqueFiles[match] = true
+			}
 		} else {
 			// If glob didn't match and file doesn't exist, report error
 			return nil, fmt.Errorf("%w: %s", errTestFileDoesNotExist, pattern)
 		}
 	}
 
-	if len(fileNames) == 0 {
+	if len(uniqueFiles) == 0 {
 		return nil, errNoTestFilesFound
+	}
+
+	// Convert map keys to slice
+	fileNames := make([]string, 0, len(uniqueFiles))
+	for file := range uniqueFiles {
+		fileNames = append(fileNames, file)
 	}
 
 	return fileNames, nil
