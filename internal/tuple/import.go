@@ -122,7 +122,7 @@ func ImportTuples(ctx context.Context, fgaClient client.SdkClient,
 		},
 		Conflict: client.ClientWriteConflictOptions{
 			OnDuplicateWrites: client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE,
-			OnMissingDeletes:  client.CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_ERROR,
+			OnMissingDeletes:  client.CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_IGNORE,
 		},
 	}
 
