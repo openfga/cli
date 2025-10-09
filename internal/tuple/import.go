@@ -120,6 +120,10 @@ func ImportTuples(ctx context.Context, fgaClient client.SdkClient,
 			MaxPerChunk:         maxTuplesPerWrite32,
 			MaxParallelRequests: maxParallelRequests32,
 		},
+		Conflict: client.ClientWriteConflictOptions{
+			OnDuplicateWrites: client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE,
+			OnMissingDeletes:  client.CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_IGNORE,
+		},
 	}
 
 	// If RPS values are 0, then fallback to the previous way of importing
