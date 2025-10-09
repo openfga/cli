@@ -19,6 +19,7 @@ package storetest
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 
@@ -31,10 +32,21 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 
 	var storeData StoreData
 
-	testFile, err := os.Open(fileName)
-	if err != nil {
-		return format, nil, fmt.Errorf("failed to read file %s due to %w", fileName, err)
+	absFileName := fileName
+
+	// Only join with basePath if fileName is not absolute and basePath is provided
+	if !filepath.IsAbs(fileName) && basePath != "" {
+		absFileName = filepath.Join(basePath, fileName)
 	}
+
+	testFile, err := os.Open(absFileName)
+	if err != nil {
+		return format, nil, fmt.Errorf(
+			"failed to read file %q (resolved path: %q): %w",
+			fileName, absFileName, err,
+		)
+	}
+	defer testFile.Close()
 
 	decoder := yaml.NewDecoder(testFile)
 	decoder.KnownFields(true)
@@ -44,12 +56,15 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 		return format, nil, fmt.Errorf("failed to unmarshal file %s due to %w", fileName, err)
 	}
 
-	format, err = storeData.LoadModel(basePath)
+	// Use the directory of the resolved file path for nested file references
+	resolvedBasePath := filepath.Dir(absFileName)
+
+	format, err = storeData.LoadModel(resolvedBasePath)
 	if err != nil {
 		return format, nil, err
 	}
 
-	err = storeData.LoadTuples(basePath)
+	err = storeData.LoadTuples(resolvedBasePath)
 	if err != nil {
 		return format, nil, err
 	}

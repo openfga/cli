@@ -307,7 +307,7 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to get file name: %w", err)
 		}
 
-		format, storeData, err := storetest.ReadFromFile(fileName, path.Dir(fileName))
+		format, storeData, err := storetest.ReadFromFile(fileName, "")
 		if err != nil {
 			return fmt.Errorf("failed to read from file: %w", err)
 		}
