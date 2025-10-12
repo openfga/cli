@@ -10,14 +10,19 @@ Fixed:
 - Fix relative path resolution in `model test` to resolve paths relative to test file location instead of CWD ([#516](https://github.com/openfga/cli/pull/516)) - fixes #349
 
 
+## [0.7.5] - 2025-10-09
+
 Added:
-- Add configurable `--page-size` parameter to `fga tuple read` command with intelligent defaults ([#571](https://github.com/openfga/cli/pull/571))
+- Add configurable `--page-size` parameter to `fga tuple read` command with intelligent defaults ([#571](https://github.com/openfga/cli/pull/571)) - thanks @Siddhant-K-code
   * When `--max-pages=0` (read all tuples), defaults to 100 for better efficiency
   * When `--max-pages!=0` (limited pages), defaults to 50 to maintain backward compatibility
   * Custom page size can be specified with `--page-size` flag
 
 Changed:
 - Import now ignores duplicate tuples instead of failing the import. Note: this feature requires OpenFGA server [v1.10.0](https://github.com/openfga/openfga/releases/tag/v1.10.0) or later. You can still import to previous versions, but this setting will be ignored. Writes that are not imports (aka. writing a single tuple instead of from a file) will still fail on duplicates.
+
+Fixed:
+- Issue retrying 5xx errors. Fixed upstream (https://github.com/openfga/go-sdk/issues/204)
 
 ## [0.7.4] - 2025-08-15
 
@@ -331,7 +336,8 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.4...HEAD
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.5...HEAD
+[0.7.5]: https://github.com/openfga/cli/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/openfga/cli/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/openfga/cli/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/openfga/cli/compare/v0.7.1...v0.7.2
