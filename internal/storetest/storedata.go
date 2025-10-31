@@ -42,25 +42,25 @@ var (
 )
 
 type ModelTestCheck struct {
-	User       string                  `json:"user,omitempty"    yaml:"user,omitempty"`
-	Users      []string                `json:"users,omitempty"   yaml:"users,omitempty"`
-	Object     string                  `json:"object,omitempty"  yaml:"object,omitempty"`
-	Objects    []string                `json:"objects,omitempty" yaml:"objects,omitempty"`
-	Context    *map[string]interface{} `json:"context"           yaml:"context,omitempty"`
-	Assertions map[string]bool         `json:"assertions"        yaml:"assertions"`
+	User       string          `json:"user,omitempty"    yaml:"user,omitempty"`
+	Users      []string        `json:"users,omitempty"   yaml:"users,omitempty"`
+	Object     string          `json:"object,omitempty"  yaml:"object,omitempty"`
+	Objects    []string        `json:"objects,omitempty" yaml:"objects,omitempty"`
+	Context    *map[string]any `json:"context"           yaml:"context,omitempty"`
+	Assertions map[string]bool `json:"assertions"        yaml:"assertions"`
 }
 
 type ModelTestListObjects struct {
-	User       string                  `json:"user"       yaml:"user"`
-	Type       string                  `json:"type"       yaml:"type"`
-	Context    *map[string]interface{} `json:"context"    yaml:"context"`
-	Assertions map[string][]string     `json:"assertions" yaml:"assertions"`
+	User       string              `json:"user"       yaml:"user"`
+	Type       string              `json:"type"       yaml:"type"`
+	Context    *map[string]any     `json:"context"    yaml:"context"`
+	Assertions map[string][]string `json:"assertions" yaml:"assertions"`
 }
 
 type ModelTestListUsers struct {
 	Object     string                                 `json:"object"      yaml:"object"`
 	UserFilter []openfga.UserTypeFilter               `json:"user_filter" yaml:"user_filter"` //nolint:tagliatelle
-	Context    *map[string]interface{}                `json:"context"     yaml:"context,omitempty"`
+	Context    *map[string]any                        `json:"context"     yaml:"context,omitempty"`
 	Assertions map[string]ModelTestListUsersAssertion `json:"assertions"  yaml:"assertions"`
 }
 

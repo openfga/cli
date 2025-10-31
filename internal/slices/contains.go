@@ -16,15 +16,11 @@ limitations under the License.
 
 package slices
 
+import "slices"
+
 // Contains returns whether a string is in a list of strings
 // Similar to slices.Contains from golang.org/x/exp/slices
 // https://cs.opensource.google/go/x/exp/+/515e97eb:slices/slices.go;l=116
 func Contains(itemArray []string, lookingFor string) bool {
-	for _, item := range itemArray {
-		if item == lookingFor {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(itemArray, lookingFor)
 }

@@ -90,7 +90,7 @@ var deleteCmd = &cobra.Command{
 			duration := time.Since(startTime)
 			timeSpent := duration.String()
 
-			outputResponse := make(map[string]interface{})
+			outputResponse := make(map[string]any)
 
 			if !hideImportedTuples && len(response.Successful) > 0 {
 				outputResponse["successful"] = response.Successful

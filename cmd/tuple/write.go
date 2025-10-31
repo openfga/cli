@@ -183,11 +183,7 @@ func applyWriteDefaults(flags *flag.FlagSet, maxTuplesPerWrite, maxParallelReque
 	}
 
 	if maxRPS > 0 && !flags.Changed("max-parallel-requests") {
-		defaultParallel := maxRPS / tuple.RPSToParallelRequestsDivisor
-
-		if defaultParallel < 1 {
-			defaultParallel = 1
-		}
+		defaultParallel := max(maxRPS/tuple.RPSToParallelRequestsDivisor, 1)
 
 		maxParallelRequests = defaultParallel
 	}

@@ -23,8 +23,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func ParseQueryContextInner(contextString string) (*map[string]interface{}, error) {
-	queryContext := map[string]interface{}{}
+func ParseQueryContextInner(contextString string) (*map[string]any, error) {
+	queryContext := map[string]any{}
 
 	if contextString == "" {
 		return &queryContext, nil
@@ -38,7 +38,7 @@ func ParseQueryContextInner(contextString string) (*map[string]interface{}, erro
 	return &queryContext, nil
 }
 
-func ParseQueryContext(cmd *cobra.Command, queryParamName string) (*map[string]interface{}, error) {
+func ParseQueryContext(cmd *cobra.Command, queryParamName string) (*map[string]any, error) {
 	contextString, _ := cmd.Flags().GetString(queryParamName)
 
 	return ParseQueryContextInner(contextString)

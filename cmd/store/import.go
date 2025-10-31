@@ -173,10 +173,7 @@ func importTuples(
 	bar := createProgressBar(len(tuples))
 
 	for index := 0; index < len(tuples); index += maxTuplesPerWrite {
-		end := index + maxTuplesPerWrite
-		if end > len(tuples) {
-			end = len(tuples)
-		}
+		end := min(index+maxTuplesPerWrite, len(tuples))
 
 		writeRequest := client.ClientWriteRequest{
 			Writes: tuples[index:end],

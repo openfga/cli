@@ -66,7 +66,7 @@ func listUsers(
 	relation string,
 	rawUserFilter string,
 	contextualTuples []client.ClientContextualTupleKey,
-	queryContext *map[string]interface{},
+	queryContext *map[string]any,
 	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListUsersResponse, error) {
 	body := &client.ClientListUsersRequest{

@@ -449,7 +449,7 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 						Object:   "document:secret.doc",
 						Condition: &openfga.RelationshipCondition{
 							Name:    "inOfficeIP",
-							Context: toPointer(map[string]interface{}{"ip_addr": "10.0.0.1"}),
+							Context: toPointer(map[string]any{"ip_addr": "10.0.0.1"}),
 						},
 					},
 					{
