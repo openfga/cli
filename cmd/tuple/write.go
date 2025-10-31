@@ -125,7 +125,7 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 	options := client.ClientWriteOptions{
 		Conflict: client.ClientWriteConflictOptions{},
 	}
-	if onDuplicateWriteOption != "" {
+	if cmd.Flags().Changed("on-duplicate") {
 		options.Conflict.OnDuplicateWrites = onDuplicateWriteOption.ToSdkEnum()
 	} else {
 		// for requests from args, default to error on duplicate writes
@@ -250,7 +250,7 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	}
 
 	options := client.ClientWriteOptions{Conflict: client.ClientWriteConflictOptions{}}
-	if onDuplicateWriteOption != "" {
+	if flags.Changed("on-duplicate") {
 		options.Conflict.OnDuplicateWrites = onDuplicateWriteOption.ToSdkEnum()
 	} else {
 		// for requests from file, default to ignore on duplicate writes

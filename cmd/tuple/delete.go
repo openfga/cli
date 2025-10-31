@@ -37,7 +37,7 @@ var deleteCmd = &cobra.Command{
 	Args:  ExactArgsOrFlag(3, "file"), //nolint:mnd
 	Long:  "Delete relationship tuples from the store.",
 	Example: `  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
-  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`,
+  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-missing ignore`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -72,7 +72,7 @@ var deleteCmd = &cobra.Command{
 			}
 
 			options := client.ClientWriteOptions{Conflict: client.ClientWriteConflictOptions{}}
-			if onMissingDeleteOption != "" {
+			if cmd.Flags().Changed("on-missing") {
 				options.Conflict.OnMissingDeletes = onMissingDeleteOption.ToSdkEnum()
 			} else {
 				// for requests from file, default to ignore on missing deletes
@@ -115,7 +115,7 @@ var deleteCmd = &cobra.Command{
 			},
 		}
 		options := &client.ClientWriteOptions{}
-		if onDuplicateWriteOption != "" {
+		if cmd.Flags().Changed("on-missing") {
 			options.Conflict.OnMissingDeletes = onMissingDeleteOption.ToSdkEnum()
 		} else {
 			// for requests from args, default to error on missing deletes
