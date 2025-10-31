@@ -688,12 +688,12 @@ type document
 
 * `tuple`
 
-| Description                                                                       | command   | parameters                           | example                                                                                                           |
-|-----------------------------------------------------------------------------------|-----------|--------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` `--file`          | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
-| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id`           | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
-| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`          | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4`                      |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--start-time`, `--continuation-token`,           | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --start-time=2022-01-01T00:00:00Z --continuation-token=M3w=`                   |
+| Description                                                                       | command   | parameters                                                      | example                                                                                                           |
+|-----------------------------------------------------------------------------------|-----------|-----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` `--file` `--on-duplicate`            | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
+| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` `--file` `--on-missing`              | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
+| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`                                                    | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4`                      |
+| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--start-time`, `--continuation-token`, | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --start-time=2022-01-01T00:00:00Z --continuation-token=M3w=`                   |
 
 ##### Write Relationship Tuples
 
@@ -714,6 +714,9 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
 * `--max-rps`: Max requests per second. When set, the CLI will ramp up requests from 1 RPS to the set value. If `--rampup-period-in-sec` is omitted it defaults to `max-rps*2`.
 * `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Only used if `--max-rps` is set.
+* `--on-duplicate`: Behavior when a tuple to be written already exists. Options are:
+  * `ignore`: Skip the tuple and do not return an error. Default when importing via a file.
+  * `error`: Return an error for the tuple. Default when writing a single tuple via arguments.
 * All integer parameters must be greater than zero when provided.
 
 ###### Example (with arguments)
@@ -721,6 +724,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`
 
 ###### Response
 ```json5
@@ -856,9 +860,13 @@ fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
 * `--file`: Specifies the file name, `yaml`, `json`, and `jsonl` files are supported
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--on-missing`: Behavior when a tuple to be deleted does not exist. Options are:
+  * `ignore`: Skip the tuple and do not return an error. Default when importing via a file.
+  * `error`: Return an error for the tuple. Default when deleting a single tuple via arguments.
 
 ###### Example (with arguments)
-`fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+- `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
+- `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --on-missing ignore`
 
 ###### Response
 ```json5

@@ -182,8 +182,14 @@ func importTuples(
 			Writes: tuples[index:end],
 		}
 
+		options := client.ClientWriteOptions{
+			Conflict: client.ClientWriteConflictOptions{
+				OnDuplicateWrites: client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE,
+			},
+		}
+
 		if _, err := tuple.ImportTuplesWithoutRampUp(
-			ctx, fgaClient, maxTuplesPerWrite, maxParallelRequests, writeRequest); err != nil {
+			ctx, fgaClient, maxTuplesPerWrite, maxParallelRequests, writeRequest, options); err != nil {
 			return fmt.Errorf("failed to import tuples: %w", err)
 		}
 

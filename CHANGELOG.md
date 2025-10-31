@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+Added:
+- Write conflict options are now configurable via flags
+  * `fga tuple delete` now accepts `--on-missing ignore` with a choice of `error` or `ignore`
+  * `fga tuple write` now accepts `--on-duplicate ignore` with a choice of `error` or `ignore`
+  * In both cases, default is `ignore` when importing/deleting from a file, and `error` when writing/deleting a single tuple via flags
+
 Fixed:
 - Fix relative path resolution in `model test` to resolve paths relative to test file location instead of CWD ([#516](https://github.com/openfga/cli/pull/516)) - fixes #349
 

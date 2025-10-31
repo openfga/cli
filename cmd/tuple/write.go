@@ -74,7 +74,8 @@ var writeCmd = &cobra.Command{
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5
-  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`,
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
@@ -121,6 +122,16 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 		return err
 	}
 
+	options := client.ClientWriteOptions{
+		Conflict: client.ClientWriteConflictOptions{},
+	}
+	if onDuplicateWriteOption != "" {
+		options.Conflict.OnDuplicateWrites = onDuplicateWriteOption.ToSdkEnum()
+	} else {
+		// for requests from args, default to error on duplicate writes
+		options.Conflict.OnDuplicateWrites = client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_ERROR
+	}
+
 	body := client.ClientWriteTuplesBody{
 		client.ClientTupleKey{
 			User:      args[0],
@@ -133,7 +144,7 @@ func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.Op
 	_, err = fgaClient.
 		WriteTuples(context.Background()).
 		Body(body).
-		Options(client.ClientWriteOptions{}).
+		Options(options).
 		Execute()
 	if err != nil {
 		return fmt.Errorf("failed to write tuple: %w", err)
@@ -242,12 +253,20 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 		Writes: tuples,
 	}
 
+	options := client.ClientWriteOptions{Conflict: client.ClientWriteConflictOptions{}}
+	if onDuplicateWriteOption != "" {
+		options.Conflict.OnDuplicateWrites = onDuplicateWriteOption.ToSdkEnum()
+	} else {
+		// for requests from file, default to ignore on duplicate writes
+		options.Conflict.OnDuplicateWrites = client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE
+	}
+
 	newCtx := utils.WithDebugContext(ctx, debug)
 
 	response, err := tuple.ImportTuples(
 		newCtx, fgaClient,
 		tuple.DefaultMinRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests,
-		writeRequest)
+		writeRequest, options)
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
@@ -255,7 +274,7 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	duration := time.Since(startTime)
 	timeSpent := duration.String()
 
-	outputResponse := make(map[string]interface{})
+	outputResponse := make(map[string]any)
 
 	if !hideImportedTuples && len(response.Successful) > 0 {
 		outputResponse["successful"] = response.Successful
@@ -273,11 +292,14 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	return output.Display(outputResponse) //nolint:wrapcheck
 }
 
+var onDuplicateWriteOption tuple.ClientWriteRequestOnDuplicateWrites
+
 func init() {
 	writeCmd.Flags().String("model-id", "", "Model ID")
 	writeCmd.Flags().String("file", "", "Tuples file")
 	writeCmd.Flags().String("condition-name", "", "Condition Name")
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
+	writeCmd.Flags().Var(&onDuplicateWriteOption, "on-duplicate", "Whether to ignore or error on duplicate tuples. Valid values are 'ignore' and 'error'. (default: 'ignore' when importing a file of tuples, 'error' otherwise)")
 	writeCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.")
 

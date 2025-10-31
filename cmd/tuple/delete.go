@@ -32,11 +32,12 @@ import (
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete Relationship Tuples",
-	Args:    ExactArgsOrFlag(3, "file"), //nolint:mnd
-	Long:    "Delete relationship tuples from the store.",
-	Example: "fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap",
+	Use:   "delete",
+	Short: "Delete Relationship Tuples",
+	Args:  ExactArgsOrFlag(3, "file"), //nolint:mnd
+	Long:  "Delete relationship tuples from the store.",
+	Example: `  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
+  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -70,10 +71,18 @@ var deleteCmd = &cobra.Command{
 				Deletes: clientTupleKeyWithoutCondition,
 			}
 
+			options := client.ClientWriteOptions{Conflict: client.ClientWriteConflictOptions{}}
+			if onMissingDeleteOption != "" {
+				options.Conflict.OnMissingDeletes = onMissingDeleteOption.ToSdkEnum()
+			} else {
+				// for requests from file, default to ignore on missing deletes
+				options.Conflict.OnMissingDeletes = client.CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_IGNORE
+			}
+
 			response, err := tuple.ImportTuplesWithoutRampUp(
 				cmd.Context(), fgaClient,
 				maxTuplesPerWrite, maxParallelRequests,
-				writeRequest)
+				writeRequest, options)
 			if err != nil {
 				return err //nolint:wrapcheck
 			}
@@ -106,6 +115,13 @@ var deleteCmd = &cobra.Command{
 			},
 		}
 		options := &client.ClientWriteOptions{}
+		if onDuplicateWriteOption != "" {
+			options.Conflict.OnMissingDeletes = onMissingDeleteOption.ToSdkEnum()
+		} else {
+			// for requests from args, default to error on missing deletes
+			options.Conflict.OnMissingDeletes = client.CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_ERROR
+		}
+
 		_, err = fgaClient.DeleteTuples(context.Background()).Body(*body).Options(*options).Execute()
 		if err != nil {
 			return fmt.Errorf("failed to delete tuples due to %w", err)
@@ -115,13 +131,15 @@ var deleteCmd = &cobra.Command{
 	},
 }
 
+var onMissingDeleteOption tuple.ClientWriteRequestOnMissingDeletes
+
 func init() {
 	deleteCmd.Flags().String("file", "", "Tuples file")
 	deleteCmd.Flags().String("model-id", "", "Model ID")
+	deleteCmd.Flags().Var(&onMissingDeleteOption, "on-missing", "Whether to ignore or error on missing tuples. Valid values are 'ignore' and 'error'. (default: 'ignore' when deleting a file of tuples, 'error' otherwise)") //nolint:lll
 	deleteCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
 	deleteCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
-
-	deleteCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output") //nolint:lll
+	deleteCmd.Flags().BoolVar(&hideImportedTuples, "hide-imported-tuples", false, "Hide successfully imported tuples from output")          //nolint:lll
 }
 
 func ExactArgsOrFlag(n int, flag string) cobra.PositionalArgs {
