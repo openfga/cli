@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.6] - 2025-11-04
+
 Added:
 - Write conflict options are now configurable via flags
   * `fga tuple delete` now accepts `--on-missing ignore` with a choice of `error` or `ignore`
@@ -343,7 +345,8 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.5...HEAD
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.6...HEAD
+[0.7.6]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/openfga/cli/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/openfga/cli/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/openfga/cli/compare/v0.7.2...v0.7.3
