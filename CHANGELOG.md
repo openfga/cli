@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.7.6] - 2025-11-04
+## [0.7.7] - 2025-11-04
+
+> [!NOTE]
+> `v0.7.6` has the same changelog as `v0.7.7`, but failed to be released due to CI errors.
 
 Added:
 - Write conflict options are now configurable via flags
@@ -20,7 +23,6 @@ Changed:
 
 Fixed:
 - Fix relative path resolution in `model test` to resolve paths relative to test file location instead of CWD ([#516](https://github.com/openfga/cli/pull/516)) - fixes #349
-
 
 ## [0.7.5] - 2025-10-09
 
@@ -348,8 +350,8 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.6...HEAD
-[0.7.6]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.6
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.7...HEAD
+[0.7.7]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.7
 [0.7.5]: https://github.com/openfga/cli/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/openfga/cli/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/openfga/cli/compare/v0.7.2...v0.7.3
