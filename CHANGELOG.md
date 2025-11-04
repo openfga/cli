@@ -15,6 +15,9 @@ Added:
   * `fga tuple write` now accepts `--on-duplicate ignore` with a choice of `error` or `ignore`
   * In both cases, default is `ignore` when importing/deleting from a file, and `error` when writing/deleting a single tuple via flags
 
+Changed:
+- Update bundled OpenFGA to [v1.10.4](https://github.com/openfga/openfga/releases/tag/v1.10.4)
+
 Fixed:
 - Fix relative path resolution in `model test` to resolve paths relative to test file location instead of CWD ([#516](https://github.com/openfga/cli/pull/516)) - fixes #349
 
