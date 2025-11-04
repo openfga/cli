@@ -64,7 +64,7 @@ func parseConditionColumnsForRow(
 	var condition *openfga.RelationshipCondition
 
 	if columns.ConditionName != -1 && tuple[columns.ConditionName] != "" {
-		conditionContext := &(map[string]interface{}{})
+		conditionContext := &(map[string]any{})
 
 		if columns.ConditionContext != -1 {
 			var err error

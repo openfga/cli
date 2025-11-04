@@ -84,9 +84,9 @@ func validateImportParams(minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, 
 // Deletes and writes are put together in the same ImportResponse.
 func ImportTuplesWithoutRampUp(ctx context.Context, fgaClient client.SdkClient,
 	maxTuplesPerWrite, maxParallelRequests int,
-	body client.ClientWriteRequest,
+	body client.ClientWriteRequest, opts client.ClientWriteOptions,
 ) (*ImportResponse, error) {
-	return ImportTuples(ctx, fgaClient, 0, 0, 0, maxTuplesPerWrite, maxParallelRequests, body)
+	return ImportTuples(ctx, fgaClient, 0, 0, 0, maxTuplesPerWrite, maxParallelRequests, body, opts)
 }
 
 // ImportTuples receives a client.ClientWriteRequest and imports the tuples to the store. It can be used to import
@@ -96,7 +96,7 @@ func ImportTuplesWithoutRampUp(ctx context.Context, fgaClient client.SdkClient,
 // Deletes and writes are put together in the same ImportResponse.
 func ImportTuples(ctx context.Context, fgaClient client.SdkClient,
 	minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests int,
-	body client.ClientWriteRequest,
+	body client.ClientWriteRequest, opts client.ClientWriteOptions,
 ) (*ImportResponse, error) {
 	if err := validateImportParams(
 		minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, maxParallelRequests, body,
@@ -120,10 +120,7 @@ func ImportTuples(ctx context.Context, fgaClient client.SdkClient,
 			MaxPerChunk:         maxTuplesPerWrite32,
 			MaxParallelRequests: maxParallelRequests32,
 		},
-		Conflict: client.ClientWriteConflictOptions{
-			OnDuplicateWrites: client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE,
-			OnMissingDeletes:  client.CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_IGNORE,
-		},
+		Conflict: opts.Conflict,
 	}
 
 	// If RPS values are 0, then fallback to the previous way of importing

@@ -79,7 +79,7 @@ func listRelations(ctx context.Context,
 	object string,
 	relations []string,
 	contextualTuples []client.ClientContextualTupleKey,
-	queryContext *map[string]interface{},
+	queryContext *map[string]any,
 	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListRelationsResponse, error) {
 	if len(relations) < 1 {

@@ -123,6 +123,8 @@ func buildCheckTestResults(
 	failedCheckCount int,
 	checkResultsOutput string,
 ) (int, string) {
+	var checkResultsOutputSb126 strings.Builder
+
 	for _, checkResult := range result.CheckResults {
 		if !checkResult.IsPassing() {
 			failedCheckCount++
@@ -132,23 +134,25 @@ func buildCheckTestResults(
 				got = strconv.FormatBool(*checkResult.Got)
 			}
 
-			checkResultsOutput += fmt.Sprintf(
+			checkResultsOutputSb126.WriteString(fmt.Sprintf(
 				"\nⅹ Check(user=%s,relation=%s,object=%s",
 				checkResult.Request.User,
 				checkResult.Request.Relation,
-				checkResult.Request.Object)
+				checkResult.Request.Object))
 
 			if checkResult.Request.Context != nil {
-				checkResultsOutput += fmt.Sprintf(", context:%v", checkResult.Request.Context)
+				checkResultsOutputSb126.WriteString(fmt.Sprintf(", context:%v", checkResult.Request.Context))
 			}
 
-			checkResultsOutput += fmt.Sprintf("): expected=%t, got=%s", checkResult.Expected, got)
+			checkResultsOutputSb126.WriteString(fmt.Sprintf("): expected=%t, got=%s", checkResult.Expected, got))
 
 			if checkResult.Error != nil {
-				checkResultsOutput += fmt.Sprintf(", error=%v", checkResult.Error)
+				checkResultsOutputSb126.WriteString(fmt.Sprintf(", error=%v", checkResult.Error))
 			}
 		}
 	}
+
+	checkResultsOutput += checkResultsOutputSb126.String()
 
 	return failedCheckCount, checkResultsOutput
 }
@@ -158,6 +162,8 @@ func buildListObjectsTestResults(
 	failedListObjectsCount int,
 	listObjectsResultsOutput string,
 ) (int, string) {
+	var listObjectsResultsOutputSb161 strings.Builder
+
 	for _, listObjectsResult := range result.ListObjectsResults {
 		if !listObjectsResult.IsPassing() {
 			failedListObjectsCount++
@@ -167,23 +173,25 @@ func buildListObjectsTestResults(
 				got = fmt.Sprintf("%s", listObjectsResult.Got)
 			}
 
-			listObjectsResultsOutput += fmt.Sprintf(
+			listObjectsResultsOutputSb161.WriteString(fmt.Sprintf(
 				"\nⅹ ListObjects(user=%s,relation=%s,type=%s",
 				listObjectsResult.Request.User,
 				listObjectsResult.Request.Relation,
-				listObjectsResult.Request.Type)
+				listObjectsResult.Request.Type))
 
 			if listObjectsResult.Request.Context != nil {
-				listObjectsResultsOutput += fmt.Sprintf(", context:%v", listObjectsResult.Request.Context)
+				listObjectsResultsOutputSb161.WriteString(fmt.Sprintf(", context:%v", listObjectsResult.Request.Context))
 			}
 
-			listObjectsResultsOutput += fmt.Sprintf("): expected=%s, got=%s", listObjectsResult.Expected, got)
+			listObjectsResultsOutputSb161.WriteString(fmt.Sprintf("): expected=%s, got=%s", listObjectsResult.Expected, got))
 
 			if listObjectsResult.Error != nil {
-				listObjectsResultsOutput += fmt.Sprintf(", error=%v", listObjectsResult.Error)
+				listObjectsResultsOutputSb161.WriteString(fmt.Sprintf(", error=%v", listObjectsResult.Error))
 			}
 		}
 	}
+
+	listObjectsResultsOutput += listObjectsResultsOutputSb161.String()
 
 	return failedListObjectsCount, listObjectsResultsOutput
 }
@@ -193,6 +201,8 @@ func buildListUsersTestResults(
 	failedListUsersCount int,
 	listUsersResultsOutput string,
 ) (int, string) {
+	var listUsersResultsOutputSb196 strings.Builder
+
 	for _, listUsersResult := range result.ListUsersResults {
 		if !listUsersResult.IsPassing() {
 			failedListUsersCount++
@@ -205,23 +215,25 @@ func buildListUsersTestResults(
 
 			userFilter := listUsersResult.Request.UserFilters[0]
 
-			listUsersResultsOutput += fmt.Sprintf(
+			listUsersResultsOutputSb196.WriteString(fmt.Sprintf(
 				"\nⅹ ListUsers(object=%+v,relation=%s,user_filter=%+v",
 				listUsersResult.Request.Object,
 				listUsersResult.Request.Relation,
-				userFilter)
+				userFilter))
 
 			if listUsersResult.Request.Context != nil {
-				listUsersResultsOutput += fmt.Sprintf(", context:%v", listUsersResult.Request.Context)
+				listUsersResultsOutputSb196.WriteString(fmt.Sprintf(", context:%v", listUsersResult.Request.Context))
 			}
 
-			listUsersResultsOutput += fmt.Sprintf("): expected=%+v, got=%+v", listUsersResult.Expected, got)
+			listUsersResultsOutputSb196.WriteString(fmt.Sprintf("): expected=%+v, got=%+v", listUsersResult.Expected, got))
 
 			if listUsersResult.Error != nil {
-				listUsersResultsOutput += fmt.Sprintf(", error=%v", listUsersResult.Error)
+				listUsersResultsOutputSb196.WriteString(fmt.Sprintf(", error=%v", listUsersResult.Error))
 			}
 		}
 	}
+
+	listUsersResultsOutput += listUsersResultsOutputSb196.String()
 
 	return failedListUsersCount, listUsersResultsOutput
 }

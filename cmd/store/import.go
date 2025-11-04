@@ -173,17 +173,20 @@ func importTuples(
 	bar := createProgressBar(len(tuples))
 
 	for index := 0; index < len(tuples); index += maxTuplesPerWrite {
-		end := index + maxTuplesPerWrite
-		if end > len(tuples) {
-			end = len(tuples)
-		}
+		end := min(index+maxTuplesPerWrite, len(tuples))
 
 		writeRequest := client.ClientWriteRequest{
 			Writes: tuples[index:end],
 		}
 
+		options := client.ClientWriteOptions{
+			Conflict: client.ClientWriteConflictOptions{
+				OnDuplicateWrites: client.CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE,
+			},
+		}
+
 		if _, err := tuple.ImportTuplesWithoutRampUp(
-			ctx, fgaClient, maxTuplesPerWrite, maxParallelRequests, writeRequest); err != nil {
+			ctx, fgaClient, maxTuplesPerWrite, maxParallelRequests, writeRequest, options); err != nil {
 			return fmt.Errorf("failed to import tuples: %w", err)
 		}
 

@@ -36,7 +36,7 @@ func listObjects(
 	relation string,
 	objectType string,
 	contextualTuples []client.ClientContextualTupleKey,
-	queryContext *map[string]interface{},
+	queryContext *map[string]any,
 	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListObjectsResponse, error) {
 	body := &client.ClientListObjectsRequest{

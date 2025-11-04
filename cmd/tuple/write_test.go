@@ -30,7 +30,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product",
 					Condition: &openfga.RelationshipCondition{
 						Name:    "inOfficeIP",
-						Context: &map[string]interface{}{},
+						Context: &map[string]any{},
 					},
 				},
 				{
@@ -39,7 +39,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product-2021",
 					Condition: &openfga.RelationshipCondition{
 						Name: "inOfficeIP",
-						Context: &map[string]interface{}{
+						Context: &map[string]any{
 							"ip_addr": "10.0.0.1",
 						},
 					},
@@ -61,7 +61,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product",
 					Condition: &openfga.RelationshipCondition{
 						Name:    "inOfficeIP",
-						Context: &map[string]interface{}{},
+						Context: &map[string]any{},
 					},
 				},
 				{
@@ -70,7 +70,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product-2021",
 					Condition: &openfga.RelationshipCondition{
 						Name: "inOfficeIP",
-						Context: &map[string]interface{}{
+						Context: &map[string]any{
 							"ip_addr": "10.0.0.1",
 						},
 					},
@@ -108,7 +108,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product",
 					Condition: &openfga.RelationshipCondition{
 						Name:    "inOfficeIP",
-						Context: &map[string]interface{}{},
+						Context: &map[string]any{},
 					},
 				},
 				{
@@ -117,7 +117,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product-2021",
 					Condition: &openfga.RelationshipCondition{
 						Name:    "inOfficeIP",
-						Context: &map[string]interface{}{},
+						Context: &map[string]any{},
 					},
 				},
 				{
@@ -163,7 +163,7 @@ func TestParseTuplesFileData(t *testing.T) {
 					Object:   "folder:product-2021",
 					Condition: &openfga.RelationshipCondition{
 						Name:    "inOfficeIP",
-						Context: &map[string]interface{}{"ip_addr": "10.0.0.1"},
+						Context: &map[string]any{"ip_addr": "10.0.0.1"},
 					},
 				},
 				{
