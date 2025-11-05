@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.8] - 2025-11-05
+
+Fixed:
+- Fix path resolution in `fga model test` to no longer resolve paths using the files base path
+
 ## [0.7.7] - 2025-11-04
 
 > [!NOTE]
@@ -351,6 +356,7 @@ Initial OpenFGA CLI release
   * Use Expand to understand why access was granted
 
 [Unreleased]: https://github.com/openfga/cli/compare/v0.7.7...HEAD
+[0.7.8]: https://github.com/openfga/cli/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.7
 [0.7.5]: https://github.com/openfga/cli/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/openfga/cli/compare/v0.7.3...v0.7.4
