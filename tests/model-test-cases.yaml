@@ -1,0 +1,20 @@
+config:
+  inherit-env: true
+
+tests:
+  001 - it successfully runs local tests against a store with an absolute path:
+    command: fga model test --tests ./tests/fixtures/basic-store.fga.yaml
+    exit-code: 0
+    stderr: # Test Summary #
+  002 - it successfully runs local tests against a store with a relative path:
+    command: fga model test --tests tests/fixtures/basic-store.fga.yaml
+    exit-code: 0
+    stderr: # Test Summary #
+  003 - it successfully runs local tests against a store when resolving a glob pattern:
+    command: fga model test --tests "tests/**/*-store.fga.yaml"
+    exit-code: 0
+    stderr: # Test Summary #
+  004 - it successfully runs local tests against a store with relative paths in the store file:
+    command: fga model test --tests tests/fixtures/relative-path/relative-path-store.fga.yaml
+    exit-code: 0
+    stderr: # Test Summary #

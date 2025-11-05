@@ -1,0 +1,10 @@
+name: Relative Path Store
+model_file: ../basic-model.fga
+tuple_file: ../basic-tuples.json
+tests:
+  - name: test-1
+    check:
+      - user: user:anne
+        object: group:foo
+        assertions:
+          owner: true
