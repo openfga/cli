@@ -8,3 +8,9 @@ tests:
     stdout:
       json:
         store.name: "Basic Store"
+  002 - it successfully imports a store with relative paths:
+    command: fga store import --file=./tests/fixtures/relative-path/relative-path-store.fga.yaml
+    exit-code: 0
+    stdout:
+      json:
+        store.name: "Relative Path Store"
