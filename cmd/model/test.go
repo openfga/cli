@@ -19,7 +19,6 @@ package model
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
