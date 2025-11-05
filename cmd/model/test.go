@@ -77,7 +77,11 @@ var modelTestCmd = &cobra.Command{
 		summaries := []string{}
 
 		for _, file := range fileNames {
-			format, storeData, err := storetest.ReadFromFile(file, path.Dir(file))
+			// Pass empty basePath since 'file' from glob is already the complete path to the test file.
+			// ReadFromFile will use the file's directory for resolving nested file references (model_file, tuple_file).
+			// This prevents path duplication issues where passing path.Dir(file) as basePath would cause
+			// the path to be joined, creating: "path/to/file/path/to/file/test.yaml"
+			format, storeData, err := storetest.ReadFromFile(file, "")
 			if err != nil {
 				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
