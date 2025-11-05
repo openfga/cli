@@ -19,7 +19,6 @@ package model
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -77,7 +76,7 @@ var modelTestCmd = &cobra.Command{
 		summaries := []string{}
 
 		for _, file := range fileNames {
-			format, storeData, err := storetest.ReadFromFile(file, path.Dir(file))
+			format, storeData, err := storetest.ReadFromFile(file, "")
 			if err != nil {
 				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
