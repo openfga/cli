@@ -117,7 +117,21 @@ func initConfig() {
 	}
 
 	// If a config file is found, read it in.
-	if err := viperInstance.ReadInConfig(); err == nil {
+	if err := viperInstance.ReadInConfig(); err != nil {
+		// It's okay if the config file is not found (it's optional)
+		// But if it exists and has parsing errors, we should report it
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// This is a real error (e.g., YAML parsing failure)
+			if cfgFile != "" {
+				// User explicitly specified a config file
+				fmt.Fprintf(os.Stderr, "Error reading config file '%s': %v\n", cfgFile, err)
+			} else {
+				// Config file was auto-discovered
+				fmt.Fprintf(os.Stderr, "Error reading config file '%s': %v\n", viperInstance.ConfigFileUsed(), err)
+			}
+			os.Exit(1)
+		}
+	} else {
 		fmt.Fprintln(os.Stderr, "Using config file:", viperInstance.ConfigFileUsed())
 	}
 
