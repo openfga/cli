@@ -26,10 +26,10 @@ func RunLocalCheckTest(
 	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestCheckSingleResult {
-	results := []ModelTestCheckSingleResult{}
 	users := GetEffectiveUsers(checkTest)
-
 	objects := GetEffectiveObjects(checkTest)
+	results := make([]ModelTestCheckSingleResult, 0, len(users)*len(objects)*len(checkTest.Assertions))
+
 	for _, user := range users {
 		for _, object := range objects {
 			for relation, expectation := range checkTest.Assertions {
@@ -101,7 +101,7 @@ func RunLocalListObjectsTest(
 	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestListObjectsSingleResult {
-	results := []ModelTestListObjectsSingleResult{}
+	results := make([]ModelTestListObjectsSingleResult, 0, len(listObjectsTest.Assertions))
 
 	for relation, expectation := range listObjectsTest.Assertions {
 		result := ModelTestListObjectsSingleResult{
@@ -168,8 +168,7 @@ func RunLocalListUsersTest(
 	tuples []client.ClientContextualTupleKey,
 	options ModelTestOptions,
 ) []ModelTestListUsersSingleResult {
-	results := []ModelTestListUsersSingleResult{}
-
+	results := make([]ModelTestListUsersSingleResult, 0, len(listUsersTest.Assertions))
 	object, pbObject := convertStoreObjectToObject(listUsersTest.Object)
 
 	userFilter := &pb.UserTypeFilter{

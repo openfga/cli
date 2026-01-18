@@ -44,6 +44,7 @@ const (
 	progressBarSleepDelay    = 10 // time.Millisecond
 	progressBarThrottleValue = 65
 	progressBarUpdateDelay   = 5 * time.Millisecond
+	maxAssertionsPerWrite    = 100
 )
 
 // createStore creates a new store with the given client configuration and store data.
@@ -226,9 +227,15 @@ func importAssertions(
 			StoreId:              &storeID,
 		}
 
+		if len(assertions) > maxAssertionsPerWrite {
+			fmt.Fprintf(os.Stderr, "Warning: %d test assertions found, but only the first %d will be written\n",
+				len(assertions), maxAssertionsPerWrite)
+			assertions = assertions[:maxAssertionsPerWrite]
+		}
+
 		_, err := fgaClient.WriteAssertions(ctx).Body(assertions).Options(writeOptions).Execute()
 		if err != nil {
-			return fmt.Errorf("failed to import assertions: %w", err)
+			return fmt.Errorf("failed to import test assertions: %w", err)
 		}
 	}
 
@@ -236,7 +243,15 @@ func importAssertions(
 }
 
 func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAssertion {
-	var assertions []client.ClientAssertion
+	totalAssertions := 0
+
+	for _, checkTest := range checkTests {
+		users := storetest.GetEffectiveUsers(checkTest)
+		objects := storetest.GetEffectiveObjects(checkTest)
+		totalAssertions += len(users) * len(objects) * len(checkTest.Assertions)
+	}
+
+	assertions := make([]client.ClientAssertion, 0, totalAssertions)
 
 	for _, checkTest := range checkTests {
 		users := storetest.GetEffectiveUsers(checkTest)
