@@ -220,7 +220,7 @@ func TestImportStore(t *testing.T) {
 	}
 }
 
-func TestImportStoreWithBatchedAssertions(t *testing.T) {
+func TestImportStoreWithTruncatedAssertions(t *testing.T) {
 	t.Parallel()
 
 	modelID, storeID := testModelID, testStoreID
@@ -232,10 +232,10 @@ func TestImportStoreWithBatchedAssertions(t *testing.T) {
 		users[i] = "user:" + string(rune('a'+i/26)) + string(rune('a'+i%26))
 	}
 
-	// Expected assertions split into batches
-	allAssertions := make([]client.ClientAssertion, 150)
-	for i := range 150 {
-		allAssertions[i] = client.ClientAssertion{
+	// Only the first 100 assertions should be written
+	first100Assertions := make([]client.ClientAssertion, 100)
+	for i := range 100 {
+		first100Assertions[i] = client.ClientAssertion{
 			User:        users[i],
 			Relation:    "reader",
 			Object:      "document:doc1",
@@ -243,15 +243,13 @@ func TestImportStoreWithBatchedAssertions(t *testing.T) {
 		}
 	}
 
-	batch1 := allAssertions[:100]
-	batch2 := allAssertions[100:]
-
 	mockCtrl := gomock.NewController(t)
 	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
 
 	defer mockCtrl.Finish()
 
-	setupBatchedWriteAssertionsMock(mockCtrl, mockFgaClient, [][]client.ClientAssertion{batch1, batch2}, expectedOptions)
+	// Only expect a single write with the first 100 assertions
+	setupWriteAssertionsMock(mockCtrl, mockFgaClient, first100Assertions, expectedOptions)
 	setupWriteModelMock(mockCtrl, mockFgaClient, modelID)
 	setupCreateStoreMock(mockCtrl, mockFgaClient, storeID)
 
@@ -425,19 +423,4 @@ func setupWriteAssertionsMock(
 	mockWriteAssertions.EXPECT().Body(expectedAssertions).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Options(expectedOptions).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Execute().Return(nil, nil)
-}
-
-func setupBatchedWriteAssertionsMock(
-	mockCtrl *gomock.Controller,
-	mockFgaClient *mockclient.MockSdkClient,
-	expectedBatches [][]client.ClientAssertion,
-	expectedOptions client.ClientWriteAssertionsOptions,
-) {
-	for _, batch := range expectedBatches {
-		mockWriteAssertions := mockclient.NewMockSdkClientWriteAssertionsRequestInterface(mockCtrl)
-		mockFgaClient.EXPECT().WriteAssertions(gomock.Any()).Return(mockWriteAssertions)
-		mockWriteAssertions.EXPECT().Body(batch).Return(mockWriteAssertions)
-		mockWriteAssertions.EXPECT().Options(expectedOptions).Return(mockWriteAssertions)
-		mockWriteAssertions.EXPECT().Execute().Return(nil, nil)
-	}
 }

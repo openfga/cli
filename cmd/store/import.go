@@ -227,14 +227,15 @@ func importAssertions(
 			StoreId:              &storeID,
 		}
 
-		for index := 0; index < len(assertions); index += maxAssertionsPerWrite {
-			end := min(index+maxAssertionsPerWrite, len(assertions))
-			batch := assertions[index:end]
+		if len(assertions) > maxAssertionsPerWrite {
+			fmt.Fprintf(os.Stderr, "Warning: %d test assertions found, but only the first %d will be written\n",
+				len(assertions), maxAssertionsPerWrite)
+			assertions = assertions[:maxAssertionsPerWrite]
+		}
 
-			_, err := fgaClient.WriteAssertions(ctx).Body(batch).Options(writeOptions).Execute()
-			if err != nil {
-				return fmt.Errorf("failed to import assertions: %w", err)
-			}
+		_, err := fgaClient.WriteAssertions(ctx).Body(assertions).Options(writeOptions).Execute()
+		if err != nil {
+			return fmt.Errorf("failed to import test assertions: %w", err)
 		}
 	}
 
