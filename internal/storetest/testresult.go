@@ -366,12 +366,12 @@ func (test TestResults) FriendlyDisplay() string { //nolint:cyclop
 func (test TestResults) FriendlyBody() string {
 	fullOutput := test.FriendlyDisplay()
 
-	headerIndex := strings.Index(fullOutput, "# Test Summary #")
-	if headerIndex == -1 {
+	before, _, found := strings.Cut(fullOutput, "# Test Summary #")
+	if !found {
 		return fullOutput
 	}
 
-	return strings.TrimSpace(fullOutput[:headerIndex])
+	return strings.TrimSpace(before)
 }
 
 func buildTestSummary(failedTestCount int, summary string, totalTestCount int,
