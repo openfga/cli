@@ -33,10 +33,9 @@ func RunRemoteCheckTest(
 	checkTest ModelTestCheck,
 	tuples []client.ClientContextualTupleKey,
 ) []ModelTestCheckSingleResult {
-	results := []ModelTestCheckSingleResult{}
-
 	users := GetEffectiveUsers(checkTest)
 	objects := GetEffectiveObjects(checkTest)
+	results := make([]ModelTestCheckSingleResult, 0, len(users)*len(objects)*len(checkTest.Assertions))
 
 	for _, user := range users {
 		for _, object := range objects {
@@ -89,7 +88,7 @@ func RunRemoteListObjectsTest(
 	listObjectsTest ModelTestListObjects,
 	tuples []client.ClientContextualTupleKey,
 ) []ModelTestListObjectsSingleResult {
-	results := []ModelTestListObjectsSingleResult{}
+	results := make([]ModelTestListObjectsSingleResult, 0, len(listObjectsTest.Assertions))
 
 	for relation, expectation := range listObjectsTest.Assertions {
 		result := RunSingleRemoteListObjectsTest(ctx, fgaClient,
@@ -138,7 +137,7 @@ func RunRemoteListUsersTest(
 	listUsersTest ModelTestListUsers,
 	tuples []client.ClientContextualTupleKey,
 ) []ModelTestListUsersSingleResult {
-	results := []ModelTestListUsersSingleResult{}
+	results := make([]ModelTestListUsersSingleResult, 0, len(listUsersTest.Assertions))
 
 	object, _ := convertStoreObjectToObject(listUsersTest.Object)
 	for relation, expectation := range listUsersTest.Assertions {
@@ -165,21 +164,21 @@ func RunRemoteTest(
 	test ModelTest,
 	testTuples []client.ClientContextualTupleKey,
 ) TestResult {
-	checkResults := []ModelTestCheckSingleResult{}
+	checkResults := make([]ModelTestCheckSingleResult, 0, len(test.Check))
 
 	for index := range test.Check {
 		results := RunRemoteCheckTest(ctx, fgaClient, test.Check[index], testTuples)
 		checkResults = append(checkResults, results...)
 	}
 
-	listObjectResults := []ModelTestListObjectsSingleResult{}
+	listObjectResults := make([]ModelTestListObjectsSingleResult, 0, len(test.ListObjects))
 
 	for index := range test.ListObjects {
 		results := RunRemoteListObjectsTest(ctx, fgaClient, test.ListObjects[index], testTuples)
 		listObjectResults = append(listObjectResults, results...)
 	}
 
-	listUserResults := []ModelTestListUsersSingleResult{}
+	listUserResults := make([]ModelTestListUsersSingleResult, 0, len(test.ListUsers))
 
 	for index := range test.ListUsers {
 		results := RunRemoteListUsersTest(ctx, fgaClient, test.ListUsers[index], testTuples)
