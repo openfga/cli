@@ -236,7 +236,7 @@ func importAssertions(
 }
 
 func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAssertion {
-	var assertions []client.ClientAssertion
+	assertions := make([]client.ClientAssertion, 0, len(checkTests))
 
 	for _, checkTest := range checkTests {
 		users := storetest.GetEffectiveUsers(checkTest)
