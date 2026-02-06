@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+Fixed:
+- CLI now warns users when `.fga.yaml` config file has YAML parsing errors instead of silently ignoring them. Use `--debug` flag or set `FGA_DEBUG=true` for detailed error messages
+
 ## [0.7.8] - 2025-11-05
 
 Fixed:

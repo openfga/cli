@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -49,6 +50,33 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
+}
+
+// isDebugMode checks if debug mode is enabled via --debug flag or FGA_DEBUG env var.
+// We are not following cobra's built-in flag checking here because we want to determine
+// debug mode status before cobra parses flags (to control logging during initConfig).
+// The precedence is:
+// 1. Command-line flag --debug
+// 2. Environment variable FGA_DEBUG
+// Other areas in the code should parse the flag using cobra after initialization rather
+// than rely on this function.
+func isDebugMode() bool {
+	// Command-line flag takes precedence
+	for _, arg := range os.Args {
+		if arg == "--debug=true" {
+			return true
+		}
+		if arg == "--debug=false" {
+			return false
+		}
+	}
+
+	// Check environment variable first
+	if os.Getenv("FGA_DEBUG") == "true" {
+		return true
+	}
+
+	return false
 }
 
 func init() {
@@ -119,6 +147,18 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viperInstance.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viperInstance.ConfigFileUsed())
+	} else {
+		// Check if error is due to config file not found (this is OK, we continue silently)
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if !errors.As(err, &configFileNotFoundError) {
+			// Config file exists but failed to parse - show warning
+			if isDebugMode() {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to load config file %s: %v\n",
+					viperInstance.ConfigFileUsed(), err)
+			} else {
+				fmt.Fprintln(os.Stderr, "Warning: Failed to load config file. Use --debug=true or set FGA_DEBUG=true for details.")
+			}
+		}
 	}
 
 	viperInstance.SetEnvPrefix("FGA")
