@@ -97,6 +97,7 @@ var listCmd = &cobra.Command{
 		}
 
 		models := authorizationmodel.AuthzModelList{}
+
 		authzModels := response.AuthorizationModels
 		for index := range authzModels {
 			authModel := authorizationmodel.AuthzModel{}

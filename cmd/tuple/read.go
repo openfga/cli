@@ -166,6 +166,7 @@ var readCmd = &cobra.Command{
 		if pageSize < 0 {
 			return fmt.Errorf("%w: got %d", ErrPageSizeNegative, pageSize)
 		}
+
 		if pageSize > 100 {
 			return fmt.Errorf("%w: got %d", ErrPageSizeExceedsMax, pageSize)
 		}

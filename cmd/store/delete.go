@@ -47,6 +47,7 @@ var deleteCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("prompt failed due to %w", err)
 			}
+
 			if !confirmation {
 				type returnMessage struct {
 					Message string

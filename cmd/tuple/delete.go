@@ -48,6 +48,7 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to parse file name due to %w", err)
 		}
+
 		if fileName != "" {
 			startTime := time.Now()
 

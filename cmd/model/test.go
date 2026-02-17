@@ -125,6 +125,7 @@ var modelTestCmd = &cobra.Command{
 					fmt.Fprintln(os.Stderr, summary)
 				}
 			}
+
 			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
 		}
 
