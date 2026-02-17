@@ -155,7 +155,7 @@ var readCmd = &cobra.Command{
 		relation, _ := cmd.Flags().GetString("relation")
 		object, _ := cmd.Flags().GetString("object")
 
-		maxPages, _ := cmd.Flags().GetInt("max-pages")
+		maxPages, err := cmd.Flags().GetInt("max-pages")
 		if err != nil {
 			return fmt.Errorf("failed to parse max pages due to %w", err)
 		}
@@ -207,7 +207,9 @@ var readCmd = &cobra.Command{
 
 			return nil
 		}
+
 		var data any
+
 		data = *response.complete
 
 		if simpleOutput || outputFormat == "simple-json" {

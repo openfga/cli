@@ -56,6 +56,7 @@ var modelTestCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
 		}
+
 		if len(fileNames) == 0 {
 			// Check if the literal path exists
 			if _, err := os.Stat(testsFileName); err != nil {
@@ -93,14 +94,18 @@ var modelTestCmd = &cobra.Command{
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 
 			if !suppressSummary && multipleFiles {
+
 				fullDisplay := test.FriendlyDisplay()
+
 				// Extract just the summary part (after "# Test Summary #")
+
 				headerIndex := strings.Index(fullDisplay, "# Test Summary #")
 				var summaryText string
 				if headerIndex != -1 {
 					// Get the summary part and remove the "# Test Summary #" header
 					summaryPart := fullDisplay[headerIndex:]
 					lines := strings.Split(summaryPart, "\n")
+
 					if len(lines) > 1 {
 						summaryText = strings.Join(lines[1:], "\n") // Skip the header line
 					}
