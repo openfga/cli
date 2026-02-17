@@ -94,13 +94,13 @@ var modelTestCmd = &cobra.Command{
 			aggregateResults.Results = append(aggregateResults.Results, test.Results...)
 
 			if !suppressSummary && multipleFiles {
-
 				fullDisplay := test.FriendlyDisplay()
 
 				// Extract just the summary part (after "# Test Summary #")
-
 				headerIndex := strings.Index(fullDisplay, "# Test Summary #")
+
 				var summaryText string
+
 				if headerIndex != -1 {
 					// Get the summary part and remove the "# Test Summary #" header
 					summaryPart := fullDisplay[headerIndex:]
@@ -112,6 +112,7 @@ var modelTestCmd = &cobra.Command{
 				} else {
 					summaryText = fullDisplay
 				}
+
 				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
 			}
