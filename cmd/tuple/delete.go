@@ -40,10 +40,12 @@ var deleteCmd = &cobra.Command{
   fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-missing ignore`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		fileName, err := cmd.Flags().GetString("file")
 		if err != nil {
 			return fmt.Errorf("failed to parse file name due to %w", err)
@@ -56,6 +58,7 @@ var deleteCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 			}
+
 			clientTupleKeyWithoutCondition := tuple.TupleKeysToTupleKeysWithoutCondition(clientTupleKeys...)
 
 			maxTuplesPerWrite, err := cmd.Flags().GetInt("max-tuples-per-write")
@@ -108,6 +111,7 @@ var deleteCmd = &cobra.Command{
 
 			return output.Display(outputResponse)
 		}
+
 		body := &client.ClientDeleteTuplesBody{
 			client.ClientTupleKeyWithoutCondition{
 				User:     args[0],
@@ -115,6 +119,7 @@ var deleteCmd = &cobra.Command{
 				Object:   args[2],
 			},
 		}
+
 		options := &client.ClientWriteOptions{}
 		if cmd.Flags().Changed("on-missing") {
 			options.Conflict.OnMissingDeletes = onMissingDeleteOption.ToSdkEnum()

@@ -61,6 +61,7 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		_, err = fgaClient.DeleteStore(context.Background()).Execute()
 		if err != nil {
 			return fmt.Errorf("failed to delete store %v due to %w", clientConfig.StoreID, err)

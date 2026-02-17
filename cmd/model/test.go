@@ -62,8 +62,10 @@ var modelTestCmd = &cobra.Command{
 			if _, err := os.Stat(testsFileName); err != nil {
 				return fmt.Errorf("test file %s does not exist: %w", testsFileName, err)
 			}
+
 			fileNames = []string{testsFileName}
 		}
+
 		multipleFiles := len(fileNames) > 1
 
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -81,6 +83,7 @@ var modelTestCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
+
 			test, err := storetest.RunTests(
 				cmd.Context(),
 				fgaClient,

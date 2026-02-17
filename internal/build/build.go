@@ -16,6 +16,8 @@ limitations under the License.
 
 // Package build provides build information that is linked into the application. Other
 // packages within this project can use this information in logs etc..
+
+//nolint:revive // package name conflicts with stdlib is acceptable here
 package build
 
 var (
