@@ -41,11 +41,13 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to parse force flag due to %w", err)
 		}
+
 		if !force {
 			confirmation, err := confirmation.AskForConfirmation("Are you sure you want to delete the store:")
 			if err != nil {
 				return fmt.Errorf("prompt failed due to %w", err)
 			}
+
 			if !confirmation {
 				type returnMessage struct {
 					Message string
@@ -59,6 +61,7 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
+
 		_, err = fgaClient.DeleteStore(context.Background()).Execute()
 		if err != nil {
 			return fmt.Errorf("failed to delete store %v due to %w", clientConfig.StoreID, err)

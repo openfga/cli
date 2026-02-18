@@ -106,6 +106,7 @@ export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client: %w", err)
