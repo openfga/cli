@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.9] - 2026-02-18
+Changed:
+- Switch to distroless base image for SSL certs (#617)
+
 ## [0.7.8] - 2025-11-05
 
 Fixed:
@@ -355,7 +359,8 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.7...HEAD
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.9...HEAD
+[0.7.9]: https://github.com/openfga/cli/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/openfga/cli/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.7
 [0.7.5]: https://github.com/openfga/cli/compare/v0.7.4...v0.7.5
