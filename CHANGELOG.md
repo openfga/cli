@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ## [0.7.9] - 2026-02-18
+
 Changed:
 - Switch to distroless base image for SSL certs (#617)
 
