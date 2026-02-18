@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 Changed:
 - Switch to distroless base image for SSL certs (#617) - thanks @runabol!
+- go > v1.25 is now required (#631)
 
 ## [0.7.8] - 2025-11-05
 

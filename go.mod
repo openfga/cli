@@ -1,8 +1,8 @@
 module github.com/openfga/cli
 
-go 1.24.0
+go 1.25
 
-toolchain go1.25.7
+toolchain go1.26.0
 
 require (
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
