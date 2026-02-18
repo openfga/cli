@@ -56,13 +56,16 @@ var modelTestCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
 		}
+
 		if len(fileNames) == 0 {
 			// Check if the literal path exists
 			if _, err := os.Stat(testsFileName); err != nil {
 				return fmt.Errorf("test file %s does not exist: %w", testsFileName, err)
 			}
+
 			fileNames = []string{testsFileName}
 		}
+
 		multipleFiles := len(fileNames) > 1
 
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -80,6 +83,7 @@ var modelTestCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
+
 			test, err := storetest.RunTests(
 				cmd.Context(),
 				fgaClient,
@@ -94,19 +98,24 @@ var modelTestCmd = &cobra.Command{
 
 			if !suppressSummary && multipleFiles {
 				fullDisplay := test.FriendlyDisplay()
+
 				// Extract just the summary part (after "# Test Summary #")
 				headerIndex := strings.Index(fullDisplay, "# Test Summary #")
+
 				var summaryText string
+
 				if headerIndex != -1 {
 					// Get the summary part and remove the "# Test Summary #" header
 					summaryPart := fullDisplay[headerIndex:]
 					lines := strings.Split(summaryPart, "\n")
+
 					if len(lines) > 1 {
 						summaryText = strings.Join(lines[1:], "\n") // Skip the header line
 					}
 				} else {
 					summaryText = fullDisplay
 				}
+
 				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
 			}
@@ -120,6 +129,7 @@ var modelTestCmd = &cobra.Command{
 					fmt.Fprintln(os.Stderr, summary)
 				}
 			}
+
 			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
 		}
 

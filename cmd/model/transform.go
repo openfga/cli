@@ -84,6 +84,7 @@ fga model transform --file=fga.mod`,
 			if err != nil {
 				return fmt.Errorf("failed to transform model due to %w", err)
 			}
+
 			fmt.Printf("%v", *dslModel)
 
 			return nil

@@ -144,6 +144,7 @@ var exportCmd = &cobra.Command{
 		}
 
 		maxTupleCount, _ := cmd.Flags().GetUint("max-tuples")
+
 		storeData, err := buildStoreData(cmd.Context(), clientConfig, fgaClient, maxTupleCount)
 		if err != nil {
 			return fmt.Errorf("failed to export store: %w", err)

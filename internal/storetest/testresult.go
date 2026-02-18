@@ -134,20 +134,19 @@ func buildCheckTestResults(
 				got = strconv.FormatBool(*checkResult.Got)
 			}
 
-			checkResultsOutputSb126.WriteString(fmt.Sprintf(
-				"\nⅹ Check(user=%s,relation=%s,object=%s",
+			fmt.Fprintf(&checkResultsOutputSb126, "\nⅹ Check(user=%s,relation=%s,object=%s",
 				checkResult.Request.User,
 				checkResult.Request.Relation,
-				checkResult.Request.Object))
+				checkResult.Request.Object)
 
 			if checkResult.Request.Context != nil {
-				checkResultsOutputSb126.WriteString(fmt.Sprintf(", context:%v", checkResult.Request.Context))
+				fmt.Fprintf(&checkResultsOutputSb126, ", context:%v", checkResult.Request.Context)
 			}
 
-			checkResultsOutputSb126.WriteString(fmt.Sprintf("): expected=%t, got=%s", checkResult.Expected, got))
+			fmt.Fprintf(&checkResultsOutputSb126, "): expected=%t, got=%s", checkResult.Expected, got)
 
 			if checkResult.Error != nil {
-				checkResultsOutputSb126.WriteString(fmt.Sprintf(", error=%v", checkResult.Error))
+				fmt.Fprintf(&checkResultsOutputSb126, ", error=%v", checkResult.Error)
 			}
 		}
 	}
@@ -173,20 +172,19 @@ func buildListObjectsTestResults(
 				got = fmt.Sprintf("%s", listObjectsResult.Got)
 			}
 
-			listObjectsResultsOutputSb161.WriteString(fmt.Sprintf(
-				"\nⅹ ListObjects(user=%s,relation=%s,type=%s",
+			fmt.Fprintf(&listObjectsResultsOutputSb161, "\nⅹ ListObjects(user=%s,relation=%s,type=%s",
 				listObjectsResult.Request.User,
 				listObjectsResult.Request.Relation,
-				listObjectsResult.Request.Type))
+				listObjectsResult.Request.Type)
 
 			if listObjectsResult.Request.Context != nil {
-				listObjectsResultsOutputSb161.WriteString(fmt.Sprintf(", context:%v", listObjectsResult.Request.Context))
+				fmt.Fprintf(&listObjectsResultsOutputSb161, ", context:%v", listObjectsResult.Request.Context)
 			}
 
-			listObjectsResultsOutputSb161.WriteString(fmt.Sprintf("): expected=%s, got=%s", listObjectsResult.Expected, got))
+			fmt.Fprintf(&listObjectsResultsOutputSb161, "): expected=%s, got=%s", listObjectsResult.Expected, got)
 
 			if listObjectsResult.Error != nil {
-				listObjectsResultsOutputSb161.WriteString(fmt.Sprintf(", error=%v", listObjectsResult.Error))
+				fmt.Fprintf(&listObjectsResultsOutputSb161, ", error=%v", listObjectsResult.Error)
 			}
 		}
 	}
@@ -215,20 +213,19 @@ func buildListUsersTestResults(
 
 			userFilter := listUsersResult.Request.UserFilters[0]
 
-			listUsersResultsOutputSb196.WriteString(fmt.Sprintf(
-				"\nⅹ ListUsers(object=%+v,relation=%s,user_filter=%+v",
+			fmt.Fprintf(&listUsersResultsOutputSb196, "\nⅹ ListUsers(object=%+v,relation=%s,user_filter=%+v",
 				listUsersResult.Request.Object,
 				listUsersResult.Request.Relation,
-				userFilter))
+				userFilter)
 
 			if listUsersResult.Request.Context != nil {
-				listUsersResultsOutputSb196.WriteString(fmt.Sprintf(", context:%v", listUsersResult.Request.Context))
+				fmt.Fprintf(&listUsersResultsOutputSb196, ", context:%v", listUsersResult.Request.Context)
 			}
 
-			listUsersResultsOutputSb196.WriteString(fmt.Sprintf("): expected=%+v, got=%+v", listUsersResult.Expected, got))
+			fmt.Fprintf(&listUsersResultsOutputSb196, "): expected=%+v, got=%+v", listUsersResult.Expected, got)
 
 			if listUsersResult.Error != nil {
-				listUsersResultsOutputSb196.WriteString(fmt.Sprintf(", error=%v", listUsersResult.Error))
+				fmt.Fprintf(&listUsersResultsOutputSb196, ", error=%v", listUsersResult.Error)
 			}
 		}
 	}
