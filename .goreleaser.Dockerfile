@@ -1,3 +1,4 @@
 FROM gcr.io/distroless/static:nonroot
-COPY fga /fga
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/fga /fga
 ENTRYPOINT ["/fga"]
