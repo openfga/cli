@@ -24,72 +24,29 @@ builds:
       - "-X github.com/openfga/cli/internal/build.Commit={{.Commit}}"
       - "-X github.com/openfga/cli/internal/build.Date={{.Date}}"
 
-dockers:
-  - goos: linux
-    goarch: amd64
-
+dockers_v2:
+  - images:
+      - "openfga/cli"
     dockerfile: .goreleaser.Dockerfile
 
-    image_templates:
-      - "openfga/cli:latest-amd64"
-      - "openfga/cli:{{ .Tag }}-amd64"
-      - "openfga/cli:v{{ .Version }}-amd64"
-      - "openfga/cli:v{{ .Major }}-amd64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}-amd64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64"
+    platforms:
+      - linux/amd64
+      - linux/arm64
 
-    use: buildx
+    tags:
+      - "latest"
+      - "{{ .Tag }}"
+      - "v{{ .Version }}"
+      - "v{{ .Major }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
 
-    build_flag_templates:
-      - "--platform=linux/amd64"
-      - "--pull"
-      - "--provenance=false"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
+    labels:
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.title": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
 
-  - goos: linux
-    goarch: arm64
-
-    dockerfile: .goreleaser.Dockerfile
-
-    image_templates:
-      - "openfga/cli:latest-arm64"
-      - "openfga/cli:{{ .Tag }}-arm64"
-      - "openfga/cli:v{{ .Version }}-arm64"
-      - "openfga/cli:v{{ .Major }}-arm64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}-arm64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64"
-
-    use: buildx
-
-    build_flag_templates:
-      - "--platform=linux/arm64"
-      - "--pull"
-      - "--provenance=false"
-
-docker_manifests:
-  - name_template: openfga/cli:latest
-    image_templates:
-      - openfga/cli:latest-amd64
-      - openfga/cli:latest-arm64
-  - name_template: openfga/cli:v{{ .Version }}
-    image_templates:
-      - openfga/cli:v{{ .Version }}-amd64
-      - openfga/cli:v{{ .Version }}-arm64
-  - name_template: openfga/cli:v{{ .Major }}
-    image_templates:
-      - openfga/cli:v{{ .Major }}-amd64
-      - openfga/cli:v{{ .Major }}-arm64
-  - name_template: openfga/cli:v{{ .Major }}.{{ .Minor }}
-    image_templates:
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}-amd64
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}-arm64
-  - name_template: openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-    image_templates:
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64
 
 release:
   github:
@@ -249,7 +206,7 @@ checksum:
     - glob: manpages/*
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 report_sizes: true
 
