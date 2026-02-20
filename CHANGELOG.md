@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.10] - 2026-02-20
+
+Changed:
+- go > v1.25 is now required (#631)
+- reverted the switch to distroless base image for SSL certs (#635) 
+
 ## [0.7.9] - 2026-02-18
+
+> [!NOTE]
+> `v0.7.9` failed to be released due to CI errors, its changelog entries are included here for reference.
 
 Changed:
 - Switch to distroless base image for SSL certs (#617) - thanks @runabol!
