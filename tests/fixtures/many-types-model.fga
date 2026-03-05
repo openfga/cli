@@ -1,0 +1,24 @@
+model
+  schema 1.1
+
+type user
+
+type resource1
+  relations
+    define owner: [user]
+
+type resource2
+  relations
+    define owner: [user]
+
+type resource3
+  relations
+    define owner: [user]
+
+type resource4
+  relations
+    define owner: [user]
+
+type resource5
+  relations
+    define owner: [user]

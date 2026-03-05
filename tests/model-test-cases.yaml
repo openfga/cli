@@ -18,3 +18,11 @@ tests:
     command: fga model test --tests tests/fixtures/relative-path/relative-path-store.fga.yaml
     exit-code: 0
     stderr: # Test Summary #
+  005 - it fails when model exceeds max-types-per-authorization-model:
+    command: fga model test --tests tests/fixtures/many-types.fga.yaml --max-types-per-authorization-model 5
+    exit-code: 1
+    stderr: exceeds the allowed limit of 5
+  006 - it succeeds when max-types-per-authorization-model is sufficient:
+    command: fga model test --tests tests/fixtures/many-types.fga.yaml --max-types-per-authorization-model 10
+    exit-code: 0
+    stderr: # Test Summary #
