@@ -48,6 +48,7 @@ var getCmd = &cobra.Command{
 	Example: "fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)

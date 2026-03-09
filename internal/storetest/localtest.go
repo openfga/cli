@@ -169,6 +169,7 @@ func RunLocalListUsersTest(
 	options ModelTestOptions,
 ) []ModelTestListUsersSingleResult {
 	results := make([]ModelTestListUsersSingleResult, 0, len(listUsersTest.Assertions))
+
 	object, pbObject := convertStoreObjectToObject(listUsersTest.Object)
 
 	userFilter := &pb.UserTypeFilter{

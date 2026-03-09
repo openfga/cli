@@ -69,6 +69,7 @@ var checkCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(3), //nolint:mnd
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
+
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)

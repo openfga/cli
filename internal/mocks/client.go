@@ -22,6 +22,7 @@ import (
 type MockSdkClient struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientMockRecorder is the mock recorder for MockSdkClient.
@@ -621,6 +622,35 @@ func (mr *MockSdkClientMockRecorder) SetStoreId(storeId any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStoreId", reflect.TypeOf((*MockSdkClient)(nil).SetStoreId), storeId)
 }
 
+// StreamedListObjects mocks base method.
+func (m *MockSdkClient) StreamedListObjects(ctx context.Context) client.SdkClientStreamedListObjectsRequestInterface {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StreamedListObjects", ctx)
+	ret0, _ := ret[0].(client.SdkClientStreamedListObjectsRequestInterface)
+	return ret0
+}
+
+// StreamedListObjects indicates an expected call of StreamedListObjects.
+func (mr *MockSdkClientMockRecorder) StreamedListObjects(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamedListObjects", reflect.TypeOf((*MockSdkClient)(nil).StreamedListObjects), ctx)
+}
+
+// StreamedListObjectsExecute mocks base method.
+func (m *MockSdkClient) StreamedListObjectsExecute(request client.SdkClientStreamedListObjectsRequestInterface) (*client.ClientStreamedListObjectsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StreamedListObjectsExecute", request)
+	ret0, _ := ret[0].(*client.ClientStreamedListObjectsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StreamedListObjectsExecute indicates an expected call of StreamedListObjectsExecute.
+func (mr *MockSdkClientMockRecorder) StreamedListObjectsExecute(request any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StreamedListObjectsExecute", reflect.TypeOf((*MockSdkClient)(nil).StreamedListObjectsExecute), request)
+}
+
 // Write mocks base method.
 func (m *MockSdkClient) Write(ctx context.Context) client.SdkClientWriteRequestInterface {
 	m.ctrl.T.Helper()
@@ -741,6 +771,7 @@ func (mr *MockSdkClientMockRecorder) WriteTuplesExecute(request any) *gomock.Cal
 type MockSdkClientListStoresRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientListStoresRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientListStoresRequestInterfaceMockRecorder is the mock recorder for MockSdkClientListStoresRequestInterface.
@@ -821,6 +852,7 @@ func (mr *MockSdkClientListStoresRequestInterfaceMockRecorder) Options(options a
 type MockSdkClientCreateStoreRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientCreateStoreRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientCreateStoreRequestInterfaceMockRecorder is the mock recorder for MockSdkClientCreateStoreRequestInterface.
@@ -929,6 +961,7 @@ func (mr *MockSdkClientCreateStoreRequestInterfaceMockRecorder) Options(options 
 type MockSdkClientGetStoreRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientGetStoreRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientGetStoreRequestInterfaceMockRecorder is the mock recorder for MockSdkClientGetStoreRequestInterface.
@@ -1023,6 +1056,7 @@ func (mr *MockSdkClientGetStoreRequestInterfaceMockRecorder) Options(options any
 type MockSdkClientDeleteStoreRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientDeleteStoreRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientDeleteStoreRequestInterfaceMockRecorder is the mock recorder for MockSdkClientDeleteStoreRequestInterface.
@@ -1117,6 +1151,7 @@ func (mr *MockSdkClientDeleteStoreRequestInterfaceMockRecorder) Options(options 
 type MockSdkClientReadAuthorizationModelsRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientReadAuthorizationModelsRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientReadAuthorizationModelsRequestInterfaceMockRecorder is the mock recorder for MockSdkClientReadAuthorizationModelsRequestInterface.
@@ -1211,6 +1246,7 @@ func (mr *MockSdkClientReadAuthorizationModelsRequestInterfaceMockRecorder) Opti
 type MockSdkClientWriteAuthorizationModelRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientWriteAuthorizationModelRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientWriteAuthorizationModelRequestInterfaceMockRecorder is the mock recorder for MockSdkClientWriteAuthorizationModelRequestInterface.
@@ -1333,6 +1369,7 @@ func (mr *MockSdkClientWriteAuthorizationModelRequestInterfaceMockRecorder) Opti
 type MockSdkClientReadAuthorizationModelRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientReadAuthorizationModelRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientReadAuthorizationModelRequestInterfaceMockRecorder is the mock recorder for MockSdkClientReadAuthorizationModelRequestInterface.
@@ -1469,6 +1506,7 @@ func (mr *MockSdkClientReadAuthorizationModelRequestInterfaceMockRecorder) Optio
 type MockSdkClientReadLatestAuthorizationModelRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientReadLatestAuthorizationModelRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientReadLatestAuthorizationModelRequestInterfaceMockRecorder is the mock recorder for MockSdkClientReadLatestAuthorizationModelRequestInterface.
@@ -1563,6 +1601,7 @@ func (mr *MockSdkClientReadLatestAuthorizationModelRequestInterfaceMockRecorder)
 type MockSdkClientReadChangesRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientReadChangesRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientReadChangesRequestInterfaceMockRecorder is the mock recorder for MockSdkClientReadChangesRequestInterface.
@@ -1685,6 +1724,7 @@ func (mr *MockSdkClientReadChangesRequestInterfaceMockRecorder) Options(options 
 type MockSdkClientReadRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientReadRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientReadRequestInterfaceMockRecorder is the mock recorder for MockSdkClientReadRequestInterface.
@@ -1807,6 +1847,7 @@ func (mr *MockSdkClientReadRequestInterfaceMockRecorder) Options(options any) *g
 type MockSdkClientWriteRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientWriteRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientWriteRequestInterfaceMockRecorder is the mock recorder for MockSdkClientWriteRequestInterface.
@@ -1943,6 +1984,7 @@ func (mr *MockSdkClientWriteRequestInterfaceMockRecorder) Options(options any) *
 type MockSdkClientWriteTuplesRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientWriteTuplesRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientWriteTuplesRequestInterfaceMockRecorder is the mock recorder for MockSdkClientWriteTuplesRequestInterface.
@@ -2051,6 +2093,7 @@ func (mr *MockSdkClientWriteTuplesRequestInterfaceMockRecorder) Options(options 
 type MockSdkClientDeleteTuplesRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientDeleteTuplesRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientDeleteTuplesRequestInterfaceMockRecorder is the mock recorder for MockSdkClientDeleteTuplesRequestInterface.
@@ -2159,6 +2202,7 @@ func (mr *MockSdkClientDeleteTuplesRequestInterfaceMockRecorder) Options(options
 type MockSdkClientCheckRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientCheckRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientCheckRequestInterfaceMockRecorder is the mock recorder for MockSdkClientCheckRequestInterface.
@@ -2295,6 +2339,7 @@ func (mr *MockSdkClientCheckRequestInterfaceMockRecorder) Options(options any) *
 type MockSdkClientBatchCheckClientRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientBatchCheckClientRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientBatchCheckClientRequestInterfaceMockRecorder is the mock recorder for MockSdkClientBatchCheckClientRequestInterface.
@@ -2431,6 +2476,7 @@ func (mr *MockSdkClientBatchCheckClientRequestInterfaceMockRecorder) Options(opt
 type MockSdkClientBatchCheckRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientBatchCheckRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientBatchCheckRequestInterfaceMockRecorder is the mock recorder for MockSdkClientBatchCheckRequestInterface.
@@ -2539,6 +2585,7 @@ func (mr *MockSdkClientBatchCheckRequestInterfaceMockRecorder) Options(options a
 type MockSdkClientExpandRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientExpandRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientExpandRequestInterfaceMockRecorder is the mock recorder for MockSdkClientExpandRequestInterface.
@@ -2675,6 +2722,7 @@ func (mr *MockSdkClientExpandRequestInterfaceMockRecorder) Options(options any) 
 type MockSdkClientListObjectsRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientListObjectsRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientListObjectsRequestInterfaceMockRecorder is the mock recorder for MockSdkClientListObjectsRequestInterface.
@@ -2811,6 +2859,7 @@ func (mr *MockSdkClientListObjectsRequestInterfaceMockRecorder) Options(options 
 type MockSdkClientListRelationsRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientListRelationsRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientListRelationsRequestInterfaceMockRecorder is the mock recorder for MockSdkClientListRelationsRequestInterface.
@@ -2947,6 +2996,7 @@ func (mr *MockSdkClientListRelationsRequestInterfaceMockRecorder) Options(option
 type MockSdkClientListUsersRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientListUsersRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientListUsersRequestInterfaceMockRecorder is the mock recorder for MockSdkClientListUsersRequestInterface.
@@ -3083,6 +3133,7 @@ func (mr *MockSdkClientListUsersRequestInterfaceMockRecorder) Options(options an
 type MockSdkClientReadAssertionsRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientReadAssertionsRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientReadAssertionsRequestInterfaceMockRecorder is the mock recorder for MockSdkClientReadAssertionsRequestInterface.
@@ -3191,6 +3242,7 @@ func (mr *MockSdkClientReadAssertionsRequestInterfaceMockRecorder) Options(optio
 type MockSdkClientWriteAssertionsRequestInterface struct {
 	ctrl     *gomock.Controller
 	recorder *MockSdkClientWriteAssertionsRequestInterfaceMockRecorder
+	isgomock struct{}
 }
 
 // MockSdkClientWriteAssertionsRequestInterfaceMockRecorder is the mock recorder for MockSdkClientWriteAssertionsRequestInterface.
@@ -3321,4 +3373,141 @@ func (m *MockSdkClientWriteAssertionsRequestInterface) Options(options client.Cl
 func (mr *MockSdkClientWriteAssertionsRequestInterfaceMockRecorder) Options(options any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Options", reflect.TypeOf((*MockSdkClientWriteAssertionsRequestInterface)(nil).Options), options)
+}
+
+// MockSdkClientStreamedListObjectsRequestInterface is a mock of SdkClientStreamedListObjectsRequestInterface interface.
+type MockSdkClientStreamedListObjectsRequestInterface struct {
+	ctrl     *gomock.Controller
+	recorder *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder
+	isgomock struct{}
+}
+
+// MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder is the mock recorder for MockSdkClientStreamedListObjectsRequestInterface.
+type MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder struct {
+	mock *MockSdkClientStreamedListObjectsRequestInterface
+}
+
+// NewMockSdkClientStreamedListObjectsRequestInterface creates a new mock instance.
+func NewMockSdkClientStreamedListObjectsRequestInterface(ctrl *gomock.Controller) *MockSdkClientStreamedListObjectsRequestInterface {
+	mock := &MockSdkClientStreamedListObjectsRequestInterface{ctrl: ctrl}
+	mock.recorder = &MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) EXPECT() *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder {
+	return m.recorder
+}
+
+// Body mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) Body(body client.ClientStreamedListObjectsRequest) client.SdkClientStreamedListObjectsRequestInterface {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Body", body)
+	ret0, _ := ret[0].(client.SdkClientStreamedListObjectsRequestInterface)
+	return ret0
+}
+
+// Body indicates an expected call of Body.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) Body(body any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Body", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).Body), body)
+}
+
+// Execute mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) Execute() (*client.ClientStreamedListObjectsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute")
+	ret0, _ := ret[0].(*client.ClientStreamedListObjectsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) Execute() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).Execute))
+}
+
+// GetAuthorizationModelIdOverride mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) GetAuthorizationModelIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAuthorizationModelIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetAuthorizationModelIdOverride indicates an expected call of GetAuthorizationModelIdOverride.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) GetAuthorizationModelIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthorizationModelIdOverride", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).GetAuthorizationModelIdOverride))
+}
+
+// GetBody mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) GetBody() *client.ClientStreamedListObjectsRequest {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBody")
+	ret0, _ := ret[0].(*client.ClientStreamedListObjectsRequest)
+	return ret0
+}
+
+// GetBody indicates an expected call of GetBody.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) GetBody() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBody", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).GetBody))
+}
+
+// GetContext mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) GetContext() context.Context {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetContext")
+	ret0, _ := ret[0].(context.Context)
+	return ret0
+}
+
+// GetContext indicates an expected call of GetContext.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) GetContext() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetContext", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).GetContext))
+}
+
+// GetOptions mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) GetOptions() *client.ClientStreamedListObjectsOptions {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOptions")
+	ret0, _ := ret[0].(*client.ClientStreamedListObjectsOptions)
+	return ret0
+}
+
+// GetOptions indicates an expected call of GetOptions.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) GetOptions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOptions", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).GetOptions))
+}
+
+// GetStoreIdOverride mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) GetStoreIdOverride() *string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStoreIdOverride")
+	ret0, _ := ret[0].(*string)
+	return ret0
+}
+
+// GetStoreIdOverride indicates an expected call of GetStoreIdOverride.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) GetStoreIdOverride() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStoreIdOverride", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).GetStoreIdOverride))
+}
+
+// Options mocks base method.
+func (m *MockSdkClientStreamedListObjectsRequestInterface) Options(options client.ClientStreamedListObjectsOptions) client.SdkClientStreamedListObjectsRequestInterface {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Options", options)
+	ret0, _ := ret[0].(client.SdkClientStreamedListObjectsRequestInterface)
+	return ret0
+}
+
+// Options indicates an expected call of Options.
+func (mr *MockSdkClientStreamedListObjectsRequestInterfaceMockRecorder) Options(options any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Options", reflect.TypeOf((*MockSdkClientStreamedListObjectsRequestInterface)(nil).Options), options)
 }

@@ -24,6 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
@@ -52,17 +53,34 @@ var modelTestCmd = &cobra.Command{
 			return fmt.Errorf("failed to get suppress-summary flag: %w", err)
 		}
 
+		maxTypes, err := cmd.Flags().GetInt("max-types-per-authorization-model")
+		if err != nil {
+			return fmt.Errorf("failed to get max-types-per-authorization-model flag: %w", err)
+		}
+
+		if maxTypes <= 0 {
+			return clierrors.ValidationError("model test",
+				"max-types-per-authorization-model must be greater than 0")
+		}
+
+		serverConfig := storetest.LocalServerConfig{
+			MaxTypesPerAuthorizationModel: maxTypes,
+		}
+
 		fileNames, err := filepath.Glob(testsFileName)
 		if err != nil {
 			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
 		}
+
 		if len(fileNames) == 0 {
 			// Check if the literal path exists
 			if _, err := os.Stat(testsFileName); err != nil {
 				return fmt.Errorf("test file %s does not exist: %w", testsFileName, err)
 			}
+
 			fileNames = []string{testsFileName}
 		}
+
 		multipleFiles := len(fileNames) > 1
 
 		clientConfig := cmdutils.GetClientConfig(cmd)
@@ -80,11 +98,13 @@ var modelTestCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read test file %s: %w", file, err)
 			}
+
 			test, err := storetest.RunTests(
 				cmd.Context(),
 				fgaClient,
 				storeData,
 				format,
+				serverConfig,
 			)
 			if err != nil {
 				return fmt.Errorf("error running tests for %s due to %w", file, err)
@@ -94,19 +114,24 @@ var modelTestCmd = &cobra.Command{
 
 			if !suppressSummary && multipleFiles {
 				fullDisplay := test.FriendlyDisplay()
+
 				// Extract just the summary part (after "# Test Summary #")
 				headerIndex := strings.Index(fullDisplay, "# Test Summary #")
+
 				var summaryText string
+
 				if headerIndex != -1 {
 					// Get the summary part and remove the "# Test Summary #" header
 					summaryPart := fullDisplay[headerIndex:]
 					lines := strings.Split(summaryPart, "\n")
+
 					if len(lines) > 1 {
 						summaryText = strings.Join(lines[1:], "\n") // Skip the header line
 					}
 				} else {
 					summaryText = fullDisplay
 				}
+
 				summary := fmt.Sprintf("# file: %s\n%s", file, summaryText)
 				summaries = append(summaries, summary)
 			}
@@ -120,6 +145,7 @@ var modelTestCmd = &cobra.Command{
 					fmt.Fprintln(os.Stderr, summary)
 				}
 			}
+
 			fmt.Fprintln(os.Stderr, aggregateResults.FriendlyDisplay())
 		}
 
@@ -144,6 +170,8 @@ func init() {
 	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files")
 	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
+	modelTestCmd.Flags().Int("max-types-per-authorization-model", 100, //nolint:mnd
+		"Max allowed number of type definitions per authorization model")
 
 	if err := modelTestCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)
