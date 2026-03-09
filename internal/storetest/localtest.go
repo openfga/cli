@@ -143,7 +143,7 @@ func RunLocalListObjectsTest(
 			result.Error = err
 		} else if response != nil {
 			result.Got = response.GetObjects()
-			if len(result.Got) == 0 {
+			if result.Got == nil {
 				result.Got = []string{}
 			}
 

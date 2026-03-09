@@ -27,7 +27,6 @@ type document
 		listObjectTest ModelTestListObjects
 		expectedGot    []string
 		expectedPass   bool
-		expectError    bool
 	}{
 		"returns_matching_objects_when_tuples_exist": {
 			tuples: []client.ClientContextualTupleKey{
@@ -43,7 +42,6 @@ type document
 			},
 			expectedGot:  []string{"document:roadmap", "document:budget"},
 			expectedPass: true,
-			expectError:  false,
 		},
 		"returns_empty_slice_when_no_matching_tuples": {
 			tuples: []client.ClientContextualTupleKey{},
@@ -56,7 +54,6 @@ type document
 			},
 			expectedGot:  []string{},
 			expectedPass: true,
-			expectError:  false,
 		},
 		"returns_empty_slice_when_user_has_no_access": {
 			tuples: []client.ClientContextualTupleKey{
@@ -71,7 +68,6 @@ type document
 			},
 			expectedGot:  []string{},
 			expectedPass: true,
-			expectError:  false,
 		},
 		"test_fails_when_expected_objects_do_not_match": {
 			tuples: []client.ClientContextualTupleKey{
@@ -86,7 +82,6 @@ type document
 			},
 			expectedGot:  []string{"document:roadmap"},
 			expectedPass: false,
-			expectError:  false,
 		},
 		"test_fails_when_got_is_empty_but_expected_is_not": {
 			tuples: []client.ClientContextualTupleKey{},
@@ -99,7 +94,6 @@ type document
 			},
 			expectedGot:  []string{},
 			expectedPass: false,
-			expectError:  false,
 		},
 	}
 
@@ -134,15 +128,10 @@ type document
 			require.Len(t, results, len(testCase.listObjectTest.Assertions))
 
 			for _, result := range results {
-				if testCase.expectError {
-					require.Error(t, result.Error)
-					assert.Nil(t, result.Got)
-				} else {
-					require.NoError(t, result.Error)
-					require.NotNil(t, result.Got)
-					assert.ElementsMatch(t, testCase.expectedGot, result.Got)
-					assert.Equal(t, testCase.expectedPass, result.TestResult)
-				}
+				require.NoError(t, result.Error)
+				require.NotNil(t, result.Got)
+				assert.ElementsMatch(t, testCase.expectedGot, result.Got)
+				assert.Equal(t, testCase.expectedPass, result.TestResult)
 			}
 		})
 	}
