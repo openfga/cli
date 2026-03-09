@@ -70,9 +70,7 @@ func RunLocalCheckTest(
 					)
 					if err != nil {
 						result.Error = err
-					}
-
-					if response != nil {
+					} else if response != nil {
 						result.Got = &response.Allowed
 						result.TestResult = result.IsPassing()
 					}
@@ -139,10 +137,11 @@ func RunLocalListObjectsTest(
 			)
 			if err != nil {
 				result.Error = err
-			}
-
-			if response != nil {
+			} else if response != nil {
 				result.Got = response.GetObjects()
+				if len(result.Got) == 0 {
+					result.Got = []string{}
+				}
 				result.TestResult = result.IsPassing()
 			}
 		}
@@ -213,9 +212,7 @@ func RunLocalListUsersTest(
 			)
 			if err != nil {
 				result.Error = err
-			}
-
-			if response != nil {
+			} else if response != nil {
 				result.Got = ModelTestListUsersAssertion{
 					Users: convertPbUsersToStrings(response.GetUsers()),
 				}
