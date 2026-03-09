@@ -135,10 +135,10 @@ type document
 
 			for _, result := range results {
 				if testCase.expectError {
-					assert.Error(t, result.Error)
+					require.Error(t, result.Error)
 					assert.Nil(t, result.Got)
 				} else {
-					assert.NoError(t, result.Error)
+					require.NoError(t, result.Error)
 					require.NotNil(t, result.Got)
 					assert.ElementsMatch(t, testCase.expectedGot, result.Got)
 					assert.Equal(t, testCase.expectedPass, result.TestResult)
@@ -195,7 +195,7 @@ type document
 	require.Len(t, results, 1)
 
 	result := results[0]
-	assert.NoError(t, result.Error)
+	require.NoError(t, result.Error)
 	require.NotNil(t, result.Got, "Got should be a non-nil empty slice, not nil")
 	assert.Empty(t, result.Got)
 	assert.True(t, result.TestResult, "test should pass when expected and got are both empty")

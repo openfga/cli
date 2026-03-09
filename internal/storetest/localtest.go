@@ -124,26 +124,30 @@ func RunLocalListObjectsTest(
 
 		if err != nil {
 			result.Error = err
-		} else {
-			response, err := RunSingleLocalListObjectsTest(ctx, fgaServer,
-				&pb.ListObjectsRequest{
-					StoreId:              *options.StoreID,
-					AuthorizationModelId: *options.ModelID,
-					User:                 listObjectsTest.User,
-					Type:                 listObjectsTest.Type,
-					Relation:             relation,
-					Context:              reqCtx,
-				},
-			)
-			if err != nil {
-				result.Error = err
-			} else if response != nil {
-				result.Got = response.GetObjects()
-				if len(result.Got) == 0 {
-					result.Got = []string{}
-				}
-				result.TestResult = result.IsPassing()
+			results = append(results, result)
+
+			continue
+		}
+
+		response, err := RunSingleLocalListObjectsTest(ctx, fgaServer,
+			&pb.ListObjectsRequest{
+				StoreId:              *options.StoreID,
+				AuthorizationModelId: *options.ModelID,
+				User:                 listObjectsTest.User,
+				Type:                 listObjectsTest.Type,
+				Relation:             relation,
+				Context:              reqCtx,
+			},
+		)
+		if err != nil {
+			result.Error = err
+		} else if response != nil {
+			result.Got = response.GetObjects()
+			if len(result.Got) == 0 {
+				result.Got = []string{}
 			}
+
+			result.TestResult = result.IsPassing()
 		}
 
 		results = append(results, result)
