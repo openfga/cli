@@ -140,6 +140,7 @@ func RunRemoteListUsersTest(
 	results := make([]ModelTestListUsersSingleResult, 0, len(listUsersTest.Assertions))
 
 	object, _ := convertStoreObjectToObject(listUsersTest.Object)
+
 	for relation, expectation := range listUsersTest.Assertions {
 		result := RunSingleRemoteListUsersTest(ctx, fgaClient,
 			client.ClientListUsersRequest{
