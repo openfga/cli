@@ -11,10 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 Fixed:
 - Fix local ListObjects tests when expected response is an empty slice (#645)
-- fix: Limit WriteAssertions to 100 assertions (#619)
+- Limit WriteAssertions to 100 assertions (#619)
 
 Added:
-- feat(model/test): add --max-types-per-authorization-model flag (#641) - Thanks @nverbos-godaddy
+- Add --max-types-per-authorization-model flag (#641) - Thanks @nverbos-godaddy
 
 
 
