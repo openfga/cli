@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.7.10] - 2026-03-17
+## [0.7.11] - 2026-03-17
 
 Fixed:
 - Fix local ListObjects tests when expected response is an empty slice (#645)
