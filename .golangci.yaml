@@ -85,6 +85,10 @@ linters:
           - funlen
           - lll
         path: _test.go
+      - linters:
+          - revive
+        text: "avoid package names that conflict with Go standard library package names"
+        path: internal/slices
     paths:
       - third_party$
       - builtin$
