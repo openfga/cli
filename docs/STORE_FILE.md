@@ -290,6 +290,8 @@ Run tests against an authorization model:
 fga model test --tests store.fga.yaml
 ```
 
+If the `.fga.yaml` file includes a `model` or `model_file`, `fga model test` runs locally against a built-in OpenFGA instance. If the file does not define a model, tests run against the configured OpenFGA server/store.
+
 ### Store Export
 Export store configuration to file:
 ```bash

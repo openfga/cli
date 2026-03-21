@@ -543,7 +543,9 @@ fga model **test**
 * `--verbose`: Outputs the results in JSON
 * `--max-types-per-authorization-model`: Max allowed number of type definitions per authorization model (default: 100). Increase this when testing models with more than 100 type definitions.
 
-If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
+If a model is provided (for example, in a `.fga.yaml` tests file), the tests run locally in a built-in OpenFGA instance (you do not need a separate server).
+
+If no model is provided, the tests run against the configured OpenFGA server and store (for example via `--store-id` or your config/env values). When running against a remote instance, tuples are sent as contextual tuples and must abide by the OpenFGA server limits (20 contextual tuples per request).
 
 The tests file should be in yaml and have the following format:
 

@@ -165,8 +165,8 @@ var modelTestCmd = &cobra.Command{
 }
 
 func init() {
-	modelTestCmd.Flags().String("store-id", "", "Store ID")
-	modelTestCmd.Flags().String("model-id", "", "Model ID")
+	modelTestCmd.Flags().String("store-id", "", "Store ID (used when tests do not define a model)")
+	modelTestCmd.Flags().String("model-id", "", "Model ID (used when tests do not define a model)")
 	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files")
 	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
