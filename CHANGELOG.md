@@ -387,7 +387,7 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.9...HEAD
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.12...HEAD
 [0.7.12]: https://github.com/openfga/cli/compare/v0.7.11...v0.7.12
 [0.7.11]: https://github.com/openfga/cli/compare/v0.7.10...v0.7.11
 [0.7.10]: https://github.com/openfga/cli/compare/v0.7.9...v0.7.10
