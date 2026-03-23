@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-03-23
+
+Maintenance:
+- dependency updates
+
+
 ## [0.7.11] - 2026-03-17
 
 Fixed:
@@ -382,6 +388,9 @@ Initial OpenFGA CLI release
   * Use Expand to understand why access was granted
 
 [Unreleased]: https://github.com/openfga/cli/compare/v0.7.9...HEAD
+[0.7.12]: https://github.com/openfga/cli/compare/v0.7.11...v0.7.12
+[0.7.11]: https://github.com/openfga/cli/compare/v0.7.10...v0.7.11
+[0.7.10]: https://github.com/openfga/cli/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/openfga/cli/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/openfga/cli/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.7
