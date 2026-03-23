@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-03-23
+
+### Security
+- Bumped `google.golang.org/grpc` to v1.79.3 to resolve CVE-2026-33186.
+  This vulnerability did not affect the CLI as the vulnerable code path was not reachable, but the dependency has been updated as a precaution.
+
+
 ## [0.7.11] - 2026-03-17
 
 Fixed:
@@ -381,7 +388,10 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.9...HEAD
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.12...HEAD
+[0.7.12]: https://github.com/openfga/cli/compare/v0.7.11...v0.7.12
+[0.7.11]: https://github.com/openfga/cli/compare/v0.7.10...v0.7.11
+[0.7.10]: https://github.com/openfga/cli/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/openfga/cli/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/openfga/cli/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.7
