@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.7.12] - 2026-03-23
 
-Maintenance:
-- dependency updates
+### Security
+- Bumped `google.golang.org/grpc` to v1.79.3 to resolve CVE-2026-33186.
+  This vulnerability did not affect the CLI as the vulnerable code path was not reachable, but the dependency has been updated as a precaution.
 
 
 ## [0.7.11] - 2026-03-17
