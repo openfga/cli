@@ -23,9 +23,99 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/fga"
+	"github.com/openfga/cli/internal/serve"
 )
 
+// GetClientConfig resolves an fga.ClientConfig for the given command.
+//
+// If the --server flag is set, the named server is loaded from
+// $XDG_CONFIG_HOME/fga/servers.yaml and used as the base configuration.
+// If --store-id is also set, any auth overrides from that store entry are merged.
+// Any other flags that are explicitly set override the server/store values.
+//
+// If --server is not set, behaviour is unchanged (flags and env vars only).
 func GetClientConfig(cmd *cobra.Command) fga.ClientConfig {
+	if serverID, _ := cmd.Flags().GetString("server"); serverID != "" {
+		cfg, err := loadServerConfig(cmd, serverID)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "warning: could not load server %q: %v\n", serverID, err)
+			// Fall through to flag-based config.
+		} else {
+			return cfg
+		}
+	}
+
+	return buildConfigFromFlags(cmd)
+}
+
+// loadServerConfig builds a ClientConfig starting from the named server,
+// merges any store-level auth overrides (if --store-id is set), then applies
+// any explicitly-set command flags on top.
+func loadServerConfig(cmd *cobra.Command, serverID string) (fga.ClientConfig, error) {
+	cs, err := serve.NewConfigStore()
+	if err != nil {
+		return fga.ClientConfig{}, err
+	}
+
+	srv, err := cs.FindServerByID(serverID)
+	if err != nil {
+		return fga.ClientConfig{}, err
+	}
+	if srv == nil {
+		return fga.ClientConfig{}, fmt.Errorf("server %q not found", serverID) //nolint:err113
+	}
+
+	// Resolve auth: start with server base, apply store override if --store-id is set.
+	storeID, _ := cmd.Flags().GetString("store-id")
+	auth := srv.ResolvedAuth(storeID)
+
+	cfg := fga.ClientConfig{
+		ApiUrl:         srv.APIURL,
+		StoreID:        storeID,
+		APIToken:       auth.APIToken,
+		APITokenIssuer: auth.TokenIssuer,
+		APIAudience:    auth.Audience,
+		ClientID:       auth.ClientID,
+		ClientSecret:   auth.ClientSecret,
+	}
+
+	// Command-line flags override server/store values when explicitly provided.
+	if cmd.Flags().Changed("api-url") {
+		cfg.ApiUrl, _ = cmd.Flags().GetString("api-url")
+	}
+	if cmd.Flags().Changed("store-id") {
+		cfg.StoreID, _ = cmd.Flags().GetString("store-id")
+	}
+	if cmd.Flags().Changed("model-id") {
+		cfg.AuthorizationModelID, _ = cmd.Flags().GetString("model-id")
+	}
+	if cmd.Flags().Changed("api-token") {
+		cfg.APIToken, _ = cmd.Flags().GetString("api-token")
+	}
+	if cmd.Flags().Changed("api-token-issuer") {
+		cfg.APITokenIssuer, _ = cmd.Flags().GetString("api-token-issuer")
+	}
+	if cmd.Flags().Changed("api-audience") {
+		cfg.APIAudience, _ = cmd.Flags().GetString("api-audience")
+	}
+	if cmd.Flags().Changed("client-id") {
+		cfg.ClientID, _ = cmd.Flags().GetString("client-id")
+	}
+	if cmd.Flags().Changed("client-secret") {
+		cfg.ClientSecret, _ = cmd.Flags().GetString("client-secret")
+	}
+	if cmd.Flags().Changed("api-scopes") {
+		cfg.APIScopes, _ = cmd.Flags().GetStringArray("api-scopes")
+	}
+	if cmd.Flags().Changed("debug") {
+		cfg.Debug, _ = cmd.Flags().GetBool("debug")
+	}
+
+	return cfg, nil
+}
+
+// buildConfigFromFlags builds a ClientConfig purely from command flags (original behaviour).
+func buildConfigFromFlags(cmd *cobra.Command) fga.ClientConfig {
 	apiURL, _ := cmd.Flags().GetString("api-url")
 	if !cmd.Flags().Changed("api-url") && cmd.Flags().Changed("server-url") {
 		apiURL, _ = cmd.Flags().GetString("server-url")

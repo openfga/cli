@@ -27,6 +27,8 @@ import (
 
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/cmd/query"
+	servecmd "github.com/openfga/cli/cmd/serve"
+	servercmd "github.com/openfga/cli/cmd/server"
 	"github.com/openfga/cli/cmd/store"
 	"github.com/openfga/cli/cmd/tuple"
 	"github.com/openfga/cli/internal/cmdutils"
@@ -70,6 +72,7 @@ func init() {
 	rootCmd.PersistentFlags().StringArray("api-scopes", []string{}, "API Scopes (repeat option for multiple values). Used in the Client Credentials flow")   //nolint:lll
 	rootCmd.PersistentFlags().StringArray("custom-headers", []string{}, "Custom HTTP headers in 'Header: value' format (repeat option for multiple values)") //nolint:lll
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode - can print more detailed information for debugging")
+	rootCmd.PersistentFlags().String("server", "", "Server connection ID from ~/.config/fga/servers.yaml")
 
 	_ = rootCmd.Flags().MarkHidden("debug")
 	rootCmd.MarkFlagsRequiredTogether(
@@ -85,6 +88,8 @@ func init() {
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)
 	rootCmd.AddCommand(query.QueryCmd)
+	rootCmd.AddCommand(servecmd.ServeCmd)
+	rootCmd.AddCommand(servercmd.ServerCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
