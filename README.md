@@ -151,6 +151,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 | Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     | `api-audience`     |
 | Store ID               | `--store-id`         | `FGA_STORE_ID`         | `store-id`         |
 | Authorization Model ID | `--model-id`         | `FGA_MODEL_ID`         | `model-id`         |
+| Custom Headers         | `--custom-headers`   | `FGA_CUSTOM_HEADERS`   | `custom-headers`   |
 
 If you are authenticating with a shared secret, you should specify the API Token value. If you are authenticating using OAuth, you should specify the Client ID, Client Secret, API Audience and Token Issuer. For example:
 
