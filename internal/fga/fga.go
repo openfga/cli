@@ -108,7 +108,9 @@ func (c ClientConfig) getCustomHeaders() map[string]string {
 		if len(parts) == 2 {
 			head := strings.TrimSpace(parts[0])
 			value := strings.TrimSpace(parts[1])
-			headers[head] = value
+			if head != "" {
+				headers[head] = value
+			}
 		}
 	}
 	return headers
