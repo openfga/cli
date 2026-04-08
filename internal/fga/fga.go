@@ -44,6 +44,7 @@ type ClientConfig struct {
 	APIScopes            []string `json:"api_scopes,omitempty"`
 	ClientID             string   `json:"client_id,omitempty"`
 	ClientSecret         string   `json:"client_secret,omitempty"` //nolint:gosec
+	CustomHeaders        []string `json:"custom_headers,omitempty"`
 	Debug                bool     `json:"debug,omitempty"`
 }
 
@@ -95,6 +96,20 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 			MaxRetry:    MaxSdkRetry,
 			MinWaitInMs: MinSdkWaitInMs,
 		},
-		Debug: c.Debug,
+		Debug:          c.Debug,
+		DefaultHeaders: c.getCustomHeaders(),
 	}
+}
+
+func (c ClientConfig) getCustomHeaders() map[string]string {
+	headers := map[string]string{}
+	for _, header := range c.CustomHeaders {
+		parts := strings.SplitN(header, ":", 2)
+		if len(parts) == 2 {
+			head := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			headers[head] = value
+		}
+	}
+	return headers
 }
