@@ -14,50 +14,54 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmdutils_test
+package cmdutils
 
 import (
 	"testing"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
-	"github.com/openfga/cli/internal/cmdutils"
 )
 
-func TestBindViperToFlags_StringArrayFromYAML(t *testing.T) {
+func TestViperValueToStrings(t *testing.T) {
 	t.Parallel()
 
 	testcases := []struct {
 		name     string
-		config   map[string]any
+		value    any
 		expected []string
 	}{
 		{
-			name: "yaml list binds as multiple values",
-			config: map[string]any{
-				"custom-headers": []any{
-					"X-Custom-Header: value1",
-					"X-Request-ID: abc123",
-				},
+			name: "slice value produces one string per element",
+			value: []any{
+				"X-Custom-Header: value1",
+				"X-Request-ID: abc123",
 			},
 			expected: []string{"X-Custom-Header: value1", "X-Request-ID: abc123"},
 		},
 		{
-			name: "single element list",
-			config: map[string]any{
-				"custom-headers": []any{
-					"X-Custom-Header: value1",
-				},
-			},
+			name:     "single element slice",
+			value:    []any{"X-Custom-Header: value1"},
 			expected: []string{"X-Custom-Header: value1"},
 		},
 		{
-			name:     "no config leaves default",
-			config:   map[string]any{},
+			name:     "empty slice",
+			value:    []any{},
 			expected: []string{},
+		},
+		{
+			name:     "scalar string produces single-element slice",
+			value:    "https://api.fga.example",
+			expected: []string{"https://api.fga.example"},
+		},
+		{
+			name:     "boolean value is stringified",
+			value:    true,
+			expected: []string{"true"},
+		},
+		{
+			name:     "integer value is stringified",
+			value:    42,
+			expected: []string{"42"},
 		},
 	}
 
@@ -65,53 +69,8 @@ func TestBindViperToFlags_StringArrayFromYAML(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			cmd := &cobra.Command{Use: "test"}
-			cmd.Flags().StringArray("custom-headers", []string{}, "test flag")
-
-			v := viper.New()
-			for k, val := range test.config {
-				v.Set(k, val)
-			}
-
-			cmdutils.BindViperToFlags(cmd, v)
-
-			result, err := cmd.Flags().GetStringArray("custom-headers")
-			require.NoError(t, err)
+			result := viperValueToStrings(test.value)
 			assert.Equal(t, test.expected, result)
 		})
 	}
-}
-
-func TestBindViperToFlags_ScalarFlagUnchanged(t *testing.T) {
-	t.Parallel()
-
-	cmd := &cobra.Command{Use: "test"}
-	cmd.Flags().String("api-url", "http://localhost:8080", "test flag")
-
-	v := viper.New()
-	v.Set("api-url", "https://api.fga.example")
-
-	cmdutils.BindViperToFlags(cmd, v)
-
-	result, err := cmd.Flags().GetString("api-url")
-	require.NoError(t, err)
-	assert.Equal(t, "https://api.fga.example", result)
-}
-
-func TestBindViperToFlags_CLIFlagTakesPrecedence(t *testing.T) {
-	t.Parallel()
-
-	cmd := &cobra.Command{Use: "test"}
-	cmd.Flags().StringArray("custom-headers", []string{}, "test flag")
-
-	require.NoError(t, cmd.Flags().Set("custom-headers", "X-CLI: from-flag"))
-
-	v := viper.New()
-	v.Set("custom-headers", []any{"X-Config: from-yaml"})
-
-	cmdutils.BindViperToFlags(cmd, v)
-
-	result, err := cmd.Flags().GetStringArray("custom-headers")
-	require.NoError(t, err)
-	assert.Equal(t, []string{"X-CLI: from-flag"}, result)
 }

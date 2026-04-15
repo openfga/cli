@@ -31,7 +31,9 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 
 		if !flag.Changed && viperInstance.IsSet(configName) {
 			value := viperInstance.Get(configName)
-			setFlagFromViper(cmd, flag, value)
+			for _, strVal := range viperValueToStrings(value) {
+				cobra.CheckErr(cmd.Flags().Set(flag.Name, strVal))
+			}
 		}
 	})
 
@@ -40,15 +42,19 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 	}
 }
 
-func setFlagFromViper(cmd *cobra.Command, flag *pflag.Flag, value any) {
-	switch v := value.(type) {
-	case []any:
-		for _, elem := range v {
-			err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", elem))
-			cobra.CheckErr(err)
-		}
-	default:
-		err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", v))
-		cobra.CheckErr(err)
+// viperValueToStrings converts a Viper config value to a slice of strings
+// suitable for pflag.Set calls. Slice values (from YAML lists) produce one
+// string per element; scalar values produce a single-element slice.
+func viperValueToStrings(value any) []string {
+	sliceValue, ok := value.([]any)
+	if !ok {
+		return []string{fmt.Sprintf("%v", value)}
 	}
+
+	result := make([]string, 0, len(sliceValue))
+	for _, elem := range sliceValue {
+		result = append(result, fmt.Sprintf("%v", elem))
+	}
+
+	return result
 }
