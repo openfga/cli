@@ -32,13 +32,13 @@ func TestBindViperToFlags_StringArrayFromYAML(t *testing.T) {
 
 	testcases := []struct {
 		name     string
-		config   map[string]interface{}
+		config   map[string]any
 		expected []string
 	}{
 		{
 			name: "yaml list binds as multiple values",
-			config: map[string]interface{}{
-				"custom-headers": []interface{}{
+			config: map[string]any{
+				"custom-headers": []any{
 					"X-Custom-Header: value1",
 					"X-Request-ID: abc123",
 				},
@@ -47,8 +47,8 @@ func TestBindViperToFlags_StringArrayFromYAML(t *testing.T) {
 		},
 		{
 			name: "single element list",
-			config: map[string]interface{}{
-				"custom-headers": []interface{}{
+			config: map[string]any{
+				"custom-headers": []any{
 					"X-Custom-Header: value1",
 				},
 			},
@@ -56,7 +56,7 @@ func TestBindViperToFlags_StringArrayFromYAML(t *testing.T) {
 		},
 		{
 			name:     "no config leaves default",
-			config:   map[string]interface{}{},
+			config:   map[string]any{},
 			expected: []string{},
 		},
 	}
@@ -107,7 +107,7 @@ func TestBindViperToFlags_CLIFlagTakesPrecedence(t *testing.T) {
 	require.NoError(t, cmd.Flags().Set("custom-headers", "X-CLI: from-flag"))
 
 	v := viper.New()
-	v.Set("custom-headers", []interface{}{"X-Config: from-yaml"})
+	v.Set("custom-headers", []any{"X-Config: from-yaml"})
 
 	cmdutils.BindViperToFlags(cmd, v)
 

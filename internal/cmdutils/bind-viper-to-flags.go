@@ -40,9 +40,9 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 	}
 }
 
-func setFlagFromViper(cmd *cobra.Command, flag *pflag.Flag, value interface{}) {
+func setFlagFromViper(cmd *cobra.Command, flag *pflag.Flag, value any) {
 	switch v := value.(type) {
-	case []interface{}:
+	case []any:
 		for _, elem := range v {
 			err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", elem))
 			cobra.CheckErr(err)
