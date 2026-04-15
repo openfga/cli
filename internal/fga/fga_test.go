@@ -18,7 +18,6 @@ package fga
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -109,7 +108,7 @@ func TestGetCustomHeaders(t *testing.T) {
 
 			if test.err != nil {
 				require.Error(t, err)
-				assert.True(t, errors.Is(err, test.err))
+				assert.ErrorIs(t, err, test.err)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, result)

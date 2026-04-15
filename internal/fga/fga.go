@@ -45,12 +45,12 @@ type ClientConfig struct {
 	ApiUrl               string   `json:"api_url,omitempty"` //nolint:revive,stylecheck
 	StoreID              string   `json:"store_id,omitempty"`
 	AuthorizationModelID string   `json:"authorization_model_id,omitempty"`
-	APIToken             string   `json:"api_token,omitempty"` //nolint:gosec
+	APIToken             string   `json:"api_token,omitempty"`
 	APITokenIssuer       string   `json:"api_token_issuer,omitempty"`
 	APIAudience          string   `json:"api_audience,omitempty"`
 	APIScopes            []string `json:"api_scopes,omitempty"`
 	ClientID             string   `json:"client_id,omitempty"`
-	ClientSecret         string   `json:"client_secret,omitempty"` //nolint:gosec
+	ClientSecret         string   `json:"client_secret,omitempty"`
 	CustomHeaders        []string `json:"custom_headers,omitempty"`
 	Debug                bool     `json:"debug,omitempty"`
 }
