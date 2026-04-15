@@ -31,12 +31,24 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 
 		if !flag.Changed && viperInstance.IsSet(configName) {
 			value := viperInstance.Get(configName)
-			err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", value))
-			cobra.CheckErr(err)
+			setFlagFromViper(cmd, flag, value)
 		}
 	})
 
 	for _, subcmd := range cmd.Commands() {
 		BindViperToFlags(subcmd, viperInstance)
+	}
+}
+
+func setFlagFromViper(cmd *cobra.Command, flag *pflag.Flag, value interface{}) {
+	switch v := value.(type) {
+	case []interface{}:
+		for _, elem := range v {
+			err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", elem))
+			cobra.CheckErr(err)
+		}
+	default:
+		err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", v))
+		cobra.CheckErr(err)
 	}
 }
