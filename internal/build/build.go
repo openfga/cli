@@ -16,7 +16,6 @@ limitations under the License.
 
 // Package build provides build information that is linked into the application. Other
 // packages within this project can use this information in logs etc..
-
 package build
 
 var (
