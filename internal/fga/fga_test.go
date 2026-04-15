@@ -17,9 +17,13 @@ limitations under the License.
 package fga
 
 import (
+	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -109,6 +113,70 @@ func TestGetCustomHeaders(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, result)
+			}
+		})
+	}
+}
+
+func TestCustomHeadersSentInRequest(t *testing.T) {
+	t.Parallel()
+
+	testcases := []struct {
+		name            string
+		customHeaders   []string
+		expectedHeaders map[string]string
+	}{
+		{
+			name:            "single header is sent",
+			customHeaders:   []string{"X-Custom-Header: value1"},
+			expectedHeaders: map[string]string{"X-Custom-Header": "value1"},
+		},
+		{
+			name:          "multiple headers are sent",
+			customHeaders: []string{"X-Custom-Header: value1", "X-Request-ID: abc123"},
+			expectedHeaders: map[string]string{
+				"X-Custom-Header": "value1",
+				"X-Request-ID":    "abc123",
+			},
+		},
+		{
+			name:            "no custom headers",
+			customHeaders:   []string{},
+			expectedHeaders: map[string]string{},
+		},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			var capturedHeaders http.Header
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				capturedHeaders = r.Header.Clone()
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{"stores": []}`))
+			}))
+			defer server.Close()
+
+			cfg := ClientConfig{
+				ApiUrl:        server.URL,
+				StoreID:       "01H0H015178Y2V4CX10C2KGHF4",
+				CustomHeaders: test.customHeaders,
+			}
+
+			fgaClient, err := cfg.GetFgaClient()
+			require.NoError(t, err)
+
+			_, err = fgaClient.ListStores(context.Background()).
+				Options(client.ClientListStoresOptions{}).
+				Execute()
+			require.NoError(t, err)
+
+			for name, value := range test.expectedHeaders {
+				assert.Equal(t, value, capturedHeaders.Get(name),
+					"expected header %s to have value %q", name, value)
 			}
 		})
 	}
