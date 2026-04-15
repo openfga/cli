@@ -17,6 +17,7 @@ limitations under the License.
 package fga
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,7 @@ func TestGetCustomHeaders(t *testing.T) {
 		name     string
 		headers  []string
 		expected map[string]string
-		err      string
+		err      error
 	}{
 		{
 			name:     "no headers",
@@ -76,22 +77,22 @@ func TestGetCustomHeaders(t *testing.T) {
 		{
 			name:    "missing colon returns error",
 			headers: []string{"nocolon"},
-			err:     `invalid custom header "nocolon": expected format "Header-Name: value"`,
+			err:     ErrInvalidHeaderFormat,
 		},
 		{
 			name:    "empty string returns error",
 			headers: []string{""},
-			err:     `invalid custom header "": expected format "Header-Name: value"`,
+			err:     ErrInvalidHeaderFormat,
 		},
 		{
 			name:    "empty header name returns error",
 			headers: []string{": value"},
-			err:     `invalid custom header ": value": header name must not be empty`,
+			err:     ErrEmptyHeaderName,
 		},
 		{
 			name:    "valid header before invalid stops at first error",
 			headers: []string{"X-Good: ok", "bad-header"},
-			err:     `invalid custom header "bad-header": expected format "Header-Name: value"`,
+			err:     ErrInvalidHeaderFormat,
 		},
 	}
 
@@ -102,9 +103,9 @@ func TestGetCustomHeaders(t *testing.T) {
 			cfg := ClientConfig{CustomHeaders: test.headers}
 			result, err := cfg.getCustomHeaders()
 
-			if test.err != "" {
+			if test.err != nil {
 				require.Error(t, err)
-				assert.ErrorContains(t, err, test.err)
+				assert.True(t, errors.Is(err, test.err))
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, result)

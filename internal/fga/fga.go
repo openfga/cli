@@ -18,6 +18,7 @@ limitations under the License.
 package fga
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,7 +34,12 @@ const (
 	MinSdkWaitInMs = 500
 )
 
-var userAgent = "openfga-cli/" + build.Version
+var (
+	userAgent = "openfga-cli/" + build.Version
+
+	ErrInvalidHeaderFormat = errors.New("expected format \"Header-Name: value\"")
+	ErrEmptyHeaderName     = errors.New("header name must not be empty")
+)
 
 type ClientConfig struct {
 	ApiUrl               string   `json:"api_url,omitempty"` //nolint:revive,stylecheck
@@ -118,12 +124,12 @@ func (c ClientConfig) getCustomHeaders() (map[string]string, error) {
 	for _, header := range c.CustomHeaders {
 		parts := strings.SplitN(header, ":", 2)
 		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid custom header %q: expected format \"Header-Name: value\"", header)
+			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrInvalidHeaderFormat)
 		}
 
 		name := strings.TrimSpace(parts[0])
 		if name == "" {
-			return nil, fmt.Errorf("invalid custom header %q: header name must not be empty", header)
+			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrEmptyHeaderName)
 		}
 
 		headers[name] = strings.TrimSpace(parts[1])
