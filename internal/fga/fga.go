@@ -18,6 +18,7 @@ limitations under the License.
 package fga
 
 import (
+	"fmt"
 	"strings"
 
 	openfga "github.com/openfga/go-sdk"
@@ -49,7 +50,12 @@ type ClientConfig struct {
 }
 
 func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
-	fgaClient, err := client.NewSdkClient(c.getClientConfig())
+	clientConfig, err := c.getClientConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	fgaClient, err := client.NewSdkClient(clientConfig)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -85,7 +91,12 @@ func (c ClientConfig) getCredentials() *credentials.Credentials {
 	}
 }
 
-func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
+func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
+	customHeaders, err := c.getCustomHeaders()
+	if err != nil {
+		return nil, fmt.Errorf("invalid custom headers configuration: %w", err)
+	}
+
 	return &client.ClientConfiguration{
 		ApiUrl:               c.ApiUrl,
 		StoreId:              c.StoreID,
@@ -97,21 +108,26 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 			MinWaitInMs: MinSdkWaitInMs,
 		},
 		Debug:          c.Debug,
-		DefaultHeaders: c.getCustomHeaders(),
-	}
+		DefaultHeaders: customHeaders,
+	}, nil
 }
 
-func (c ClientConfig) getCustomHeaders() map[string]string {
+func (c ClientConfig) getCustomHeaders() (map[string]string, error) {
 	headers := map[string]string{}
+
 	for _, header := range c.CustomHeaders {
 		parts := strings.SplitN(header, ":", 2)
-		if len(parts) == 2 {
-			head := strings.TrimSpace(parts[0])
-			value := strings.TrimSpace(parts[1])
-			if head != "" {
-				headers[head] = value
-			}
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid custom header %q: expected format \"Header-Name: value\"", header)
 		}
+
+		name := strings.TrimSpace(parts[0])
+		if name == "" {
+			return nil, fmt.Errorf("invalid custom header %q: header name must not be empty", header)
+		}
+
+		headers[name] = strings.TrimSpace(parts[1])
 	}
-	return headers
+
+	return headers, nil
 }

@@ -17,6 +17,7 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Building from Source](#building-from-source)
 - [Usage](#usage)
   - [Configuration](#configuration)
+  - [Custom Headers](#custom-headers)
   - [Commands](#commands)
     - [Stores](#stores)
       - [List All Stores](#list-stores)
@@ -163,6 +164,37 @@ client-secret: J3...2pBwiauD
 api-audience: https://api.us1.fga.dev/
 api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
+```
+
+#### Custom Headers
+
+You can add custom HTTP headers to all requests sent to the API using the `--custom-headers` flag. Headers are specified in `<name>: <value>` format, and the flag can be repeated to add multiple headers.
+
+##### Flag
+```shell
+--custom-headers "Header-Name: header-value"
+```
+
+##### Example
+```shell
+fga store list --custom-headers "X-Custom-Header: value1" --custom-headers "X-Request-ID: abc123"
+```
+
+##### Configuration
+
+Custom headers can also be configured via the CLI environment variable or the configuration file:
+
+| Name           | Flag                 | CLI                    | ~/.fga.yaml        |
+|----------------|----------------------|------------------------|---------------------|
+| Custom Headers | `--custom-headers`   | `FGA_CUSTOM_HEADERS`   | `custom-headers`    |
+
+Example `~/.fga.yaml`:
+```yaml
+api-url: https://api.fga.example
+store-id: 01H0H015178Y2V4CX10C2KGHF4
+custom-headers:
+  - "X-Custom-Header: value1"
+  - "X-Request-ID: abc123"
 ```
 
 ### Commands
