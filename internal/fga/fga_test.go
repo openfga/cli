@@ -87,17 +87,17 @@ func TestGetCustomHeaders(t *testing.T) {
 		{
 			name:    "empty string returns error",
 			headers: []string{""},
-			err:     ErrEmptyHeaderName,
+			err:     ErrInvalidHeaderFormat,
 		},
 		{
 			name:    "empty header name returns error",
 			headers: []string{": value"},
-			err:     ErrEmptyHeaderName,
+			err:     ErrInvalidHeaderFormat,
 		},
 		{
 			name:    "valid header before invalid stops at first error",
 			headers: []string{"X-Good: ok", ""},
-			err:     ErrEmptyHeaderName,
+			err:     ErrInvalidHeaderFormat,
 		},
 	}
 

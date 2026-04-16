@@ -37,7 +37,7 @@ const (
 var (
 	userAgent = "openfga-cli/" + build.Version
 
-	ErrEmptyHeaderName = errors.New("header name must not be empty")
+	ErrInvalidHeaderFormat = errors.New("expected format \"Header-Name: value\"")
 )
 
 type ClientConfig struct {
@@ -125,7 +125,7 @@ func (c ClientConfig) getCustomHeaders() (map[string]string, error) {
 
 		name, value = strings.TrimSpace(name), strings.TrimSpace(value)
 		if name == "" {
-			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrEmptyHeaderName)
+			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrInvalidHeaderFormat)
 		}
 
 		headers[name] = value
