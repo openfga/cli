@@ -47,14 +47,15 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 // suitable for pflag.Set calls. Slice values (from YAML lists) produce one
 // string per element; scalar values produce a single-element slice.
 func viperValueToStrings(value any) []string {
-	rv := reflect.ValueOf(value)
-	if rv.Kind() != reflect.Slice {
+	reflectValue := reflect.ValueOf(value)
+
+	if reflectValue.Kind() != reflect.Slice && reflectValue.Kind() != reflect.Array {
 		return []string{fmt.Sprintf("%v", value)}
 	}
 
-	result := make([]string, 0, rv.Len())
-	for i := range rv.Len() {
-		result = append(result, fmt.Sprintf("%v", rv.Index(i).Interface()))
+	result := make([]string, 0, reflectValue.Len())
+	for i := range reflectValue.Len() {
+		result = append(result, fmt.Sprintf("%v", reflectValue.Index(i).Interface()))
 	}
 
 	return result
