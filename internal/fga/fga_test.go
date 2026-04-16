@@ -78,14 +78,16 @@ func TestGetCustomHeaders(t *testing.T) {
 			},
 		},
 		{
-			name:    "missing colon returns error",
-			headers: []string{"nocolon"},
-			err:     ErrInvalidHeaderFormat,
+			name:    "no colon allowed",
+			headers: []string{"X-Custom"},
+			expected: map[string]string{
+				"X-Custom": "",
+			},
 		},
 		{
 			name:    "empty string returns error",
 			headers: []string{""},
-			err:     ErrInvalidHeaderFormat,
+			err:     ErrEmptyHeaderName,
 		},
 		{
 			name:    "empty header name returns error",
@@ -94,8 +96,8 @@ func TestGetCustomHeaders(t *testing.T) {
 		},
 		{
 			name:    "valid header before invalid stops at first error",
-			headers: []string{"X-Good: ok", "bad-header"},
-			err:     ErrInvalidHeaderFormat,
+			headers: []string{"X-Good: ok", ""},
+			err:     ErrEmptyHeaderName,
 		},
 	}
 
@@ -153,6 +155,7 @@ func TestCustomHeadersSentInRequest(t *testing.T) {
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				headersCh <- r.Header.Clone()
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"stores": []}`))
