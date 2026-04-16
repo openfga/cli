@@ -119,20 +119,21 @@ func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
 }
 
 func (c ClientConfig) getCustomHeaders() (map[string]string, error) {
-	headers := map[string]string{}
+	headers := make(map[string]string, len(c.CustomHeaders))
 
 	for _, header := range c.CustomHeaders {
-		parts := strings.SplitN(header, ":", 2)
-		if len(parts) != 2 {
+		name, value, found := strings.Cut(header, ":")
+		name, value = strings.TrimSpace(name), strings.TrimSpace(value)
+		if !found {
 			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrInvalidHeaderFormat)
 		}
-
-		name := strings.TrimSpace(parts[0])
+		if name == "" && value == "" {
+			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrInvalidHeaderFormat)
+		}
 		if name == "" {
 			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrEmptyHeaderName)
 		}
-
-		headers[name] = strings.TrimSpace(parts[1])
+		headers[name] = value
 	}
 
 	return headers, nil
