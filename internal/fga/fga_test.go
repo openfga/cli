@@ -149,10 +149,10 @@ func TestCustomHeadersSentInRequest(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			var capturedHeaders http.Header
+			headersCh := make(chan http.Header, 1)
 
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				capturedHeaders = r.Header.Clone()
+				headersCh <- r.Header.Clone()
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(`{"stores": []}`))
@@ -173,6 +173,7 @@ func TestCustomHeadersSentInRequest(t *testing.T) {
 				Execute()
 			require.NoError(t, err)
 
+			capturedHeaders := <-headersCh
 			for name, value := range test.expectedHeaders {
 				assert.Equal(t, value, capturedHeaders.Get(name),
 					"expected header %s to have value %q", name, value)
