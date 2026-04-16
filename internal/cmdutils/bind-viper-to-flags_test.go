@@ -49,6 +49,16 @@ func TestViperValueToStrings(t *testing.T) {
 			expected: []string{},
 		},
 		{
+			name:     "typed string slice produces one string per element",
+			value:    []string{"X-Custom-Header: value1", "X-Request-ID: abc123"},
+			expected: []string{"X-Custom-Header: value1", "X-Request-ID: abc123"},
+		},
+		{
+			name:     "typed int slice produces one string per element",
+			value:    []int{1, 2, 3},
+			expected: []string{"1", "2", "3"},
+		},
+		{
 			name:     "scalar string produces single-element slice",
 			value:    "https://api.fga.example",
 			expected: []string{"https://api.fga.example"},

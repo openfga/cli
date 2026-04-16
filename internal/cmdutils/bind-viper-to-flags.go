@@ -18,6 +18,7 @@ package cmdutils
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -46,14 +47,14 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 // suitable for pflag.Set calls. Slice values (from YAML lists) produce one
 // string per element; scalar values produce a single-element slice.
 func viperValueToStrings(value any) []string {
-	sliceValue, ok := value.([]any)
-	if !ok {
+	rv := reflect.ValueOf(value)
+	if rv.Kind() != reflect.Slice {
 		return []string{fmt.Sprintf("%v", value)}
 	}
 
-	result := make([]string, 0, len(sliceValue))
-	for _, elem := range sliceValue {
-		result = append(result, fmt.Sprintf("%v", elem))
+	result := make([]string, 0, rv.Len())
+	for i := range rv.Len() {
+		result = append(result, fmt.Sprintf("%v", rv.Index(i).Interface()))
 	}
 
 	return result
