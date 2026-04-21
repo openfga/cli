@@ -17,9 +17,6 @@ limitations under the License.
 package cmdutils
 
 import (
-	"fmt"
-	"reflect"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -31,8 +28,7 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 		configName := flag.Name
 
 		if !flag.Changed && viperInstance.IsSet(configName) {
-			value := viperInstance.Get(configName)
-			for _, strVal := range viperValueToStrings(value) {
+			for _, strVal := range viperInstance.GetStringSlice(configName) {
 				cobra.CheckErr(cmd.Flags().Set(flag.Name, strVal))
 			}
 		}
@@ -41,22 +37,4 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 	for _, subcmd := range cmd.Commands() {
 		BindViperToFlags(subcmd, viperInstance)
 	}
-}
-
-// viperValueToStrings converts a Viper config value to a slice of strings
-// suitable for pflag.Set calls. Slice values (from YAML lists) produce one
-// string per element; scalar values produce a single-element slice.
-func viperValueToStrings(value any) []string {
-	reflectValue := reflect.ValueOf(value)
-
-	if reflectValue.Kind() != reflect.Slice && reflectValue.Kind() != reflect.Array {
-		return []string{fmt.Sprintf("%v", value)}
-	}
-
-	result := make([]string, 0, reflectValue.Len())
-	for i := range reflectValue.Len() {
-		result = append(result, fmt.Sprintf("%v", reflectValue.Index(i).Interface()))
-	}
-
-	return result
 }

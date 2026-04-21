@@ -19,11 +19,16 @@ package cmdutils
 import (
 	"testing"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestViperValueToStrings(t *testing.T) {
+func TestBindViperToFlags(t *testing.T) {
 	t.Parallel()
+
+	const flagName = "header"
 
 	testcases := []struct {
 		name     string
@@ -31,7 +36,7 @@ func TestViperValueToStrings(t *testing.T) {
 		expected []string
 	}{
 		{
-			name: "slice value produces one string per element",
+			name: "slice value produces one flag value per element",
 			value: []any{
 				"X-Custom-Header: value1",
 				"X-Request-ID: abc123",
@@ -44,22 +49,22 @@ func TestViperValueToStrings(t *testing.T) {
 			expected: []string{"X-Custom-Header: value1"},
 		},
 		{
-			name:     "empty slice",
+			name:     "empty slice leaves flag untouched",
 			value:    []any{},
 			expected: []string{},
 		},
 		{
-			name:     "typed string slice produces one string per element",
+			name:     "typed string slice produces one flag value per element",
 			value:    []string{"X-Custom-Header: value1", "X-Request-ID: abc123"},
 			expected: []string{"X-Custom-Header: value1", "X-Request-ID: abc123"},
 		},
 		{
-			name:     "typed int slice produces one string per element",
+			name:     "typed int slice produces one flag value per element",
 			value:    []int{1, 2, 3},
 			expected: []string{"1", "2", "3"},
 		},
 		{
-			name:     "scalar string produces single-element slice",
+			name:     "scalar string produces single flag value",
 			value:    "https://api.fga.example",
 			expected: []string{"https://api.fga.example"},
 		},
@@ -79,8 +84,17 @@ func TestViperValueToStrings(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := viperValueToStrings(test.value)
-			assert.Equal(t, test.expected, result)
+			cmd := &cobra.Command{Use: "root"}
+			cmd.Flags().StringArray(flagName, nil, "")
+
+			viperInstance := viper.New()
+			viperInstance.Set(flagName, test.value)
+
+			BindViperToFlags(cmd, viperInstance)
+
+			got, err := cmd.Flags().GetStringArray(flagName)
+			require.NoError(t, err)
+			assert.Equal(t, test.expected, got)
 		})
 	}
 }
