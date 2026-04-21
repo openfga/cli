@@ -21,7 +21,7 @@ linters:
         main:
           files:
             - $all
-            - '!$test'
+            - "!$test"
           allow:
             - $gostd
             - github.com/gocarina/gocsv
@@ -57,6 +57,8 @@ linters:
             - github.com/openfga/openfga
             - github.com/stretchr
             - go.uber.org/mock/gomock
+            - github.com/spf13/cobra
+            - github.com/spf13/viper
     funlen:
       lines: 120
       statements: 80
