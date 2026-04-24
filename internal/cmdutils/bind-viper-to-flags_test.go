@@ -69,6 +69,11 @@ func TestBindViperToFlags(t *testing.T) {
 			expected: []string{"https://api.fga.example"},
 		},
 		{
+			name:     "space separated scalar string (env var style) splits into multiple flag values",
+			value:    "X-Custom-Header:value1 X-Request-ID:abc123",
+			expected: []string{"X-Custom-Header:value1", "X-Request-ID:abc123"},
+		},
+		{
 			name:     "boolean value is stringified",
 			value:    true,
 			expected: []string{"true"},
