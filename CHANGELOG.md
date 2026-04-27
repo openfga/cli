@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 * support custom headers ([#670](https://github.com/openfga/cli/issues/670)) ([5826777](https://github.com/openfga/cli/commit/5826777f8b8f6b0ee6f46d184121fd760234609f))
 
 
-### Miscellaneous
-
-* release 0.7.13 ([211b3f1](https://github.com/openfga/cli/commit/211b3f115693162b1ae447d8ff73c3adfdd3f4a7))
-
 ## [Unreleased]
 
 ## [0.7.12] - 2026-03-23
