@@ -37,7 +37,7 @@ const (
 var (
 	userAgent = "openfga-cli/" + build.Version
 
-	ErrInvalidHeaderFormat = errors.New("expected format \"Header-Name: value\"")
+	ErrInvalidHeaderFormat = errors.New("expected format \"Header-Name:value\"")
 )
 
 type ClientConfig struct {
