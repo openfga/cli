@@ -16,8 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 * Update bundled OpenFGA to [v1.15.0](https://github.com/openfga/openfga/releases/tag/v1.15.0)
 
 
-## [Unreleased]
-
 ## [0.7.12] - 2026-03-23
 
 ### Security
