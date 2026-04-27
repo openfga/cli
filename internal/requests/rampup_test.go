@@ -47,7 +47,7 @@ func TestRampUpAPIRequests_RampUpRate(t *testing.T) {
 	defer cancel()
 
 	var (
-		callCount int32
+		callCount atomic.Int32
 		mutex     sync.Mutex
 	)
 
@@ -55,7 +55,7 @@ func TestRampUpAPIRequests_RampUpRate(t *testing.T) {
 	for i := range requestsList {
 		requestsList[i] = func() error {
 			mutex.Lock()
-			atomic.AddInt32(&callCount, 1)
+			callCount.Add(1)
 			mutex.Unlock()
 
 			return nil

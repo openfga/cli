@@ -18,6 +18,8 @@ limitations under the License.
 package fga
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	openfga "github.com/openfga/go-sdk"
@@ -32,7 +34,11 @@ const (
 	MinSdkWaitInMs = 500
 )
 
-var userAgent = "openfga-cli/" + build.Version
+var (
+	userAgent = "openfga-cli/" + build.Version
+
+	ErrInvalidHeaderFormat = errors.New("expected format \"Header-Name:value\"")
+)
 
 type ClientConfig struct {
 	ApiUrl               string   `json:"api_url,omitempty"` //nolint:revive,stylecheck
@@ -44,11 +50,17 @@ type ClientConfig struct {
 	APIScopes            []string `json:"api_scopes,omitempty"`
 	ClientID             string   `json:"client_id,omitempty"`
 	ClientSecret         string   `json:"client_secret,omitempty"` //nolint:gosec
+	CustomHeaders        []string `json:"custom_headers,omitempty"`
 	Debug                bool     `json:"debug,omitempty"`
 }
 
 func (c ClientConfig) GetFgaClient() (*client.OpenFgaClient, error) {
-	fgaClient, err := client.NewSdkClient(c.getClientConfig())
+	clientConfig, err := c.getClientConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	fgaClient, err := client.NewSdkClient(clientConfig)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
 	}
@@ -84,7 +96,12 @@ func (c ClientConfig) getCredentials() *credentials.Credentials {
 	}
 }
 
-func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
+func (c ClientConfig) getClientConfig() (*client.ClientConfiguration, error) {
+	customHeaders, err := c.getCustomHeaders()
+	if err != nil {
+		return nil, fmt.Errorf("invalid custom headers configuration: %w", err)
+	}
+
 	return &client.ClientConfiguration{
 		ApiUrl:               c.ApiUrl,
 		StoreId:              c.StoreID,
@@ -95,6 +112,24 @@ func (c ClientConfig) getClientConfig() *client.ClientConfiguration {
 			MaxRetry:    MaxSdkRetry,
 			MinWaitInMs: MinSdkWaitInMs,
 		},
-		Debug: c.Debug,
+		Debug:          c.Debug,
+		DefaultHeaders: customHeaders,
+	}, nil
+}
+
+func (c ClientConfig) getCustomHeaders() (map[string]string, error) {
+	headers := make(map[string]string, len(c.CustomHeaders))
+
+	for _, header := range c.CustomHeaders {
+		name, value, _ := strings.Cut(header, ":")
+
+		name, value = strings.TrimSpace(name), strings.TrimSpace(value)
+		if name == "" {
+			return nil, fmt.Errorf("invalid custom header %q: %w", header, ErrInvalidHeaderFormat)
+		}
+
+		headers[name] = value
 	}
+
+	return headers, nil
 }
