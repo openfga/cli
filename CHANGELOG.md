@@ -2,8 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](https://semver.org/).
+This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.7.13](https://github.com/openfga/cli/compare/v0.7.12...v0.7.13) (2026-04-27)
 
