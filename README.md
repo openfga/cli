@@ -109,7 +109,7 @@ Download the pre-compiled binaries from the [releases page](https://github.com/o
 
 ## Building from Source
 
-Make sure you have Go 1.20 or later installed. See the [Go downloads](https://go.dev/dl/) page.
+Make sure you have Go 1.25 or later installed. See the [Go downloads](https://go.dev/dl/) page.
 
 1. Clone the repo to a local directory, and navigate to that directory:
 

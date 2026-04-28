@@ -14,6 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package cmdutils contains utility and common functions that interaction with the input
+// Package cmdutils contains utility and common functions that interact with the input
 // such as reading or binding flags
 package cmdutils
