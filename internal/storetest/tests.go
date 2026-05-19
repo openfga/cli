@@ -15,6 +15,13 @@ type ModelTestOptions struct {
 	Remote  bool
 }
 
+// LocalServerConfig holds configuration for the embedded OpenFGA server
+// used during local model testing. Additional server options can be added
+// here as needed (see https://github.com/openfga/cli/issues/564).
+type LocalServerConfig struct {
+	MaxTypesPerAuthorizationModel int
+}
+
 func RunTest(
 	ctx context.Context,
 	fgaClient *client.OpenFgaClient,
@@ -37,6 +44,7 @@ func RunTests(
 	fgaClient *client.OpenFgaClient,
 	storeData *StoreData,
 	format authorizationmodel.ModelFormat,
+	serverConfig LocalServerConfig,
 ) (TestResults, error) {
 	testResults := TestResults{}
 
@@ -44,7 +52,7 @@ func RunTests(
 		return testResults, err
 	}
 
-	fgaServer, authModel, stopServerFn, err := getLocalServerModelAndTuples(storeData, format)
+	fgaServer, authModel, stopServerFn, err := getLocalServerModelAndTuples(storeData, format, serverConfig)
 	if err != nil {
 		return testResults, err
 	}

@@ -2,12 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](https://semver.org/).
+This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.7.13](https://github.com/openfga/cli/compare/v0.7.12...v0.7.13) (2026-04-27)
+
+
+### Added
+
+* support custom headers ([#670](https://github.com/openfga/cli/issues/670)) ([5826777](https://github.com/openfga/cli/commit/5826777f8b8f6b0ee6f46d184121fd760234609f))
+
+### Changed
+* Update bundled OpenFGA to [v1.15.0](https://github.com/openfga/openfga/releases/tag/v1.15.0)
+
+
+## [0.7.12] - 2026-03-23
+
+### Security
+- Bumped `google.golang.org/grpc` to v1.79.3 to resolve CVE-2026-33186.
+  This vulnerability did not affect the CLI as the vulnerable code path was not reachable, but the dependency has been updated as a precaution.
+
+
+## [0.7.11] - 2026-03-17
+
+Fixed:
+- Fix local ListObjects tests when expected response is an empty slice (#645)
+- Limit WriteAssertions to 100 assertions (#619)
+
+Added:
+- Add --max-types-per-authorization-model flag (#641) - Thanks @nverbos-godaddy
+
+
+
+## [0.7.10] - 2026-02-20
+
+Changed:
+- go > v1.25 is now required (#631)
+- reverted the switch to distroless base image for SSL certs (#635) 
 
 ## [0.7.9] - 2026-02-18
+
+> [!NOTE]
+> `v0.7.9` failed to be released due to CI errors, its changelog entries are included here for reference.
 
 Changed:
 - Switch to distroless base image for SSL certs (#617) - thanks @runabol!
@@ -361,7 +396,10 @@ Initial OpenFGA CLI release
   * List relations a user has on an object
   * Use Expand to understand why access was granted
 
-[Unreleased]: https://github.com/openfga/cli/compare/v0.7.9...HEAD
+[Unreleased]: https://github.com/openfga/cli/compare/v0.7.12...HEAD
+[0.7.12]: https://github.com/openfga/cli/compare/v0.7.11...v0.7.12
+[0.7.11]: https://github.com/openfga/cli/compare/v0.7.10...v0.7.11
+[0.7.10]: https://github.com/openfga/cli/compare/v0.7.9...v0.7.10
 [0.7.9]: https://github.com/openfga/cli/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/openfga/cli/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/openfga/cli/compare/v0.7.5...v0.7.7

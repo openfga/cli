@@ -24,6 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
@@ -50,6 +51,20 @@ var modelTestCmd = &cobra.Command{
 		suppressSummary, err := cmd.Flags().GetBool("suppress-summary")
 		if err != nil {
 			return fmt.Errorf("failed to get suppress-summary flag: %w", err)
+		}
+
+		maxTypes, err := cmd.Flags().GetInt("max-types-per-authorization-model")
+		if err != nil {
+			return fmt.Errorf("failed to get max-types-per-authorization-model flag: %w", err)
+		}
+
+		if maxTypes <= 0 {
+			return clierrors.ValidationError("model test",
+				"max-types-per-authorization-model must be greater than 0")
+		}
+
+		serverConfig := storetest.LocalServerConfig{
+			MaxTypesPerAuthorizationModel: maxTypes,
 		}
 
 		fileNames, err := filepath.Glob(testsFileName)
@@ -89,6 +104,7 @@ var modelTestCmd = &cobra.Command{
 				fgaClient,
 				storeData,
 				format,
+				serverConfig,
 			)
 			if err != nil {
 				return fmt.Errorf("error running tests for %s due to %w", file, err)
@@ -154,6 +170,8 @@ func init() {
 	modelTestCmd.Flags().String("tests", "", "Path or glob of YAML test files")
 	modelTestCmd.Flags().Bool("verbose", false, "Print verbose JSON output")
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
+	modelTestCmd.Flags().Int("max-types-per-authorization-model", 100, //nolint:mnd
+		"Max allowed number of type definitions per authorization model")
 
 	if err := modelTestCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)

@@ -17,6 +17,7 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Building from Source](#building-from-source)
 - [Usage](#usage)
   - [Configuration](#configuration)
+  - [Custom Headers](#custom-headers)
   - [Commands](#commands)
     - [Stores](#stores)
       - [List All Stores](#list-stores)
@@ -151,6 +152,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 | Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     | `api-audience`     |
 | Store ID               | `--store-id`         | `FGA_STORE_ID`         | `store-id`         |
 | Authorization Model ID | `--model-id`         | `FGA_MODEL_ID`         | `model-id`         |
+| Custom Headers         | `--custom-headers`   | `FGA_CUSTOM_HEADERS`   | `custom-headers`   |
 
 If you are authenticating with a shared secret, you should specify the API Token value. If you are authenticating using OAuth, you should specify the Client ID, Client Secret, API Audience and Token Issuer. For example:
 
@@ -162,6 +164,37 @@ client-secret: J3...2pBwiauD
 api-audience: https://api.us1.fga.dev/
 api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
+```
+
+#### Custom Headers
+
+You can add custom HTTP headers to all requests sent to the API using the `--custom-headers` flag. Headers are specified in `<name>: <value>` format, and the flag can be repeated to add multiple headers.
+
+##### Flag
+```shell
+--custom-headers "Header-Name: header-value"
+```
+
+##### Example
+```shell
+fga store list --custom-headers "X-Custom-Header: value1" --custom-headers "X-Request-ID: abc123"
+```
+
+##### Configuration
+
+Custom headers can also be configured via the CLI environment variable or the configuration file:
+
+| Name           | Flag                 | CLI                    | ~/.fga.yaml        |
+|----------------|----------------------|------------------------|---------------------|
+| Custom Headers | `--custom-headers`   | `FGA_CUSTOM_HEADERS`   | `custom-headers`    |
+
+Example `~/.fga.yaml`:
+```yaml
+api-url: https://api.fga.example
+store-id: 01H0H015178Y2V4CX10C2KGHF4
+custom-headers:
+  - "X-Custom-Header: value1"
+  - "X-Request-ID: abc123"
 ```
 
 ### Commands
@@ -392,7 +425,7 @@ fga store **delete**
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
 | [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
-| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`     | `fga model test --tests "**/*.fga.yaml"`                                                     |
+| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`, `--max-types-per-authorization-model` | `fga model test --tests "**/*.fga.yaml"`                                      |
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
 
@@ -541,6 +574,7 @@ fga model **test**
 
 * `--tests`: Name of the tests file, or a glob pattern to multiple files (for example `"tests/*.fga.yaml"`,  or `"**/*.fga.yaml"`). Each file must be in yaml format.  See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--verbose`: Outputs the results in JSON
+* `--max-types-per-authorization-model`: Max allowed number of type definitions per authorization model (default: 100). Increase this when testing models with more than 100 type definitions.
 
 If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
 

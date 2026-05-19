@@ -12,6 +12,11 @@ import (
 	"github.com/openfga/cli/internal/storetest"
 )
 
+const (
+	testModelID = "model-1"
+	testStoreID = "store-1"
+)
+
 func TestImportStore(t *testing.T) {
 	t.Parallel()
 
@@ -51,7 +56,7 @@ func TestImportStore(t *testing.T) {
 			Expectation: true,
 		},
 	}
-	modelID, storeID := "model-1", "store-1"
+	modelID, storeID := testModelID, testStoreID
 	expectedOptions := client.ClientWriteAssertionsOptions{AuthorizationModelId: &modelID, StoreId: &storeID}
 
 	importStoreTests := []struct {
@@ -215,6 +220,64 @@ func TestImportStore(t *testing.T) {
 	}
 }
 
+func TestImportStoreWithTruncatedAssertions(t *testing.T) {
+	t.Parallel()
+
+	modelID, storeID := testModelID, testStoreID
+	expectedOptions := client.ClientWriteAssertionsOptions{AuthorizationModelId: &modelID, StoreId: &storeID}
+
+	// Generate 150 users to create 150 assertions (exceeding 100 limit)
+	users := make([]string, 150)
+	for i := range 150 {
+		users[i] = "user:" + string(rune('a'+i/26)) + string(rune('a'+i%26))
+	}
+
+	// Only the first 100 assertions should be written
+	first100Assertions := make([]client.ClientAssertion, 100)
+	for i := range 100 {
+		first100Assertions[i] = client.ClientAssertion{
+			User:        users[i],
+			Relation:    "reader",
+			Object:      "document:doc1",
+			Expectation: true,
+		}
+	}
+
+	mockCtrl := gomock.NewController(t)
+	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
+
+	defer mockCtrl.Finish()
+
+	// Only expect a single write with the first 100 assertions
+	setupWriteAssertionsMock(mockCtrl, mockFgaClient, first100Assertions, expectedOptions)
+	setupWriteModelMock(mockCtrl, mockFgaClient, modelID)
+	setupCreateStoreMock(mockCtrl, mockFgaClient, storeID)
+
+	testStore := storetest.StoreData{
+		Model: `type user
+                type document
+                        relations
+                                define reader: [user]`,
+		Tests: []storetest.ModelTest{
+			{
+				Name: "Test",
+				Check: []storetest.ModelTestCheck{
+					{
+						Users:      users,
+						Object:     "document:doc1",
+						Assertions: map[string]bool{"reader": true},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := importStore(t.Context(), &fga.ClientConfig{}, mockFgaClient, &testStore, "", "", 10, 1, "")
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
 func TestUpdateStore(t *testing.T) {
 	t.Parallel()
 
@@ -225,8 +288,8 @@ func TestUpdateStore(t *testing.T) {
 		Expectation: true,
 	}}
 
-	modelID := "model-1"
-	storeID := "store-1"
+	modelID := testModelID
+	storeID := testStoreID
 	sampleTime := time.Now()
 	expectedOptions := client.ClientWriteAssertionsOptions{
 		AuthorizationModelId: &modelID,

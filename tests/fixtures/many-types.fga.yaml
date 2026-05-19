@@ -1,0 +1,13 @@
+name: Many Types Store
+model_file: many-types-model.fga
+tests:
+  - name: test-owner-check
+    tuples:
+      - user: user:anne
+        relation: owner
+        object: resource1:doc1
+    check:
+      - user: user:anne
+        object: resource1:doc1
+        assertions:
+          owner: true
