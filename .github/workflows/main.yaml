@@ -118,10 +118,32 @@ jobs:
         version: '~> v2'
         args: release --clean --config .goreleaser.yaml --snapshot --skip sign,publish,announce
 
+  verify-version:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ lint, audit, test, shellcheck ]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Verify versions match
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          MANIFEST_VERSION=$(jq -r '.["."]' .release-please-manifest.json)
+
+          echo "Tag: $TAG_VERSION | Manifest: $MANIFEST_VERSION"
+
+          if [[ "$TAG_VERSION" != "$MANIFEST_VERSION" ]]; then
+            echo "ERROR: Tag version does not match manifest version"
+            exit 1
+          fi
+          echo "All versions verified: $TAG_VERSION"
+
   goreleaser:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [lint,audit,test,shellcheck]
+    needs: [ verify-version ]
     permissions:
       contents: write
       packages: write # publish a new github release
@@ -235,8 +257,14 @@ jobs:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+  undraft-release:
+    needs: [ binary-provenance, image-provenance ]
+    permissions:
+      contents: write
+    uses: openfga/sdk-generator/.github/workflows/undraft-release.yml@main
+
   verification-with-slsa-verifier:
-    needs: [ goreleaser, binary-provenance ]
+    needs: [ undraft-release, binary-provenance ]
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
@@ -288,32 +316,3 @@ jobs:
               --certificate-oidc-issuer https://token.actions.githubusercontent.com \
               --certificate-identity-regexp '^https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v[0-9]+.[0-9]+.[0-9]+$' \
               $IMAGE@$DIGEST
-
-  verify-version:
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [lint, audit, test, shellcheck]
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Verify versions match
-        run: |
-          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
-          MANIFEST_VERSION=$(jq -r '.["."]' .release-please-manifest.json)
-
-          echo "Tag: $TAG_VERSION | Manifest: $MANIFEST_VERSION"
-
-          if [[ "$TAG_VERSION" != "$MANIFEST_VERSION" ]]; then
-            echo "ERROR: Tag version does not match manifest version"
-            exit 1
-          fi
-          echo "All versions verified: $TAG_VERSION"
-
-  undraft-release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [verify-version, verification-with-slsa-verifier, verification-with-cosign]
-    permissions:
-      contents: write
-    uses: openfga/sdk-generator/.github/workflows/undraft-release.yml@main
