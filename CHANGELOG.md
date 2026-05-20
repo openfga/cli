@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.14-beta.1](https://github.com/openfga/cli/compare/v0.7.14...v0.7.14-beta.1) (2026-05-20)
+
+
+### Miscellaneous
+
+* release 0.7.14-beta.1 ([6a62a0c](https://github.com/openfga/cli/commit/6a62a0cb65783fbf8bca108f4d2df1bd4515ab2c))
+
 ## [0.7.14](https://github.com/openfga/cli/compare/v0.7.13...v0.7.14) (2026-05-20)
 
 
