@@ -264,7 +264,7 @@ jobs:
     uses: openfga/sdk-generator/.github/workflows/undraft-release.yml@main
 
   verification-with-slsa-verifier:
-    needs: [ undraft-release ]
+    needs: [ undraft-release, binary-provenance ]
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
