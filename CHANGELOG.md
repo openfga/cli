@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Miscellaneous
 
-* release 0.7.14 ([956aa20](https://github.com/openfga/cli/commit/956aa20ad0d750a4829c4d04061d7c7b734a6df7))
+* Bumped the [`openfga/go-sdk`](https://github.com/openfga/go-sdk) version to include a fix for a retry logic bug (see [#677](https://github.com/openfga/cli/issues/677), fixed by [openfga/go-sdk#319](https://github.com/openfga/go-sdk/pull/319)).
 
 ## [0.7.13](https://github.com/openfga/cli/compare/v0.7.12...v0.7.13) (2026-04-27)
 
