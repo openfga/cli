@@ -4,26 +4,20 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.7.15](https://github.com/openfga/cli/compare/v0.7.14-beta.1...v0.7.15) (2026-05-20)
+## [0.7.15](https://github.com/openfga/cli/compare/v0.7.13...v0.7.15) (2026-05-20)
 
 
-### Miscellaneous
+### Changed
 
-* release 0.7.15 ([478893e](https://github.com/openfga/cli/commit/478893e0a6936b71c752d024b7d4b223c29822c2))
-
-## [0.7.14-beta.1](https://github.com/openfga/cli/compare/v0.7.14...v0.7.14-beta.1) (2026-05-20)
-
-
-### Miscellaneous
-
-* release 0.7.14-beta.1 ([6a62a0c](https://github.com/openfga/cli/commit/6a62a0cb65783fbf8bca108f4d2df1bd4515ab2c))
-
-## [0.7.14](https://github.com/openfga/cli/compare/v0.7.13...v0.7.14) (2026-05-20)
-
+* Update bundled OpenFGA to [v1.16.0](https://github.com/openfga/openfga/releases/tag/v1.16.0)
 
 ### Fixed
 
 * Bumped the [`openfga/go-sdk`](https://github.com/openfga/go-sdk) version to include a fix for a retry logic bug (see [#677](https://github.com/openfga/cli/issues/677), fixed by [openfga/go-sdk#319](https://github.com/openfga/go-sdk/pull/319)).
+
+> [!NOTE]
+> v0.7.14 had issues in the release process so the changelog has been merged into v0.7.15
+
 
 ## [0.7.13](https://github.com/openfga/cli/compare/v0.7.12...v0.7.13) (2026-04-27)
 
