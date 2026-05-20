@@ -2,7 +2,7 @@ module github.com/openfga/cli
 
 go 1.25.7
 
-toolchain go1.26.2
+toolchain go1.26.3
 
 require (
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
@@ -13,7 +13,7 @@ require (
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20
-	github.com/openfga/go-sdk v0.8.0
+	github.com/openfga/go-sdk v0.8.1
 	github.com/openfga/language/pkg/go v0.2.1
 	github.com/openfga/openfga v1.15.1
 	github.com/rung/go-safecast v1.0.1
