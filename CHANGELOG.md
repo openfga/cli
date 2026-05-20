@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.14](https://github.com/openfga/cli/compare/v0.7.13...v0.7.14) (2026-05-20)
+
+
+### Fixed
+
+* Bumped the [`openfga/go-sdk`](https://github.com/openfga/go-sdk) version to include a fix for a retry logic bug (see [#677](https://github.com/openfga/cli/issues/677), fixed by [openfga/go-sdk#319](https://github.com/openfga/go-sdk/pull/319)).
+
 ## [0.7.13](https://github.com/openfga/cli/compare/v0.7.12...v0.7.13) (2026-04-27)
 
 
