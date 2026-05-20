@@ -215,7 +215,9 @@ jobs:
     with:
       base64-subjects-as-file: "${{ needs.goreleaser.outputs.subjects-as-file }}"
       provenance-name: "fga.intoto.jsonl"
-      upload-assets: true # upload to a new release
+      upload-assets: true
+      upload-tag-name: ${{ github.ref_name }}
+      draft-release: true
 
   image-provenance:
     needs: [ goreleaser ]
