@@ -89,6 +89,8 @@ docker_manifests:
 
 release:
   draft: true
+  use_existing_draft: true
+  mode: keep-existing
   github:
     owner: openfga
     name: cli
