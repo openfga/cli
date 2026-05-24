@@ -261,7 +261,7 @@ func buildTestResultOutput(result TestResult, totalCheckCount int, failedCheckCo
 	}
 
 	if totalListUsersCount > 0 {
-		output += fmt.Sprintf("ListUsers(%d/%d passing)",
+		output += fmt.Sprintf("ListUsers (%d/%d passing)",
 			totalListUsersCount-failedListUsersCount, totalListUsersCount)
 	}
 
