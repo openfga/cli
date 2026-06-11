@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	openfga "github.com/openfga/go-sdk"
@@ -48,18 +49,44 @@ type readResponse struct {
 }
 
 type readResponseCSVDTO struct {
-	UserType         string `csv:"user_type"`
-	UserID           string `csv:"user_id"`
-	UserRelation     string `csv:"user_relation,omitempty"`
-	Relation         string `csv:"relation"`
-	ObjectType       string `csv:"object_type"`
-	ObjectID         string `csv:"object_id"`
-	ConditionName    string `csv:"condition_name,omitempty"`
-	ConditionContext string `csv:"condition_context,omitempty"`
+	UserType         string
+	UserID           string
+	UserRelation     string
+	Relation         string
+	ObjectType       string
+	ObjectID         string
+	ConditionName    string
+	ConditionContext string
 }
 
-func (r readResponse) toCsvDTO() ([]readResponseCSVDTO, error) {
-	readResponseDTO := make([]readResponseCSVDTO, 0, len(r.simple))
+type readResponseCSVDTOList []readResponseCSVDTO
+
+var readResponseCSVHeaders = []string{
+	"user_type",
+	"user_id",
+	"user_relation",
+	"relation",
+	"object_type",
+	"object_id",
+	"condition_name",
+	"condition_context",
+}
+
+func (dto readResponseCSVDTO) MarshalCSV() ([]string, error) {
+	return []string{
+		dto.UserType,
+		dto.UserID,
+		dto.UserRelation,
+		dto.Relation,
+		dto.ObjectType,
+		dto.ObjectID,
+		dto.ConditionName,
+		dto.ConditionContext,
+	}, nil
+}
+
+func (r readResponse) toCsvDTO() (readResponseCSVDTOList, error) {
+	readResponseDTO := make(readResponseCSVDTOList, 0, len(r.simple))
 
 	for _, readRes := range r.simple {
 		// Handle Condition
@@ -196,18 +223,21 @@ var readCmd = &cobra.Command{
 
 		simpleOutput, _ := cmd.Flags().GetBool("simple-output")
 		outputFormat, _ := cmd.Flags().GetString("output-format")
-		dataPrinter := output.NewUniPrinter(outputFormat)
 
 		if outputFormat == "csv" {
-			data, _ := response.toCsvDTO()
-
-			err := dataPrinter.Display(data)
+			records, err := response.toCsvDTO()
 			if err != nil {
+				return fmt.Errorf("failed to convert response to csv: %w", err)
+			}
+
+			if err := output.MarshalCSV(records, os.Stdout, readResponseCSVHeaders...); err != nil {
 				return fmt.Errorf("failed to display csv: %w", err)
 			}
 
 			return nil
 		}
+
+		dataPrinter := output.NewUniPrinter(outputFormat)
 
 		var data any
 

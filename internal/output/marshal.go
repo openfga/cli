@@ -18,11 +18,12 @@ limitations under the License.
 package output
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
-	"github.com/gocarina/gocsv"
 	"gopkg.in/yaml.v3"
 
 	"github.com/mattn/go-isatty"
@@ -37,9 +38,6 @@ type Printer interface {
 
 // jsonPrinter implements the Printer interface for JSON output.
 type jsonPrinter struct{}
-
-// csvPrinter implements the Printer interface for CSV output.
-type csvPrinter struct{}
 
 // yamlPrinter implements the Printer interface for YAML output.
 type yamlPrinter struct{}
@@ -69,17 +67,37 @@ func (prt *jsonPrinter) DisplayColor(data any) error {
 	return nil
 }
 
-func (prt *csvPrinter) DisplayColor(data any) error {
-	return prt.DisplayNoColor(data)
+// CSVMarshaler is implemented by a value that can encode itself as a CSV record.
+type CSVMarshaler interface {
+	MarshalCSV() ([]string, error)
 }
 
-func (prt *csvPrinter) DisplayNoColor(data any) error {
-	b, err := gocsv.MarshalBytes(data)
-	if err != nil {
-		return fmt.Errorf("unable to marshal CSV with error: %w", err)
+// MarshalCSV writes an optional header row followed by one record per element to w.
+func MarshalCSV[T CSVMarshaler](records []T, w io.Writer, header ...string) error {
+	writer := csv.NewWriter(w)
+
+	if len(header) > 0 {
+		if err := writer.Write(header); err != nil {
+			return fmt.Errorf("failed to write csv header: %w", err)
+		}
 	}
 
-	fmt.Println(string(b))
+	for _, record := range records {
+		row, err := record.MarshalCSV()
+		if err != nil {
+			return fmt.Errorf("failed to marshal csv record: %w", err)
+		}
+
+		if err := writer.Write(row); err != nil {
+			return fmt.Errorf("failed to write csv record: %w", err)
+		}
+	}
+
+	writer.Flush()
+
+	if err := writer.Error(); err != nil {
+		return fmt.Errorf("failed to flush csv: %w", err)
+	}
 
 	return nil
 }
@@ -115,8 +133,6 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 	switch outputFormat {
 	case "yaml":
 		uniPrinter.Printer = &yamlPrinter{}
-	case "csv":
-		uniPrinter.Printer = &csvPrinter{}
 	default:
 		uniPrinter.Printer = &jsonPrinter{}
 	}
