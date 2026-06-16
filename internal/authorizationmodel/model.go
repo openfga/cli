@@ -18,12 +18,12 @@ package authorizationmodel
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
@@ -207,7 +207,9 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 	}
 
 	moduleFiles := []language.ModuleFile{}
-	fileReadErrors := multierror.Error{}
+
+	var fileReadErrors []error
+
 	directory := path.Dir(modFile)
 
 	for _, fileName := range parsedModFile.Contents.Value {
@@ -215,8 +217,8 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 
 		fileContents, err := os.ReadFile(filePath)
 		if err != nil {
-			fileReadErrors = *multierror.Append(
-				&fileReadErrors,
+			fileReadErrors = append(
+				fileReadErrors,
 				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
 			)
 
@@ -229,8 +231,8 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 		})
 	}
 
-	if len(fileReadErrors.Errors) != 0 {
-		return &fileReadErrors
+	if len(fileReadErrors) != 0 {
+		return errors.Join(fileReadErrors...)
 	}
 
 	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
