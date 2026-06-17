@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.16](https://github.com/openfga/cli/compare/v0.7.15...v0.7.16) (2026-06-17)
+
+
+### Changed
+
+* replace go-multierror with stdlib, remove dep ([#705](https://github.com/openfga/cli/issues/705)) ([2e9afa2](https://github.com/openfga/cli/commit/2e9afa2397b61561ca0652be5d21a1b2197f1912))
+
+
+### Miscellaneous
+
+* release 0.7.16 ([bf585f1](https://github.com/openfga/cli/commit/bf585f17ea13910acb3c6ed519700ddb47e89c84))
+
 ## [0.7.15](https://github.com/openfga/cli/compare/v0.7.13...v0.7.15) (2026-05-20)
 
 
