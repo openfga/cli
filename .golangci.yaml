@@ -43,6 +43,7 @@ linters:
             - github.com/spf13/viper
             - golang.org/x/time/rate
             - google.golang.org/protobuf/encoding/protojson
+            - google.golang.org/protobuf/proto
             - google.golang.org/protobuf/types/known/structpb
             - gopkg.in/yaml.v3
         test:
@@ -59,6 +60,7 @@ linters:
             - go.uber.org/mock/gomock
             - github.com/spf13/cobra
             - github.com/spf13/viper
+            - google.golang.org/protobuf/proto
     funlen:
       lines: 120
       statements: 80

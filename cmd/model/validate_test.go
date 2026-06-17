@@ -87,11 +87,51 @@ func TestValidate(t *testing.T) {
 				return
 			}
 
+			expected := test.ExpectedOutput
+			size := model.GetSizeInKB()
+			expected.SizeKB = &size
+
 			output := validate(model)
 
-			if !reflect.DeepEqual(output, test.ExpectedOutput) {
-				t.Fatalf("Expect output %v actual %v", test.ExpectedOutput, output)
+			if !reflect.DeepEqual(output, expected) {
+				t.Fatalf("Expect output %v actual %v", expected, output)
 			}
 		})
+	}
+}
+
+func TestValidateReportsSize(t *testing.T) {
+	t.Parallel()
+
+	model := authorizationmodel.AuthzModel{}
+	if err := model.ReadFromJSONString(`{"schema_version":"1.1"}`); err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	result := validate(model)
+	if result.SizeKB == nil {
+		t.Fatalf("expected SizeKB to be set")
+	}
+
+	if *result.SizeKB != model.GetSizeInKB() {
+		t.Errorf("expected %v to equal %v", *result.SizeKB, model.GetSizeInKB())
+	}
+}
+
+func TestValidateWithValidIDReportsSize(t *testing.T) {
+	t.Parallel()
+
+	model := authorizationmodel.AuthzModel{}
+	if err := model.ReadFromJSONString(`{"id":"01GVKXGDCV2SMG6TRE9NMBQ2VG","schema_version":"1.1"}`); err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	result := validate(model)
+	if !result.IsValid {
+		t.Fatalf("expected valid model, got error: %v", *result.Error)
+	}
+
+	if result.SizeKB == nil {
+		t.Fatalf("expected SizeKB to be set")
 	}
 }
