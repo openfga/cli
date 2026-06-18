@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.16](https://github.com/openfga/cli/compare/v0.7.15...v0.7.16) (2026-06-17)
+
+### Added
+
+* Add a size field to `fga model get` and `size_kb` to `fga model validate` output, reporting the protobuf-serialized size of an authorization model in KB. ([#712](https://github.com/openfga/cli/pull/712))
+
+### Changed
+
+* replace go-multierror with stdlib, remove dep ([#705](https://github.com/openfga/cli/issues/705)) ([2e9afa2](https://github.com/openfga/cli/commit/2e9afa2397b61561ca0652be5d21a1b2197f1912))
+* Update bundled OpenFGA to [v1.18.0](https://github.com/openfga/openfga/releases/tag/v1.18.0)
+
+
 ## [0.7.15](https://github.com/openfga/cli/compare/v0.7.13...v0.7.15) (2026-05-20)
 
 
