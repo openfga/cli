@@ -22,26 +22,21 @@ func TestValidate(t *testing.T) {
 	t.Parallel()
 
 	type validationTest struct {
-		Name           string
-		Input          string
-		IsValid        bool
-		ExpectedOutput validationResult
+		Name             string
+		Input            string
+		ExpectParseError bool
+		ExpectedOutput   validationResult
 	}
 
 	tests := []validationTest{
 		{
-			Name:    "missing schema version",
-			Input:   "{",
-			IsValid: false,
-			ExpectedOutput: validationResult{
-				IsValid: false,
-				Error:   openfga.PtrString("unable to parse json input"),
-			},
+			Name:             "invalid json",
+			Input:            "{",
+			ExpectParseError: true,
 		},
 		{
-			Name:    "missing schema version",
-			Input:   `{"id":"abcde","schema_version":"1.1"}`,
-			IsValid: false,
+			Name:  "invalid model id",
+			Input: `{"id":"abcde","schema_version":"1.1"}`,
 			ExpectedOutput: validationResult{
 				ID:      "abcde",
 				IsValid: false,
@@ -49,27 +44,24 @@ func TestValidate(t *testing.T) {
 			},
 		},
 		{
-			Name:    "missing schema version",
-			Input:   "{}",
-			IsValid: false,
+			Name:  "missing schema version",
+			Input: "{}",
 			ExpectedOutput: validationResult{
 				IsValid: false,
 				Error:   openfga.PtrString("invalid schema version"),
 			},
 		},
 		{
-			Name:    "invalid schema version",
-			Input:   `{"schema_version":"1.0"}`,
-			IsValid: false,
+			Name:  "invalid schema version",
+			Input: `{"schema_version":"1.0"}`,
 			ExpectedOutput: validationResult{
 				IsValid: false,
 				Error:   openfga.PtrString("invalid schema version"),
 			},
 		},
 		{
-			Name:    "only schema",
-			Input:   `{"schema_version":"1.1"}`,
-			IsValid: true,
+			Name:  "only schema",
+			Input: `{"schema_version":"1.1"}`,
 			ExpectedOutput: validationResult{
 				IsValid: true,
 			},
@@ -83,8 +75,16 @@ func TestValidate(t *testing.T) {
 			model := authorizationmodel.AuthzModel{}
 
 			err := model.ReadFromJSONString(test.Input)
-			if err != nil {
+			if test.ExpectParseError {
+				if err == nil {
+					t.Fatalf("Expected parse error for input %q, got none", test.Input)
+				}
+
 				return
+			}
+
+			if err != nil {
+				t.Fatalf("Unexpected parse error for input %q: %v", test.Input, err)
 			}
 
 			expected := test.ExpectedOutput
