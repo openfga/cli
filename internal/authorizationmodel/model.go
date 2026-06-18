@@ -123,7 +123,12 @@ func (model *AuthzModel) GetProtoModel() *pb.AuthorizationModel {
 }
 
 func (model *AuthzModel) GetSizeInKB() float64 {
-	pbModel := model.GetProtoModel()
+	return ProtoModelSizeInKB(model.GetProtoModel())
+}
+
+// ProtoModelSizeInKB returns the protobuf-serialized size of the model in KB,
+// rounded to two decimal places. Returns 0 for a nil model.
+func ProtoModelSizeInKB(pbModel *pb.AuthorizationModel) float64 {
 	if pbModel == nil {
 		return 0
 	}

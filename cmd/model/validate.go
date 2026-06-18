@@ -64,7 +64,7 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 		return output
 	}
 
-	sizeKB := inputModel.GetSizeInKB()
+	sizeKB := authorizationmodel.ProtoModelSizeInKB(model)
 	output.SizeKB = &sizeKB
 
 	if model.GetId() != "" {
