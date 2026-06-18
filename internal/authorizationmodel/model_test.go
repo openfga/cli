@@ -1,10 +1,13 @@
 package authorizationmodel_test
 
 import (
+	"math"
+	"strings"
 	"testing"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/openfga/pkg/typesystem"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
 )
@@ -122,5 +125,109 @@ func TestDisplayAsJsonWithFields(t *testing.T) {
 
 	if jsonModel2.GetTypeDefinitions() != nil {
 		t.Errorf("Expected %v to equal nil", jsonModel2.GetTypeDefinitions())
+	}
+}
+
+func TestGetSizeInKB(t *testing.T) {
+	t.Parallel()
+
+	typeDefs := []openfga.TypeDefinition{{Type: typeName}}
+	model := authorizationmodel.AuthzModel{
+		SchemaVersion:   openfga.PtrString(typesystem.SchemaVersion1_1),
+		ID:              openfga.PtrString(modelID),
+		TypeDefinitions: &typeDefs,
+	}
+
+	size := model.GetSizeInKB()
+	if size <= 0 {
+		t.Errorf("Expected positive size, got %v", size)
+	}
+
+	pbModel := model.GetProtoModel()
+
+	bytes, err := proto.Marshal(pbModel)
+	if err != nil {
+		t.Fatalf("unexpected marshal error: %v", err)
+	}
+
+	expected := math.Round(float64(len(bytes))/1024.0*100) / 100
+	if size != expected {
+		t.Errorf("Expected %v to equal %v", size, expected)
+	}
+
+	if size != math.Round(size*100)/100 {
+		t.Errorf("Expected %v to be rounded to 2 decimal places", size)
+	}
+}
+
+func TestGetSizeInKBWithCreatedAt(t *testing.T) {
+	t.Parallel()
+
+	model := authorizationmodel.AuthzModel{}
+	model.Set(openfga.AuthorizationModel{
+		Id:              modelID,
+		SchemaVersion:   typesystem.SchemaVersion1_1,
+		TypeDefinitions: []openfga.TypeDefinition{{Type: typeName}},
+	})
+
+	if model.GetCreatedAt() == nil {
+		t.Fatalf("expected CreatedAt to be populated by Set")
+	}
+
+	size := model.GetSizeInKB()
+	if size <= 0 {
+		t.Errorf("Expected positive size for store-fetched model, got %v", size)
+	}
+}
+
+func TestDisplayAsJSONWithSize(t *testing.T) {
+	t.Parallel()
+
+	typeDefs := []openfga.TypeDefinition{{Type: typeName}}
+	model := authorizationmodel.AuthzModel{
+		SchemaVersion:   openfga.PtrString(typesystem.SchemaVersion1_1),
+		ID:              openfga.PtrString(modelID),
+		TypeDefinitions: &typeDefs,
+	}
+
+	withSize := model.DisplayAsJSON([]string{"model", "size"})
+	if withSize.SizeKB == nil {
+		t.Fatalf("Expected SizeKB to be set")
+	}
+
+	if *withSize.SizeKB != model.GetSizeInKB() {
+		t.Errorf("Expected %v to equal %v", *withSize.SizeKB, model.GetSizeInKB())
+	}
+
+	withoutSize := model.DisplayAsJSON([]string{"model"})
+	if withoutSize.SizeKB != nil {
+		t.Errorf("Expected SizeKB to be nil, got %v", *withoutSize.SizeKB)
+	}
+}
+
+func TestDisplayAsDSLWithSize(t *testing.T) {
+	t.Parallel()
+
+	model := authorizationmodel.AuthzModel{}
+	if err := model.ReadFromDSLString("model\n  schema 1.1\n\ntype user\n"); err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	withSize, err := model.DisplayAsDSL([]string{"model", "size"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(*withSize, "# Size: ") {
+		t.Errorf("Expected DSL output to contain a size comment, got %v", *withSize)
+	}
+
+	withoutSize, err := model.DisplayAsDSL([]string{"model"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if strings.Contains(*withoutSize, "# Size: ") {
+		t.Errorf("Expected DSL output to omit size comment, got %v", *withoutSize)
 	}
 }
