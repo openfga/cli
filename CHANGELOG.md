@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.7.16](https://github.com/openfga/cli/compare/v0.7.15...v0.7.16) (2026-06-17)
 
+### Added
+
+* Add a size field to `fga model get` and `size_kb` to `fga model validate` output, reporting the protobuf-serialized size of an authorization model in KB. ([#712](https://github.com/openfga/cli/pull/712))
 
 ### Changed
 
