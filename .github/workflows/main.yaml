@@ -237,9 +237,34 @@ jobs:
     with:
       base64-subjects-as-file: "${{ needs.goreleaser.outputs.subjects-as-file }}"
       provenance-name: "fga.intoto.jsonl"
-      upload-assets: true
-      upload-tag-name: ${{ github.ref_name }}
-      draft-release: true
+      # Do NOT let the generator attach the provenance to the release. It would call
+      # softprops/action-gh-release@v2.2.1, whose draft lookup reassigns the match on every
+      # page of releases instead of breaking on first hit. Once this repo has >100 releases
+      # (2 pages), the fresh draft on page 1 is clobbered by the empty page 2, the action falls
+      # through to createRelease(), and we end up with two drafts on the same tag. The provenance
+      # is always uploaded as a workflow artifact regardless, so we attach it ourselves below via
+      # `gh release upload`, which resolves the draft deterministically by tag.
+      upload-assets: false
+
+  release-provenance:
+    needs: [ binary-provenance ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # To add the provenance asset to the draft release.
+    steps:
+      - name: Download the provenance
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: ${{ needs.binary-provenance.outputs.provenance-name }}
+
+      - name: Attach provenance to the draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROVENANCE: ${{ needs.binary-provenance.outputs.provenance-name }}
+        run: |
+          set -euo pipefail
+          gh release upload "$GITHUB_REF_NAME" "$PROVENANCE" \
+            --repo "$GITHUB_REPOSITORY" --clobber
 
   image-provenance:
     needs: [ goreleaser ]
@@ -258,7 +283,7 @@ jobs:
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
   undraft-release:
-    needs: [ binary-provenance, image-provenance ]
+    needs: [ release-provenance, image-provenance ]
     permissions:
       contents: write
     uses: openfga/.github/.github/workflows/undraft-release.yml@main
