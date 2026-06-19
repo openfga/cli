@@ -237,13 +237,11 @@ jobs:
     with:
       base64-subjects-as-file: "${{ needs.goreleaser.outputs.subjects-as-file }}"
       provenance-name: "fga.intoto.jsonl"
-      # Do NOT let the generator attach the provenance to the release. It would call
-      # softprops/action-gh-release@v2.2.1, whose draft lookup reassigns the match on every
-      # page of releases instead of breaking on first hit. Once this repo has >100 releases
-      # (2 pages), the fresh draft on page 1 is clobbered by the empty page 2, the action falls
-      # through to createRelease(), and we end up with two drafts on the same tag. The provenance
-      # is always uploaded as a workflow artifact regardless, so we attach it ourselves below via
-      # `gh release upload`, which resolves the draft deterministically by tag.
+      # Don't let the generator attach the provenance:
+      # - it uses softprops/action-gh-release@v2.2.1, whose paginated draft lookup
+      #   creates a duplicate draft once a repo has >100 releases (2 pages)
+      # - the provenance is still published as a workflow artifact, so the
+      #   release-provenance job attaches it via `gh release upload` (by tag)
       upload-assets: false
 
   release-provenance:
