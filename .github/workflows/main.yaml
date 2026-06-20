@@ -230,7 +230,8 @@ jobs:
     permissions:
       actions: read # To read the workflow path.
       id-token: write # To sign the provenance.
-      contents: read
+      # write required even with upload-assets:false due to slsa-framework/slsa-github-generator#2044
+      contents: write
 
     # Note: this _must_ be referenced by tag. See: https://github.com/slsa-framework/slsa-verifier/issues/12
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
