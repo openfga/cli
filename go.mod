@@ -5,16 +5,15 @@ go 1.25.7
 toolchain go1.26.4
 
 require (
-	github.com/hashicorp/go-multierror v1.1.1
 	github.com/mattn/go-isatty v0.0.22
 	github.com/muesli/mango-cobra v1.3.0
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20
-	github.com/openfga/go-sdk v0.8.1
-	github.com/openfga/language/pkg/go v0.2.1
-	github.com/openfga/openfga v1.17.1
+	github.com/openfga/go-sdk v0.8.2
+	github.com/openfga/language/pkg/go v0.3.0
+	github.com/openfga/openfga v1.18.0
 	github.com/rung/go-safecast v1.0.1
 	github.com/schollz/progressbar/v3 v3.19.0
 	github.com/spf13/cobra v1.10.2
@@ -47,7 +46,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
@@ -83,7 +81,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/term v0.43.0 // indirect
 	golang.org/x/text v0.37.0 // indirect

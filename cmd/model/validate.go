@@ -37,6 +37,7 @@ type validationResult struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	IsValid   bool       `json:"is_valid"`
 	Error     *string    `json:"error,omitempty"`
+	SizeKB    *float64   `json:"size_kb,omitempty"`
 }
 
 func validate(inputModel authorizationmodel.AuthzModel) validationResult {
@@ -54,7 +55,7 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 		return output
 	}
 
-	err = protojson.Unmarshal([]byte(*modelJSONString), model)
+	err = (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal([]byte(*modelJSONString), model)
 	if err != nil {
 		output.IsValid = false
 		errorString := "unable to parse json input"
@@ -62,6 +63,9 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 
 		return output
 	}
+
+	sizeKB := authorizationmodel.ProtoModelSizeInKB(model)
+	output.SizeKB = &sizeKB
 
 	if model.GetId() != "" {
 		output.ID = model.GetId()

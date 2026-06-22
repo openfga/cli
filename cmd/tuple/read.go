@@ -59,8 +59,6 @@ type readResponseCSVDTO struct {
 	ConditionContext string
 }
 
-type readResponseCSVDTOList []readResponseCSVDTO
-
 var readResponseCSVHeaders = []string{
 	"user_type",
 	"user_id",
@@ -85,8 +83,8 @@ func (dto readResponseCSVDTO) MarshalCSV() ([]string, error) {
 	}, nil
 }
 
-func (r readResponse) toCsvDTO() (readResponseCSVDTOList, error) {
-	readResponseDTO := make(readResponseCSVDTOList, 0, len(r.simple))
+func (r readResponse) toCsvDTO() ([]readResponseCSVDTO, error) {
+	readResponseDTO := make([]readResponseCSVDTO, 0, len(r.simple))
 
 	for _, readRes := range r.simple {
 		// Handle Condition

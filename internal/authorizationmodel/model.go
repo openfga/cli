@@ -18,17 +18,19 @@ package authorizationmodel
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/oklog/ulid/v2"
 	pb "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	language "github.com/openfga/language/pkg/go/transformer"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openfga/cli/internal/slices"
 )
@@ -51,6 +53,7 @@ type AuthzModelList struct {
 type AuthzModel struct {
 	ID              *string                       `json:"id,omitempty"`
 	CreatedAt       *time.Time                    `json:"created_at,omitempty"`
+	SizeKB          *float64                      `json:"size_kb,omitempty"`
 	SchemaVersion   *string                       `json:"schema_version,omitempty"`
 	TypeDefinitions *[]openfga.TypeDefinition     `json:"type_definitions,omitempty"`
 	Conditions      map[string]*openfga.Condition `json:"conditions,omitempty"`
@@ -112,11 +115,27 @@ func (model *AuthzModel) GetProtoModel() *pb.AuthorizationModel {
 		return nil
 	}
 
-	if err = protojson.Unmarshal([]byte(*jsonModel), &pbModel); err != nil {
+	if err = (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal([]byte(*jsonModel), &pbModel); err != nil {
 		return nil
 	}
 
 	return &pbModel
+}
+
+func (model *AuthzModel) GetSizeInKB() float64 {
+	return ProtoModelSizeInKB(model.GetProtoModel())
+}
+
+// ProtoModelSizeInKB returns the protobuf-serialized size of the model in KB,
+// rounded to two decimal places. Returns 0 for a nil model.
+func ProtoModelSizeInKB(pbModel *pb.AuthorizationModel) float64 {
+	if pbModel == nil {
+		return 0
+	}
+
+	sizeKB := float64(proto.Size(pbModel)) / 1024.0 //nolint:mnd
+
+	return math.Round(sizeKB*100) / 100 //nolint:mnd
 }
 
 func (model *AuthzModel) GetCreatedAt() *time.Time {
@@ -207,7 +226,9 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 	}
 
 	moduleFiles := []language.ModuleFile{}
-	fileReadErrors := multierror.Error{}
+
+	var fileReadErrors []error
+
 	directory := path.Dir(modFile)
 
 	for _, fileName := range parsedModFile.Contents.Value {
@@ -215,8 +236,8 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 
 		fileContents, err := os.ReadFile(filePath)
 		if err != nil {
-			fileReadErrors = *multierror.Append(
-				&fileReadErrors,
+			fileReadErrors = append(
+				fileReadErrors,
 				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
 			)
 
@@ -229,8 +250,8 @@ func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
 		})
 	}
 
-	if len(fileReadErrors.Errors) != 0 {
-		return &fileReadErrors
+	if len(fileReadErrors) != 0 {
+		return errors.Join(fileReadErrors...)
 	}
 
 	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
@@ -316,6 +337,11 @@ func (model *AuthzModel) DisplayAsJSON(fields []string) AuthzModel {
 		newModel.Conditions = model.Conditions
 	}
 
+	if slices.Contains(fields, "size") {
+		size := model.GetSizeInKB()
+		newModel.SizeKB = &size
+	}
+
 	return newModel
 }
 
@@ -326,23 +352,7 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 		fields = append(fields, "model")
 	}
 
-	dslModel := ""
-
-	if slices.Contains(fields, "id") {
-		if model.ID != nil {
-			dslModel += fmt.Sprintf("# Model ID: %v\n", *model.ID)
-		} else {
-			dslModel += fmt.Sprintf("# Model ID: %v\n", "N/A")
-		}
-	}
-
-	if slices.Contains(fields, "created_at") {
-		if model.CreatedAt != nil {
-			dslModel += fmt.Sprintf("# Created At: %v\n", *model.CreatedAt)
-		} else {
-			dslModel += fmt.Sprintf("# Created At: %v\n", "N/A")
-		}
-	}
+	dslModel := model.buildDSLMetadata(fields)
 
 	if slices.Contains(fields, "model") {
 		modelJSON, err := model.GetAsJSONString()
@@ -364,6 +374,32 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 	}
 
 	return &dslModel, nil
+}
+
+func (model *AuthzModel) buildDSLMetadata(fields []string) string {
+	metadata := ""
+
+	if slices.Contains(fields, "id") {
+		if model.ID != nil {
+			metadata += fmt.Sprintf("# Model ID: %v\n", *model.ID)
+		} else {
+			metadata += fmt.Sprintf("# Model ID: %v\n", "N/A")
+		}
+	}
+
+	if slices.Contains(fields, "created_at") {
+		if model.CreatedAt != nil {
+			metadata += fmt.Sprintf("# Created At: %v\n", *model.CreatedAt)
+		} else {
+			metadata += fmt.Sprintf("# Created At: %v\n", "N/A")
+		}
+	}
+
+	if slices.Contains(fields, "size") {
+		metadata += fmt.Sprintf("# Size: %.2f KB\n", model.GetSizeInKB())
+	}
+
+	return metadata
 }
 
 func (model *AuthzModel) setCreatedAt() {

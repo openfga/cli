@@ -439,7 +439,7 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 
 	testCases := []struct {
 		readRes  readResponse
-		expected readResponseCSVDTOList
+		expected []readResponseCSVDTO
 	}{
 		{
 			readRes: readResponse{
@@ -461,7 +461,7 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 					},
 				},
 			},
-			expected: readResponseCSVDTOList{
+			expected: []readResponseCSVDTO{
 				{
 					UserType:         "user",
 					UserID:           "anne",
@@ -491,7 +491,7 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 func TestReadResponseCSVDTOListMarshalCSV(t *testing.T) {
 	t.Parallel()
 
-	list := readResponseCSVDTOList{
+	list := []readResponseCSVDTO{
 		{
 			UserType:         "user",
 			UserID:           "anne",

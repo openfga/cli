@@ -74,7 +74,7 @@ var getOutputFormat = authorizationmodel.ModelFormatFGA
 func init() {
 	getCmd.Flags().String("model-id", "", "Authorization Model ID")
 	getCmd.Flags().String("store-id", "", "Store ID")
-	getCmd.Flags().StringArray("field", []string{"model"}, "Fields to display, choices are: id, created_at and model") //nolint:lll
+	getCmd.Flags().StringArray("field", []string{"model"}, "Fields to display, choices are: id, created_at, size and model") //nolint:lll
 	getCmd.Flags().Var(&getOutputFormat, "format", `Authorization model output format. Can be "fga" or "json"`)
 
 	if err := getCmd.MarkFlagRequired("store-id"); err != nil {
