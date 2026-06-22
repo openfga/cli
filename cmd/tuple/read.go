@@ -17,7 +17,7 @@ limitations under the License.
 package tuple
 
 import (
-	"bytes"
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -229,12 +229,12 @@ var readCmd = &cobra.Command{
 				return fmt.Errorf("failed to convert response to csv: %w", err)
 			}
 
-			var buf bytes.Buffer
-			if err := output.MarshalCSV(records, &buf, readResponseCSVHeaders...); err != nil {
+			writer := bufio.NewWriter(os.Stdout)
+			if err := output.MarshalCSV(records, writer, readResponseCSVHeaders...); err != nil {
 				return fmt.Errorf("failed to marshal csv: %w", err)
 			}
 
-			if _, err := os.Stdout.Write(buf.Bytes()); err != nil {
+			if err := writer.Flush(); err != nil {
 				return fmt.Errorf("failed to display csv: %w", err)
 			}
 
