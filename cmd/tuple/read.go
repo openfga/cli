@@ -17,6 +17,7 @@ limitations under the License.
 package tuple
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -228,7 +229,12 @@ var readCmd = &cobra.Command{
 				return fmt.Errorf("failed to convert response to csv: %w", err)
 			}
 
-			if err := output.MarshalCSV(records, os.Stdout, readResponseCSVHeaders...); err != nil {
+			var buf bytes.Buffer
+			if err := output.MarshalCSV(records, &buf, readResponseCSVHeaders...); err != nil {
+				return fmt.Errorf("failed to marshal csv: %w", err)
+			}
+
+			if _, err := os.Stdout.Write(buf.Bytes()); err != nil {
 				return fmt.Errorf("failed to display csv: %w", err)
 			}
 
