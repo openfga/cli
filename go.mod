@@ -5,7 +5,6 @@ go 1.25.7
 toolchain go1.26.4
 
 require (
-	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/mattn/go-isatty v0.0.22
 	github.com/muesli/mango-cobra v1.3.0
 	github.com/muesli/roff v0.1.0
