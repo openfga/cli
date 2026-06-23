@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.17](https://github.com/openfga/cli/compare/v0.7.16...v0.7.17) (2026-06-23)
+
+
+### Fixed
+
+* attach SLSA provenance to draft release via gh release upload ([#713](https://github.com/openfga/cli/issues/713)) ([2c4adfb](https://github.com/openfga/cli/commit/2c4adfbcec93d1665340119c245b8d558d4c6366))
+
+
+### Changed
+
+* drop gocsv to stdlib encoding/csv  ([#704](https://github.com/openfga/cli/issues/704)) ([436b74f](https://github.com/openfga/cli/commit/436b74f2ff118ffa1f95f89242905dbab9bc97c6))
+
+
+### Miscellaneous
+
+* release 0.7.17 ([6b2d16e](https://github.com/openfga/cli/commit/6b2d16e6c148121ae73706608d6aadfea4453a3a))
+
 ## [0.7.16](https://github.com/openfga/cli/compare/v0.7.15...v0.7.16) (2026-06-17)
 
 ### Added
