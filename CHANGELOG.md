@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.17](https://github.com/openfga/cli/compare/v0.7.16...v0.7.17) (2026-06-23)
+
+### Changed
+
+* drop gocsv to stdlib encoding/csv  ([#704](https://github.com/openfga/cli/issues/704)) ([436b74f](https://github.com/openfga/cli/commit/436b74f2ff118ffa1f95f89242905dbab9bc97c6))
+
+
 ## [0.7.16](https://github.com/openfga/cli/compare/v0.7.15...v0.7.16) (2026-06-17)
 
 ### Added
