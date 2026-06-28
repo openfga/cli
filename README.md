@@ -98,6 +98,8 @@ scoop install openfga
 docker pull openfga/cli; docker run -it openfga/cli
 ```
 
+The Docker image is multi-platform and includes the system CA certificates needed for endpoints that use publicly trusted certificate authorities. Private or internal CAs still need to be provided by the user.
+
 ### Go
 
 ```shell
