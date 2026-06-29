@@ -286,7 +286,7 @@ jobs:
     needs: [ release-provenance, image-provenance ]
     permissions:
       contents: write
-    uses: openfga/.github/.github/workflows/undraft-release.yml@main
+    uses: openfga/.github/.github/workflows/undraft-release.yml@835baf31562809ad9eb884c73efc5b79318f700f # pin@main
 
   verification-with-slsa-verifier:
     needs: [ undraft-release, binary-provenance ]
