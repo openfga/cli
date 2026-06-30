@@ -220,8 +220,16 @@ jobs:
             ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
           set -euo pipefail
-          artifact=$(echo "$ARTIFACTS" | jq -r '[.[] | select (.type=="Docker Manifest")][0]')
-          image=$(echo "$artifact" | jq -r '.path' | cut -d':' -f1)
+          artifact=$(
+            echo "$ARTIFACTS" | jq -er --arg image_tag "openfga/cli:${GITHUB_REF_NAME}" '
+              [
+                .[]
+                | select(.type == "Docker Image")
+                | select(.path == $image_tag)
+                | select(((.extra.Platforms // []) | index("linux/amd64")) and ((.extra.Platforms // []) | index("linux/arm64")))
+              ][0]
+            '
+          )
           digest=$(echo "$artifact" | jq -r '.extra.Digest')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
