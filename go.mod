@@ -13,9 +13,9 @@ require (
 	github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20
 	github.com/openfga/go-sdk v0.8.2
 	github.com/openfga/language/pkg/go v0.3.0
-	github.com/openfga/openfga v1.18.0
+	github.com/openfga/openfga v1.18.1
 	github.com/rung/go-safecast v1.0.1
-	github.com/schollz/progressbar/v3 v3.19.0
+	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
@@ -82,8 +82,8 @@ require (
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/term v0.44.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	gonum.org/v1/gonum v0.17.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa // indirect
