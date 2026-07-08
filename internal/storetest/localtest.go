@@ -70,9 +70,7 @@ func RunLocalCheckTest(
 					)
 					if err != nil {
 						result.Error = err
-					}
-
-					if response != nil {
+					} else if response != nil {
 						result.Got = &response.Allowed
 						result.TestResult = result.IsPassing()
 					}
@@ -126,25 +124,30 @@ func RunLocalListObjectsTest(
 
 		if err != nil {
 			result.Error = err
-		} else {
-			response, err := RunSingleLocalListObjectsTest(ctx, fgaServer,
-				&pb.ListObjectsRequest{
-					StoreId:              *options.StoreID,
-					AuthorizationModelId: *options.ModelID,
-					User:                 listObjectsTest.User,
-					Type:                 listObjectsTest.Type,
-					Relation:             relation,
-					Context:              reqCtx,
-				},
-			)
-			if err != nil {
-				result.Error = err
+			results = append(results, result)
+
+			continue
+		}
+
+		response, err := RunSingleLocalListObjectsTest(ctx, fgaServer,
+			&pb.ListObjectsRequest{
+				StoreId:              *options.StoreID,
+				AuthorizationModelId: *options.ModelID,
+				User:                 listObjectsTest.User,
+				Type:                 listObjectsTest.Type,
+				Relation:             relation,
+				Context:              reqCtx,
+			},
+		)
+		if err != nil {
+			result.Error = err
+		} else if response != nil {
+			result.Got = response.GetObjects()
+			if result.Got == nil {
+				result.Got = []string{}
 			}
 
-			if response != nil {
-				result.Got = response.GetObjects()
-				result.TestResult = result.IsPassing()
-			}
+			result.TestResult = result.IsPassing()
 		}
 
 		results = append(results, result)
@@ -213,9 +216,7 @@ func RunLocalListUsersTest(
 			)
 			if err != nil {
 				result.Error = err
-			}
-
-			if response != nil {
+			} else if response != nil {
 				result.Got = ModelTestListUsersAssertion{
 					Users: convertPbUsersToStrings(response.GetUsers()),
 				}

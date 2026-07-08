@@ -17,6 +17,7 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Building from Source](#building-from-source)
 - [Usage](#usage)
   - [Configuration](#configuration)
+  - [Custom Headers](#custom-headers)
   - [Commands](#commands)
     - [Stores](#stores)
       - [List All Stores](#list-stores)
@@ -97,6 +98,8 @@ scoop install openfga
 docker pull openfga/cli; docker run -it openfga/cli
 ```
 
+The Docker image is multi-platform and includes the system CA certificates needed for endpoints that use publicly trusted certificate authorities. Private or internal CAs still need to be provided by the user.
+
 ### Go
 
 ```shell
@@ -151,6 +154,7 @@ For any command that interacts with an OpenFGA server, these configuration value
 | Token Audience         | `--api-audience`     | `FGA_API_AUDIENCE`     | `api-audience`     |
 | Store ID               | `--store-id`         | `FGA_STORE_ID`         | `store-id`         |
 | Authorization Model ID | `--model-id`         | `FGA_MODEL_ID`         | `model-id`         |
+| Custom Headers         | `--custom-headers`   | `FGA_CUSTOM_HEADERS`   | `custom-headers`   |
 
 If you are authenticating with a shared secret, you should specify the API Token value. If you are authenticating using OAuth, you should specify the Client ID, Client Secret, API Audience and Token Issuer. For example:
 
@@ -162,6 +166,37 @@ client-secret: J3...2pBwiauD
 api-audience: https://api.us1.fga.dev/
 api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
+```
+
+#### Custom Headers
+
+You can add custom HTTP headers to all requests sent to the API using the `--custom-headers` flag. Headers are specified in `<name>: <value>` format, and the flag can be repeated to add multiple headers.
+
+##### Flag
+```shell
+--custom-headers "Header-Name: header-value"
+```
+
+##### Example
+```shell
+fga store list --custom-headers "X-Custom-Header: value1" --custom-headers "X-Request-ID: abc123"
+```
+
+##### Configuration
+
+Custom headers can also be configured via the CLI environment variable or the configuration file:
+
+| Name           | Flag                 | CLI                    | ~/.fga.yaml        |
+|----------------|----------------------|------------------------|---------------------|
+| Custom Headers | `--custom-headers`   | `FGA_CUSTOM_HEADERS`   | `custom-headers`    |
+
+Example `~/.fga.yaml`:
+```yaml
+api-url: https://api.fga.example
+store-id: 01H0H015178Y2V4CX10C2KGHF4
+custom-headers:
+  - "X-Custom-Header: value1"
+  - "X-Request-ID: abc123"
 ```
 
 ### Commands
@@ -458,13 +493,16 @@ fga model **get**
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id
 * `--format`: Authorization model output format. Can be "fga" or "json" (default fga).
-* `--field`: Fields to display, choices are: `id`, `created_at` and `model`. Default is `model`.
+* `--field`: Fields to display, choices are: `id`, `created_at`, `size` and `model`. Default is `model`.
 
 ###### Example
-`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`
+`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --field size --field model --field id --field created_at`
 
 ###### Response
 ```python
+# Model ID: 01GXSA8YR785C4FYS3C0RTG7B1
+# Created At: 2023-04-11 23:26:34.759 +0000 UTC
+# Size: 20.05 KB
 model
   schema 1.1
 
@@ -473,6 +511,20 @@ type user
 type document
   relations
     define can_view: [user]
+```
+
+In `json` format, the fields appear intermixed with the model.
+
+`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --field size --field model --field id --field created_at --format=json`
+
+```json
+{
+  "id":"01GXSA8YR785C4FYS3C0RTG7B1",
+  "created_at":"2023-04-11T23:26:34.759Z",
+  "size_kb":20.05,
+  "schema_version":"1.1",
+  "type_definitions": [...]
+}
 ```
 
 ##### Read the Latest Authorization Model
@@ -512,22 +564,24 @@ fga model **validate**
 ###### Example
 `fga model validate --file model.json`
 
+When the input parses successfully, the JSON response includes `size_kb`, the protobuf-serialized size of the model in KB. If the input cannot be parsed, the command exits with an error and does not emit a JSON response.
+
 ###### JSON Response
 * Valid model with an ID
 ```json5
-{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true}
+{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true,"size_kb":0.05}
 ```
 * Valid model without an ID
 ```json5
-{"is_valid":true}
+{"is_valid":true,"size_kb":0.05}
 ```
 * Invalid model with an ID
 ```json5
-{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version"}
+{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version","size_kb":0.05}
 ```
 * Invalid model without an ID
 ```json5
-{"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid"}
+{"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid","size_kb":0.05}
 ```
 
 ##### Run Tests on an Authorization Model

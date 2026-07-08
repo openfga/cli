@@ -24,70 +24,30 @@ builds:
       - "-X github.com/openfga/cli/internal/build.Commit={{.Commit}}"
       - "-X github.com/openfga/cli/internal/build.Date={{.Date}}"
 
-dockers:
-  - goos: linux
-    goarch: amd64
-
+dockers_v2:
+  - images:
+      - openfga/cli
+    tags:
+      - latest
+      - "{{ .Tag }}"
+      - "v{{ .Major }}"
+      - "v{{ .Major }}.{{ .Minor }}"
     dockerfile: .goreleaser.Dockerfile
-
-    image_templates:
-      - "openfga/cli:latest-amd64"
-      - "openfga/cli:{{ .Tag }}-amd64"
-      - "openfga/cli:v{{ .Version }}-amd64"
-      - "openfga/cli:v{{ .Major }}-amd64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}-amd64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64"
-
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.created: "{{ .Date }}"
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.version: "{{ .Version }}"
+    flags:
       - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-
-  - goos: linux
-    goarch: arm64
-
-    dockerfile: .goreleaser.Dockerfile
-
-    image_templates:
-      - "openfga/cli:latest-arm64"
-      - "openfga/cli:{{ .Tag }}-arm64"
-      - "openfga/cli:v{{ .Version }}-arm64"
-      - "openfga/cli:v{{ .Major }}-arm64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}-arm64"
-      - "openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64"
-
-    use: buildx
-
-    build_flag_templates:
-      - "--platform=linux/arm64"
-
-docker_manifests:
-  - name_template: openfga/cli:latest
-    image_templates:
-      - openfga/cli:latest-amd64
-      - openfga/cli:latest-arm64
-  - name_template: openfga/cli:v{{ .Version }}
-    image_templates:
-      - openfga/cli:v{{ .Version }}-amd64
-      - openfga/cli:v{{ .Version }}-arm64
-  - name_template: openfga/cli:v{{ .Major }}
-    image_templates:
-      - openfga/cli:v{{ .Major }}-amd64
-      - openfga/cli:v{{ .Major }}-arm64
-  - name_template: openfga/cli:v{{ .Major }}.{{ .Minor }}
-    image_templates:
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}-amd64
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}-arm64
-  - name_template: openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}
-    image_templates:
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-amd64
-      - openfga/cli:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-arm64
 
 release:
+  draft: true
+  use_existing_draft: true
+  mode: keep-existing
   github:
     owner: openfga
     name: cli
@@ -113,11 +73,11 @@ docker_signs:
   - cmd: cosign
     env:
     - COSIGN_EXPERIMENTAL=1
-    artifacts: manifests
+    artifacts: images
     output: true
     args:
     - 'sign'
-    - '${artifact}'
+    - '${artifact}@${digest}'
     - "--yes" # needed on cosign 2.0.0+
 
 brews:

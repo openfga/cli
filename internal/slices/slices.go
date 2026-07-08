@@ -15,6 +15,4 @@ limitations under the License.
 */
 
 // Package slices contains some functionality to make working with slices easier
-
-//nolint:revive // package name conflicts with stdlib is acceptable here
 package slices

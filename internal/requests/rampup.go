@@ -30,7 +30,7 @@ func RampUpAPIRequests( //nolint:cyclop
 		semaphore    = make(chan struct{}, maxInFlight)
 		waitGroup    sync.WaitGroup
 		ticker       = time.NewTicker(rampupPeriodDuration)
-		requestIndex int32
+		requestIndex atomic.Int32
 	)
 
 	// if the ramp up period is 0, go to max rps directly
@@ -65,7 +65,7 @@ func RampUpAPIRequests( //nolint:cyclop
 			}
 
 			for i := 0; i < int(limiter.Limit()); i++ { //nolint:intrange
-				idx := atomic.AddInt32(&requestIndex, 1) - 1
+				idx := requestIndex.Add(1) - 1
 				if idx >= requestsLen {
 					waitGroup.Wait()
 
@@ -102,7 +102,7 @@ func RampUpAPIRequests( //nolint:cyclop
 			}
 
 			for i := 0; i < int(limiter.Limit()); i++ { //nolint:intrange
-				idx := atomic.AddInt32(&requestIndex, 1) - 1
+				idx := requestIndex.Add(1) - 1
 				if idx >= requestsLen {
 					waitGroup.Wait()
 

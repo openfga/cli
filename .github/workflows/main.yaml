@@ -19,16 +19,16 @@ jobs:
     name: Lints
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.5.4
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
-    - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+    - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
         check-latest: true
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+      uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
       with:
         version: v2.10.1
         args: -v -c .golangci.yaml
@@ -37,10 +37,10 @@ jobs:
     name: Security Audits
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.5.4
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
-    - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+    - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
@@ -53,11 +53,11 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.5.4
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
 
-    - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+    - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
@@ -73,7 +73,7 @@ jobs:
     name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 #2.0.0
 
@@ -82,10 +82,10 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') != true
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.5.4
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
-    - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+    - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
@@ -98,30 +98,52 @@ jobs:
       shell: bash
 
     - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.5.4
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0
 
     - name: Set up Go
-      uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
       with:
         go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
         check-latest: true
 
-    - uses: anchore/sbom-action/download-syft@17ae1740179002c89186b61233e0f892c3118b11 # v0.23.0
+    - uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
     - name: Run GoReleaser
-      uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+      uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
       with:
         distribution: goreleaser
         version: '~> v2'
         args: release --clean --config .goreleaser.yaml --snapshot --skip sign,publish,announce
 
+  verify-version:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ lint, audit, test, shellcheck ]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Verify versions match
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          MANIFEST_VERSION=$(jq -r '.["."]' .release-please-manifest.json)
+
+          echo "Tag: $TAG_VERSION | Manifest: $MANIFEST_VERSION"
+
+          if [[ "$TAG_VERSION" != "$MANIFEST_VERSION" ]]; then
+            echo "ERROR: Tag version does not match manifest version"
+            exit 1
+          fi
+          echo "All versions verified: $TAG_VERSION"
+
   goreleaser:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [lint,audit,test,shellcheck]
+    needs: [ verify-version ]
     permissions:
       contents: write
       packages: write # publish a new github release
@@ -137,32 +159,32 @@ jobs:
         shell: bash
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.5.4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: './go.mod'
           cache-dependency-path: './go.sum'
           check-latest: true
 
       - name: Login to Docker Hub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
         with:
           cosign-release: "v2.6.1"
 
-      - uses: anchore/sbom-action/download-syft@17ae1740179002c89186b61233e0f892c3118b11 # v0.23.0
+      - uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
       - name: Run GoReleaser
         id: goreleaser
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
           version: '~> v2'
@@ -198,8 +220,16 @@ jobs:
             ARTIFACTS: "${{ steps.goreleaser.outputs.artifacts }}"
         run: |
           set -euo pipefail
-          artifact=$(echo "$ARTIFACTS" | jq -r '[.[] | select (.type=="Docker Manifest")][0]')
-          image=$(echo "$artifact" | jq -r '.path' | cut -d':' -f1)
+          artifact=$(
+            echo "$ARTIFACTS" | jq -er --arg image_tag "openfga/cli:${GITHUB_REF_NAME}" '
+              [
+                .[]
+                | select(.type == "Docker Image")
+                | select(.path == $image_tag)
+                | select(((.extra.Platforms // []) | index("linux/amd64")) and ((.extra.Platforms // []) | index("linux/arm64")))
+              ][0]
+            '
+          )
           digest=$(echo "$artifact" | jq -r '.extra.Digest')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
@@ -208,14 +238,41 @@ jobs:
     permissions:
       actions: read # To read the workflow path.
       id-token: write # To sign the provenance.
-      contents: write # To add assets to a release.
+      # write required even with upload-assets:false due to slsa-framework/slsa-github-generator#2044
+      contents: write
 
     # Note: this _must_ be referenced by tag. See: https://github.com/slsa-framework/slsa-verifier/issues/12
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects-as-file: "${{ needs.goreleaser.outputs.subjects-as-file }}"
       provenance-name: "fga.intoto.jsonl"
-      upload-assets: true # upload to a new release
+      # Don't let the generator attach the provenance:
+      # - it uses softprops/action-gh-release@v2.2.1, whose paginated draft lookup
+      #   creates a duplicate draft once a repo has >100 releases (2 pages)
+      # - the provenance is still published as a workflow artifact, so the
+      #   release-provenance job attaches it via `gh release upload` (by tag)
+      upload-assets: false
+
+  release-provenance:
+    needs: [ binary-provenance ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # To add the provenance asset to the draft release.
+    steps:
+      - name: Download the provenance
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.binary-provenance.outputs.provenance-name }}
+
+      - name: Attach provenance to the draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROVENANCE: ${{ needs.binary-provenance.outputs.provenance-name }}
+        run: |
+          set -euo pipefail
+          gh release upload "$GITHUB_REF_NAME" "$PROVENANCE" \
+            --repo "$GITHUB_REPOSITORY" --clobber
 
   image-provenance:
     needs: [ goreleaser ]
@@ -233,8 +290,14 @@ jobs:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+  undraft-release:
+    needs: [ release-provenance, image-provenance ]
+    permissions:
+      contents: write
+    uses: openfga/.github/.github/workflows/undraft-release.yml@835baf31562809ad9eb884c73efc5b79318f700f # pin@main
+
   verification-with-slsa-verifier:
-    needs: [ goreleaser, binary-provenance ]
+    needs: [ undraft-release, binary-provenance ]
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
@@ -266,13 +329,13 @@ jobs:
     permissions: read-all
     steps:
       - name: Login to Docker Hub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
         with:
           cosign-release: "v2.6.1"
 

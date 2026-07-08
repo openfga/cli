@@ -17,8 +17,6 @@ limitations under the License.
 package cmdutils
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -30,9 +28,9 @@ func BindViperToFlags(cmd *cobra.Command, viperInstance *viper.Viper) {
 		configName := flag.Name
 
 		if !flag.Changed && viperInstance.IsSet(configName) {
-			value := viperInstance.Get(configName)
-			err := cmd.Flags().Set(flag.Name, fmt.Sprintf("%v", value))
-			cobra.CheckErr(err)
+			for _, strVal := range viperInstance.GetStringSlice(configName) {
+				cobra.CheckErr(cmd.Flags().Set(flag.Name, strVal))
+			}
 		}
 	})
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -485,6 +486,43 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 		outcome, _ := testCase.readRes.toCsvDTO()
 		assert.Equal(t, testCase.expected, outcome)
 	}
+}
+
+func TestReadResponseCSVDTOListMarshalCSV(t *testing.T) {
+	t.Parallel()
+
+	list := []readResponseCSVDTO{
+		{
+			UserType:         "user",
+			UserID:           "anne",
+			Relation:         "reader",
+			ObjectType:       "document",
+			ObjectID:         "secret.doc",
+			ConditionName:    "inOfficeIP",
+			ConditionContext: `{"ip_addr":"10.0.0.1"}`,
+		},
+		{
+			UserType:   "user",
+			UserID:     "john",
+			Relation:   "writer",
+			ObjectType: "document",
+			ObjectID:   "abc.doc",
+		},
+	}
+
+	rows := make([][]string, 0, len(list))
+
+	for _, record := range list {
+		row, err := record.MarshalCSV()
+		require.NoError(t, err)
+
+		rows = append(rows, row)
+	}
+
+	assert.Equal(t, [][]string{
+		{"user", "anne", "", "reader", "document", "secret.doc", "inOfficeIP", `{"ip_addr":"10.0.0.1"}`},
+		{"user", "john", "", "writer", "document", "abc.doc", "", ""},
+	}, rows)
 }
 
 func toPointer[T any](p T) *T {
