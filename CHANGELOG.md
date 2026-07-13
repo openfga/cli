@@ -13,7 +13,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-* bump github.com/openfga/language/pkg/go` from 0.3.0 to 0.3.1 ([042151f](https://github.com/openfga/cli/commit/042151fb16d75d91bd45a36666f6f6239b833809))
+* bump `github.com/openfga/language/pkg/go` from 0.3.0 to 0.3.1 ([042151f](https://github.com/openfga/cli/commit/042151fb16d75d91bd45a36666f6f6239b833809))
 
 ## [0.7.17](https://github.com/openfga/cli/compare/v0.7.16...v0.7.17) (2026-06-23)
 
