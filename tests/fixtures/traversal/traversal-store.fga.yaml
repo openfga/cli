@@ -1,0 +1,6 @@
+name: Traversal Store
+# Attempts to escape the store file's directory to read an arbitrary local file.
+# This must be rejected by default (path traversal containment).
+model_file: ../../../../../../../../etc/hosts
+tuples: []
+tests: []

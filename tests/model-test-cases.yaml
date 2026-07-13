@@ -14,10 +14,18 @@ tests:
     command: fga model test --tests "tests/**/*-store.fga.yaml"
     exit-code: 0
     stderr: # Test Summary #
-  004 - it successfully runs local tests against a store with relative paths in the store file:
-    command: fga model test --tests tests/fixtures/relative-path/relative-path-store.fga.yaml
+  004 - it successfully runs local tests against a store with relative paths when external files are allowed:
+    command: fga model test --tests tests/fixtures/relative-path/relative-path-store.fga.yaml --allow-external-files
     exit-code: 0
     stderr: # Test Summary #
+  004b - it fails on relative paths in the store file by default (path traversal blocked):
+    command: fga model test --tests tests/fixtures/relative-path/relative-path-store.fga.yaml
+    exit-code: 1
+    stderr: is not accessible within
+  004c - it fails when a store file references a file outside its directory:
+    command: fga model test --tests tests/fixtures/traversal/traversal-store.fga.yaml
+    exit-code: 1
+    stderr: is not accessible within
   005 - it fails when model exceeds max-types-per-authorization-model:
     command: fga model test --tests tests/fixtures/many-types.fga.yaml --max-types-per-authorization-model 5
     exit-code: 1

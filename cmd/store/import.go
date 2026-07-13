@@ -317,7 +317,12 @@ var importCmd = &cobra.Command{
 			return fmt.Errorf("failed to get file name: %w", err)
 		}
 
-		format, storeData, err := storetest.ReadFromFile(fileName, "")
+		allowExternalFiles, err := cmd.Flags().GetBool("allow-external-files")
+		if err != nil {
+			return fmt.Errorf("failed to get allow-external-files flag: %w", err)
+		}
+
+		format, storeData, err := storetest.ReadFromFile(fileName, "", allowExternalFiles)
 		if err != nil {
 			return fmt.Errorf("failed to read from file: %w", err)
 		}
@@ -347,7 +352,8 @@ func init() {
 	importCmd.Flags().String("file", "", "File Name. The file should have the store")
 	importCmd.Flags().String("store-id", "", "Store ID")
 	importCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
-	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.") //nolint:lll
+	importCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.")                                                                                                //nolint:lll
+	importCmd.Flags().Bool("allow-external-files", false, "Allow model_file, tuple_file and tuple_files references in the store file to resolve to paths outside the store file's directory. Only enable this for store files you trust.") //nolint:lll
 
 	if err := importCmd.MarkFlagRequired("file"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/write", err)
