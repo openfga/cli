@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.18](https://github.com/openfga/cli/compare/v0.7.17...v0.7.18) (2026-07-13)
+
+
+### Fixed
+
+* publish distroless Docker image with dockers v2 ([#716](https://github.com/openfga/cli/issues/716)) ([e39700a](https://github.com/openfga/cli/commit/e39700a4c2aabfc026af1a40045b183b78ca2541))
+
+
+### Miscellaneous
+
+* release 0.7.18 ([729eda5](https://github.com/openfga/cli/commit/729eda53722859ffdbf758271f42cc5262ff0ed5))
+
 ## [0.7.17](https://github.com/openfga/cli/compare/v0.7.16...v0.7.17) (2026-06-23)
 
 ### Changed
