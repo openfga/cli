@@ -4,19 +4,7 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.7.19](https://github.com/openfga/cli/compare/v0.7.18...v0.7.19) (2026-07-13)
-
-
-### Fixed
-
-* set up buildx driver for dockers_v2 sbom attestation in release ([#724](https://github.com/openfga/cli/issues/724)) ([fe382e0](https://github.com/openfga/cli/commit/fe382e090fea6dfeaaa92731535aceeaa801f344))
-
-
-### Miscellaneous
-
-* release 0.7.19 ([d7d9769](https://github.com/openfga/cli/commit/d7d9769e3bf0cb46131fe61138e885e1a26ca8b2))
-
-## [0.7.18](https://github.com/openfga/cli/compare/v0.7.17...v0.7.18) (2026-07-13)
+## [0.7.19](https://github.com/openfga/cli/compare/v0.7.17...v0.7.19) (2026-07-13)
 
 
 ### Fixed
@@ -26,6 +14,10 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 
 * bump `github.com/openfga/language/pkg/go` from 0.3.0 to 0.3.1 ([042151f](https://github.com/openfga/cli/commit/042151fb16d75d91bd45a36666f6f6239b833809))
+
+> [!NOTE]
+> v0.7.18 had issues in the release pipeline so it was never published; the changelog has been merged into v0.7.19.
+
 
 ## [0.7.17](https://github.com/openfga/cli/compare/v0.7.16...v0.7.17) (2026-06-23)
 
