@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/static-debian13:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:d29e660cc75a5b6b1334e03c5c81ccf9bc0884a002c6000dbf0fb96034814478
 
 ARG TARGETPLATFORM
 COPY ${TARGETPLATFORM}/fga /fga
