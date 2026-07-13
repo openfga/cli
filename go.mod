@@ -12,7 +12,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20
 	github.com/openfga/go-sdk v0.8.2
-	github.com/openfga/language/pkg/go v0.3.0
+	github.com/openfga/language/pkg/go v0.3.1
 	github.com/openfga/openfga v1.18.1
 	github.com/rung/go-safecast v1.0.1
 	github.com/schollz/progressbar/v3 v3.19.1
