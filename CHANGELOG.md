@@ -11,10 +11,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 * publish distroless Docker image with dockers v2 ([#716](https://github.com/openfga/cli/issues/716)) ([e39700a](https://github.com/openfga/cli/commit/e39700a4c2aabfc026af1a40045b183b78ca2541))
 
+### Changed
 
-### Miscellaneous
-
-* release 0.7.18 ([729eda5](https://github.com/openfga/cli/commit/729eda53722859ffdbf758271f42cc5262ff0ed5))
+* bump github.com/openfga/language/pkg/go` from 0.3.0 to 0.3.1 ([042151f](https://github.com/openfga/cli/commit/042151fb16d75d91bd45a36666f6f6239b833809))
 
 ## [0.7.17](https://github.com/openfga/cli/compare/v0.7.16...v0.7.17) (2026-06-23)
 
