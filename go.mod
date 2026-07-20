@@ -5,7 +5,7 @@ go 1.25.7
 toolchain go1.26.5
 
 require (
-	github.com/mattn/go-isatty v0.0.22
+	github.com/mattn/go-isatty v0.0.23
 	github.com/muesli/mango-cobra v1.3.0
 	github.com/muesli/roff v0.1.0
 	github.com/nwidger/jsoncolor v0.3.2
