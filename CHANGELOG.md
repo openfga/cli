@@ -97,6 +97,9 @@ Changed:
 - Switch to distroless base image for SSL certs (#617) - thanks @runabol!
 - go > v1.25 is now required (#631)
 
+Fixed:
+- CLI now warns users when `.fga.yaml` config file has YAML parsing errors instead of silently ignoring them. Use `--debug` flag or set `FGA_DEBUG=true` for detailed error messages
+
 ## [0.7.8] - 2025-11-05
 
 Fixed:
