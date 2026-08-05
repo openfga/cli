@@ -177,8 +177,7 @@ func init() {
 	modelTestCmd.Flags().Bool("suppress-summary", false, "Suppress the plain text summary output")
 	modelTestCmd.Flags().Int("max-types-per-authorization-model", 100, //nolint:mnd
 		"Max allowed number of type definitions per authorization model")
-	//nolint:lll
-	modelTestCmd.Flags().Bool("allow-external-files", false, "Allow model_file, tuple_file and tuple_files references in the test file to resolve to paths outside the test file's directory. Only enable this for test files you trust.")
+	modelTestCmd.Flags().Bool("allow-external-files", false, "Allow model_file, tuple_file and tuple_files references in the test file to resolve to paths outside the test file's directory. Only enable this for test files you trust.") //nolint:lll
 
 	if err := modelTestCmd.MarkFlagRequired("tests"); err != nil {
 		fmt.Printf("error setting flag as required - %v: %v\n", "cmd/models/test", err)

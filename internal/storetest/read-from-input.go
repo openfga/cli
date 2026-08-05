@@ -50,8 +50,9 @@ func ReadFromFile(
 		absFileName = filepath.Join(basePath, fileName)
 	}
 
-	// Guard against blocking special files (e.g. /dev/zero, FIFOs): reading
-	// them would hang the process indefinitely.
+	// Reject non-regular files before reading: a FIFO with no writer blocks the
+	// read forever, and an endless device such as /dev/zero grows the read buffer
+	// until the process is OOM-killed.
 	if err := safefile.CheckRegular(absFileName); err != nil {
 		return format, nil, fmt.Errorf("cannot read store file: %w", err)
 	}

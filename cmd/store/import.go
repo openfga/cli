@@ -97,7 +97,7 @@ func updateStore(
 	authModel := authorizationmodel.AuthzModel{}
 	clientConfig.StoreID = storeID
 
-	if err := authModel.ReadModelFromString(storeData.Model, format); err != nil {
+	if err := authModel.ReadModelFromStringContained(storeData.Model, format, storeData.ModelContainBase()); err != nil {
 		return nil, fmt.Errorf("failed to read model: %w", err)
 	}
 

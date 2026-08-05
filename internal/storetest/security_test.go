@@ -3,18 +3,16 @@ package storetest
 import (
 	"os"
 	"path/filepath"
-	"runtime"
-	"syscall"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// TestResolveFileContainment verifies that references escaping the base
-// directory are rejected by default but permitted when external files are
-// explicitly allowed.
-func TestResolveFileContainment(t *testing.T) {
+// TestReadRefContainment verifies that references escaping the base directory
+// are rejected by default but permitted when external files are explicitly
+// allowed.
+func TestReadRefContainment(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
@@ -27,59 +25,95 @@ func TestResolveFileContainment(t *testing.T) {
 	// A regular file one level above the base directory (the traversal target).
 	writeTempFile(t, root, "secret.txt", "SENSITIVE")
 
-	t.Run("reference inside base resolves", func(t *testing.T) {
+	t.Run("reference inside base resolves and reads", func(t *testing.T) {
 		t.Parallel()
 
-		got, err := resolveFile(base, filepath.Base(inside), false)
+		path, contents, err := readRef(base, filepath.Base(inside), false)
 		require.NoError(t, err)
-		assert.Equal(t, inside, got)
+		assert.Equal(t, inside, path)
+		assert.Equal(t, "model", string(contents))
 	})
 
 	t.Run("traversal is blocked by default", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := resolveFile(base, "../secret.txt", false)
+		_, _, err := readRef(base, "../secret.txt", false)
 		require.Error(t, err)
 	})
 
 	t.Run("absolute path is blocked by default", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := resolveFile(base, filepath.Join(root, "secret.txt"), false)
+		_, _, err := readRef(base, filepath.Join(root, "secret.txt"), false)
 		require.Error(t, err)
 	})
 
 	t.Run("traversal is allowed when external files are permitted", func(t *testing.T) {
 		t.Parallel()
 
-		got, err := resolveFile(base, "../secret.txt", true)
+		path, contents, err := readRef(base, "../secret.txt", true)
 		require.NoError(t, err)
-		assert.Equal(t, filepath.Join(root, "secret.txt"), got)
+		assert.Equal(t, filepath.Join(root, "secret.txt"), path)
+		assert.Equal(t, "SENSITIVE", string(contents))
 	})
 }
 
-// TestResolveFileRejectsNonRegular verifies that FIFOs (and other special
-// files) are rejected before any read, guarding against the DoS (a FIFO read
-// blocks forever; an infinite device like /dev/zero exhausts memory).
-func TestResolveFileRejectsNonRegular(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("mkfifo is not available on Windows")
-	}
+// TestReadRefSymlinkTraversalIsBlocked covers the case where a lexical path and
+// a root-relative lookup disagree.
+//
+// With a symlink "link" -> "sub/dir", os.Root resolves "link/../target.json" to
+// "sub/target.json" while filepath.Join collapses it to "target.json". If the
+// containment check ran against the former but the read used the latter, a
+// "target.json" symlink pointing outside the base directory would be followed
+// and its contents returned. The read therefore has to go through the same
+// os.Root handle the check used.
+func TestReadRefSymlinkTraversalIsBlocked(t *testing.T) {
+	t.Parallel()
 
+	root := t.TempDir()
+	base := filepath.Join(root, "base")
+	require.NoError(t, os.MkdirAll(filepath.Join(base, "sub", "dir"), 0o750))
+
+	// The file the attacker wants, outside the base directory.
+	writeTempFile(t, root, "outside-secret.json", "EXFILTRATED")
+
+	// base/link -> sub/dir, so "link/.." resolves to base/sub through os.Root but
+	// collapses to base lexically.
+	require.NoError(t, os.Symlink(filepath.Join("sub", "dir"), filepath.Join(base, "link")))
+
+	// The lexical target: base/target.json, itself a symlink out of the tree.
+	require.NoError(t, os.Symlink(
+		filepath.Join("..", "outside-secret.json"),
+		filepath.Join(base, "target.json"),
+	))
+
+	// Something harmless exists at the root-relative target, so a check that
+	// resolves through the root succeeds and only the read location differs.
+	writeTempFile(t, filepath.Join(base, "sub"), "target.json", "harmless")
+
+	_, contents, err := readRef(base, "link/../target.json", false)
+
+	// Either the reference is rejected outright, or it resolves through the root
+	// to the harmless in-tree file. What must never happen is reading the file
+	// outside the base directory.
+	if err == nil {
+		assert.NotContains(t, string(contents), "EXFILTRATED",
+			"read escaped the base directory via symlink")
+		assert.Equal(t, "harmless", string(contents))
+	}
+}
+
+// TestReadRefRejectsDirectory verifies a reference to a directory is rejected
+// rather than read.
+func TestReadRefRejectsDirectory(t *testing.T) {
 	t.Parallel()
 
 	base := t.TempDir()
-	fifo := filepath.Join(base, "pipe")
+	require.NoError(t, os.Mkdir(filepath.Join(base, "adir"), 0o750))
 
-	if err := syscall.Mkfifo(fifo, 0o600); err != nil {
-		t.Skipf("unable to create FIFO: %v", err)
-	}
-
-	// Contained mode: os.Root.Stat rejects the FIFO as non-regular.
-	_, err := resolveFile(base, filepath.Base(fifo), false)
+	_, _, err := readRef(base, "adir", false)
 	require.Error(t, err)
 
-	// External-files mode: safefile.CheckRegular still rejects the FIFO.
-	_, err = resolveFile(base, filepath.Base(fifo), true)
+	_, _, err = readRef(base, "adir", true)
 	require.Error(t, err)
 }
