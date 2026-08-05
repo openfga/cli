@@ -45,12 +45,12 @@ func checkRegularInfo(name string, info fs.FileInfo) error {
 	return nil
 }
 
-// CheckRegular returns an error if the file at name is not a regular file.
+// checkRegularPath returns an error if the file at name is not a regular file.
 //
 // os.Stat performs a metadata-only lookup that does not open the file for I/O,
 // so it neither blocks on a FIFO nor reads from a device, allowing the file to
 // be rejected before either failure mode is triggered.
-func CheckRegular(name string) error {
+func checkRegularPath(name string) error {
 	info, err := os.Stat(name)
 	if err != nil {
 		return fmt.Errorf("failed to stat file %q: %w", name, err)
@@ -63,6 +63,9 @@ func CheckRegular(name string) error {
 // descriptor itself, that it is a regular file. Checking the descriptor rather
 // than the path means the file whose contents are returned is the same file that
 // was validated.
+//
+// The buffer is pre-sized from the descriptor's reported size so the read does
+// not repeatedly grow and copy it, matching what os.ReadFile does.
 func readOpened(name string, file *os.File) ([]byte, error) {
 	info, err := file.Stat()
 	if err != nil {
@@ -73,12 +76,28 @@ func readOpened(name string, file *os.File) ([]byte, error) {
 		return nil, err
 	}
 
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file %q: %w", name, err)
-	}
+	// Pre-size from the descriptor's reported size and grow only if the file
+	// turned out to be larger, which is what os.ReadFile does. io.ReadAll would
+	// instead start small and repeatedly double, allocating roughly twice the
+	// file size in the process.
+	data := make([]byte, 0, info.Size()+1)
 
-	return data, nil
+	for {
+		if len(data) >= cap(data) {
+			data = append(data, 0)[:len(data)]
+		}
+
+		read, err := file.Read(data[len(data):cap(data)])
+		data = data[:len(data)+read]
+
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return data, nil
+			}
+
+			return nil, fmt.Errorf("failed to read file %q: %w", name, err)
+		}
+	}
 }
 
 // ReadContained reads ref, resolved relative to basePath, and returns its
@@ -128,7 +147,7 @@ func ReadContained(basePath, ref string) ([]byte, error) {
 // that have explicitly opted in to references outside the base directory. The
 // target must still be a regular file.
 func ReadExternal(name string) ([]byte, error) {
-	if err := CheckRegular(name); err != nil {
+	if err := checkRegularPath(name); err != nil {
 		return nil, err
 	}
 

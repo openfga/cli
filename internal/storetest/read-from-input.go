@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
-	"github.com/openfga/cli/internal/safefile"
 
 	"gopkg.in/yaml.v3"
 )
@@ -48,13 +47,6 @@ func ReadFromFile(
 	// Only join with basePath if fileName is not absolute and basePath is provided
 	if !filepath.IsAbs(fileName) && basePath != "" {
 		absFileName = filepath.Join(basePath, fileName)
-	}
-
-	// Reject non-regular files before reading: a FIFO with no writer blocks the
-	// read forever, and an endless device such as /dev/zero grows the read buffer
-	// until the process is OOM-killed.
-	if err := safefile.CheckRegular(absFileName); err != nil {
-		return format, nil, fmt.Errorf("cannot read store file: %w", err)
 	}
 
 	testFile, err := os.Open(absFileName)
