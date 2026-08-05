@@ -401,17 +401,14 @@ func TestParseConditionColumnsForRow_WithConditionNameAndContext(t *testing.T) {
 	}
 	tuple := []string{"user", "anne", "can_view", "document", "roadmap", "inOffice", `{"ip":"10.0.0.1"}`}
 
-	condition, err := parseConditionColumnsForRow(columns, tuple, 0)
-	require.NoError(t, err)
-	require.NotNil(t, condition)
-	assert.Equal(t, "inOffice", condition.Name)
-
 	expected := &openfga.RelationshipCondition{
 		Name:    "inOffice",
 		Context: &map[string]any{"ip": "10.0.0.1"},
 	}
-	assert.Equal(t, expected.Name, condition.Name)
-	assert.Equal(t, (*expected.Context)["ip"], (*condition.Context)["ip"])
+
+	condition, err := parseConditionColumnsForRow(columns, tuple, 0)
+	require.NoError(t, err)
+	assert.Equal(t, expected, condition)
 }
 
 func TestParseConditionColumnsForRow_EmptyConditionName(t *testing.T) {
