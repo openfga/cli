@@ -266,6 +266,7 @@ fga store **import**
 * `--store-id`: Specifies the store id to import into
 * `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
+* `--allow-external-files`: Allow `model_file`, `tuple_file` and `tuple_files` references in the store file to resolve outside the store file's directory (optional, default=false). Only enable this for store files you trust.
 
 ###### Example
 `fga store import --file model.fga.yaml`
@@ -596,6 +597,7 @@ fga model **test**
 * `--tests`: Name of the tests file, or a glob pattern to multiple files (for example `"tests/*.fga.yaml"`,  or `"**/*.fga.yaml"`). Each file must be in yaml format.  See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
 * `--verbose`: Outputs the results in JSON
 * `--max-types-per-authorization-model`: Max allowed number of type definitions per authorization model (default: 100). Increase this when testing models with more than 100 type definitions.
+* `--allow-external-files`: Allow `model_file`, `tuple_file` and `tuple_files` references in the test file to resolve outside the test file's directory (optional, default=false). Only enable this for test files you trust.
 
 If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
 
