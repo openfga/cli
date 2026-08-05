@@ -248,70 +248,6 @@ func (model *AuthzModel) ReadModelFromModFGAContained(modFile string, containBas
 	return model.readModelFromModFGA(modFile, containBase)
 }
 
-// readModelFromModFGA reads a modular model. When containBase is non-empty, the
-// fga.mod file and each of its contents entries must resolve inside it.
-func (model *AuthzModel) readModelFromModFGA(modFile string, containBase string) error {
-	modFileContents, err := readModelFile(modFile, containBase)
-	if err != nil {
-		return fmt.Errorf("failed to read fga.mod file due to %w", err)
-	}
-
-	parsedModFile, err := language.TransformModFile(string(modFileContents))
-	if err != nil {
-		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
-	}
-
-	moduleFiles := []language.ModuleFile{}
-
-	var fileReadErrors []error
-
-	directory := path.Dir(modFile)
-
-	for _, fileName := range parsedModFile.Contents.Value {
-		filePath := path.Join(directory, fileName.Value)
-
-		fileContents, err := readModelFile(filePath, containBase)
-		if err != nil {
-			fileReadErrors = append(
-				fileReadErrors,
-				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
-			)
-
-			continue
-		}
-
-		moduleFiles = append(moduleFiles, language.ModuleFile{
-			Name:     fileName.Value,
-			Contents: string(fileContents),
-		})
-	}
-
-	if len(fileReadErrors) != 0 {
-		return errors.Join(fileReadErrors...)
-	}
-
-	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
-	if err != nil {
-		return fmt.Errorf("failed to transform module to model due to %w", err)
-	}
-
-	bytes, err := protojson.Marshal(parsedAuthModel)
-	if err != nil {
-		return fmt.Errorf("failed to transform due to %w", err)
-	}
-
-	jsonAuthModel := openfga.AuthorizationModel{}
-
-	err = json.Unmarshal(bytes, &jsonAuthModel)
-	if err != nil {
-		return fmt.Errorf("failed to transform due to %w", err)
-	}
-
-	model.Set(jsonAuthModel)
-
-	return nil
-}
-
 func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) error {
 	return model.ReadModelFromStringContained(input, format, "")
 }
@@ -421,6 +357,70 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 	}
 
 	return &dslModel, nil
+}
+
+// readModelFromModFGA reads a modular model. When containBase is non-empty, the
+// fga.mod file and each of its contents entries must resolve inside it.
+func (model *AuthzModel) readModelFromModFGA(modFile string, containBase string) error {
+	modFileContents, err := readModelFile(modFile, containBase)
+	if err != nil {
+		return fmt.Errorf("failed to read fga.mod file due to %w", err)
+	}
+
+	parsedModFile, err := language.TransformModFile(string(modFileContents))
+	if err != nil {
+		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
+	}
+
+	moduleFiles := []language.ModuleFile{}
+
+	var fileReadErrors []error
+
+	directory := path.Dir(modFile)
+
+	for _, fileName := range parsedModFile.Contents.Value {
+		filePath := path.Join(directory, fileName.Value)
+
+		fileContents, err := readModelFile(filePath, containBase)
+		if err != nil {
+			fileReadErrors = append(
+				fileReadErrors,
+				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
+			)
+
+			continue
+		}
+
+		moduleFiles = append(moduleFiles, language.ModuleFile{
+			Name:     fileName.Value,
+			Contents: string(fileContents),
+		})
+	}
+
+	if len(fileReadErrors) != 0 {
+		return errors.Join(fileReadErrors...)
+	}
+
+	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
+	if err != nil {
+		return fmt.Errorf("failed to transform module to model due to %w", err)
+	}
+
+	bytes, err := protojson.Marshal(parsedAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	jsonAuthModel := openfga.AuthorizationModel{}
+
+	err = json.Unmarshal(bytes, &jsonAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	model.Set(jsonAuthModel)
+
+	return nil
 }
 
 func (model *AuthzModel) buildDSLMetadata(fields []string) string {
