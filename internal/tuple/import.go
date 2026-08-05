@@ -11,7 +11,6 @@ import (
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
-	"github.com/rung/go-safecast"
 
 	"github.com/openfga/cli/internal/requests"
 	"github.com/openfga/cli/internal/utils"
@@ -66,11 +65,27 @@ func validateImportParams(minRPS, maxRPS, rampUpPeriodInSec, maxTuplesPerWrite, 
 		return errors.New("maxParallelRequests must be at least 1") //nolint:err113
 	}
 
+	if err := validateImportInt32Bounds(maxTuplesPerWrite, maxParallelRequests); err != nil {
+		return err
+	}
+
 	requestsLen := len(body.Writes) + len(body.Deletes)
 	if requestsLen > math.MaxInt32 {
 		return fmt.Errorf( //nolint:err113
 			"too many requests in ramp up: %d. max supported is %d", requestsLen, math.MaxInt32,
 		)
+	}
+
+	return nil
+}
+
+func validateImportInt32Bounds(maxTuplesPerWrite, maxParallelRequests int) error {
+	if maxTuplesPerWrite > math.MaxInt32 {
+		return fmt.Errorf("maxTuplesPerWrite must be at most %d", math.MaxInt32) //nolint:err113
+	}
+
+	if maxParallelRequests > math.MaxInt32 {
+		return fmt.Errorf("maxParallelRequests must be at most %d", math.MaxInt32) //nolint:err113
 	}
 
 	return nil
@@ -104,21 +119,13 @@ func ImportTuples(ctx context.Context, fgaClient client.SdkClient,
 		return nil, fmt.Errorf("failed to validate import parameters due to %w", err)
 	}
 
-	maxTuplesPerWrite32, err := safecast.Int32(maxTuplesPerWrite)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse maxTuplesPerWrite due to %w", err)
-	}
-
-	maxParallelRequests32, err := safecast.Int32(maxParallelRequests)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse maxParallelRequests due to %w", err)
-	}
-
 	options := client.ClientWriteOptions{
 		Transaction: &client.TransactionOptions{
-			Disable:             true,
-			MaxPerChunk:         maxTuplesPerWrite32,
-			MaxParallelRequests: maxParallelRequests32,
+			Disable: true,
+			//nolint:gosec // maxTuplesPerWrite is validated in validateImportParams.
+			MaxPerChunk: int32(maxTuplesPerWrite),
+			//nolint:gosec // maxParallelRequests is validated in validateImportParams.
+			MaxParallelRequests: int32(maxParallelRequests),
 		},
 		Conflict: opts.Conflict,
 	}
