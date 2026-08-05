@@ -14,7 +14,6 @@ require (
 	github.com/openfga/go-sdk v0.8.2
 	github.com/openfga/language/pkg/go v0.3.1
 	github.com/openfga/openfga v1.18.1
-	github.com/rung/go-safecast v1.0.1
 	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
