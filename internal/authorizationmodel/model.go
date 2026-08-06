@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"path"
 	"path/filepath"
 	"time"
 
@@ -376,10 +375,12 @@ func (model *AuthzModel) readModelFromModFGA(modFile string, containBase string)
 
 	var fileReadErrors []error
 
-	directory := path.Dir(modFile)
+	// modFile is an OS filesystem path, while a contents entry inside fga.mod is
+	// always slash-separated, so each entry is converted before being joined.
+	directory := filepath.Dir(modFile)
 
 	for _, fileName := range parsedModFile.Contents.Value {
-		filePath := path.Join(directory, fileName.Value)
+		filePath := filepath.Join(directory, filepath.FromSlash(fileName.Value))
 
 		fileContents, err := readModelFile(filePath, containBase)
 		if err != nil {
