@@ -1,12 +1,60 @@
 package tuple
 
 import (
+	"context"
 	"errors"
+	"math"
+	"strconv"
 	"testing"
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestImportTuplesRejectsValuesOutsideInt32Range(t *testing.T) {
+	t.Parallel()
+
+	if strconv.IntSize == 32 {
+		t.Skip("int cannot exceed math.MaxInt32 on 32-bit platforms")
+	}
+
+	maxInt32 := int(math.MaxInt32)
+	maxInt32PlusOne := maxInt32
+	maxInt32PlusOne++
+	maxInt32String := strconv.Itoa(maxInt32)
+	tests := []struct {
+		name                string
+		maxTuplesPerWrite   int
+		maxParallelRequests int
+		expectedError       string
+	}{
+		{
+			name:                "max tuples per write",
+			maxTuplesPerWrite:   maxInt32PlusOne,
+			maxParallelRequests: 1,
+			expectedError:       "maxTuplesPerWrite must be at most " + maxInt32String,
+		},
+		{
+			name:                "max parallel requests",
+			maxTuplesPerWrite:   1,
+			maxParallelRequests: maxInt32PlusOne,
+			expectedError:       "maxParallelRequests must be at most " + maxInt32String,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := ImportTuples(
+				context.Background(), nil, 0, 0, 0, test.maxTuplesPerWrite, test.maxParallelRequests,
+				client.ClientWriteRequest{}, client.ClientWriteOptions{},
+			)
+
+			assert.ErrorContains(t, err, test.expectedError)
+		})
+	}
+}
 
 func TestProcessWrites(t *testing.T) {
 	t.Parallel()
