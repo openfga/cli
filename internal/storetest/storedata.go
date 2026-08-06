@@ -116,22 +116,28 @@ func (storeData *StoreData) ModelContainBase() string {
 //
 // When allowExternal == true the caller has explicitly opted in (via
 // --allow-external-files) to references outside basePath, so containment is
-// skipped.
+// skipped and an absolute reference is used as-is rather than being joined onto
+// basePath.
 //
 // In both modes the target must be a regular file: a FIFO with no writer blocks
 // the read forever, while an endless device such as /dev/zero grows the read
 // buffer until the process is OOM-killed.
 func readRef(basePath, ref string, allowExternal bool) (string, []byte, error) {
-	joined := filepath.Join(basePath, ref)
-
 	if allowExternal {
-		data, err := safefile.ReadExternal(joined)
+		resolved := ref
+		if !filepath.IsAbs(resolved) {
+			resolved = filepath.Join(basePath, ref)
+		}
+
+		data, err := safefile.ReadExternal(resolved)
 		if err != nil {
 			return "", nil, fmt.Errorf("file reference %q: %w", ref, err)
 		}
 
-		return joined, data, nil
+		return resolved, data, nil
 	}
+
+	joined := filepath.Join(basePath, ref)
 
 	data, err := safefile.ReadContained(basePath, ref)
 	if err != nil {

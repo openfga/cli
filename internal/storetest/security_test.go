@@ -56,6 +56,20 @@ func TestReadRefContainment(t *testing.T) {
 		assert.Equal(t, filepath.Join(root, "secret.txt"), path)
 		assert.Equal(t, "SENSITIVE", string(contents))
 	})
+
+	// An absolute reference must be used as-is rather than joined onto the base
+	// directory, which would otherwise turn it into a path under base that does
+	// not exist.
+	t.Run("absolute path is allowed when external files are permitted", func(t *testing.T) {
+		t.Parallel()
+
+		absolute := filepath.Join(root, "secret.txt")
+
+		path, contents, err := readRef(base, absolute, true)
+		require.NoError(t, err)
+		assert.Equal(t, absolute, path)
+		assert.Equal(t, "SENSITIVE", string(contents))
+	})
 }
 
 // TestReadRefSymlinkTraversalIsBlocked covers the case where a lexical path and
