@@ -55,6 +55,20 @@ func CreateStoreWithModel(
 	inputModel string,
 	inputFormat authorizationmodel.ModelFormat,
 ) (*CreateStoreAndModelResponse, error) {
+	return CreateStoreWithModelContained(ctx, fgaClient, storeName, inputModel, inputFormat, "")
+}
+
+// CreateStoreWithModelContained is CreateStoreWithModel, but for a modular
+// model it contains every file the fga.mod references to containBase. Pass an
+// empty containBase to read without containment.
+func CreateStoreWithModelContained(
+	ctx context.Context,
+	fgaClient client.SdkClient,
+	storeName string,
+	inputModel string,
+	inputFormat authorizationmodel.ModelFormat,
+	containBase string,
+) (*CreateStoreAndModelResponse, error) {
 	response := CreateStoreAndModelResponse{}
 
 	if storeName == "" {
@@ -76,7 +90,7 @@ func CreateStoreWithModel(
 	if inputModel != "" {
 		authModel := authorizationmodel.AuthzModel{}
 
-		err = authModel.ReadModelFromString(inputModel, inputFormat)
+		err = authModel.ReadModelFromStringContained(inputModel, inputFormat, containBase)
 		if err != nil {
 			return nil, err //nolint:wrapcheck
 		}

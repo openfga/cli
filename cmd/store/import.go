@@ -61,7 +61,11 @@ func createStore(
 		storeDataName = strings.TrimSuffix(path.Base(fileName), ".fga.yaml")
 	}
 
-	createStoreAndModelResponse, err := CreateStoreWithModel(ctx, fgaClient, storeDataName, storeData.Model, format)
+	// The contain base travels with the store data so that a modular model
+	// referenced from the store file keeps its module reads contained on the
+	// create path too, exactly as updateStore does.
+	createStoreAndModelResponse, err := CreateStoreWithModelContained(
+		ctx, fgaClient, storeDataName, storeData.Model, format, storeData.ModelContainBase())
 	if err != nil {
 		return nil, err
 	}
