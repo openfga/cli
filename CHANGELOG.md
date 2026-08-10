@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.20](https://github.com/openfga/cli/compare/v0.7.19...v0.7.20) (2026-08-10)
+
+
+### Fixed
+
+* remove go-safecast dependency ([#738](https://github.com/openfga/cli/issues/738)) ([379f941](https://github.com/openfga/cli/commit/379f9415fd7daba16d7390362c61c0c60eeec901))
+
+
+### Miscellaneous
+
+* release 0.7.20 ([63630b3](https://github.com/openfga/cli/commit/63630b368286857aa81884d8288502769c526929))
+
 ## [0.7.19](https://github.com/openfga/cli/compare/v0.7.17...v0.7.19) (2026-07-13)
 
 
