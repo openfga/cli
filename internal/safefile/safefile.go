@@ -111,9 +111,11 @@ func readOpened(name string, file *os.File) ([]byte, error) {
 // collapses it to "target". Validating one path and then reading the other would
 // leave the containment check bypassable, so the same handle is used throughout.
 //
-// The target must also be a regular file. A metadata-only Stat runs first, since
-// opening a FIFO would block before any check could reject it, and the opened
-// descriptor is then re-checked before its contents are read.
+// The target must also be a regular file. A metadata-only Stat runs first to
+// reject non-regular files without opening anything for I/O. The Stat and the
+// open are not atomic, so the open is nonblocking — a FIFO swapped into place
+// between the two cannot block it — and the opened descriptor is re-checked
+// before its contents are read.
 func ReadContained(basePath, ref string) ([]byte, error) {
 	root, err := os.OpenRoot(basePath)
 	if err != nil {
@@ -133,7 +135,7 @@ func ReadContained(basePath, ref string) ([]byte, error) {
 		return nil, err
 	}
 
-	file, err := root.Open(ref)
+	file, err := root.OpenFile(ref, os.O_RDONLY|openNonblock, 0)
 	if err != nil {
 		return nil, fmt.Errorf("%q is not accessible within %q: %w", ref, basePath, err)
 	}
@@ -145,13 +147,15 @@ func ReadContained(basePath, ref string) ([]byte, error) {
 
 // ReadExternal reads name without containing it to any directory, for callers
 // that have explicitly opted in to references outside the base directory. The
-// target must still be a regular file.
+// target must still be a regular file, checked before the open and again on
+// the opened descriptor; the open is nonblocking so a FIFO swapped into place
+// after the check cannot block it.
 func ReadExternal(name string) ([]byte, error) {
 	if err := checkRegularPath(name); err != nil {
 		return nil, err
 	}
 
-	file, err := os.Open(name)
+	file, err := os.OpenFile(name, os.O_RDONLY|openNonblock, 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file %q: %w", name, err)
 	}
