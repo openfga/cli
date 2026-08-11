@@ -27,7 +27,17 @@ import (
 )
 
 // ReadFromFile is used to read and parse the Store file.
-func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFormat, *StoreData, error) {
+//
+// Files referenced from within the store YAML (model_file, tuple_file,
+// tuple_files, and per-test tuple_file) are, by default, contained to the
+// directory holding the store file and must be regular files. Set
+// allowExternalFiles to true to permit references that resolve outside that
+// directory (e.g. via "..") for trusted workflows.
+func ReadFromFile(
+	fileName string,
+	basePath string,
+	allowExternalFiles bool,
+) (authorizationmodel.ModelFormat, *StoreData, error) {
 	format := authorizationmodel.ModelFormatDefault
 
 	var storeData StoreData
@@ -59,12 +69,12 @@ func ReadFromFile(fileName string, basePath string) (authorizationmodel.ModelFor
 	// Use the directory of the resolved file path for nested file references
 	resolvedBasePath := filepath.Dir(absFileName)
 
-	format, err = storeData.LoadModel(resolvedBasePath)
+	format, err = storeData.LoadModel(resolvedBasePath, allowExternalFiles)
 	if err != nil {
 		return format, nil, err
 	}
 
-	err = storeData.LoadTuples(resolvedBasePath)
+	err = storeData.LoadTuples(resolvedBasePath, allowExternalFiles)
 	if err != nil {
 		return format, nil, err
 	}

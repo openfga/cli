@@ -100,7 +100,7 @@ func getLocalServerModelAndTuples(
 
 	tempModel := authorizationmodel.AuthzModel{}
 
-	err = tempModel.ReadModelFromString(storeData.Model, format)
+	err = tempModel.ReadModelFromStringContained(storeData.Model, format, storeData.ModelContainBase())
 	if err != nil {
 		return nil, nil, stopServerFn, err //nolint:wrapcheck
 	}

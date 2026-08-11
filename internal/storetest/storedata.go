@@ -20,9 +20,10 @@ package storetest
 import (
 	"errors"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/openfga/cli/internal/clierrors"
+	"github.com/openfga/cli/internal/safefile"
 	"github.com/openfga/cli/internal/tuplefile"
 
 	openfga "github.com/openfga/go-sdk"
@@ -86,10 +87,76 @@ type StoreData struct {
 	TupleFile  string                            `json:"tuple_file"  yaml:"tuple_file,omitempty"`  //nolint:tagliatelle
 	TupleFiles []string                          `json:"tuple_files" yaml:"tuple_files,omitempty"` //nolint:tagliatelle
 	Tests      []ModelTest                       `json:"tests"       yaml:"tests"`
+
+	// containBase is the directory that files referenced by this store must stay
+	// within, or "" when the caller opted out via --allow-external-files. A
+	// modular model defers reading its module files until the model is parsed, so
+	// the base has to travel with the store data to be enforced there.
+	containBase string
 }
 
-func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.ModelFormat, error) {
+// ModelContainBase returns the directory that files referenced by a modular
+// model must stay within, or "" if external references were explicitly allowed.
+func (storeData *StoreData) ModelContainBase() string {
+	return storeData.containBase
+}
+
+// readRef reads a file referenced from within a store YAML, resolved against
+// basePath, and returns its contents along with the path used for
+// format detection.
+//
+// By default (allowExternal == false) the read is contained to basePath through
+// an os.Root handle: a reference escaping it via "..", an absolute path, or a
+// symlink pointing outside the tree is rejected. The file is read through that
+// same handle rather than resolved to a path first, because a lexical path and a
+// root-relative lookup can disagree — given a symlink "link" -> "sub/dir",
+// os.Root resolves "link/../f" to "sub/f" while filepath.Join collapses it to
+// "f" — and validating one while reading the other would leave the containment
+// bypassable.
+//
+// When allowExternal == true the caller has explicitly opted in (via
+// --allow-external-files) to references outside basePath, so containment is
+// skipped and an absolute reference is used as-is rather than being joined onto
+// basePath.
+//
+// In both modes the target must be a regular file: a FIFO with no writer blocks
+// the read forever, while an endless device such as /dev/zero grows the read
+// buffer until the process is OOM-killed.
+func readRef(basePath, ref string, allowExternal bool) (string, []byte, error) {
+	if allowExternal {
+		resolved := ref
+		if !filepath.IsAbs(resolved) {
+			resolved = filepath.Join(basePath, ref)
+		}
+
+		data, err := safefile.ReadExternal(resolved)
+		if err != nil {
+			return "", nil, fmt.Errorf("file reference %q: %w", ref, err)
+		}
+
+		return resolved, data, nil
+	}
+
+	joined := filepath.Join(basePath, ref)
+
+	data, err := safefile.ReadContained(basePath, ref)
+	if err != nil {
+		return "", nil, fmt.Errorf("file reference %w", err)
+	}
+
+	return joined, data, nil
+}
+
+func (storeData *StoreData) LoadModel(
+	basePath string,
+	allowExternalFiles bool,
+) (authorizationmodel.ModelFormat, error) {
 	format := authorizationmodel.ModelFormatDefault
+
+	if !allowExternalFiles {
+		storeData.containBase = basePath
+	}
+
 	if storeData.Model != "" {
 		return format, nil
 	}
@@ -98,16 +165,20 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 		return format, nil
 	}
 
+	modelPath, contents, err := readRef(basePath, storeData.ModelFile, allowExternalFiles)
+	if err != nil {
+		return format, err
+	}
+
 	var inputModel string
 
 	storeName := storeData.Name
-	if err := authorizationmodel.ReadFromFile(
-		path.Join(basePath, storeData.ModelFile),
+	authorizationmodel.ReadFromContents(
+		modelPath,
+		contents,
 		&inputModel,
 		&format,
-		&storeName); err != nil {
-		return format, err //nolint:wrapcheck
-	}
+		&storeName)
 
 	if inputModel != "" {
 		storeData.Model = inputModel
@@ -116,7 +187,7 @@ func (storeData *StoreData) LoadModel(basePath string) (authorizationmodel.Model
 	return format, nil
 }
 
-func (storeData *StoreData) LoadTuples(basePath string) error {
+func (storeData *StoreData) LoadTuples(basePath string, allowExternalFiles bool) error {
 	var (
 		errs      error
 		allTuples []client.ClientContextualTupleKey
@@ -133,14 +204,14 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 	if storeData.TupleFile != "" {
 		errs = errors.Join(
 			errs,
-			storeData.loadAndAddTuplesFromFile(basePath, storeData.TupleFile, addTuples),
+			storeData.loadAndAddTuplesFromFile(basePath, storeData.TupleFile, allowExternalFiles, addTuples),
 		)
 	}
 
 	if len(storeData.TupleFiles) > 0 {
 		errs = errors.Join(
 			errs,
-			storeData.loadAndAddTuplesFromFiles(basePath, storeData.TupleFiles, addTuples),
+			storeData.loadAndAddTuplesFromFiles(basePath, storeData.TupleFiles, allowExternalFiles, addTuples),
 		)
 	}
 
@@ -150,7 +221,7 @@ func (storeData *StoreData) LoadTuples(basePath string) error {
 
 	errs = errors.Join(
 		errs,
-		storeData.loadTestTuples(basePath),
+		storeData.loadTestTuples(basePath, allowExternalFiles),
 	)
 	if errs != nil {
 		return errors.Join(
@@ -196,13 +267,19 @@ func (storeData *StoreData) Validate() error {
 func (storeData *StoreData) loadAndAddTuplesFromFile(
 	basePath string,
 	file string,
+	allowExternalFiles bool,
 	add func([]client.ClientContextualTupleKey),
 ) error {
 	if file == "" {
 		return nil
 	}
 
-	tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, file))
+	resolved, contents, err := readRef(basePath, file, allowExternalFiles)
+	if err != nil {
+		return fmt.Errorf("failed to process global tuple %s file due to %w", file, err)
+	}
+
+	tuples, err := tuplefile.ParseTuples(resolved, contents)
 	if err != nil {
 		return fmt.Errorf("failed to process global tuple %s file due to %w", file, err)
 	}
@@ -215,12 +292,23 @@ func (storeData *StoreData) loadAndAddTuplesFromFile(
 func (storeData *StoreData) loadAndAddTuplesFromFiles(
 	basePath string,
 	files []string,
+	allowExternalFiles bool,
 	add func([]client.ClientContextualTupleKey),
 ) error {
 	var errs error
 
 	for _, file := range files {
-		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, file))
+		resolved, contents, err := readRef(basePath, file, allowExternalFiles)
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf("failed to process tuple file %s due to %w", file, err),
+			)
+
+			continue
+		}
+
+		tuples, err := tuplefile.ParseTuples(resolved, contents)
 		if err != nil {
 			errs = errors.Join(
 				errs,
@@ -236,7 +324,7 @@ func (storeData *StoreData) loadAndAddTuplesFromFiles(
 	return errs
 }
 
-func (storeData *StoreData) loadTestTuples(basePath string) error {
+func (storeData *StoreData) loadTestTuples(basePath string, allowExternalFiles bool) error {
 	var errs error
 
 	for testIndex, testCase := range storeData.Tests {
@@ -244,7 +332,22 @@ func (storeData *StoreData) loadTestTuples(basePath string) error {
 			continue
 		}
 
-		tuples, err := tuplefile.ReadTupleFile(path.Join(basePath, testCase.TupleFile))
+		resolved, contents, err := readRef(basePath, testCase.TupleFile, allowExternalFiles)
+		if err != nil {
+			errs = errors.Join(
+				errs,
+				fmt.Errorf(
+					"failed to process tuple file %s for test %s due to %w",
+					testCase.TupleFile,
+					testCase.Name,
+					err,
+				),
+			)
+
+			continue
+		}
+
+		tuples, err := tuplefile.ParseTuples(resolved, contents)
 		if err != nil {
 			errs = errors.Join(
 				errs,

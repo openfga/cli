@@ -21,8 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/oklog/ulid/v2"
@@ -32,8 +31,26 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/openfga/cli/internal/safefile"
 	"github.com/openfga/cli/internal/slices"
 )
+
+// readModelFile reads a file belonging to a modular model. When containBase is
+// non-empty the read is contained to that directory, so a contents entry cannot
+// escape it; otherwise the file is read directly. Either way the target must be
+// a regular file.
+func readModelFile(filePath string, containBase string) ([]byte, error) {
+	if containBase == "" {
+		return safefile.ReadExternal(filePath) //nolint:wrapcheck
+	}
+
+	rel, err := filepath.Rel(containBase, filePath)
+	if err != nil {
+		return nil, fmt.Errorf("unable to resolve %q against %q: %w", filePath, containBase, err)
+	}
+
+	return safefile.ReadContained(containBase, rel) //nolint:wrapcheck
+}
 
 func getCreatedAtFromModelID(id string) (*time.Time, error) {
 	modelID, err := ulid.Parse(id)
@@ -214,69 +231,34 @@ func (model *AuthzModel) ReadFromDSLString(dslString string) error {
 	return nil
 }
 
+// ReadModelFromModFGA reads a modular model from modFile, resolving its
+// contents entries relative to the directory holding modFile with no
+// containment. It is used when the user names the fga.mod file directly.
 func (model *AuthzModel) ReadModelFromModFGA(modFile string) error {
-	modFileContents, err := os.ReadFile(modFile)
-	if err != nil {
-		return fmt.Errorf("failed to read fga.mod file due to %w", err)
-	}
+	return model.readModelFromModFGA(modFile, "")
+}
 
-	parsedModFile, err := language.TransformModFile(string(modFileContents))
-	if err != nil {
-		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
-	}
-
-	moduleFiles := []language.ModuleFile{}
-
-	var fileReadErrors []error
-
-	directory := path.Dir(modFile)
-
-	for _, fileName := range parsedModFile.Contents.Value {
-		filePath := path.Join(directory, fileName.Value)
-
-		fileContents, err := os.ReadFile(filePath)
-		if err != nil {
-			fileReadErrors = append(
-				fileReadErrors,
-				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
-			)
-
-			continue
-		}
-
-		moduleFiles = append(moduleFiles, language.ModuleFile{
-			Name:     fileName.Value,
-			Contents: string(fileContents),
-		})
-	}
-
-	if len(fileReadErrors) != 0 {
-		return errors.Join(fileReadErrors...)
-	}
-
-	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
-	if err != nil {
-		return fmt.Errorf("failed to transform module to model due to %w", err)
-	}
-
-	bytes, err := protojson.Marshal(parsedAuthModel)
-	if err != nil {
-		return fmt.Errorf("failed to transform due to %w", err)
-	}
-
-	jsonAuthModel := openfga.AuthorizationModel{}
-
-	err = json.Unmarshal(bytes, &jsonAuthModel)
-	if err != nil {
-		return fmt.Errorf("failed to transform due to %w", err)
-	}
-
-	model.Set(jsonAuthModel)
-
-	return nil
+// ReadModelFromModFGAContained reads a modular model from modFile and contains
+// every file it references to containBase. A contents entry that escapes
+// containBase (via "..", an absolute path, or a symlink) is rejected, so a
+// modular model referenced from a store file cannot read files the store file
+// itself could not.
+func (model *AuthzModel) ReadModelFromModFGAContained(modFile string, containBase string) error {
+	return model.readModelFromModFGA(modFile, containBase)
 }
 
 func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) error {
+	return model.ReadModelFromStringContained(input, format, "")
+}
+
+// ReadModelFromStringContained is ReadModelFromString, but for a modular model
+// it contains every file the fga.mod references to containBase. Pass an empty
+// containBase to read without containment.
+func (model *AuthzModel) ReadModelFromStringContained(
+	input string,
+	format ModelFormat,
+	containBase string,
+) error {
 	if input == "" {
 		return nil
 	}
@@ -295,7 +277,7 @@ func (model *AuthzModel) ReadModelFromString(input string, format ModelFormat) e
 
 		return nil
 	case ModelFormatModular:
-		if err := model.ReadModelFromModFGA(input); err != nil {
+		if err := model.readModelFromModFGA(input, containBase); err != nil {
 			return err
 		}
 
@@ -374,6 +356,72 @@ func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
 	}
 
 	return &dslModel, nil
+}
+
+// readModelFromModFGA reads a modular model. When containBase is non-empty, the
+// fga.mod file and each of its contents entries must resolve inside it.
+func (model *AuthzModel) readModelFromModFGA(modFile string, containBase string) error {
+	modFileContents, err := readModelFile(modFile, containBase)
+	if err != nil {
+		return fmt.Errorf("failed to read fga.mod file due to %w", err)
+	}
+
+	parsedModFile, err := language.TransformModFile(string(modFileContents))
+	if err != nil {
+		return fmt.Errorf("failed to transform fga.mod file due to %w", err)
+	}
+
+	moduleFiles := []language.ModuleFile{}
+
+	var fileReadErrors []error
+
+	// modFile is an OS filesystem path, while a contents entry inside fga.mod is
+	// always slash-separated, so each entry is converted before being joined.
+	directory := filepath.Dir(modFile)
+
+	for _, fileName := range parsedModFile.Contents.Value {
+		filePath := filepath.Join(directory, filepath.FromSlash(fileName.Value))
+
+		fileContents, err := readModelFile(filePath, containBase)
+		if err != nil {
+			fileReadErrors = append(
+				fileReadErrors,
+				fmt.Errorf("failed to read module file %s due to %w", fileName.Value, err),
+			)
+
+			continue
+		}
+
+		moduleFiles = append(moduleFiles, language.ModuleFile{
+			Name:     fileName.Value,
+			Contents: string(fileContents),
+		})
+	}
+
+	if len(fileReadErrors) != 0 {
+		return errors.Join(fileReadErrors...)
+	}
+
+	parsedAuthModel, err := language.TransformModuleFilesToModel(moduleFiles, parsedModFile.Schema.Value)
+	if err != nil {
+		return fmt.Errorf("failed to transform module to model due to %w", err)
+	}
+
+	bytes, err := protojson.Marshal(parsedAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	jsonAuthModel := openfga.AuthorizationModel{}
+
+	err = json.Unmarshal(bytes, &jsonAuthModel)
+	if err != nil {
+		return fmt.Errorf("failed to transform due to %w", err)
+	}
+
+	model.Set(jsonAuthModel)
+
+	return nil
 }
 
 func (model *AuthzModel) buildDSLMetadata(fields []string) string {

@@ -1,10 +1,13 @@
 package store
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/openfga/go-sdk/client"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
 	"github.com/openfga/cli/internal/fga"
@@ -276,6 +279,51 @@ func TestImportStoreWithTruncatedAssertions(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
+}
+
+// TestImportStoreCreatePathContainsModularModel verifies that importing a
+// store without --store-id (the create path) contains the module files of a
+// modular model to the store file's directory, exactly as the update path
+// does: an fga.mod contents entry whose file is a symlink pointing outside the
+// tree must be rejected before any model is written.
+func TestImportStoreCreatePathContainsModularModel(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+
+	// The file the module entry escapes to, outside the store directory.
+	outside := filepath.Join(tmpDir, "outside.fga")
+	require.NoError(t, os.WriteFile(outside, []byte("module core\n"), 0o600))
+
+	storeDir := filepath.Join(tmpDir, "store")
+	require.NoError(t, os.Mkdir(storeDir, 0o750))
+
+	modFile := "schema: '1.2'\ncontents:\n  - core.fga\n"
+	require.NoError(t, os.WriteFile(filepath.Join(storeDir, "model.fga.mod"), []byte(modFile), 0o600))
+
+	// The module file named by the fga.mod is a symlink out of the tree.
+	require.NoError(t, os.Symlink(
+		filepath.Join("..", "outside.fga"),
+		filepath.Join(storeDir, "core.fga"),
+	))
+
+	storeFile := filepath.Join(storeDir, "store.fga.yaml")
+	require.NoError(t, os.WriteFile(storeFile, []byte("name: test-store\nmodel_file: model.fga.mod\n"), 0o600))
+
+	format, storeData, err := storetest.ReadFromFile(storeFile, "", false)
+	require.NoError(t, err)
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
+
+	setupCreateStoreMock(mockCtrl, mockFgaClient, testStoreID)
+	mockFgaClient.EXPECT().WriteAuthorizationModel(gomock.Any()).Times(0)
+
+	_, err = importStore(t.Context(), &fga.ClientConfig{}, mockFgaClient, storeData, format, "", 10, 1, storeFile)
+	require.Error(t, err)
+	require.ErrorContains(t, err, "core.fga")
 }
 
 func TestUpdateStore(t *testing.T) {

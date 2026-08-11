@@ -39,7 +39,23 @@ func ReadFromFile(
 		return fmt.Errorf("failed to read file %s due to %w", fileName, err)
 	}
 
-	*input = string(file)
+	ReadFromContents(fileName, file, input, format, storeName)
+
+	return nil
+}
+
+// ReadFromContents populates input, format and storeName from already-read file
+// contents, using fileName only for format detection and naming. Callers that
+// must control how the file is read (for example to contain the read to a
+// directory) read the bytes themselves and pass them here.
+func ReadFromContents(
+	fileName string,
+	contents []byte,
+	input *string,
+	format *ModelFormat,
+	storeName *string,
+) {
+	*input = string(contents)
 
 	// if the input format is set as the default, set it from the file extension (and default to fga)
 	//nolint:staticcheck
@@ -62,8 +78,6 @@ func ReadFromFile(
 	if *storeName == "" {
 		*storeName = strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
 	}
-
-	return nil
 }
 
 func ReadFromInputFileOrArg(

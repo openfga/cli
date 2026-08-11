@@ -21,7 +21,18 @@ func ReadTupleFile(fileName string) ([]client.ClientTupleKey, error) {
 		return nil, fmt.Errorf("failed to read file %q: %w", fileName, err)
 	}
 
-	var tuples []client.ClientTupleKey
+	return ParseTuples(fileName, data)
+}
+
+// ParseTuples parses already-read tuple file contents, using fileName only to
+// determine the format. Callers that must control how the file is read (for
+// example to contain the read to a directory) read the bytes themselves and
+// pass them here.
+func ParseTuples(fileName string, data []byte) ([]client.ClientTupleKey, error) {
+	var (
+		tuples []client.ClientTupleKey
+		err    error
+	)
 
 	switch path.Ext(fileName) {
 	case ".json", ".yaml", ".yml":

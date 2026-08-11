@@ -88,7 +88,7 @@ func TestLoadTuples(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := testCase.storeData.LoadTuples(tempDir)
+			err := testCase.storeData.LoadTuples(tempDir, false)
 
 			if testCase.expectErr {
 				if err == nil {
