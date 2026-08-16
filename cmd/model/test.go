@@ -87,7 +87,6 @@ var modelTestCmd = &cobra.Command{
 		}
 
 		multipleFiles := len(fileNames) > 1
-
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
 		fgaClient, err := clientConfig.GetFgaClient()
@@ -167,6 +166,35 @@ var modelTestCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// resolveTestFiles expands testsPattern via filepath.Glob and filters out any matches that
+// are not regular files (e.g. FIFOs, devices, sockets). Reading a FIFO with no writer via
+// os.ReadFile blocks forever, so non-regular glob matches are silently skipped rather than
+// read. This filtering only applies to glob matches: if the pattern matches nothing, the
+// pattern itself is treated as a literal path and returned as-is, untouched by the regular
+// file check (e.g. to keep process substitution like --tests <(...) working).
+
+func resolveTestFiles(testsPattern string) ([]string, error) {
+	fileNames, err := filepath.Glob(testsPattern)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tests pattern %s due to %w", testsPattern, err)
+	}
+
+	regularFileNames := fileNames[:0]
+
+	for _, name := range fileNames {
+		info, statErr := os.Stat(name)
+		if statErr != nil {
+			return nil, fmt.Errorf("failed to stat test file %s: %w", name, statErr)
+		}
+
+		if info.Mode().IsRegular() {
+			regularFileNames = append(regularFileNames, name)
+		}
+	}
+
+	return regularFileNames, nil
 }
 
 func init() {
