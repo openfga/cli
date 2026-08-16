@@ -2,7 +2,7 @@ module github.com/openfga/cli
 
 go 1.25.7
 
-toolchain go1.26.5
+toolchain go1.26.6
 
 require (
 	github.com/mattn/go-isatty v0.0.24
