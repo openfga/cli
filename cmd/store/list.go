@@ -31,7 +31,12 @@ import (
 // MaxStoresPagesLength Limit the pages of stores so that we are not paginating indefinitely.
 var MaxStoresPagesLength = 20 // up to 1000 records
 
-func listStores(ctx context.Context, fgaClient client.SdkClient, maxPages int, name string) (*openfga.ListStoresResponse, error) {
+func listStores(
+	ctx context.Context,
+	fgaClient client.SdkClient,
+	maxPages int,
+	name string,
+) (*openfga.ListStoresResponse, error) {
 	stores := []openfga.Store{}
 	continuationToken := ""
 	pageIndex := 0
