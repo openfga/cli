@@ -364,6 +364,7 @@ fga store **list**
 
 ###### Parameters
 * `--max-pages`: Max number of pages to retrieve (default: 20)
+* `--name`: Filter stores by name
 
 ###### Example
 `fga store list`
