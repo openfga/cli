@@ -19,10 +19,10 @@ func writeRegularFile(t *testing.T, path string) error {
 	return nil
 }
 
-// A pattern with no glob matches at all is treated as a literal path. Since the pattern here
-// contains a wildcard and no such literal file exists, resolution should fail with a
-// not-found error rather than silently returning an empty result.
-func TestResolveTestFilesNoMatchesTreatedAsLiteralPath(t *testing.T) {
+// A glob pattern (contains metacharacters) that matches no files should fail with a
+// not-found/no-match error rather than being treated as a literal path or returning an empty
+// result.
+func TestResolveTestFilesNoMatchesFails(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
@@ -34,9 +34,8 @@ func TestResolveTestFilesNoMatchesTreatedAsLiteralPath(t *testing.T) {
 	}
 }
 
-// An existing literal path (no glob metacharacters, so filepath.Glob returns it as a single
-// match) is returned as-is, without the regular-file check rejecting it - this preserves
-// existing behavior for explicitly named paths.
+// An explicitly named, existing regular file (no glob metacharacters) is honored as-is - this
+// preserves existing behavior for explicitly named paths.
 func TestResolveTestFilesLiteralExistingPath(t *testing.T) {
 	t.Parallel()
 

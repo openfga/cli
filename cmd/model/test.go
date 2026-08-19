@@ -36,6 +36,9 @@ import (
 var errAllTestFilesNonRegular = errors.New("tests pattern matched only non-regular files (e.g. FIFOs); " +
 	"pass an explicit regular file path instead")
 
+// errNoTestFilesMatched is returned when a tests glob pattern matches no files at all.
+var errNoTestFilesMatched = errors.New("no test files matched pattern")
+
 // modelTestCmd represents the test command.
 var modelTestCmd = &cobra.Command{
 	Use:     "test",
@@ -166,28 +169,37 @@ var modelTestCmd = &cobra.Command{
 	},
 }
 
-// resolveTestFiles expands testsPattern via filepath.Glob and filters out any matches that
-// are not regular files (e.g. FIFOs, devices, sockets). Reading a FIFO with no writer via
-// os.ReadFile blocks forever, so non-regular glob matches are silently skipped rather than
-// read.
+// resolveTestFiles turns testsPattern into the list of test files to read.
 //
-// If the pattern matches nothing at all, it is treated as a literal path (e.g. to keep
-// process substitution like --tests <(...) working) and is not subject to the regular-file
-// check. If the pattern matches only non-regular files, that is treated as an error rather
-// than silently falling back to the literal-path behavior, since testsPattern itself
-// (e.g. "*.fga.yaml") is very unlikely to also be a valid literal path.
+// A pattern with no glob metacharacters (*, ?, [) is treated as an explicit, literal path
+// and honored as-is - including non-regular paths such as process substitution
+// (--tests <(...)), which resolves to a FIFO like /dev/fd/11. The caller asked for that
+// exact path, so it is not subject to the regular-file filter below.
+//
+// A pattern with glob metacharacters is expanded via filepath.Glob, and non-regular matches
+// (FIFOs, devices, sockets) are dropped: a glob is not an explicit request for any single
+// file, and reading a FIFO with no writer via os.ReadFile blocks forever. If the glob matches
+// only non-regular files, that is an error rather than something to read.
+//
+// The metacharacter check (rather than, say, comparing the single glob match against the
+// pattern) is deliberate: a FIFO literally named "*.fga.yaml" must still be filtered out, not
+// mistaken for a literal path.
 func resolveTestFiles(testsPattern string) ([]string, error) {
+	if !strings.ContainsAny(testsPattern, `*?[`) {
+		if _, statErr := os.Stat(testsPattern); statErr != nil {
+			return nil, fmt.Errorf("test file %s does not exist: %w", testsPattern, statErr)
+		}
+
+		return []string{testsPattern}, nil
+	}
+
 	rawMatches, err := filepath.Glob(testsPattern)
 	if err != nil {
 		return nil, fmt.Errorf("invalid tests pattern %s due to %w", testsPattern, err)
 	}
 
 	if len(rawMatches) == 0 {
-		if _, statErr := os.Stat(testsPattern); statErr != nil {
-			return nil, fmt.Errorf("test file %s does not exist: %w", testsPattern, statErr)
-		}
-
-		return []string{testsPattern}, nil
+		return nil, fmt.Errorf("%w: %s", errNoTestFilesMatched, testsPattern)
 	}
 
 	regularFileNames := rawMatches[:0]

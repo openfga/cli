@@ -33,9 +33,6 @@ func TestResolveTestFilesSkipsNonRegularGlobMatches(t *testing.T) {
 
 	pattern := filepath.Join(dir, "*.fga.yaml")
 
-	// This call must return promptly. If the FIFO were not filtered out, resolveTestFiles
-	// itself doesn't read file contents, but a regression that moved the read here would hang
-	// the test; test-unit's overall timeout is the real backstop for that case.
 	fileNames, err := resolveTestFiles(pattern)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -104,7 +101,7 @@ func TestResolveTestFilesAllMatchesNonRegular(t *testing.T) {
 // the command block forever in os.ReadFile. Here the command must return within a short
 // deadline instead of hanging; whatever error it returns afterwards (e.g. from running the
 // tests) is irrelevant to this regression.
-func TestModelTestCmdDoesNotHangOnFifoGlobMatch(t *testing.T) { //nolint:paralleltest // mutates the shared global modelTestCmd, so it must not run in parallel	// Not parallel: modelTestCmd is a shared global and this test sets flags/args on it.
+func TestModelTestCmdDoesNotHangOnFifoGlobMatch(t *testing.T) { //nolint:paralleltest // mutates the shared global modelTestCmd, so it must not run in parallel
 	dir := t.TempDir()
 
 	regularPath := filepath.Join(dir, "ok.fga.yaml")
@@ -132,5 +129,49 @@ func TestModelTestCmdDoesNotHangOnFifoGlobMatch(t *testing.T) { //nolint:paralle
 	case <-done:
 	case <-time.After(10 * time.Second):
 		t.Fatal("modelTestCmd hung on a FIFO glob match instead of skipping it")
+	}
+}
+
+// An explicitly named non-regular path (no glob metacharacters) must be honored as-is, not
+// rejected by the regular-file filter. This is what keeps process substitution
+// (--tests <(...), which the shell turns into a FIFO like /dev/fd/11) working. The literal-
+// path test in test_test.go uses a regular file, so it cannot catch this case.
+func TestResolveTestFilesLiteralFifoPathHonored(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	fifoPath := filepath.Join(dir, "pipe.fga.yaml")
+
+	if err := syscall.Mkfifo(fifoPath, 0o600); err != nil {
+		t.Skipf("unable to create FIFO: %v", err)
+	}
+
+	fileNames, err := resolveTestFiles(fifoPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(fileNames) != 1 || fileNames[0] != fifoPath {
+		t.Fatalf("expected [%s], got %v", fifoPath, fileNames)
+	}
+}
+
+// A FIFO literally named "*.fga.yaml" must be treated as a glob match and filtered out, not
+// mistaken for a literal path - otherwise it would be read and hang. This guards the
+// metacharacter-based branch against a naive "single match equals the pattern" shortcut.
+func TestResolveTestFilesFifoNamedLikeGlobStillFiltered(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+
+	if err := syscall.Mkfifo(filepath.Join(dir, "*.fga.yaml"), 0o600); err != nil {
+		t.Skipf("unable to create FIFO: %v", err)
+	}
+
+	pattern := filepath.Join(dir, "*.fga.yaml")
+
+	fileNames, err := resolveTestFiles(pattern)
+	if err == nil {
+		t.Fatalf("expected an error, got fileNames=%v", fileNames)
 	}
 }
