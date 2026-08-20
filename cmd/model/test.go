@@ -17,6 +17,7 @@ limitations under the License.
 package model
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -29,6 +30,14 @@ import (
 	"github.com/openfga/cli/internal/output"
 	"github.com/openfga/cli/internal/storetest"
 )
+
+// errAllTestFilesNonRegular is returned when a tests glob pattern matches only non-regular
+// files (e.g. FIFOs), so there is nothing safe to read.
+var errAllTestFilesNonRegular = errors.New("tests pattern matched only non-regular files (e.g. FIFOs); " +
+	"pass an explicit regular file path instead")
+
+// errNoTestFilesMatched is returned when a tests glob pattern matches no files at all.
+var errNoTestFilesMatched = errors.New("no test files matched pattern")
 
 // modelTestCmd represents the test command.
 var modelTestCmd = &cobra.Command{
@@ -72,18 +81,9 @@ var modelTestCmd = &cobra.Command{
 			MaxTypesPerAuthorizationModel: maxTypes,
 		}
 
-		fileNames, err := filepath.Glob(testsFileName)
+		fileNames, err := resolveTestFiles(testsFileName)
 		if err != nil {
-			return fmt.Errorf("invalid tests pattern %s due to %w", testsFileName, err)
-		}
-
-		if len(fileNames) == 0 {
-			// Check if the literal path exists
-			if _, err := os.Stat(testsFileName); err != nil {
-				return fmt.Errorf("test file %s does not exist: %w", testsFileName, err)
-			}
-
-			fileNames = []string{testsFileName}
+			return err
 		}
 
 		multipleFiles := len(fileNames) > 1
@@ -167,6 +167,59 @@ var modelTestCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// resolveTestFiles turns testsPattern into the list of test files to read.
+//
+// A pattern with no glob metacharacters (*, ?, [) is treated as an explicit, literal path
+// and honored as-is - including non-regular paths such as process substitution
+// (--tests <(...)), which resolves to a FIFO like /dev/fd/11. The caller asked for that
+// exact path, so it is not subject to the regular-file filter below.
+//
+// A pattern with glob metacharacters is expanded via filepath.Glob, and non-regular matches
+// (FIFOs, devices, sockets) are dropped: a glob is not an explicit request for any single
+// file, and reading a FIFO with no writer via os.ReadFile blocks forever. If the glob matches
+// only non-regular files, that is an error rather than something to read.
+//
+// The metacharacter check (rather than, say, comparing the single glob match against the
+// pattern) is deliberate: a FIFO literally named "*.fga.yaml" must still be filtered out, not
+// mistaken for a literal path.
+func resolveTestFiles(testsPattern string) ([]string, error) {
+	if !strings.ContainsAny(testsPattern, `*?[`) {
+		if _, statErr := os.Stat(testsPattern); statErr != nil {
+			return nil, fmt.Errorf("test file %s does not exist: %w", testsPattern, statErr)
+		}
+
+		return []string{testsPattern}, nil
+	}
+
+	rawMatches, err := filepath.Glob(testsPattern)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tests pattern %s due to %w", testsPattern, err)
+	}
+
+	if len(rawMatches) == 0 {
+		return nil, fmt.Errorf("%w: %s", errNoTestFilesMatched, testsPattern)
+	}
+
+	regularFileNames := rawMatches[:0]
+
+	for _, name := range rawMatches {
+		info, statErr := os.Stat(name)
+		if statErr != nil {
+			return nil, fmt.Errorf("failed to stat test file %s: %w", name, statErr)
+		}
+
+		if info.Mode().IsRegular() {
+			regularFileNames = append(regularFileNames, name)
+		}
+	}
+
+	if len(regularFileNames) == 0 {
+		return nil, fmt.Errorf("%w: %s", errAllTestFilesNonRegular, testsPattern)
+	}
+
+	return regularFileNames, nil
 }
 
 func init() {
