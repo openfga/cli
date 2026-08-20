@@ -102,5 +102,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	listCmd.Flags().Int("max-pages", MaxStoresPagesLength, "Max number of pages to get.")
-	listCmd.Flags().String("name", "", "Filter stores by name.")
+	listCmd.Flags().String("name", "", "Filter stores by exact name. Substrings and regexes are not supported.")
 }
