@@ -207,7 +207,7 @@ custom-headers:
 | [Create a Store](#create-store) | `create` | `--name`        | `fga store create --name="FGA Demo Store"`               |
 | [Import a Store](#import-store) | `import` | `--file`        | `fga store import --file store.fga.yaml`                 |
 | [Export a Store](#export-store) | `export` | `--store-id`    | `fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4` |
-| [List Stores](#list-stores)     | `list`   |                 | `fga store list`                                         |
+| [List Stores](#list-stores)     | `list`   | `--name`        | `fga store list --name="FGA Demo Store"`                 |
 | [Get a Store](#get-store)       | `get`    | `--store-id`    | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
 | [Delete a Store](#delete-store) | `delete` | `--store-id`    | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
 
@@ -364,9 +364,12 @@ fga store **list**
 
 ###### Parameters
 * `--max-pages`: Max number of pages to retrieve (default: 20)
+* `--name`: Filter stores by exact name (substrings and regexes are not supported)
 
 ###### Example
 `fga store list`
+
+`fga store list --name="FGA Demo Store"`
 
 ###### Response
 ```json

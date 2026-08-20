@@ -36,7 +36,7 @@ func TestListStoresError(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
 
-	_, err := listStores(t.Context(), mockFgaClient, 5)
+	_, err := listStores(t.Context(), mockFgaClient, 5, "")
 	if err == nil {
 		t.Error("Expect error but there is none")
 	}
@@ -67,7 +67,7 @@ func TestListStoresEmpty(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
 
-	output, err := listStores(t.Context(), mockFgaClient, 5)
+	output, err := listStores(t.Context(), mockFgaClient, 5, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -118,7 +118,7 @@ func TestListStoresSinglePage(t *testing.T) {
 	mockRequest.EXPECT().Options(options).Return(mockExecute)
 	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
 
-	output, err := listStores(t.Context(), mockFgaClient, 5)
+	output, err := listStores(t.Context(), mockFgaClient, 5, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -202,7 +202,7 @@ func TestListStoresMultiPage(t *testing.T) {
 		mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest2),
 	)
 
-	output, err := listStores(t.Context(), mockFgaClient, 5)
+	output, err := listStores(t.Context(), mockFgaClient, 5, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -256,7 +256,7 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 	mockRequest1.EXPECT().Options(options1).Return(mockExecute1)
 	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest1)
 
-	output, err := listStores(t.Context(), mockFgaClient, 1)
+	output, err := listStores(t.Context(), mockFgaClient, 1, "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -270,5 +270,37 @@ func TestListStoresMultiPageMaxPage(t *testing.T) {
 
 	if string(outputTxt) != expectedOutput {
 		t.Errorf("Expected output %v actual %v", expectedOutput, string(outputTxt))
+	}
+}
+
+func TestListStoresWithName(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	const storeName = "my-store"
+
+	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)
+
+	response := openfga.ListStoresResponse{
+		Stores:            []openfga.Store{},
+		ContinuationToken: "",
+	}
+	mockExecute.EXPECT().Execute().Return(&response, nil)
+
+	mockRequest := mockclient.NewMockSdkClientListStoresRequestInterface(mockCtrl)
+	options := client.ClientListStoresOptions{
+		ContinuationToken: openfga.PtrString(""),
+		Name:              openfga.PtrString(storeName),
+	}
+	mockRequest.EXPECT().Options(options).Return(mockExecute)
+	mockFgaClient.EXPECT().ListStores(t.Context()).Return(mockRequest)
+
+	_, err := listStores(t.Context(), mockFgaClient, 5, storeName)
+	if err != nil {
+		t.Error(err)
 	}
 }
