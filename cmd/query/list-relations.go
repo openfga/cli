@@ -55,7 +55,7 @@ func getRelationsForType(
 	}
 
 	typeDefs := authorizationModel.TypeDefinitions
-	objectType := strings.Split(object, ":")[0]
+	objectType, _, _ := strings.Cut(object, ":")
 	relations := []string{}
 
 	for index := range typeDefs {
