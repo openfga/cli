@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/oklog/ulid/v2"
-	pb "github.com/openfga/api/proto/openfga/v1"
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/openfga/pkg/typesystem"
 	"github.com/spf13/cobra"
@@ -41,7 +41,7 @@ type validationResult struct {
 }
 
 func validate(inputModel authorizationmodel.AuthzModel) validationResult {
-	model := &pb.AuthorizationModel{}
+	model := &openfgav1.AuthorizationModel{}
 	output := validationResult{
 		IsValid: true,
 	}
