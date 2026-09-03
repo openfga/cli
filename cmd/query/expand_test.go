@@ -87,7 +87,7 @@ func TestExpandWithNoError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if !(reflect.DeepEqual(*output, expectedResponse)) {
+	if !reflect.DeepEqual(*output, expectedResponse) {
 		t.Errorf("Expect output response %v actual response %v", expandResponseTxt, *output)
 	}
 }
@@ -132,7 +132,7 @@ func TestExpandWithConsistency(t *testing.T) {
 		t.Error(err)
 	}
 
-	if !(reflect.DeepEqual(*output, expectedResponse)) {
+	if !reflect.DeepEqual(*output, expectedResponse) {
 		t.Errorf("Expect output response %v actual response %v", expandResponseTxt, *output)
 	}
 }

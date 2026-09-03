@@ -41,7 +41,7 @@ var (
 )
 
 type ClientConfig struct {
-	ApiUrl               string   `json:"api_url,omitempty"` //nolint:revive,stylecheck
+	ApiUrl               string   `json:"api_url,omitempty"` //nolint:revive,staticcheck
 	StoreID              string   `json:"store_id,omitempty"`
 	AuthorizationModelID string   `json:"authorization_model_id,omitempty"`
 	APIToken             string   `json:"api_token,omitempty"`

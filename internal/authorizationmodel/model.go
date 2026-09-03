@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/oklog/ulid/v2"
-	pb "github.com/openfga/api/proto/openfga/v1"
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	language "github.com/openfga/language/pkg/go/transformer"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -120,12 +120,12 @@ func (model *AuthzModel) GetConditions() *map[string]openfga.Condition {
 	return &conditions
 }
 
-func (model *AuthzModel) GetProtoModel() *pb.AuthorizationModel {
+func (model *AuthzModel) GetProtoModel() *openfgav1.AuthorizationModel {
 	if model == nil {
 		return nil
 	}
 
-	var pbModel pb.AuthorizationModel
+	var pbModel openfgav1.AuthorizationModel
 
 	jsonModel, err := model.GetAsJSONString()
 	if err != nil {
@@ -145,7 +145,7 @@ func (model *AuthzModel) GetSizeInKB() float64 {
 
 // ProtoModelSizeInKB returns the protobuf-serialized size of the model in KB,
 // rounded to two decimal places. Returns 0 for a nil model.
-func ProtoModelSizeInKB(pbModel *pb.AuthorizationModel) float64 {
+func ProtoModelSizeInKB(pbModel *openfgav1.AuthorizationModel) float64 {
 	if pbModel == nil {
 		return 0
 	}
@@ -328,7 +328,7 @@ func (model *AuthzModel) DisplayAsJSON(fields []string) AuthzModel {
 }
 
 func (model *AuthzModel) DisplayAsDSL(fields []string) (*string, error) {
-	modelPb := pb.AuthorizationModel{}
+	modelPb := openfgav1.AuthorizationModel{}
 
 	if len(fields) < 1 {
 		fields = append(fields, "model")

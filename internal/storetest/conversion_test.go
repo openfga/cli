@@ -3,7 +3,7 @@ package storetest
 import (
 	"testing"
 
-	pb "github.com/openfga/api/proto/openfga/v1"
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
@@ -14,19 +14,19 @@ func TestConvertPbUsersToStrings(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		input    *pb.User
+		input    *openfgav1.User
 		expected string
 	}{
 		"User_Object": {
-			input:    &pb.User{User: &pb.User_Object{Object: &pb.Object{Type: "user", Id: "anne"}}},
+			input:    &openfgav1.User{User: &openfgav1.User_Object{Object: &openfgav1.Object{Type: "user", Id: "anne"}}},
 			expected: "user:anne",
 		},
 		"User_Userset": {
-			input:    &pb.User{User: &pb.User_Userset{Userset: &pb.UsersetUser{Type: "group", Id: "fga", Relation: "member"}}},
+			input:    &openfgav1.User{User: &openfgav1.User_Userset{Userset: &openfgav1.UsersetUser{Type: "group", Id: "fga", Relation: "member"}}},
 			expected: "group:fga#member",
 		},
 		"User_Wildcard": {
-			input:    &pb.User{User: &pb.User_Wildcard{Wildcard: &pb.TypedWildcard{Type: "user"}}},
+			input:    &openfgav1.User{User: &openfgav1.User_Wildcard{Wildcard: &openfgav1.TypedWildcard{Type: "user"}}},
 			expected: "user:*",
 		},
 	}
@@ -35,7 +35,7 @@ func TestConvertPbUsersToStrings(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got := convertPbUsersToStrings([]*pb.User{testcase.input})
+			got := convertPbUsersToStrings([]*openfgav1.User{testcase.input})
 
 			assert.Equal(t, []string{testcase.expected}, got)
 		})
@@ -80,12 +80,12 @@ func TestConvertStoreObjectToObject(t *testing.T) {
 	tests := map[string]struct {
 		input             string
 		expectedFGAObject openfga.FgaObject
-		expectedPBObject  *pb.Object
+		expectedPBObject  *openfgav1.Object
 	}{
 		"Converts object": {
 			input:             "document:roadmap",
 			expectedFGAObject: openfga.FgaObject{Type: "document", Id: "roadmap"},
-			expectedPBObject:  &pb.Object{Type: "document", Id: "roadmap"},
+			expectedPBObject:  &openfgav1.Object{Type: "document", Id: "roadmap"},
 		},
 	}
 
@@ -106,13 +106,13 @@ func TestConvertClientTupleKeysToProtoTupleKeys(t *testing.T) {
 
 	tests := map[string]struct {
 		input    []client.ClientContextualTupleKey
-		expected []*pb.TupleKey
+		expected []*openfgav1.TupleKey
 	}{
 		"User_Object": {
 			input: []client.ClientContextualTupleKey{
 				{User: "user:anne", Relation: "owner", Object: "folder:product"},
 			},
-			expected: []*pb.TupleKey{
+			expected: []*openfgav1.TupleKey{
 				{User: "user:anne", Relation: "owner", Object: "folder:product"},
 			},
 		},
