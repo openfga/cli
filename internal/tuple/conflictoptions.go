@@ -11,8 +11,8 @@ import (
 type ClientWriteRequestOnDuplicateWrites client.ClientWriteRequestOnDuplicateWrites
 
 const (
-	CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_ERROR  ClientWriteRequestOnDuplicateWrites = "error"  //nolint:revive
-	CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE ClientWriteRequestOnDuplicateWrites = "ignore" //nolint:revive
+	CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_ERROR  ClientWriteRequestOnDuplicateWrites = "error"  //nolint:revive,staticcheck
+	CLIENT_WRITE_REQUEST_ON_DUPLICATE_WRITES_IGNORE ClientWriteRequestOnDuplicateWrites = "ignore" //nolint:revive,staticcheck
 )
 
 func (option *ClientWriteRequestOnDuplicateWrites) String() string {
@@ -46,8 +46,8 @@ func (option *ClientWriteRequestOnDuplicateWrites) Type() string {
 type ClientWriteRequestOnMissingDeletes client.ClientWriteRequestOnMissingDeletes
 
 const (
-	CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_ERROR  ClientWriteRequestOnMissingDeletes = "error"  //nolint:revive
-	CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_IGNORE ClientWriteRequestOnMissingDeletes = "ignore" //nolint:revive
+	CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_ERROR  ClientWriteRequestOnMissingDeletes = "error"  //nolint:revive,staticcheck
+	CLIENT_WRITE_REQUEST_ON_MISSING_DELETES_IGNORE ClientWriteRequestOnMissingDeletes = "ignore" //nolint:revive,staticcheck
 )
 
 func (option *ClientWriteRequestOnMissingDeletes) String() string {

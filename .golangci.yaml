@@ -3,20 +3,35 @@ run:
   modules-download-mode: readonly
   allow-parallel-runners: true
 linters:
-  default: all
-  disable:
-    - dupl
-    - exhaustruct
-    - forbidigo
-    - gochecknoglobals
-    - gochecknoinits
-    - goconst
-    - mnd
-    - testpackage
-    - usetesting
-    - noinlineerr
-    - wsl
+  default: none
+  enable:
+    - bodyclose
+    - copyloopvar
+    - errcheck
+    - errname
+    - gocritic
+    - govet
+    - ineffassign
+    - revive
+    - staticcheck
+    - unused
+    - unconvert
+    - unparam
+    - wastedassign
+    - whitespace
+    - godot
+    - importas
   settings:
+    govet: { enable-all: true, disable: [shadow, fieldalignment] }
+    staticcheck: { checks: [all] }
+    gocritic: { disabled-checks: [ifElseChain] }
+    revive:
+      rules:
+        - { name: package-comments, disabled: true }
+    importas:
+      no-unaliased: true
+      alias:
+        - { pkg: github.com/openfga/api/proto/openfga/v1, alias: openfgav1 }
     depguard:
       rules:
         main:
@@ -61,18 +76,6 @@ linters:
             - github.com/spf13/cobra
             - github.com/spf13/viper
             - google.golang.org/protobuf/proto
-    funlen:
-      lines: 120
-      statements: 80
-    tagliatelle:
-      case:
-        rules:
-          json: snake
-        use-field-name: true
-    wsl_v5:
-      allow-first-in-block: true
-      allow-whole-block: false
-      branch-max-lines: 2
   exclusions:
     generated: lax
     presets:
@@ -81,16 +84,9 @@ linters:
       - legacy
       - std-error-handling
     rules:
-      - linters:
-          - lll
-        path: cmd/tuple/write(.*).go
-      - linters:
-          - err113
-          - funlen
-          - lll
-        path: _test.go
-      - linters:
-          - revive
+      - { linters: [errcheck, bodyclose], path: (.+)_test.go }
+      - { linters: [errcheck], source: ^\s*defer\s+ }
+      - linters: [revive]
         text: "avoid package names that conflict with Go standard library package names"
         path: internal/slices
     paths:
@@ -103,6 +99,7 @@ formatters:
     - gofumpt
     - goimports
   settings:
+    gofmt: { simplify: true }
     goimports:
       local-prefixes:
         - github.com/openfga/cli
