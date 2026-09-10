@@ -1,0 +1,7 @@
+version: "1"
+rules:
+  - name: "bad"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "nonexistent"
+        object: "org:acme"

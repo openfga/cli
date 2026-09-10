@@ -1,0 +1,24 @@
+version: "1"
+rules:
+  - name: "add-member"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:{{ input.org }}"
+tests:
+  - name: "anne becomes member of acme"
+    input:
+      id: "anne"
+      org: "acme"
+    expect_tuples:
+      - user: "user:anne"
+        relation: "member"
+        object: "org:acme"
+  - name: "bob becomes member of acme"
+    input:
+      id: "bob"
+      org: "acme"
+    expect_tuples:
+      - user: "user:bob"
+        relation: "member"
+        object: "org:acme"
