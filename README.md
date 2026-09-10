@@ -48,6 +48,7 @@ A cross-platform CLI to interact with an OpenFGA server
     - [Mapping](#mapping)
       - [Validate a Mapping File](#validate-mapping)
       - [Run Embedded Tests](#test-mapping)
+      - [Scaffold a Mapping File](#init-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1275,6 +1276,26 @@ fga mapping **test** \<mapping-file\>
 PASS  admin gets member and admin (3ms)
 PASS  regular user only gets member (2ms)
 2 passed, 0 failed (5ms)
+```
+
+##### Init Mapping
+
+###### Command
+fga mapping **init** [mapping.yaml]
+
+###### Parameters
+* `[mapping.yaml]`: Output file path (optional, defaults to `mapping.yaml`)
+* `--minimal`: Emit a skeleton file without the example test block
+* `--force`: Overwrite an existing file without prompting
+
+###### Example
+`fga mapping init`
+
+`fga mapping init --minimal my-mapping.yaml`
+
+###### Response
+```
+Created mapping.yaml
 ```
 
 ## Contributing
