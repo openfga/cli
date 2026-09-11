@@ -57,6 +57,24 @@ func runMappingTests( //nolint:cyclop
 		return fmt.Errorf("%q: %w (must be text, json, or junit)", opts.format, errUnknownTestFormat)
 	}
 
+	// Create the output writer before compilation so --output-file is
+	// honoured even when the mapping fails to compile.
+	toFile := opts.outputFile != ""
+
+	var target io.Writer
+
+	if toFile {
+		outFile, createErr := os.Create(opts.outputFile)
+		if createErr != nil {
+			return fmt.Errorf("creating output file: %w", createErr)
+		}
+		defer outFile.Close()
+
+		target = outFile
+	} else {
+		target = out
+	}
+
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("reading %s: %w", path, err)
@@ -66,11 +84,11 @@ func runMappingTests( //nolint:cyclop
 	if compileErr != nil {
 		switch opts.format {
 		case "json":
-			if encErr := formatJSONCompileError(out, compileErr); encErr != nil {
+			if encErr := formatJSONCompileError(target, compileErr); encErr != nil {
 				return fmt.Errorf("encoding compile error: %w", encErr)
 			}
 		case "junit":
-			if encErr := formatJUnitCompileError(out, compileErr); encErr != nil {
+			if encErr := formatJUnitCompileError(target, compileErr); encErr != nil {
 				return fmt.Errorf("encoding compile error: %w", encErr)
 			}
 		default:
@@ -87,25 +105,6 @@ func runMappingTests( //nolint:cyclop
 
 	run := compiled.RunTestsFiltered(ctx, opts.filter, opts.failFast)
 
-	if opts.filter != "" && run.Filtered > 0 && len(run.Results) == 0 {
-		return fmt.Errorf("filter %q: %w", opts.filter, errFilterMatchedNothing)
-	}
-
-	var target io.Writer
-
-	toFile := opts.outputFile != ""
-	if toFile {
-		outFile, createErr := os.Create(opts.outputFile)
-		if createErr != nil {
-			return fmt.Errorf("creating output file: %w", createErr)
-		}
-		defer outFile.Close()
-
-		target = outFile
-	} else {
-		target = out
-	}
-
 	useColor := colorEnabled(out, opts.noColor, toFile)
 
 	result := testRunResult{
@@ -117,13 +116,23 @@ func runMappingTests( //nolint:cyclop
 		mappingFile: path,
 	}
 
+	if opts.filter != "" && run.Filtered > 0 && len(run.Results) == 0 {
+		if opts.format == "json" {
+			if encErr := formatJSON(target, result); encErr != nil {
+				return fmt.Errorf("writing output: %w", encErr)
+			}
+		}
+
+		return fmt.Errorf("filter %q: %w", opts.filter, errFilterMatchedNothing)
+	}
+
 	var fmtErr error
 
 	switch opts.format {
 	case "json":
 		fmtErr = formatJSON(target, result)
 	case "junit":
-		fmtErr = formatJUnit(target, result, true)
+		fmtErr = formatJUnit(target, result)
 	default:
 		fmtErr = formatText(target, result, opts.verbose, useColor)
 	}

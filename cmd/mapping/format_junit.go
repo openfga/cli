@@ -73,7 +73,7 @@ func junitSuiteName(mappingFile string) string {
 }
 
 // formatJUnit writes results as JUnit XML.
-func formatJUnit(out io.Writer, run testRunResult, verbose bool) error {
+func formatJUnit(out io.Writer, run testRunResult) error {
 	_, failed, errCount := countResults(run.results)
 	dur := totalDuration(run.results)
 
@@ -106,7 +106,7 @@ func formatJUnit(out io.Writer, run testRunResult, verbose bool) error {
 			}
 		}
 
-		if verbose && result.Trace != nil {
+		if result.Trace != nil {
 			if sysOut := buildJUnitSystemOut(result.Trace); sysOut != "" {
 				testCase.SystemOut = &sysOut
 			}
