@@ -1218,7 +1218,6 @@ No store credentials or network access required.
 | [Scaffold a mapping file](#init-mapping)          | `init`     | `[mapping.yaml]`, `--minimal`, `--force`          | `fga mapping init`                                          |
 | [Validate a mapping file](#validate-mapping)      | `validate` | `--format`, `--model-file`, `--verbose`           | `fga mapping validate mapping.yaml`                         |
 | [Run embedded tests](#test-mapping)               | `test`     | `--format`, `--run`, `--fail-fast`, `--output-file`, `--verbose`, `--no-color` | `fga mapping test mapping.yaml` |
-| [Evaluate against JSON input](#run-mapping)       | `run`      | `--input`, `--format`, `--writes-only`            | `echo '{"id":"anne"}' \| fga mapping run mapping.yaml`     |
 
 ##### Validate Mapping
 
