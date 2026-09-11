@@ -17,12 +17,15 @@ limitations under the License.
 package mapping
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
+	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/spf13/cobra"
 )
@@ -80,7 +83,7 @@ func runMappingTests( //nolint:cyclop
 		return fmt.Errorf("reading %s: %w", path, err)
 	}
 
-	compiled, compileErr := mapper.Compile(data)
+	compiled, compileErr := mapper.Compile(data, mapper.WithTrace(opts.verbose))
 	if compileErr != nil {
 		switch opts.format {
 		case "json":
@@ -169,9 +172,32 @@ Use --format to choose between human-readable text (default), JSON, or JUnit XML
   fga mapping test --format junit --output-file results.xml mapping.yaml
   fga mapping test --run anne mapping.yaml
   fga mapping test --fail-fast mapping.yaml`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := runMappingTests(cmd.Context(), args[0], runMappingTestsOptions{
+		path := ""
+
+		if len(args) == 0 {
+			if !isatty.IsTerminal(os.Stdin.Fd()) {
+				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
+				os.Exit(2)
+			}
+
+			fmt.Fprint(cmd.ErrOrStderr(), "Enter path to mapping file: ")
+
+			scanner := bufio.NewScanner(os.Stdin)
+			if scanner.Scan() {
+				path = strings.TrimSpace(scanner.Text())
+			}
+
+			if path == "" {
+				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
+				os.Exit(2)
+			}
+		} else {
+			path = args[0]
+		}
+
+		err := runMappingTests(cmd.Context(), path, runMappingTestsOptions{
 			filter:     testRunFilter,
 			failFast:   testFailFast,
 			format:     testFormat,
@@ -196,8 +222,8 @@ func init() {
 	testCmd.Flags().StringVar(&testFormat, "format", "text", `Output format: "text", "json", or "junit"`)
 	testCmd.Flags().StringVarP(&testOutputFile, "output-file", "o", "", "Write output to a file instead of stdout")
 	testCmd.Flags().BoolVar(&testNoColor, "no-color", false, "Disable color in text output")
-	testCmd.Flags().BoolVar(
-		&testVerbose, "verbose", false,
+	testCmd.Flags().BoolVarP(
+		&testVerbose, "verbose", "v", false,
 		"Show rule trace and tuple details for each test (text format only)",
 	)
 }

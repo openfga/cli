@@ -129,6 +129,32 @@ func writeFailureBlock(dest *errWriter, result mapper.TestResult, colors colorSe
 		writeDiffTuples(dest, extra, colors.plus("+ "), "      ")
 	}
 
+	if len(result.ExpectedTupleFilters) > 0 || len(result.ActualTupleFilters) > 0 {
+		missingFilters := sortTupleFilters(missingTupleFilters(result.ExpectedTupleFilters, result.ActualTupleFilters))
+		extraFilters := sortTupleFilters(extraTupleFilters(result.ExpectedTupleFilters, result.ActualTupleFilters))
+
+		dest.println("")
+
+		nExpected, nActual := len(result.ExpectedTupleFilters), len(result.ActualTupleFilters)
+		dest.printf("    expected %d tuple filters, got %d\n\n", nExpected, nActual)
+		dest.println("    missing filters (expected but not produced):")
+
+		if len(missingFilters) == 0 {
+			dest.println("      (none)")
+		} else {
+			writeDiffTupleFilters(dest, missingFilters, colors.minus("- "), "      ")
+		}
+
+		dest.println("")
+		dest.println("    extra filters (produced but not expected):")
+
+		if len(extraFilters) == 0 {
+			dest.println("      (none)")
+		} else {
+			writeDiffTupleFilters(dest, extraFilters, colors.plus("+ "), "      ")
+		}
+	}
+
 	if verbose && len(result.Actual) > 0 {
 		dest.println("")
 		dest.println("    all actual tuples:")
@@ -165,6 +191,38 @@ func writeVerboseTrace(dest *errWriter, result mapper.TestResult) {
 	if result.Passed && len(result.Actual) > 0 {
 		dest.println("        actual tuples:")
 		writeTupleBlock(dest, result.Actual, "          ")
+	}
+}
+
+// writeDiffTupleFilters writes tuple filters with a prefix marker, tab-aligned.
+func writeDiffTupleFilters(dest *errWriter, filters []language.TupleFilter, prefix, indent string) {
+	if dest.err != nil {
+		return
+	}
+
+	tabw := tabwriter.NewWriter(dest, 0, 0, 2, ' ', 0)
+
+	for _, filter := range filters {
+		user := filter.User
+		if user == "" {
+			user = "*"
+		}
+
+		relation := filter.Relation
+		if relation == "" {
+			relation = "*"
+		}
+
+		object := filter.Object
+		if object == "" {
+			object = "*"
+		}
+
+		fmt.Fprintf(tabw, "%s%s%s\t%s\t%s\t[%s]\n", indent, prefix, user, relation, object, filter.Action)
+	}
+
+	if err := tabw.Flush(); err != nil && dest.err == nil {
+		dest.err = err
 	}
 }
 

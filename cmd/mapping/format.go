@@ -139,6 +139,65 @@ func extraTuples(expected, actual []language.Tuple) []language.Tuple {
 	return extra
 }
 
+func tupleFilterKey(f language.TupleFilter) string {
+	return f.User + "\x00" + f.Relation + "\x00" + f.Object + "\x00" + string(f.Action)
+}
+
+// missingTupleFilters returns filters present in expected but not in actual.
+func missingTupleFilters(expected, actual []language.TupleFilter) []language.TupleFilter {
+	actualCount := make(map[string]int, len(actual))
+
+	for _, f := range actual {
+		actualCount[tupleFilterKey(f)]++
+	}
+
+	var missing []language.TupleFilter
+
+	for _, f := range expected {
+		key := tupleFilterKey(f)
+		if actualCount[key] > 0 {
+			actualCount[key]--
+		} else {
+			missing = append(missing, f)
+		}
+	}
+
+	return missing
+}
+
+// extraTupleFilters returns filters present in actual but not in expected.
+func extraTupleFilters(expected, actual []language.TupleFilter) []language.TupleFilter {
+	expectedCount := make(map[string]int, len(expected))
+
+	for _, f := range expected {
+		expectedCount[tupleFilterKey(f)]++
+	}
+
+	var extra []language.TupleFilter
+
+	for _, f := range actual {
+		key := tupleFilterKey(f)
+		if expectedCount[key] > 0 {
+			expectedCount[key]--
+		} else {
+			extra = append(extra, f)
+		}
+	}
+
+	return extra
+}
+
+// sortTupleFilters returns a sorted copy of the given filters.
+func sortTupleFilters(filters []language.TupleFilter) []language.TupleFilter {
+	sorted := make([]language.TupleFilter, len(filters))
+	copy(sorted, filters)
+	sort.Slice(sorted, func(i, j int) bool {
+		return tupleFilterKey(sorted[i]) < tupleFilterKey(sorted[j])
+	})
+
+	return sorted
+}
+
 // sortTuples returns a copy of tuples sorted by (user, relation, object, action, condition).
 func sortTuples(tuples []language.Tuple) []language.Tuple {
 	sorted := make([]language.Tuple, len(tuples))

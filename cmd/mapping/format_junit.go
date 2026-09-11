@@ -45,9 +45,14 @@ type junitSuite struct {
 type junitCase struct {
 	Name      string        `xml:"name,attr"`
 	Time      string        `xml:"time,attr"`
+	Skipped   *junitSkipped `xml:"skipped,omitempty"`
 	Failure   *junitFailure `xml:"failure,omitempty"`
 	Error     *junitError   `xml:"error,omitempty"`
 	SystemOut *string       `xml:"system-out,omitempty"`
+}
+
+type junitSkipped struct {
+	Message string `xml:"message,attr,omitempty"`
 }
 
 type junitFailure struct {
@@ -113,6 +118,22 @@ func formatJUnit(out io.Writer, run testRunResult) error {
 		}
 
 		suite.TestCases = append(suite.TestCases, testCase)
+	}
+
+	for i := range run.filtered {
+		suite.TestCases = append(suite.TestCases, junitCase{
+			Name:    fmt.Sprintf("filtered-%d", i+1),
+			Time:    "0.000",
+			Skipped: &junitSkipped{Message: "excluded by --run filter"},
+		})
+	}
+
+	for i := range run.skipped {
+		suite.TestCases = append(suite.TestCases, junitCase{
+			Name:    fmt.Sprintf("skipped-%d", i+1),
+			Time:    "0.000",
+			Skipped: &junitSkipped{Message: "not run (fail-fast)"},
+		})
 	}
 
 	return writeJUnitXML(out, junitTestSuites{TestSuites: []junitSuite{suite}})
