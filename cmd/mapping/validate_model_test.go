@@ -34,8 +34,6 @@ func typeDefWithRefs(refs []openfga.RelationReference) *openfga.TypeDefinition {
 	}
 }
 
-func ptr[T any](v T) *T { return &v }
-
 func TestIsValidAssigneeCondition(t *testing.T) {
 	t.Parallel()
 
@@ -67,7 +65,7 @@ func TestIsValidAssigneeCondition(t *testing.T) {
 	t.Run("wildcard ref with required condition", func(t *testing.T) {
 		t.Parallel()
 
-		wildcard := map[string]interface{}{}
+		wildcard := map[string]any{}
 		typeDef := typeDefWithRefs([]openfga.RelationReference{
 			{Type: "user", Wildcard: &wildcard, Condition: &condName},
 		})
@@ -80,7 +78,7 @@ func TestIsValidAssigneeCondition(t *testing.T) {
 		t.Parallel()
 
 		typeDef := typeDefWithRefs([]openfga.RelationReference{
-			{Type: "group", Relation: ptr("member"), Condition: &condName},
+			{Type: "group", Relation: openfga.PtrString("member"), Condition: &condName},
 		})
 
 		assert.True(t, isValidAssignee(typeDef, "rel", "group", "member", condName), "matching condition should be valid")

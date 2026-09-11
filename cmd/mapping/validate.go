@@ -198,6 +198,7 @@ authorization model: object types, relations, and user types must exist and be v
 	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		path := ""
+
 		if len(args) == 0 {
 			if !isatty.IsTerminal(os.Stdin.Fd()) {
 				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
@@ -223,7 +224,9 @@ authorization model: object types, relations, and user types must exist and be v
 			path, validateFormat, validateModelFile, validateVerbose,
 			cmd.OutOrStdout(), cmd.ErrOrStderr(),
 		)
-		if errors.Is(err, errMappingInvalid) || errors.Is(err, errModelInconsistent) || errors.Is(err, errUnknownValidateFormat) {
+		if errors.Is(err, errMappingInvalid) ||
+			errors.Is(err, errModelInconsistent) ||
+			errors.Is(err, errUnknownValidateFormat) {
 			os.Exit(2)
 		}
 
@@ -237,5 +240,8 @@ func init() {
 		&validateModelFile, "model-file", "",
 		"Path to FGA authorization model file (DSL, JSON, or modular)",
 	)
-	validateCmd.Flags().BoolVarP(&validateVerbose, "verbose", "v", false, "Show per-rule validation status (text format only)")
+	validateCmd.Flags().BoolVarP(
+		&validateVerbose, "verbose", "v", false,
+		"Show per-rule validation status (text format only)",
+	)
 }
