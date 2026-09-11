@@ -162,7 +162,7 @@ func validateTupleTemplate(idx *modelIndex, ruleName string, tmpl mapper.TupleTe
 		return nil
 	}
 
-	if !isValidAssignee(typeDef, relation, userType, userRel) {
+	if !isValidAssignee(typeDef, relation, userType, userRel, tmpl.Condition) {
 		userDesc := userType
 		if userRel != "" && userRel != "*" {
 			userDesc = userType + "#" + userRel
@@ -218,7 +218,7 @@ func validateTupleFilterTemplate( //nolint:cyclop
 		return nil
 	}
 
-	if !isValidAssignee(typeDef, filterTmpl.Relation, userType, userRel) {
+	if !isValidAssignee(typeDef, filterTmpl.Relation, userType, userRel, "") {
 		userDesc := userType
 		if userRel != "" && userRel != "*" {
 			userDesc = userType + "#" + userRel
@@ -291,10 +291,13 @@ func extractTypeFromField(field string) (string, string, bool) {
 	return typeName, "", true
 }
 
-// isValidAssignee checks whether a user type (with optional relation) is allowed
-// as an assignee for the given relation on the given type definition.
+// isValidAssignee checks whether a user type (with optional relation and condition) is
+// allowed as an assignee for the given relation on the given type definition.
 // Returns true when the model lacks metadata needed for assignee validation.
-func isValidAssignee(typeDef *openfga.TypeDefinition, relation, userType, userRel string) bool { //nolint:cyclop
+func isValidAssignee( //nolint:cyclop
+	typeDef *openfga.TypeDefinition,
+	relation, userType, userRel, tupleCondition string,
+) bool {
 	meta := typeDef.GetMetadata()
 	if meta.Relations == nil {
 		return true
@@ -314,17 +317,19 @@ func isValidAssignee(typeDef *openfga.TypeDefinition, relation, userType, userRe
 			continue
 		}
 
+		conditionMatches := ref.Condition == nil || *ref.Condition == tupleCondition
+
 		switch {
 		case userRel == "*":
-			if ref.Wildcard != nil {
+			if ref.Wildcard != nil && conditionMatches {
 				return true
 			}
 		case userRel != "":
-			if ref.Relation != nil && *ref.Relation == userRel {
+			if ref.Relation != nil && *ref.Relation == userRel && conditionMatches {
 				return true
 			}
 		default:
-			if ref.Relation == nil && ref.Wildcard == nil {
+			if ref.Relation == nil && ref.Wildcard == nil && conditionMatches {
 				return true
 			}
 		}
