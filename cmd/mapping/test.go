@@ -215,6 +215,11 @@ Use --format to choose between human-readable text (default), JSON, or JUnit XML
 			noColor:    testNoColor,
 			verbose:    testVerbose,
 		}, cmd.OutOrStdout(), cmd.ErrOrStderr())
+		if errors.Is(err, errUnknownTestFormat) {
+			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+			os.Exit(2)
+		}
+
 		if errors.Is(err, errMappingInvalid) {
 			os.Exit(2)
 		}

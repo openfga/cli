@@ -1262,7 +1262,7 @@ fga mapping **test** \<mapping-file\>
 * `--run`: Run only tests whose name contains this substring (case-sensitive)
 * `--fail-fast`: Stop after the first failing test
 * `--output-file` / `-o`: Write output to a file instead of stdout
-* `--verbose`: Show rule trace and tuple details for each test (text format only)
+* `--verbose`: Show rule trace and tuple details for each test (text: full trace and tuples; junit: trace in `<system-out>`)
 * `--no-color`: Disable color in text output
 
 ###### Example
