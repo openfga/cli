@@ -17,14 +17,13 @@ limitations under the License.
 package mapping
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
+	"github.com/charmbracelet/huh"
 	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/spf13/cobra"
@@ -182,14 +181,11 @@ Use --format to choose between human-readable text (default), JSON, or JUnit XML
 				os.Exit(2)
 			}
 
-			fmt.Fprint(cmd.ErrOrStderr(), "Enter path to mapping file: ")
-
-			scanner := bufio.NewScanner(os.Stdin)
-			if scanner.Scan() {
-				path = strings.TrimSpace(scanner.Text())
-			}
-
-			if path == "" {
+			if err := huh.NewInput().
+				Title("Mapping file").
+				Placeholder("mapping.yaml").
+				Value(&path).
+				Run(); err != nil || path == "" {
 				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
 				os.Exit(2)
 			}
