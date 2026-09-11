@@ -2,6 +2,7 @@ package mapping
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/fs"
 	"os"
@@ -60,6 +61,17 @@ func TestInitMapping(t *testing.T) {
 		require.NoError(t, err)
 		_, err = mapper.Compile(data)
 		assert.NoError(t, err, "generated YAML must compile cleanly")
+	})
+
+	t.Run("starter template embedded tests pass", func(t *testing.T) {
+		t.Parallel()
+
+		dir := t.TempDir()
+		path := filepath.Join(dir, "mapping.yaml")
+		require.NoError(t, initMapping(path, false, false, &bytes.Buffer{}))
+
+		err := runMappingTests(context.Background(), path, runMappingTestsOptions{}, &bytes.Buffer{}, &bytes.Buffer{})
+		assert.NoError(t, err, "embedded tests in the starter template must all pass")
 	})
 
 	t.Run("--minimal generates a skeleton without tests block", func(t *testing.T) {

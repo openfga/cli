@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/huh"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 )
 
@@ -73,19 +74,9 @@ tests:
         object: "org:acme"
 `
 
-// stdinIsTTY reports whether stdin is an interactive terminal.
-func stdinIsTTY() bool {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return false
-	}
-
-	return stat.Mode()&os.ModeCharDevice != 0
-}
-
 // huhConfirm is the default confirm function: prompts on a TTY, errors otherwise.
 func huhConfirm(path string) (bool, error) {
-	if !stdinIsTTY() {
+	if !isatty.IsTerminal(os.Stdin.Fd()) {
 		return false, fmt.Errorf("%s already exists — use --force to overwrite: %w", path, fs.ErrExist)
 	}
 
@@ -106,31 +97,45 @@ func initMapping(path string, minimal, force bool, out io.Writer) error {
 }
 
 func initMappingWithConfirm(path string, minimal, force bool, out io.Writer, confirm func(string) (bool, error)) error {
-	if !force {
-		_, err := os.Stat(path)
-		if err == nil {
-			overwrite, confirmErr := confirm(path)
-
-			switch {
-			case errors.Is(confirmErr, huh.ErrUserAborted):
-				fmt.Fprintln(out, "Aborted.")
-
-				return nil
-			case confirmErr != nil:
-				return confirmErr
-			case !overwrite:
-				fmt.Fprintln(out, "Aborted.")
-
-				return nil
-			}
-		} else if !errors.Is(err, fs.ErrNotExist) {
-			return fmt.Errorf("checking %s: %w", path, err)
-		}
-	}
-
 	content := starterTemplate
 	if minimal {
 		content = minimalTemplate
+	}
+
+	if !force {
+		// Atomically create the file — O_EXCL prevents TOCTOU and does not
+		// follow symlinks on the final path component.
+		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		if err == nil {
+			defer f.Close()
+
+			if _, writeErr := fmt.Fprint(f, content); writeErr != nil {
+				return fmt.Errorf("writing %s: %w", path, writeErr)
+			}
+
+			fmt.Fprintf(out, "Created %s\n", path)
+
+			return nil
+		}
+
+		if !errors.Is(err, fs.ErrExist) {
+			return fmt.Errorf("creating %s: %w", path, err)
+		}
+
+		overwrite, confirmErr := confirm(path)
+
+		switch {
+		case errors.Is(confirmErr, huh.ErrUserAborted):
+			fmt.Fprintln(out, "Aborted.")
+
+			return nil
+		case confirmErr != nil:
+			return confirmErr
+		case !overwrite:
+			fmt.Fprintln(out, "Aborted.")
+
+			return nil
+		}
 	}
 
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil { //nolint:gosec
