@@ -221,9 +221,12 @@ authorization model: object types, relations, and user types must exist and be v
 			path, validateFormat, validateModelFile, validateVerbose,
 			cmd.OutOrStdout(), cmd.ErrOrStderr(),
 		)
-		if errors.Is(err, errMappingInvalid) ||
-			errors.Is(err, errModelInconsistent) ||
-			errors.Is(err, errUnknownValidateFormat) {
+		if errors.Is(err, errUnknownValidateFormat) {
+			fmt.Fprintln(cmd.ErrOrStderr(), err.Error())
+			os.Exit(2)
+		}
+
+		if errors.Is(err, errMappingInvalid) || errors.Is(err, errModelInconsistent) {
 			os.Exit(2)
 		}
 

@@ -46,9 +46,9 @@ func TestIsValidAssigneeCondition(t *testing.T) {
 			{Type: "user", Condition: &condName},
 		})
 
-		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", condName), "matching condition should be valid")
-		assert.False(t, isValidAssignee(typeDef, "rel", "user", "", ""), "missing condition should be invalid")
-		assert.False(t, isValidAssignee(typeDef, "rel", "user", "", "other"), "wrong condition should be invalid")
+		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", condName, false), "matching condition should be valid")
+		assert.False(t, isValidAssignee(typeDef, "rel", "user", "", "", false), "missing condition should be invalid")
+		assert.False(t, isValidAssignee(typeDef, "rel", "user", "", "other", false), "wrong condition should be invalid")
 	})
 
 	t.Run("direct type ref with no condition required", func(t *testing.T) {
@@ -58,8 +58,8 @@ func TestIsValidAssigneeCondition(t *testing.T) {
 			{Type: "user"},
 		})
 
-		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", ""), "no condition required accepts empty condition")
-		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", condName), "no condition required accepts any condition")
+		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", "", false), "no condition required accepts empty condition")
+		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", condName, false), "no condition required accepts any condition")
 	})
 
 	t.Run("wildcard ref with required condition", func(t *testing.T) {
@@ -70,8 +70,8 @@ func TestIsValidAssigneeCondition(t *testing.T) {
 			{Type: "user", Wildcard: &wildcard, Condition: &condName},
 		})
 
-		assert.True(t, isValidAssignee(typeDef, "rel", "user", "*", condName), "matching condition should be valid")
-		assert.False(t, isValidAssignee(typeDef, "rel", "user", "*", ""), "missing condition should be invalid")
+		assert.True(t, isValidAssignee(typeDef, "rel", "user", "*", condName, false), "matching condition should be valid")
+		assert.False(t, isValidAssignee(typeDef, "rel", "user", "*", "", false), "missing condition should be invalid")
 	})
 
 	t.Run("relation ref with required condition", func(t *testing.T) {
@@ -81,7 +81,18 @@ func TestIsValidAssigneeCondition(t *testing.T) {
 			{Type: "group", Relation: openfga.PtrString("member"), Condition: &condName},
 		})
 
-		assert.True(t, isValidAssignee(typeDef, "rel", "group", "member", condName), "matching condition should be valid")
-		assert.False(t, isValidAssignee(typeDef, "rel", "group", "member", ""), "missing condition should be invalid")
+		assert.True(t, isValidAssignee(typeDef, "rel", "group", "member", condName, false), "matching condition should be valid")
+		assert.False(t, isValidAssignee(typeDef, "rel", "group", "member", "", false), "missing condition should be invalid")
+	})
+
+	t.Run("skip condition check accepts conditioned-only type (tuple_filter path)", func(t *testing.T) {
+		t.Parallel()
+
+		typeDef := typeDefWithRefs([]openfga.RelationReference{
+			{Type: "user", Condition: &condName},
+		})
+
+		assert.True(t, isValidAssignee(typeDef, "rel", "user", "", "", true),
+			"filter path should match conditioned-only type even when condition is empty")
 	})
 }

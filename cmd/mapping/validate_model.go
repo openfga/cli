@@ -162,7 +162,7 @@ func validateTupleTemplate(idx *modelIndex, ruleName string, tmpl mapper.TupleTe
 		return nil
 	}
 
-	if !isValidAssignee(typeDef, relation, userType, userRel, tmpl.Condition) {
+	if !isValidAssignee(typeDef, relation, userType, userRel, tmpl.Condition, false) {
 		userDesc := userType
 		if userRel != "" && userRel != "*" {
 			userDesc = userType + "#" + userRel
@@ -218,7 +218,7 @@ func validateTupleFilterTemplate( //nolint:cyclop
 		return nil
 	}
 
-	if !isValidAssignee(typeDef, filterTmpl.Relation, userType, userRel, "") {
+	if !isValidAssignee(typeDef, filterTmpl.Relation, userType, userRel, "", true) {
 		userDesc := userType
 		if userRel != "" && userRel != "*" {
 			userDesc = userType + "#" + userRel
@@ -294,9 +294,12 @@ func extractTypeFromField(field string) (string, string, bool) {
 // isValidAssignee checks whether a user type (with optional relation and condition) is
 // allowed as an assignee for the given relation on the given type definition.
 // Returns true when the model lacks metadata needed for assignee validation.
+// Pass skipConditionCheck=true for tuple_filter validation: filters carry no condition
+// and must match if the type is assignable under any condition.
 func isValidAssignee( //nolint:cyclop
 	typeDef *openfga.TypeDefinition,
 	relation, userType, userRel, tupleCondition string,
+	skipConditionCheck bool,
 ) bool {
 	meta := typeDef.GetMetadata()
 	if meta.Relations == nil {
@@ -317,7 +320,7 @@ func isValidAssignee( //nolint:cyclop
 			continue
 		}
 
-		conditionMatches := ref.Condition == nil || *ref.Condition == tupleCondition
+		conditionMatches := skipConditionCheck || ref.Condition == nil || *ref.Condition == tupleCondition
 
 		switch {
 		case userRel == "*":
