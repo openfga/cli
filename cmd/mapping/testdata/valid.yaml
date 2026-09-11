@@ -1,0 +1,7 @@
+version: "1"
+rules:
+  - name: "members"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:acme"

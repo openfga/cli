@@ -1,0 +1,37 @@
+config:
+  inherit-env: true
+
+tests:
+  # fga mapping validate
+  001 - validate accepts a valid mapping:
+    command: fga mapping validate ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      contains:
+        - "valid"
+
+  002 - validate json format reports rule count:
+    command: fga mapping validate --format json ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        valid: "true"
+        rule_count: "1"
+
+  003 - validate rejects an invalid mapping:
+    command: fga mapping validate ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+    stderr:
+      contains:
+        - "unclosed"
+
+  004 - validate json format reports errors on invalid mapping:
+    command: fga mapping validate --format json ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+    stdout:
+      json:
+        valid: "false"
+
+  005 - validate rejects unknown format:
+    command: fga mapping validate --format xml ./tests/fixtures/basic-mapping.yaml
+    exit-code: 2

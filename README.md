@@ -45,6 +45,8 @@ A cross-platform CLI to interact with an OpenFGA server
       - [List Objects](#list-objects)
       - [List Relations](#list-relations)
       - [List Users](#list-users)
+    - [Mapping](#mapping)
+      - [Validate a Mapping File](#validate-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1202,6 +1204,51 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
       ]
     }
 }
+```
+
+#### Mapping
+
+Offline tooling for authoring, validating, testing, and evaluating JSON→tuple mapping files.
+No store credentials or network access required.
+
+- `mapping`
+
+| Description                                       | command    | parameters                                        | example                                                     |
+|---------------------------------------------------|------------|---------------------------------------------------|-------------------------------------------------------------|
+| [Scaffold a mapping file](#init-mapping)          | `init`     | `[mapping.yaml]`, `--minimal`, `--force`          | `fga mapping init`                                          |
+| [Validate a mapping file](#validate-mapping)      | `validate` | `--format`, `--model-file`, `--verbose`           | `fga mapping validate mapping.yaml`                         |
+| [Run embedded tests](#test-mapping)               | `test`     | `--format`, `--run`, `--fail-fast`, `--output-file`, `--verbose`, `--no-color` | `fga mapping test mapping.yaml` |
+
+##### Validate Mapping
+
+###### Command
+fga mapping **validate** \<mapping-file\>
+
+###### Parameters
+* `--format`: Output format — `text` (default) or `json`
+* `--model-file`: Path to an FGA authorization model file (DSL, JSON, or modular). When provided, every tuple template is checked against the model.
+* `--verbose`: Show per-rule validation status (text format only)
+
+###### Example
+`fga mapping validate mapping.yaml`
+
+`fga mapping validate --format json --model-file model.fga mapping.yaml`
+
+###### Response
+```
+mapping is valid (2 rules)
+```
+
+With `--verbose`:
+```
+  ✓ add-member
+  ✓ add-admin
+mapping is valid (2 rules)
+```
+
+JSON response:
+```json
+{"valid":true,"rule_count":2,"rules":["add-member","add-admin"]}
 ```
 
 ## Contributing
