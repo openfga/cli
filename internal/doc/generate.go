@@ -140,11 +140,14 @@ func splice(readmePath, begin, end, section string) error {
 	return os.WriteFile(readmePath, []byte(newContent), 0o600) //nolint:wrapcheck
 }
 
-// GenerateCommandsTOC returns the indented markdown list of command groups and
-// commands suitable for splicing between the BEGIN_COMMANDS_TOC markers in the
-// table of contents. Groups are indented 4 spaces, commands 6 spaces.
+// GenerateCommandsTOC returns the markdown list entry for Commands and all its
+// subgroups, suitable for splicing between the BEGIN_COMMANDS_TOC markers.
+// The marker wraps the entire - [Commands] subtree so no HTML comment
+// interrupts the list and triggers code-block parsing.
 func GenerateCommandsTOC(rootCmd *cobra.Command) string {
 	var b strings.Builder
+
+	b.WriteString("  - [Commands](#commands)\n")
 
 	for _, cmd := range rootCmd.Commands() {
 		if !cmd.IsAvailableCommand() || cmd.IsAdditionalHelpTopicCommand() {

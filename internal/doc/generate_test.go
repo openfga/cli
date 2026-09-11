@@ -238,6 +238,15 @@ func TestSpliceIntoReadme_ErrorsWhenMarkersNotFound(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestGenerateCommandsTOC_StartsWithCommandsHeader(t *testing.T) {
+	t.Parallel()
+
+	root := buildTestTree()
+	toc := doc.GenerateCommandsTOC(root)
+
+	assert.True(t, strings.HasPrefix(toc, "  - [Commands](#commands)\n"))
+}
+
 func TestGenerateCommandsTOC_GroupEntries(t *testing.T) {
 	t.Parallel()
 

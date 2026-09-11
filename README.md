@@ -18,8 +18,8 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Custom Headers](#custom-headers)
-  - [Commands](#commands)
 <!-- BEGIN_COMMANDS_TOC -->
+  - [Commands](#commands)
     - [Manage JSON-to-tuple mappings](#manage-jsontotuple-mappings)
       - [Scaffold a starter mapping file](#scaffold-a-starter-mapping-file)
       - [Run the embedded tests in a mapping file](#run-the-embedded-tests-in-a-mapping-file)
