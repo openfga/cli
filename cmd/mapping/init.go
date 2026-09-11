@@ -96,20 +96,26 @@ func initMapping(path string, minimal, force bool, out io.Writer) error {
 	return initMappingWithConfirm(path, minimal, force, out, huhConfirm)
 }
 
-func initMappingWithConfirm(path string, minimal, force bool, out io.Writer, confirm func(string) (bool, error)) error {
+func initMappingWithConfirm( //nolint:cyclop,nonamedreturns
+	path string, minimal, force bool, out io.Writer, confirm func(string) (bool, error),
+) (err error) {
 	content := starterTemplate
 	if minimal {
 		content = minimalTemplate
 	}
 
-	if !force {
+	if !force { //nolint:nestif
 		// Atomically create the file — O_EXCL prevents TOCTOU and does not
 		// follow symlinks on the final path component.
-		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		outFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 		if err == nil {
-			defer f.Close()
+			defer func() {
+				if closeErr := outFile.Close(); closeErr != nil && err == nil {
+					err = fmt.Errorf("closing %s: %w", path, closeErr)
+				}
+			}()
 
-			if _, writeErr := fmt.Fprint(f, content); writeErr != nil {
+			if _, writeErr := fmt.Fprint(outFile, content); writeErr != nil {
 				return fmt.Errorf("writing %s: %w", path, writeErr)
 			}
 
