@@ -7,28 +7,30 @@ tests:
     command: fga mapping validate ./tests/fixtures/basic-mapping.yaml
     exit-code: 0
     stdout:
-      contains: "valid"
+      contains:
+        - "valid"
 
   002 - validate json format reports rule count:
     command: fga mapping validate --format json ./tests/fixtures/basic-mapping.yaml
     exit-code: 0
     stdout:
       json:
-        valid: true
-        rule_count: 1
+        valid: "true"
+        rule_count: "1"
 
   003 - validate rejects an invalid mapping:
     command: fga mapping validate ./tests/fixtures/invalid-mapping.yaml
-    exit-code: 1
+    exit-code: 2
     stderr:
-      contains: "unclosed"
+      contains:
+        - "unclosed"
 
   004 - validate json format reports errors on invalid mapping:
     command: fga mapping validate --format json ./tests/fixtures/invalid-mapping.yaml
-    exit-code: 1
+    exit-code: 2
     stdout:
       json:
-        valid: false
+        valid: "false"
 
   005 - validate rejects unknown format:
     command: fga mapping validate --format xml ./tests/fixtures/basic-mapping.yaml
