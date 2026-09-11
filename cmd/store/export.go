@@ -132,9 +132,23 @@ func buildStoreData(ctx context.Context, config fga.ClientConfig, fgaClient clie
 // exportCmd represents the export store command.
 var exportCmd = &cobra.Command{
 	Use:     "export",
-	Short:   "Export store data",
-	Long:    `Export a store to YAML`,
-	Example: "fga store export",
+	Short:   "Export Store Data",
+	Long:    `Export a store to YAML. If --output-file is specified the response will be written to that file; otherwise it is written to stdout.`,
+	Example: "fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4",
+	Annotations: map[string]string{
+		"docs:response": `name: Test
+model: |+
+  model
+    schema 1.1
+
+  type user
+
+tuples:
+  - user: user:1
+    relation: member
+    object: group:admins
+tests: []`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

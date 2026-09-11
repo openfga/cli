@@ -91,8 +91,23 @@ var changesCmd = &cobra.Command{
 	Use:   "changes",
 	Short: "Read Relationship Tuple Changes (Watch)",
 	Long:  "Get a list of relationship tuple changes (Writes and Deletes) across time.",
-	Example: `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type document 
-	--start-time 2022-01-01T00:00:00Z --continuation-token=MXw=`,
+	Example: `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=`,
+	Annotations: map[string]string{
+		"docs:response": `{
+  "changes": [
+    {
+      "operation": "TUPLE_OPERATION_WRITE",
+      "timestamp": "2023-07-06T15:12:40.294950382Z",
+      "tuple_key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      }
+    }
+  ],
+  "continuation_token":"NHw="
+}`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
