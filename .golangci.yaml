@@ -37,6 +37,7 @@ linters:
             - github.com/openfga/cli
             - github.com/openfga/go-sdk
             - github.com/openfga/language
+            - github.com/charmbracelet/huh
             - github.com/openfga/mapper
             - github.com/openfga/openfga
             - github.com/schollz/progressbar/v3
@@ -53,6 +54,7 @@ linters:
             - $test
           allow:
             - $gostd
+            - github.com/charmbracelet/huh
             - github.com/golang/mock/gomock
             - github.com/openfga/api/proto
             - github.com/openfga/cli
