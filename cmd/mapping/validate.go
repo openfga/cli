@@ -17,6 +17,7 @@ limitations under the License.
 package mapping
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/spf13/cobra"
 )
@@ -193,13 +195,35 @@ authorization model: object types, relations, and user types must exist and be v
 	Example: `  fga mapping validate mapping.yaml
   fga mapping validate --format json mapping.yaml
   fga mapping validate --model-file model.fga mapping.yaml`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		path := ""
+		if len(args) == 0 {
+			if !isatty.IsTerminal(os.Stdin.Fd()) {
+				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
+				os.Exit(2)
+			}
+
+			fmt.Fprint(cmd.ErrOrStderr(), "Enter path to mapping file: ")
+
+			scanner := bufio.NewScanner(os.Stdin)
+			if scanner.Scan() {
+				path = strings.TrimSpace(scanner.Text())
+			}
+
+			if path == "" {
+				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
+				os.Exit(2)
+			}
+		} else {
+			path = args[0]
+		}
+
 		err := validateMapping(
-			args[0], validateFormat, validateModelFile, validateVerbose,
+			path, validateFormat, validateModelFile, validateVerbose,
 			cmd.OutOrStdout(), cmd.ErrOrStderr(),
 		)
-		if errors.Is(err, errMappingInvalid) || errors.Is(err, errModelInconsistent) {
+		if errors.Is(err, errMappingInvalid) || errors.Is(err, errModelInconsistent) || errors.Is(err, errUnknownValidateFormat) {
 			os.Exit(2)
 		}
 
@@ -213,5 +237,5 @@ func init() {
 		&validateModelFile, "model-file", "",
 		"Path to FGA authorization model file (DSL, JSON, or modular)",
 	)
-	validateCmd.Flags().BoolVar(&validateVerbose, "verbose", false, "Show per-rule validation status (text format only)")
+	validateCmd.Flags().BoolVarP(&validateVerbose, "verbose", "v", false, "Show per-rule validation status (text format only)")
 }

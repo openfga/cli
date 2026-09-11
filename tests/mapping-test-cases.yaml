@@ -34,4 +34,4 @@ tests:
 
   005 - validate rejects unknown format:
     command: fga mapping validate --format xml ./tests/fixtures/basic-mapping.yaml
-    exit-code: 1
+    exit-code: 2
