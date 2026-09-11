@@ -17,6 +17,7 @@ limitations under the License.
 package mapping
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -41,11 +42,10 @@ func formatText(out io.Writer, run testRunResult, verbose bool, color bool) erro
 
 	for _, result := range run.results {
 		label := testLabel(result, colors)
+		dest.printf("%s%s (%s)\n", label, result.Name, formatDuration(result.Duration))
+
 		if verbose {
-			dest.printf("%s%s (%s)\n", label, result.Name, formatDuration(result.Duration))
 			writeVerboseTrace(dest, result)
-		} else {
-			dest.printf("%s%s\n", label, result.Name)
 		}
 	}
 
@@ -227,6 +227,7 @@ func writeDiffTupleFilters(dest *errWriter, filters []language.TupleFilter, pref
 }
 
 // writeDiffTuples writes tuples with a prefix marker, tab-aligned.
+// Tuples with a condition are rendered with the condition name and optional context JSON.
 func writeDiffTuples(dest *errWriter, tuples []language.Tuple, prefix, indent string) {
 	if dest.err != nil {
 		return
@@ -235,8 +236,21 @@ func writeDiffTuples(dest *errWriter, tuples []language.Tuple, prefix, indent st
 	tabw := tabwriter.NewWriter(dest, 0, 0, 2, ' ', 0)
 
 	for _, tup := range tuples {
-		fmt.Fprintf(tabw, "%s%s%s\t%s\t%s\t[%s]\n",
-			indent, prefix, tup.User, tup.Relation, tup.Object, tup.Action)
+		if tup.Condition != "" {
+			ctx := ""
+
+			if len(tup.Context) > 0 {
+				if b, jsonErr := json.Marshal(tup.Context); jsonErr == nil {
+					ctx = " | " + string(b)
+				}
+			}
+
+			fmt.Fprintf(tabw, "%s%s%s\t%s\t%s\t[%s]\t(%s%s)\n",
+				indent, prefix, tup.User, tup.Relation, tup.Object, tup.Action, tup.Condition, ctx)
+		} else {
+			fmt.Fprintf(tabw, "%s%s%s\t%s\t%s\t[%s]\n",
+				indent, prefix, tup.User, tup.Relation, tup.Object, tup.Action)
+		}
 	}
 
 	if err := tabw.Flush(); err != nil && dest.err == nil {

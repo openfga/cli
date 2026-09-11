@@ -67,6 +67,22 @@ func newColorSet(enabled bool) colorSet {
 	}
 }
 
+// sameFile reports whether src and dst refer to the same file.
+// Returns false if either path cannot be stat'd.
+func sameFile(src, dst string) bool {
+	srcInfo, err := os.Stat(src)
+	if err != nil {
+		return false
+	}
+
+	dstInfo, err := os.Stat(dst)
+	if err != nil {
+		return false
+	}
+
+	return os.SameFile(srcInfo, dstInfo)
+}
+
 // isTTY reports whether the given writer is a terminal.
 func isTTY(w io.Writer) bool {
 	f, ok := w.(*os.File)

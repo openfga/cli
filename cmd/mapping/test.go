@@ -34,6 +34,7 @@ var (
 	errFilterMatchedNothing = errors.New("matched no tests")
 	errTestsFailed          = errors.New("test(s) failed")
 	errUnknownTestFormat    = errors.New("unknown format")
+	errOutputSameAsInput    = errors.New("--output-file must not point to the mapping input file")
 )
 
 type runMappingTestsOptions struct {
@@ -45,7 +46,7 @@ type runMappingTestsOptions struct {
 	verbose    bool
 }
 
-func runMappingTests( //nolint:cyclop
+func runMappingTests( //nolint:cyclop,gocognit
 	ctx context.Context,
 	path string,
 	opts runMappingTestsOptions,
@@ -66,6 +67,10 @@ func runMappingTests( //nolint:cyclop
 	var target io.Writer
 
 	if toFile {
+		if sameFile(path, opts.outputFile) {
+			return errOutputSameAsInput
+		}
+
 		outFile, createErr := os.Create(opts.outputFile)
 		if createErr != nil {
 			return fmt.Errorf("creating output file: %w", createErr)
@@ -119,8 +124,17 @@ func runMappingTests( //nolint:cyclop
 	}
 
 	if opts.filter != "" && run.Filtered > 0 && len(run.Results) == 0 {
-		if opts.format == "json" {
+		switch opts.format {
+		case "json":
 			if encErr := formatJSON(target, result); encErr != nil {
+				return fmt.Errorf("writing output: %w", encErr)
+			}
+		case "junit":
+			if encErr := formatJUnit(target, result); encErr != nil {
+				return fmt.Errorf("writing output: %w", encErr)
+			}
+		default:
+			if encErr := formatText(target, result, opts.verbose, useColor); encErr != nil {
 				return fmt.Errorf("writing output: %w", encErr)
 			}
 		}
