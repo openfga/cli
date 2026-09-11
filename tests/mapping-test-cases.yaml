@@ -35,3 +35,32 @@ tests:
   005 - validate rejects unknown format:
     command: fga mapping validate --format xml ./tests/fixtures/basic-mapping.yaml
     exit-code: 2
+
+  # fga mapping test
+  006 - test runs passing tests:
+    command: fga mapping test --format json ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        summary.total: "2"
+        summary.passed: "2"
+        summary.failed: "0"
+
+  007 - test compile error exits with code 2:
+    command: fga mapping test ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+
+  008 - test --run filters by substring:
+    command: fga mapping test --format json --run anne ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        summary.total: "2"
+        summary.passed: "1"
+
+  009 - test --run matching nothing exits non-zero:
+    command: fga mapping test --run NOMATCH ./tests/fixtures/basic-mapping.yaml
+    exit-code: 1
+    stderr:
+      contains:
+        - "matched no tests"

@@ -47,6 +47,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [List Users](#list-users)
     - [Mapping](#mapping)
       - [Validate a Mapping File](#validate-mapping)
+      - [Run Embedded Tests](#test-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1249,6 +1250,31 @@ mapping is valid (2 rules)
 JSON response:
 ```json
 {"valid":true,"rule_count":2,"rules":["add-member","add-admin"]}
+```
+
+##### Test Mapping
+
+###### Command
+fga mapping **test** \<mapping-file\>
+
+###### Parameters
+* `--format`: Output format — `text` (default), `json`, or `junit`
+* `--run`: Run only tests whose name contains this substring (case-sensitive)
+* `--fail-fast`: Stop after the first failing test
+* `--output-file` / `-o`: Write output to a file instead of stdout
+* `--verbose`: Show rule trace and tuple details for each test (text: full trace and tuples; junit: trace in `<system-out>`)
+* `--no-color`: Disable color in text output
+
+###### Example
+`fga mapping test mapping.yaml`
+
+`fga mapping test --format junit --output-file results.xml mapping.yaml`
+
+###### Response
+```
+PASS  admin gets member and admin (3ms)
+PASS  regular user only gets member (2ms)
+2 passed, 0 failed (5ms)
 ```
 
 ## Contributing
