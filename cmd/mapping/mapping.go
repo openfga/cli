@@ -30,4 +30,5 @@ func init() {
 	MappingCmd.AddCommand(validateCmd)
 	MappingCmd.AddCommand(testCmd)
 	MappingCmd.AddCommand(initCmd)
+	MappingCmd.AddCommand(runCmd)
 }

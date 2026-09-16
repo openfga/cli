@@ -1,0 +1,8 @@
+version: "1"
+rules:
+  - name: "remove-viewer"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "viewer"
+        object: "org:acme"
+        action: "delete"
