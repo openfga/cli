@@ -34,6 +34,7 @@ import (
 var (
 	errUnknownRunFormat = errors.New("unknown format")
 	errRecordsFailed    = errors.New("one or more input records failed")
+	errNonObjectRecord  = errors.New("record is not a JSON object")
 )
 
 type runMappingOptions struct {
@@ -376,6 +377,12 @@ func evalRecord(
 		return nil, nil, fmt.Errorf("reading input JSON: %w", err)
 	}
 
+	// A bare `null` unmarshals into a nil map without error; reject it here so a
+	// non-object record fails at the input boundary like any other malformed line.
+	if event == nil {
+		return nil, nil, fmt.Errorf("reading input JSON: %w", errNonObjectRecord)
+	}
+
 	result, err := compiled.Evaluate(ctx, event)
 	if err != nil {
 		return nil, nil, fmt.Errorf("evaluating mapping: %w", err)
@@ -502,7 +509,8 @@ func init() {
 		&runWritesOnly, "writes-only", false,
 		"Emit only write operations in ClientTupleKey format (consumable by fga tuple write)",
 	)
-	runCmd.Flags().StringVar(&runInputFile, "input", "", "Path to JSON input file (default: stdin)")
+	runCmd.Flags().StringVar(
+		&runInputFile, "input", "", "Path to JSONL input file, one JSON object per line (default: stdin)")
 	runCmd.Flags().BoolVar(
 		&runAggregate, "aggregate", false,
 		"Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting",

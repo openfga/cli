@@ -1304,12 +1304,14 @@ Created mapping.yaml
 ###### Command
 fga mapping **run** \<mapping-file\>
 
-Reads a JSON event from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store and are reported as warnings on stderr.
+Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `unresolved_filters` with `--format json`.
 
 ###### Parameters
-* `--input`: Path to a JSON input file (default: stdin)
+* `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
 * `--format`: Output format — `jsonl` (default) or `json`
 * `--writes-only`: Emit only write-action tuples in `ClientTupleKey` format, consumable directly by `fga tuple write --file`
+* `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
+* `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
 
 ###### Example
 `echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
@@ -1318,7 +1320,7 @@ Reads a JSON event from stdin (or `--input`) and emits tuple operations as JSONL
 
 ###### Response
 ```json
-{"user":"user:anne","relation":"member","object":"org:acme","action":"write"}
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
 ```
 
 ## Contributing

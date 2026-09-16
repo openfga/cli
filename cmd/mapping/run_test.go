@@ -222,6 +222,14 @@ func TestRunMapping(t *testing.T) {
 		assert.Contains(t, err.Error(), "input JSON")
 	})
 
+	t.Run("null input is rejected as a non-object record", func(t *testing.T) {
+		t.Parallel()
+
+		err := runMapping(context.Background(), "testdata/valid.yaml", testOpts("jsonl", false), strings.NewReader(`null`), &bytes.Buffer{}, &bytes.Buffer{})
+		require.Error(t, err)
+		assert.ErrorIs(t, err, errNonObjectRecord)
+	})
+
 	t.Run("invalid mapping returns errMappingInvalid", func(t *testing.T) {
 		t.Parallel()
 
