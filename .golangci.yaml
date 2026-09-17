@@ -21,6 +21,7 @@ linters:
     - whitespace
     - godot
     - importas
+    - depguard
   settings:
     govet: { enable-all: true, disable: [shadow, fieldalignment] }
     staticcheck: { checks: [all] }
