@@ -26,6 +26,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/openfga/mapper/language"
 	"github.com/spf13/cobra"
@@ -470,6 +471,7 @@ var (
 	runInputFile       string
 	runAggregate       bool
 	runContinueOnError bool
+	runInteractive     bool
 )
 
 var runCmd = &cobra.Command{
@@ -495,9 +497,37 @@ before emitting; the default streaming JSONL does not.
 continues; the command still exits non-zero if any record was skipped.`,
 	Example: `  echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml
   fga mapping run mapping.yaml --input event.json --format json
-  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl`,
-	Args: cobra.ExactArgs(1),
+  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
+  fga mapping run mapping.yaml -i`,
+	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		errStream := cmd.ErrOrStderr()
+
+		// Reject incompatible interactive flags before any prompt, so a bad flag
+		// combination never blocks on asking for a mapping path first.
+		if runInteractive {
+			if err := checkInteractiveFlags(runWritesOnly, runInputFile); err != nil {
+				fmt.Fprintln(errStream, "Error: "+err.Error())
+				os.Exit(2)
+			}
+		}
+
+		path := promptMappingFile(args, errStream)
+
+		if runInteractive {
+			if !isatty.IsTerminal(os.Stdin.Fd()) {
+				fmt.Fprintln(errStream, "Error: --interactive requires an interactive terminal")
+				os.Exit(2)
+			}
+
+			err := runMappingInteractive(cmd.Context(), path, cmd.InOrStdin(), cmd.OutOrStdout(), errStream)
+			if errors.Is(err, errMappingInvalid) {
+				os.Exit(2)
+			}
+
+			return err
+		}
+
 		inputReader := cmd.InOrStdin()
 
 		if runInputFile != "" {
@@ -512,7 +542,7 @@ continues; the command still exits non-zero if any record was skipped.`,
 		}
 
 		err := runMapping(
-			cmd.Context(), args[0],
+			cmd.Context(), path,
 			runMappingOptions{
 				format:          runFormat,
 				writesOnly:      runWritesOnly,
@@ -549,5 +579,9 @@ func init() {
 	runCmd.Flags().BoolVar(
 		&runContinueOnError, "continue-on-error", false,
 		"Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped",
+	)
+	runCmd.Flags().BoolVarP(
+		&runInteractive, "interactive", "i", false,
+		"Explore the mapping in a terminal loop: paste JSON documents and see the tuples they produce (requires a TTY)",
 	)
 }

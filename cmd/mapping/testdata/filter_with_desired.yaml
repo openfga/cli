@@ -1,0 +1,10 @@
+version: "1"
+rules:
+  - name: "reconcile-viewer"
+    tuple_filters:
+      - user: "user:{{ input.id }}"
+        object: "org:{{ input.org }}"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "viewer"
+        object: "org:{{ input.org }}"

@@ -1315,6 +1315,7 @@ Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple
 * `--writes-only`: Emit only write-action tuples in `ClientTupleKey` format, consumable directly by `fga tuple write --file`
 * `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
 * `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
+* `--interactive` / `-i`: Explore the mapping in a terminal loop — type or paste a JSON document and see the tuple operations it produces. The document is evaluated as soon as it forms a complete JSON value, so a single-line object is evaluated on Enter and a multi-line one when its closing brace is typed. Supports line editing (arrow keys, history). Requires an interactive terminal and cannot be combined with `--input` or `--writes-only`.
 
 ###### Example
 `echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
@@ -1324,6 +1325,25 @@ Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple
 ###### Response
 ```json
 {"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
+```
+
+###### Interactive mode
+In a terminal, `-i` starts an explorer loop. Type or paste a JSON document and the resulting tuple operations are printed as an aligned table. The document is evaluated as soon as it parses as complete JSON — a single-line object on Enter, a multi-line one when its closing brace is typed. While more input is expected the prompt shows `...` and a one-time hint notes that the document is not yet valid JSON; pressing Enter on a blank line evaluates whatever is buffered. Invalid JSON is reported with the line, column, and a caret under the offending character. A rule with `tuple_filters` cannot be resolved offline, so its filter conditions are shown as `filter` rows, with the desired-state tuples it reconciles toward shown as indented `desired` rows (they drive a read-diff-write against a store rather than being written directly). Line editing (arrow keys, history) is available. Available commands: `:reload` re-reads and recompiles the mapping from disk, `:trace on|off` toggles the per-rule trace, and `:quit` exits.
+
+```
+$ fga mapping run mapping.yaml -i
+mapping loaded: 2 rules. Type or paste a JSON document; it is evaluated once complete.  commands: :reload  :trace on|off  :quit
+
+> {"id":"anne","org":"acme"}
+  write   user:anne   member   org:acme
+> {"id": bob}
+Error: invalid JSON at line 1, column 8: invalid character 'b' looking for beginning of value
+  {"id": bob}
+         ^
+> {"id":"anne","org":"acme"}
+  filter      user:anne   *        org:acme
+    desired   user:anne   viewer   org:acme
+> :quit
 ```
 
 ## Contributing
