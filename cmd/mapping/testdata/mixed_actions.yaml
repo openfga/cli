@@ -1,0 +1,13 @@
+version: "1"
+rules:
+  - name: "add-member"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:{{ input.org }}"
+  - name: "remove-viewer"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "viewer"
+        object: "org:{{ input.org }}"
+        action: "delete"

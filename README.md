@@ -49,6 +49,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Validate a Mapping File](#validate-mapping)
       - [Run Embedded Tests](#test-mapping)
       - [Scaffold a Mapping File](#init-mapping)
+      - [Evaluate Against JSON Input](#run-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1296,6 +1297,30 @@ fga mapping **init** [mapping.yaml]
 ###### Response
 ```
 Created mapping.yaml
+```
+
+##### Run Mapping
+
+###### Command
+fga mapping **run** \<mapping-file\>
+
+Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
+
+###### Parameters
+* `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
+* `--format`: Output format — `jsonl` (default) or `json`
+* `--writes-only`: Emit only write-action tuples in `ClientTupleKey` format, consumable directly by `fga tuple write --file`
+* `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
+* `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
+
+###### Example
+`echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
+
+`fga mapping run --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
+
+###### Response
+```json
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
 ```
 
 ## Contributing

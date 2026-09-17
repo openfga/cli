@@ -14,7 +14,7 @@ require (
 	github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20
 	github.com/openfga/go-sdk v0.8.2
 	github.com/openfga/language/pkg/go v0.3.2-0.20260730144454-83fedf8a4e70
-	github.com/openfga/mapper v0.0.0-20260908144724-afd818a559fe
+	github.com/openfga/mapper v0.0.0-20260916114550-64ae7f46a687
 	github.com/openfga/openfga v1.20.0
 	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/spf13/cobra v1.10.2

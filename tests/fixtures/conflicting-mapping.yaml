@@ -1,0 +1,15 @@
+version: "1"
+rules:
+  - name: "grant"
+    when: 'input.op == "add"'
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:{{ input.org }}"
+  - name: "revoke"
+    when: 'input.op == "remove"'
+    action: "delete"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:{{ input.org }}"
