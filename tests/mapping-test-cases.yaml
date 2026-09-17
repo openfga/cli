@@ -1,0 +1,184 @@
+config:
+  inherit-env: true
+
+tests:
+  # fga mapping validate
+  001 - validate accepts a valid mapping:
+    command: fga mapping validate ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      contains:
+        - "valid"
+
+  002 - validate json format reports rule count:
+    command: fga mapping validate --format json ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        valid: "true"
+        rule_count: "1"
+
+  003 - validate rejects an invalid mapping:
+    command: fga mapping validate ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+    stderr:
+      contains:
+        - "unclosed"
+
+  004 - validate json format reports errors on invalid mapping:
+    command: fga mapping validate --format json ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+    stdout:
+      json:
+        valid: "false"
+
+  005 - validate rejects unknown format:
+    command: fga mapping validate --format xml ./tests/fixtures/basic-mapping.yaml
+    exit-code: 2
+
+  # fga mapping test
+  006 - test runs passing tests:
+    command: fga mapping test --format json ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        summary.total: "2"
+        summary.passed: "2"
+        summary.failed: "0"
+
+  007 - test compile error exits with code 2:
+    command: fga mapping test ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+
+  008 - test --run filters by substring:
+    command: fga mapping test --format json --run anne ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        summary.total: "2"
+        summary.passed: "1"
+
+  009 - test --run matching nothing exits non-zero:
+    command: fga mapping test --run NOMATCH ./tests/fixtures/basic-mapping.yaml
+    exit-code: 1
+    stderr:
+      contains:
+        - "matched no tests"
+
+  # fga mapping init
+  010 - init creates a mapping file:
+    command: fga mapping init /tmp/fga-mapping-test-$$.yaml
+    exit-code: 0
+    stdout:
+      contains:
+        - "Created"
+
+  011 - init --minimal creates file without tests block:
+    command: bash -c 'fga mapping init --minimal /tmp/fga-mapping-minimal-test-$$.yaml && cat /tmp/fga-mapping-minimal-test-$$.yaml'
+    exit-code: 0
+    stdout:
+      not-contains:
+        - "tests:"
+
+  # fga mapping run
+  012 - run emits JSONL tuple from stdin:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      json:
+        op: "write"
+        user: "user:anne"
+        relation: "member"
+        object: "org:acme"
+
+  013 - run --writes-only emits ClientTupleKey shape without op or action field:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run --writes-only ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      json:
+        user: "user:anne"
+        relation: "member"
+        object: "org:acme"
+      not-contains:
+        - '"op"'
+        - '"action"'
+
+  014 - run --input reads from file:
+    command: fga mapping run --input ./tests/fixtures/mapping-event.json ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        op: "write"
+        user: "user:anne"
+
+  015 - run --format json --writes-only returns a flat array of tuples:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run --format json --writes-only ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      json:
+        0.user: "user:anne"
+
+  016 - run --format json returns a batch object with writes:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run --format json ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      json:
+        writes.0.user: "user:anne"
+
+  017 - run rejects unknown format:
+    command: bash -c 'echo '"'"'{}'"'"' | fga mapping run --format xml ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 2
+
+  018 - run rejects invalid mapping:
+    command: bash -c 'echo '"'"'{}'"'"' | fga mapping run ./tests/fixtures/invalid-mapping.yaml'
+    exit-code: 2
+    stderr:
+      contains:
+        - "unclosed"
+
+  019 - run streams one op per record for multi-record input:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping run ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      line-count: 2
+      contains:
+        - "user:anne"
+        - "user:bob"
+
+  020 - run --aggregate dedups an identical tuple across records:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"anne","org":"acme"}\n'"'"' | fga mapping run --aggregate ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      line-count: 1
+
+  021 - run --aggregate reports a cross-record write/delete conflict:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme","op":"add"}\n{"id":"anne","org":"acme","op":"remove"}\n'"'"' | fga mapping run --aggregate ./tests/fixtures/conflicting-mapping.yaml'
+    exit-code: 1
+    stderr:
+      contains:
+        - "conflict"
+
+  022 - run --continue-on-error skips a malformed record and exits non-zero:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\nnot json\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping run --continue-on-error ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 1
+    stdout:
+      line-count: 2
+      contains:
+        - "user:anne"
+        - "user:bob"
+    stderr:
+      contains:
+        - "skipping record on line 2"
+
+  023 - run --continue-on-error with all valid records exits zero:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping run --continue-on-error ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      line-count: 2
+
+  024 - run --aggregate dedups identical unresolved filters across records:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"anne","org":"acme"}\n'"'"' | fga mapping run --aggregate --format json ./tests/fixtures/filter-mapping.yaml'
+    exit-code: 0
+    stdout:
+      json:
+        tuple_filter_operations.#: "1"

@@ -1,0 +1,15 @@
+version: "1"
+rules:
+  - name: "members"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:acme"
+tests:
+  - name: "wrong expectation"
+    input:
+      id: "anne"
+    expect_tuples:
+      - user: "user:bob"
+        relation: "member"
+        object: "org:acme"

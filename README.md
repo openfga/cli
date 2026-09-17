@@ -45,6 +45,11 @@ A cross-platform CLI to interact with an OpenFGA server
       - [List Objects](#list-objects)
       - [List Relations](#list-relations)
       - [List Users](#list-users)
+    - [Mapping](#mapping)
+      - [Validate a Mapping File](#validate-mapping)
+      - [Run Embedded Tests](#test-mapping)
+      - [Scaffold a Mapping File](#init-mapping)
+      - [Evaluate Against JSON Input](#run-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1205,6 +1210,120 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
       ]
     }
 }
+```
+
+#### Mapping
+
+Offline tooling for authoring, validating, testing, and evaluating JSON→tuple mapping files.
+No store credentials or network access required.
+
+- `mapping`
+
+| Description                                       | command    | parameters                                        | example                                                     |
+|---------------------------------------------------|------------|---------------------------------------------------|-------------------------------------------------------------|
+| [Scaffold a mapping file](#init-mapping)          | `init`     | `[mapping.yaml]`, `--minimal`, `--force`          | `fga mapping init`                                          |
+| [Validate a mapping file](#validate-mapping)      | `validate` | `--format`, `--model-file`, `--verbose`           | `fga mapping validate mapping.yaml`                         |
+| [Run embedded tests](#test-mapping)               | `test`     | `--format`, `--run`, `--fail-fast`, `--output-file`, `--verbose`, `--no-color` | `fga mapping test mapping.yaml` |
+
+##### Validate Mapping
+
+###### Command
+fga mapping **validate** \<mapping-file\>
+
+###### Parameters
+* `--format`: Output format — `text` (default) or `json`
+* `--model-file`: Path to an FGA authorization model file (DSL, JSON, or modular). When provided, every tuple template is checked against the model.
+* `--verbose`: Show per-rule validation status (text format only)
+
+###### Example
+`fga mapping validate mapping.yaml`
+
+`fga mapping validate --format json --model-file model.fga mapping.yaml`
+
+###### Response
+```
+mapping is valid (2 rules)
+```
+
+With `--verbose`:
+```
+  ✓ add-member
+  ✓ add-admin
+mapping is valid (2 rules)
+```
+
+JSON response:
+```json
+{"valid":true,"rule_count":2,"rules":["add-member","add-admin"]}
+```
+
+##### Test Mapping
+
+###### Command
+fga mapping **test** \<mapping-file\>
+
+###### Parameters
+* `--format`: Output format — `text` (default), `json`, or `junit`
+* `--run`: Run only tests whose name contains this substring (case-sensitive)
+* `--fail-fast`: Stop after the first failing test
+* `--output-file` / `-o`: Write output to a file instead of stdout
+* `--verbose`: Show rule trace and tuple details for each test (text: full trace and tuples; junit: trace in `<system-out>`)
+* `--no-color`: Disable color in text output
+
+###### Example
+`fga mapping test mapping.yaml`
+
+`fga mapping test --format junit --output-file results.xml mapping.yaml`
+
+###### Response
+```
+PASS  admin gets member and admin (3ms)
+PASS  regular user only gets member (2ms)
+2 passed, 0 failed (5ms)
+```
+
+##### Init Mapping
+
+###### Command
+fga mapping **init** [mapping.yaml]
+
+###### Parameters
+* `[mapping.yaml]`: Output file path (optional, defaults to `mapping.yaml`)
+* `--minimal`: Emit a skeleton file without the example test block
+* `--force`: Overwrite an existing file without prompting
+
+###### Example
+`fga mapping init`
+
+`fga mapping init --minimal my-mapping.yaml`
+
+###### Response
+```
+Created mapping.yaml
+```
+
+##### Run Mapping
+
+###### Command
+fga mapping **run** \<mapping-file\>
+
+Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
+
+###### Parameters
+* `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
+* `--format`: Output format — `jsonl` (default) or `json`
+* `--writes-only`: Emit only write-action tuples in `ClientTupleKey` format, consumable directly by `fga tuple write --file`
+* `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
+* `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
+
+###### Example
+`echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
+
+`fga mapping run --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
+
+###### Response
+```json
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
 ```
 
 ## Contributing

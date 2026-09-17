@@ -450,7 +450,7 @@ func TestReadResponseCSVDTOParser(t *testing.T) {
 						Object:   "document:secret.doc",
 						Condition: &openfga.RelationshipCondition{
 							Name:    "inOfficeIP",
-							Context: toPointer(map[string]any{"ip_addr": "10.0.0.1"}),
+							Context: &map[string]any{"ip_addr": "10.0.0.1"},
 						},
 					},
 					{
@@ -523,10 +523,6 @@ func TestReadResponseCSVDTOListMarshalCSV(t *testing.T) {
 		{"user", "anne", "", "reader", "document", "secret.doc", "inOfficeIP", `{"ip_addr":"10.0.0.1"}`},
 		{"user", "john", "", "writer", "document", "abc.doc", "", ""},
 	}, rows)
-}
-
-func toPointer[T any](p T) *T {
-	return &p
 }
 
 // Test page size behavior based on max-pages parameter.

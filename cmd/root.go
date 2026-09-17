@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/openfga/cli/cmd/mapping"
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/cmd/query"
 	"github.com/openfga/cli/cmd/store"
@@ -81,6 +82,7 @@ func init() {
 	rootCmd.Version = versionStr
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(manCmd)
+	rootCmd.AddCommand(mapping.MappingCmd)
 	rootCmd.AddCommand(store.StoreCmd)
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)

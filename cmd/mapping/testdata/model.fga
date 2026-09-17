@@ -1,0 +1,9 @@
+model
+  schema 1.1
+
+type user
+
+type org
+  relations
+    define member: [user]
+    define admin: [user]

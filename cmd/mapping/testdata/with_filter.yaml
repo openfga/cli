@@ -1,0 +1,12 @@
+version: "1"
+rules:
+  - name: "add-member"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:{{ input.org }}"
+  - name: "remove-user-from-org"
+    tuple_filters:
+      - user: "user:{{ input.id }}"
+        object: "org:{{ input.org }}"
+        action: delete
