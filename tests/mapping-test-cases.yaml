@@ -181,4 +181,4 @@ tests:
     exit-code: 0
     stdout:
       json:
-        unresolved_filters.#: "1"
+        tuple_filter_operations.#: "1"
