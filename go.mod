@@ -1,6 +1,8 @@
 module github.com/openfga/cli
 
-go 1.27.1
+go 1.27
+
+toolchain go1.27.1
 
 require (
 	github.com/charmbracelet/huh v1.0.0
