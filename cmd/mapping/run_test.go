@@ -107,10 +107,10 @@ func TestRunMapping(t *testing.T) {
 		require.Len(t, result.Deletes, 1)
 		assert.Equal(t, "member", result.Writes[0].Relation)
 		assert.Equal(t, "viewer", result.Deletes[0].Relation)
-		assert.NotNil(t, result.UnresolvedFilters)
+		assert.NotNil(t, result.TupleFilterOperations)
 	})
 
-	t.Run("json full format lists unresolved filters and does not warn", func(t *testing.T) {
+	t.Run("json full format lists unresolved filter operations and does not warn", func(t *testing.T) {
 		t.Parallel()
 
 		var out, errOut bytes.Buffer
@@ -120,9 +120,10 @@ func TestRunMapping(t *testing.T) {
 
 		var result batchOutput
 		require.NoError(t, json.NewDecoder(&out).Decode(&result))
-		require.Len(t, result.UnresolvedFilters, 1)
-		assert.Equal(t, "user:anne", result.UnresolvedFilters[0].User)
-		assert.Equal(t, "org:acme", result.UnresolvedFilters[0].Object)
+		require.Len(t, result.TupleFilterOperations, 1)
+		require.Len(t, result.TupleFilterOperations[0].Filters, 1)
+		assert.Equal(t, "user:anne", result.TupleFilterOperations[0].Filters[0].User)
+		assert.Equal(t, "org:acme", result.TupleFilterOperations[0].Filters[0].Object)
 		assert.Empty(t, errOut.String())
 	})
 
@@ -154,19 +155,19 @@ func TestRunMapping(t *testing.T) {
 		assert.Equal(t, "[]", strings.TrimSpace(out.String()))
 	})
 
-	t.Run("json batch marshals empty writes/deletes/filters as [] not null", func(t *testing.T) {
+	t.Run("json batch marshals empty writes/deletes/filter ops as [] not null", func(t *testing.T) {
 		t.Parallel()
 
 		var out bytes.Buffer
 
 		// delete_only.yaml yields a delete and no writes; the batch must still
-		// render writes as an empty array and unresolved_filters as [].
+		// render writes as an empty array and tuple_filter_operations as [].
 		err := runMapping(context.Background(), "testdata/delete_only.yaml", testOpts("json", false), strings.NewReader(`{"id":"anne"}`), &out, &bytes.Buffer{})
 		require.NoError(t, err)
 
 		raw := out.String()
 		assert.Contains(t, raw, `"writes":[]`)
-		assert.Contains(t, raw, `"unresolved_filters":[]`)
+		assert.Contains(t, raw, `"tuple_filter_operations":[]`)
 
 		var result batchOutput
 		require.NoError(t, json.NewDecoder(strings.NewReader(raw)).Decode(&result))
@@ -317,7 +318,7 @@ func TestRunMappingMultiRecord(t *testing.T) {
 		assert.Len(t, lines, 1)
 	})
 
-	t.Run("--aggregate dedups identical unresolved filters across records", func(t *testing.T) {
+	t.Run("--aggregate dedups identical unresolved filter operations across records", func(t *testing.T) {
 		t.Parallel()
 
 		var out, errOut bytes.Buffer
@@ -329,7 +330,7 @@ func TestRunMappingMultiRecord(t *testing.T) {
 
 		var result batchOutput
 		require.NoError(t, json.NewDecoder(&out).Decode(&result))
-		require.Len(t, result.UnresolvedFilters, 1)
+		require.Len(t, result.TupleFilterOperations, 1)
 	})
 
 	t.Run("--aggregate --format json dedups across records", func(t *testing.T) {
@@ -465,5 +466,51 @@ func TestRunMappingContinueOnError(t *testing.T) {
 		var result batchOutput
 		require.NoError(t, json.NewDecoder(&out).Decode(&result))
 		require.Len(t, result.Writes, 1)
+	})
+}
+
+func TestRunMappingFilterOps(t *testing.T) {
+	t.Parallel()
+
+	t.Run("patch filter rule preserves desired-state tuples in json output", func(t *testing.T) {
+		t.Parallel()
+
+		var out bytes.Buffer
+
+		err := runMapping(context.Background(), "testdata/with_patch_filter.yaml", testOpts("json", false), strings.NewReader(`{"id":"anne","org":"acme"}`), &out, &bytes.Buffer{})
+		require.NoError(t, err)
+
+		var raw map[string]any
+		require.NoError(t, json.NewDecoder(&out).Decode(&raw))
+
+		filterOps, hasOps := raw["tuple_filter_operations"].([]any)
+		require.True(t, hasOps, "output must have tuple_filter_operations field")
+		require.Len(t, filterOps, 1)
+
+		filterOp, isMap := filterOps[0].(map[string]any)
+		require.True(t, isMap)
+
+		tuples, hasTuples := filterOp["tuples"].([]any)
+		require.True(t, hasTuples, "tuple_filter_operation must have tuples field")
+		require.Len(t, tuples, 1)
+
+		tuple, isTupleMap := tuples[0].(map[string]any)
+		require.True(t, isTupleMap)
+		assert.Equal(t, "user:anne", tuple["user"])
+		assert.Equal(t, "member", tuple["relation"])
+		assert.Equal(t, "org:acme", tuple["object"])
+	})
+
+	t.Run("streaming mode warns about unresolved filter before a later fatal error", func(t *testing.T) {
+		t.Parallel()
+
+		var out, errOut bytes.Buffer
+
+		// Record 1 produces an unresolved filter; record 2 is malformed and fatal.
+		// Per-record warnings mean the filter warning is already written before the error returns.
+		err := runMapping(context.Background(), "testdata/with_filter.yaml", testOpts("jsonl", false),
+			strings.NewReader(`{"id":"anne","org":"acme"}`+"\n"+`not-json`), &out, &errOut)
+		require.Error(t, err)
+		assert.Contains(t, errOut.String(), "unresolved tuple filter")
 	})
 }

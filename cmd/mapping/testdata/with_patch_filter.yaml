@@ -1,0 +1,11 @@
+version: "1"
+rules:
+  - name: "sync-members"
+    tuple_filters:
+      - object: "org:{{ input.org }}"
+        relation: member
+        action: patch
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: member
+        object: "org:{{ input.org }}"

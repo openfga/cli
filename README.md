@@ -1304,7 +1304,7 @@ Created mapping.yaml
 ###### Command
 fga mapping **run** \<mapping-file\>
 
-Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `unresolved_filters` with `--format json`.
+Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
 
 ###### Parameters
 * `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)

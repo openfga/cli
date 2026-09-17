@@ -71,12 +71,20 @@ type conditionOutput struct {
 	Context map[string]any `json:"context,omitempty"`
 }
 
+// filterOperationOutput is the JSON shape for a rule with tuple_filters: the
+// filter conditions needed to expand the rule against a store, plus the desired
+// state tuples to write once the filter is resolved.
+type filterOperationOutput struct {
+	Filters []language.TupleFilter `json:"filters"`
+	Tuples  []writeTupleOutput     `json:"tuples"`
+}
+
 // batchOutput is the --format json shape without --writes-only: writes and
-// deletes split by action, plus filters that cannot be expanded offline.
+// deletes split by action, plus filter operations that cannot be expanded offline.
 type batchOutput struct {
-	Writes            []writeTupleOutput     `json:"writes"`
-	Deletes           []writeTupleOutput     `json:"deletes"`
-	UnresolvedFilters []language.TupleFilter `json:"unresolved_filters"`
+	Writes                []writeTupleOutput      `json:"writes"`
+	Deletes               []writeTupleOutput      `json:"deletes"`
+	TupleFilterOperations []filterOperationOutput `json:"tuple_filter_operations"`
 }
 
 func toOpTuple(tuple language.Tuple) opTupleOutput {
@@ -108,34 +116,51 @@ func isWrite(tuple language.Tuple) bool {
 	return tuple.Action == "" || tuple.Action == language.ActionWrite
 }
 
-func flattenFilters(ops []mapper.TupleFilterOperation) []language.TupleFilter {
-	filters := make([]language.TupleFilter, 0)
-	for _, op := range ops {
-		filters = append(filters, op.Filters...)
+// toFilterOpOutputs converts mapper filter operations to their JSON output shape,
+// preserving each operation's desired-state tuples alongside its filter conditions.
+func toFilterOpOutputs(ops []mapper.TupleFilterOperation) []filterOperationOutput {
+	result := make([]filterOperationOutput, 0, len(ops))
+	for _, filterOp := range ops {
+		tuples := make([]writeTupleOutput, 0, len(filterOp.Tuples))
+		for _, t := range filterOp.Tuples {
+			tuples = append(tuples, toWriteTuple(t))
+		}
+
+		result = append(result, filterOperationOutput{Filters: filterOp.Filters, Tuples: tuples})
 	}
 
-	return filters
+	return result
 }
 
-// dedupFilters removes duplicate unresolved filters by full identity, preserving
-// order. Used in the --aggregate path so a filter produced identically across
+// dedupFilterOps removes duplicate filter operations by full identity, preserving
+// order. Used in the --aggregate path so an operation produced identically across
 // records collapses to one, mirroring mapper.Compact's tuple dedup.
-func dedupFilters(filters []language.TupleFilter) []language.TupleFilter {
-	if len(filters) <= 1 {
-		return filters
+func dedupFilterOps(ops []mapper.TupleFilterOperation) []mapper.TupleFilterOperation {
+	if len(ops) <= 1 {
+		return ops
 	}
 
-	seen := make(map[language.TupleFilter]struct{}, len(filters))
-	deduped := make([]language.TupleFilter, 0, len(filters))
+	seen := make(map[string]struct{}, len(ops))
+	deduped := make([]mapper.TupleFilterOperation, 0, len(ops))
 
-	for _, filter := range filters {
-		if _, ok := seen[filter]; ok {
+	for _, filterOp := range ops {
+		key, err := json.Marshal(filterOp)
+		if err != nil {
+			// TupleFilterOperation only contains JSON-safe types via JSON unmarshal;
+			// treat any unexpected error as a unique entry to avoid silent data loss.
+			deduped = append(deduped, filterOp)
+
 			continue
 		}
 
-		seen[filter] = struct{}{}
+		k := string(key)
+		if _, exists := seen[k]; exists {
+			continue
+		}
 
-		deduped = append(deduped, filter)
+		seen[k] = struct{}{}
+
+		deduped = append(deduped, filterOp)
 	}
 
 	return deduped
@@ -170,8 +195,8 @@ func emitJSONL(tuples []language.Tuple, writesOnly bool, out io.Writer) error {
 
 // emitJSON writes a single JSON document. With writesOnly it is a flat array of
 // bare write tuples (consumable by `fga tuple write --file`); otherwise a batch
-// object splitting writes/deletes and listing unresolved filters.
-func emitJSON(tuples []language.Tuple, filters []language.TupleFilter, writesOnly bool, out io.Writer) error {
+// object splitting writes/deletes and listing unresolved filter operations.
+func emitJSON(tuples []language.Tuple, ops []mapper.TupleFilterOperation, writesOnly bool, out io.Writer) error {
 	enc := json.NewEncoder(out)
 
 	if writesOnly {
@@ -191,9 +216,9 @@ func emitJSON(tuples []language.Tuple, filters []language.TupleFilter, writesOnl
 	}
 
 	batch := batchOutput{
-		Writes:            make([]writeTupleOutput, 0, len(tuples)),
-		Deletes:           make([]writeTupleOutput, 0),
-		UnresolvedFilters: filters,
+		Writes:                make([]writeTupleOutput, 0, len(tuples)),
+		Deletes:               make([]writeTupleOutput, 0),
+		TupleFilterOperations: toFilterOpOutputs(ops),
 	}
 
 	for _, tuple := range tuples {
@@ -211,13 +236,15 @@ func emitJSON(tuples []language.Tuple, filters []language.TupleFilter, writesOnl
 	return nil
 }
 
-// warnUnresolvedFilters reports, one per line on stderr, each delete-by-filter
-// operation that cannot be expanded without a store.
-func warnUnresolvedFilters(filters []language.TupleFilter, errOut io.Writer) {
-	for _, f := range filters {
-		fmt.Fprintf(errOut,
-			"WARN unresolved tuple filter (needs a store to expand): action=%s user=%s relation=%s object=%s\n",
-			f.Action, f.User, f.Relation, f.Object)
+// warnUnresolvedFilters reports, one per line on stderr, each filter within each
+// filter operation that cannot be expanded without a store.
+func warnUnresolvedFilters(ops []mapper.TupleFilterOperation, errOut io.Writer) {
+	for _, filterOp := range ops {
+		for _, f := range filterOp.Filters {
+			fmt.Fprintf(errOut,
+				"WARN unresolved tuple filter (needs a store to expand): action=%s user=%s relation=%s object=%s\n",
+				f.Action, f.User, f.Relation, f.Object)
+		}
 	}
 }
 
@@ -244,16 +271,15 @@ func runMapping(
 		return errMappingInvalid
 	}
 
-	buffered, filters, hadFailure, err := evalRecords(ctx, compiled, inputReader, opts, out, errOut)
+	buffered, ops, hadFailure, err := evalRecords(ctx, compiled, inputReader, opts, out, errOut)
 	if err != nil {
 		return err
 	}
 
-	// Streaming (default jsonl, no aggregation) has already emitted per record;
-	// only the accumulated filter warnings remain.
+	// Streaming mode emitted per-record; ops is empty and warnUnresolvedFilters is a no-op.
 	if isStreaming(opts) {
-		warnUnresolvedFilters(filters, errOut)
-	} else if err := emitBuffered(buffered, filters, opts, out, errOut); err != nil {
+		warnUnresolvedFilters(ops, errOut)
+	} else if err := emitBuffered(buffered, ops, opts, out, errOut); err != nil {
 		return err
 	}
 
@@ -275,8 +301,9 @@ func isStreaming(opts runMappingOptions) bool {
 
 // evalRecords reads the JSONL input stream (one JSON object per line) and
 // evaluates each record. Streaming output is written to out as each record is
-// evaluated; otherwise the tuples are buffered and returned. Unresolved filters
-// are accumulated across all records. With --continue-on-error a malformed or
+// evaluated; otherwise the tuples are buffered and returned. Unresolved filter
+// operations are accumulated across all records (streaming mode emits warnings
+// immediately and accumulates nothing). With --continue-on-error a malformed or
 // evaluation-failing record is warned to errOut and skipped, and the boolean
 // return reports whether any record was skipped; without it the first failure
 // is returned as a fatal error.
@@ -286,9 +313,9 @@ func evalRecords(
 	inputReader io.Reader,
 	opts runMappingOptions,
 	out, errOut io.Writer,
-) ([]language.Tuple, []language.TupleFilter, bool, error) {
+) ([]language.Tuple, []mapper.TupleFilterOperation, bool, error) {
 	buffered := make([]language.Tuple, 0)
-	filters := make([]language.TupleFilter, 0)
+	ops := make([]mapper.TupleFilterOperation, 0)
 	reader := bufio.NewReader(inputReader)
 	lineNum := 0
 	hadFailure := false
@@ -299,7 +326,7 @@ func evalRecords(
 		if line != "" {
 			lineNum++
 
-			tuples, recFilters, skipped, fatal := processLine(
+			tuples, recOps, skipped, fatal := processLine(
 				ctx, compiled, strings.TrimSpace(line), lineNum, opts, out, errOut)
 			if fatal != nil {
 				return nil, nil, false, fatal
@@ -307,7 +334,7 @@ func evalRecords(
 
 			hadFailure = hadFailure || skipped
 
-			filters = append(filters, recFilters...)
+			ops = append(ops, recOps...)
 			buffered = append(buffered, tuples...)
 		}
 
@@ -320,7 +347,7 @@ func evalRecords(
 		}
 	}
 
-	return buffered, filters, hadFailure, nil
+	return buffered, ops, hadFailure, nil
 }
 
 // processLine evaluates one input line and either streams its output or returns
@@ -335,12 +362,12 @@ func processLine(
 	lineNum int,
 	opts runMappingOptions,
 	out, errOut io.Writer,
-) ([]language.Tuple, []language.TupleFilter, bool, error) {
+) ([]language.Tuple, []mapper.TupleFilterOperation, bool, error) {
 	if trimmed == "" {
 		return nil, nil, false, nil
 	}
 
-	recTuples, recFilters, recErr := evalRecord(ctx, compiled, trimmed)
+	recTuples, recOps, recErr := evalRecord(ctx, compiled, trimmed)
 	if recErr != nil {
 		if !opts.continueOnError {
 			return nil, nil, false, recErr
@@ -356,21 +383,25 @@ func processLine(
 			return nil, nil, false, err
 		}
 
-		return nil, recFilters, false, nil
+		// Emit filter warnings immediately so they are not held in memory until
+		// EOF and are still surfaced if a later record causes a fatal error.
+		warnUnresolvedFilters(recOps, errOut)
+
+		return nil, nil, false, nil
 	}
 
-	return recTuples, recFilters, false, nil
+	return recTuples, recOps, false, nil
 }
 
 // evalRecord parses one JSONL line into an event and evaluates it against the
-// mapping, returning the produced tuples and unresolved filters. It performs no
-// output; the caller decides how to emit. A malformed line or an evaluation
-// error is returned as err.
+// mapping, returning the produced tuples and unresolved filter operations. It
+// performs no output; the caller decides how to emit. A malformed line or an
+// evaluation error is returned as err.
 func evalRecord(
 	ctx context.Context,
 	compiled *mapper.Mapping,
 	line string,
-) ([]language.Tuple, []language.TupleFilter, error) {
+) ([]language.Tuple, []mapper.TupleFilterOperation, error) {
 	var event map[string]any
 
 	if err := json.Unmarshal([]byte(line), &event); err != nil {
@@ -388,7 +419,7 @@ func evalRecord(
 		return nil, nil, fmt.Errorf("evaluating mapping: %w", err)
 	}
 
-	return result.Tuples, flattenFilters(result.TupleFilterOperations), nil
+	return result.Tuples, result.TupleFilterOperations, nil
 }
 
 // emitBuffered emits a whole-run result as a single document. With --aggregate
@@ -396,7 +427,7 @@ func evalRecord(
 // conflict detection) before emitting; a conflict is a runtime error.
 func emitBuffered(
 	tuples []language.Tuple,
-	filters []language.TupleFilter,
+	ops []mapper.TupleFilterOperation,
 	opts runMappingOptions,
 	out, errOut io.Writer,
 ) error {
@@ -407,17 +438,17 @@ func emitBuffered(
 		}
 
 		tuples = compacted
-		filters = dedupFilters(filters)
+		ops = dedupFilterOps(ops)
 	}
 
 	if opts.format == "json" {
-		if err := emitJSON(tuples, filters, opts.writesOnly, out); err != nil {
+		if err := emitJSON(tuples, ops, opts.writesOnly, out); err != nil {
 			return err
 		}
 
-		// The batch object carries unresolved_filters; the writes-only flat array does not.
+		// The batch object carries tuple_filter_operations; the writes-only flat array does not.
 		if opts.writesOnly {
-			warnUnresolvedFilters(filters, errOut)
+			warnUnresolvedFilters(ops, errOut)
 		}
 
 		return nil
@@ -428,7 +459,7 @@ func emitBuffered(
 		return err
 	}
 
-	warnUnresolvedFilters(filters, errOut)
+	warnUnresolvedFilters(ops, errOut)
 
 	return nil
 }
@@ -449,7 +480,7 @@ Input is JSON Lines: one JSON object per line. Outputs tuple operations as JSONL
 or a JSON batch (--format json).
 Runs entirely offline — no store reads, no credentials, no network.
 Rules using tuple_filters cannot be expanded offline and are reported as warnings on stderr
-(or under unresolved_filters in the --format json batch).
+(or under tuple_filter_operations in the --format json batch).
 
 Default JSONL emits one operation per line with an "op" field (write or delete).
 With --writes-only only write operations are emitted, in the bare ClientTupleKey shape
