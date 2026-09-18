@@ -58,6 +58,11 @@ var writeCmd = &cobra.Command{
 	Example: `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json
 fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=fga.mod
 fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"type":"user"},{"type":"document","relations":{"can_view":{"this":{}}},"metadata":{"relations":{"can_view":{"directly_related_user_types":[{"type":"user"}]}}}}],"schema_version":"1.1"}' --format=json`, //nolint:lll
+	Annotations: map[string]string{
+		"docs:response": `{
+  "authorization_model_id":"01GXSA8YR785C4FYS3C0RTG7B1"
+}`,
+	},
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
