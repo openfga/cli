@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### ⚠ BREAKING CHANGES
 
-* references that resolve outside the store file's directory are rejected by default. Pass --allow-external-files to fga store import or fga model test to opt back in.
+* File references that resolve outside the store file's directory are rejected by default. Pass `--allow-external-files` to `fga store import` or `fga model test` to opt back in.
 
 ### Added
 
