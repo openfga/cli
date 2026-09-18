@@ -173,7 +173,7 @@ var (
 )
 
 var testCmd = &cobra.Command{
-	Use:   "test <mapping-file>",
+	Use:   "test [mapping-file]",
 	Short: "Run the embedded tests in a mapping file",
 	Long: `Compiles the mapping and runs its embedded test cases, reporting pass/fail per case.
 Exits 1 when any test fails, 2 when the mapping file cannot be compiled.

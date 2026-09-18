@@ -1228,7 +1228,9 @@ No store credentials or network access required.
 ##### Validate Mapping
 
 ###### Command
-fga mapping **validate** \<mapping-file\>
+fga mapping **validate** [mapping-file]
+
+The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
 
 ###### Parameters
 * `--format`: Output format — `text` (default) or `json`
@@ -1260,7 +1262,9 @@ JSON response:
 ##### Test Mapping
 
 ###### Command
-fga mapping **test** \<mapping-file\>
+fga mapping **test** [mapping-file]
+
+The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
 
 ###### Parameters
 * `--format`: Output format — `text` (default), `json`, or `junit`
@@ -1305,9 +1309,11 @@ Created mapping.yaml
 ##### Run Mapping
 
 ###### Command
-fga mapping **run** \<mapping-file\>
+fga mapping **run** [mapping-file]
 
 Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
+
+The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
 
 ###### Parameters
 * `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
@@ -1315,7 +1321,7 @@ Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple
 * `--writes-only`: Emit only write-action tuples in `ClientTupleKey` format, consumable directly by `fga tuple write --file`
 * `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
 * `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
-* `--interactive` / `-i`: Explore the mapping in a terminal loop — type or paste a JSON document and see the tuple operations it produces. The document is evaluated as soon as it forms a complete JSON value, so a single-line object is evaluated on Enter and a multi-line one when its closing brace is typed. Supports line editing (arrow keys, history). Requires an interactive terminal and cannot be combined with `--input` or `--writes-only`.
+* `--interactive` / `-i`: Explore the mapping in a terminal loop — type or paste a JSON document and see the tuple operations it produces. The document is evaluated as soon as it forms a complete JSON value, so a single-line object is evaluated on Enter and a multi-line one when its closing brace is typed. Supports line editing (arrow keys, history). Requires an interactive terminal (both stdin and stdout must be a TTY) and cannot be combined with `--input`, `--writes-only`, `--format`, `--aggregate`, or `--continue-on-error`.
 
 ###### Example
 `echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
@@ -1328,7 +1334,7 @@ Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple
 ```
 
 ###### Interactive mode
-In a terminal, `-i` starts an explorer loop. Type or paste a JSON document and the resulting tuple operations are printed as an aligned table. The document is evaluated as soon as it parses as complete JSON — a single-line object on Enter, a multi-line one when its closing brace is typed. While more input is expected the prompt shows `...` and a one-time hint notes that the document is not yet valid JSON; pressing Enter on a blank line evaluates whatever is buffered. Invalid JSON is reported with the line, column, and a caret under the offending character. A rule with `tuple_filters` cannot be resolved offline, so its filter conditions are shown as `filter` rows, with the desired-state tuples it reconciles toward shown as indented `desired` rows (they drive a read-diff-write against a store rather than being written directly). Line editing (arrow keys, history) is available. Available commands: `:reload` re-reads and recompiles the mapping from disk, `:trace on|off` toggles the per-rule trace, and `:quit` exits.
+In a terminal, `-i` starts an explorer loop. Type or paste a JSON document and the resulting tuple operations are printed as an aligned table. The document is evaluated as soon as it parses as complete JSON — a single-line object on Enter, a multi-line one when its closing brace is typed. While more input is expected the prompt shows `...` and a one-time hint notes that the document is not yet valid JSON; pressing Enter on a blank line evaluates whatever is buffered. Invalid JSON is reported with the line, column, and a caret under the offending character. A rule with `tuple_filters` cannot be resolved offline, so its filter conditions are shown as `filter:patch` or `filter:delete` rows (the action distinguishes how the store is reconciled), with the desired-state tuples it reconciles toward shown as indented `desired` rows (they drive a read-diff-write against a store rather than being written directly). Filter fields left unset match any value and render as `*`, and a conditioned tuple shows its condition name and rendered context in brackets. Line editing (arrow keys, history) is available. Available commands: `:reload` re-reads and recompiles the mapping from disk, `:trace on|off` toggles the per-rule trace, and `:quit` exits.
 
 ```
 $ fga mapping run mapping.yaml -i
@@ -1341,8 +1347,8 @@ Error: invalid JSON at line 1, column 8: invalid character 'b' looking for begin
   {"id": bob}
          ^
 > {"id":"anne","org":"acme"}
-  filter      user:anne   *        org:acme
-    desired   user:anne   viewer   org:acme
+  filter:patch   user:anne   *        org:acme
+    desired      user:anne   viewer   org:acme
 > :quit
 ```
 

@@ -185,7 +185,7 @@ var (
 )
 
 var validateCmd = &cobra.Command{
-	Use:   "validate <mapping-file>",
+	Use:   "validate [mapping-file]",
 	Short: "Validate a mapping file",
 	Long: `Validates that a mapping file is syntactically correct and all expressions compile.
 With --model-file, also checks that every tuple template is consistent with the

@@ -475,7 +475,7 @@ var (
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run <mapping-file>",
+	Use:   "run [mapping-file]",
 	Short: "Evaluate a mapping against JSON input and emit tuple operations",
 	Long: `Reads JSONL from stdin (or --input) and evaluates it against the mapping file.
 Input is JSON Lines: one JSON object per line. Outputs tuple operations as JSONL (default)
@@ -503,10 +503,17 @@ continues; the command still exits non-zero if any record was skipped.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		errStream := cmd.ErrOrStderr()
 
+		opts := runMappingOptions{
+			format:          runFormat,
+			writesOnly:      runWritesOnly,
+			aggregate:       runAggregate,
+			continueOnError: runContinueOnError,
+		}
+
 		// Reject incompatible interactive flags before any prompt, so a bad flag
 		// combination never blocks on asking for a mapping path first.
 		if runInteractive {
-			if err := checkInteractiveFlags(runWritesOnly, runInputFile); err != nil {
+			if err := checkInteractiveFlags(opts, runInputFile); err != nil {
 				fmt.Fprintln(errStream, "Error: "+err.Error())
 				os.Exit(2)
 			}
@@ -515,7 +522,10 @@ continues; the command still exits non-zero if any record was skipped.`,
 		path := promptMappingFile(args, errStream)
 
 		if runInteractive {
-			if !isatty.IsTerminal(os.Stdin.Fd()) {
+			// Both streams must be a TTY: the explorer drives a raw-mode terminal,
+			// so a redirected stdout would send the prompt, echo, and results to a
+			// file and leave the user staring at a blank screen.
+			if !isatty.IsTerminal(os.Stdin.Fd()) || !isatty.IsTerminal(os.Stdout.Fd()) {
 				fmt.Fprintln(errStream, "Error: --interactive requires an interactive terminal")
 				os.Exit(2)
 			}
@@ -542,13 +552,7 @@ continues; the command still exits non-zero if any record was skipped.`,
 		}
 
 		err := runMapping(
-			cmd.Context(), path,
-			runMappingOptions{
-				format:          runFormat,
-				writesOnly:      runWritesOnly,
-				aggregate:       runAggregate,
-				continueOnError: runContinueOnError,
-			},
+			cmd.Context(), path, opts,
 			inputReader, cmd.OutOrStdout(), cmd.ErrOrStderr(),
 		)
 		if errors.Is(err, errUnknownRunFormat) {

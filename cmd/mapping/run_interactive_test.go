@@ -78,13 +78,39 @@ func TestRunMappingInteractive(t *testing.T) {
 		assert.Contains(t, out, "viewer")
 	})
 
-	t.Run("renders an unresolved tuple filter", func(t *testing.T) {
+	t.Run("renders an unresolved tuple filter with its action and wildcards", func(t *testing.T) {
 		t.Parallel()
 
+		// with_filter.yaml deletes by user+object with no relation, so the
+		// missing relation renders as the "*" wildcard it represents.
 		out, _ := runREPL(t, "testdata/with_filter.yaml", `{"id":"anne","org":"acme"}`+"\n\n:quit\n")
-		assert.Contains(t, out, "filter")
-		assert.Contains(t, out, "org:acme")
-		assert.Contains(t, out, "user:anne")
+		assert.Regexp(t, `filter:delete\s+user:anne\s+\*\s+org:acme`, out)
+	})
+
+	t.Run("renders a patch filter and wildcards an empty user", func(t *testing.T) {
+		t.Parallel()
+
+		// with_patch_filter.yaml patches by object+relation with no user.
+		out, _ := runREPL(t, "testdata/with_patch_filter.yaml", `{"id":"anne","org":"acme"}`+"\n\n:quit\n")
+		assert.Regexp(t, `filter:patch\s+\*\s+member\s+org:acme`, out)
+	})
+
+	t.Run("renders a conditioned tuple's context so it is distinguishable", func(t *testing.T) {
+		t.Parallel()
+
+		out, _ := runREPL(t, "testdata/conditional_context.yaml", `{"id":"anne","region":"us"}`+"\n\n:quit\n")
+		assert.Contains(t, out, `[in_region {"region":"us"}]`)
+	})
+
+	t.Run(":trace on shows the rule trace when evaluation errors", func(t *testing.T) {
+		t.Parallel()
+
+		// valid.yaml interpolates input.id; a record without it fails evaluation.
+		// The error trace must still surface the failing rule under :trace on.
+		out, errOut := runREPL(t, "testdata/valid.yaml", ":trace on\n"+`{"org":"acme"}`+"\n\n:quit\n")
+		assert.Contains(t, errOut, "Error: evaluating mapping")
+		assert.Contains(t, out, "rules errored")
+		assert.Contains(t, out, "members")
 	})
 
 	t.Run("renders a filter operation's desired-state tuples", func(t *testing.T) {
@@ -311,18 +337,42 @@ func TestCheckInteractiveFlags(t *testing.T) {
 	t.Run("rejects --writes-only", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(true, ""), errInteractiveWithWritesOnly)
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{writesOnly: true}, ""), errInteractiveWithWritesOnly)
 	})
 
 	t.Run("rejects --input", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(false, "event.json"), errInteractiveWithInput)
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{}, "event.json"), errInteractiveWithInput)
+	})
+
+	t.Run("rejects a non-default --format", func(t *testing.T) {
+		t.Parallel()
+
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{format: "json"}, ""), errInteractiveWithFormat)
+	})
+
+	t.Run("rejects --aggregate", func(t *testing.T) {
+		t.Parallel()
+
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{aggregate: true}, ""), errInteractiveWithAggregate)
+	})
+
+	t.Run("rejects --continue-on-error", func(t *testing.T) {
+		t.Parallel()
+
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{continueOnError: true}, ""), errInteractiveWithContinueOnError)
 	})
 
 	t.Run("accepts a clean interactive invocation", func(t *testing.T) {
 		t.Parallel()
 
-		assert.NoError(t, checkInteractiveFlags(false, ""))
+		assert.NoError(t, checkInteractiveFlags(runMappingOptions{}, ""))
+	})
+
+	t.Run("accepts the default jsonl format", func(t *testing.T) {
+		t.Parallel()
+
+		assert.NoError(t, checkInteractiveFlags(runMappingOptions{format: "jsonl"}, ""))
 	})
 }

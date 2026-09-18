@@ -33,8 +33,11 @@ import (
 )
 
 var (
-	errInteractiveWithWritesOnly = errors.New("--interactive cannot be combined with --writes-only")
-	errInteractiveWithInput      = errors.New("--interactive cannot be combined with --input")
+	errInteractiveWithWritesOnly      = errors.New("--interactive cannot be combined with --writes-only")
+	errInteractiveWithInput           = errors.New("--interactive cannot be combined with --input")
+	errInteractiveWithFormat          = errors.New("--interactive cannot be combined with --format")
+	errInteractiveWithAggregate       = errors.New("--interactive cannot be combined with --aggregate")
+	errInteractiveWithContinueOnError = errors.New("--interactive cannot be combined with --continue-on-error")
 )
 
 const (
@@ -43,15 +46,23 @@ const (
 )
 
 // checkInteractiveFlags reports the first flag that is incompatible with the
-// interactive explorer. Interactive output is a human-readable table read from
-// pasted documents, so the machine-output (--writes-only) and file-input
-// (--input) flags have no meaning in the loop.
-func checkInteractiveFlags(writesOnly bool, inputFile string) error {
+// interactive explorer. Interactive output is a human-readable table evaluated
+// one pasted document at a time, so the batch flags have no meaning in the loop:
+// --writes-only and --format select machine output, --input reads from a file
+// instead of the prompt, and --aggregate and --continue-on-error act on a whole
+// input stream. Rejecting them is clearer than silently ignoring them.
+func checkInteractiveFlags(opts runMappingOptions, inputFile string) error {
 	switch {
-	case writesOnly:
+	case opts.writesOnly:
 		return errInteractiveWithWritesOnly
 	case inputFile != "":
 		return errInteractiveWithInput
+	case opts.format != "" && opts.format != "jsonl":
+		return errInteractiveWithFormat
+	case opts.aggregate:
+		return errInteractiveWithAggregate
+	case opts.continueOnError:
+		return errInteractiveWithContinueOnError
 	}
 
 	return nil
@@ -170,6 +181,15 @@ func (s *interactiveSession) runRaw(file *os.File) error {
 	defer func() { _ = term.Restore(fileDescriptor, oldState) }()
 
 	terminal := term.NewTerminal(readWriter{Reader: file, Writer: s.out}, promptPrimary)
+
+	// term.NewTerminal assumes 80x24; seed the real dimensions so cursor and
+	// repaint maths are correct on wider terminals when editing wrapped lines.
+	if width, height, sizeErr := term.GetSize(fileDescriptor); sizeErr == nil {
+		_ = terminal.SetSize(width, height)
+	}
+
+	stopResize := watchResize(fileDescriptor, terminal)
+	defer stopResize()
 
 	s.out = terminal
 	s.errOut = terminal
@@ -396,6 +416,12 @@ func (s *interactiveSession) evaluate(doc string) {
 	if err != nil {
 		fmt.Fprintf(s.errOut, "Error: evaluating mapping: %v\n", err)
 
+		// Evaluate returns a populated trace alongside the error, so under
+		// :trace on the failing rule is still surfaced instead of no trace.
+		if s.traceOn && result != nil {
+			s.renderTrace(result.Trace)
+		}
+
 		return
 	}
 
@@ -473,12 +499,14 @@ func (s *interactiveSession) renderTuples(tuples []language.Tuple, ops []mapper.
 
 	for _, filterOp := range ops {
 		for _, filter := range filterOp.Filters {
-			relation := filter.Relation
-			if relation == "" {
-				relation = "*"
+			action := string(filter.Action)
+			if action == "" {
+				// Match the compiler default so an unset action reads as patch.
+				action = string(language.FilterActionPatch)
 			}
 
-			fmt.Fprintf(writer, "  filter\t%s\t%s\t%s\n", filter.User, relation, filter.Object)
+			fmt.Fprintf(writer, "  filter:%s\t%s\t%s\t%s\n",
+				action, orWildcard(filter.User), orWildcard(filter.Relation), orWildcard(filter.Object))
 		}
 
 		for _, tuple := range filterOp.Tuples {
@@ -489,14 +517,32 @@ func (s *interactiveSession) renderTuples(tuples []language.Tuple, ops []mapper.
 	_ = writer.Flush()
 }
 
-// tupleObject formats a tuple's object, appending its condition name in brackets
-// when the tuple is conditioned.
-func tupleObject(tuple language.Tuple) string {
-	if tuple.Condition != "" {
-		return fmt.Sprintf("%s  [%s]", tuple.Object, tuple.Condition)
+// orWildcard renders an empty tuple-filter field as "*", the wildcard it stands
+// for: an unset user, relation, or object matches any value, so a blank cell
+// would misleadingly read as a literal empty string.
+func orWildcard(field string) string {
+	if field == "" {
+		return "*"
 	}
 
-	return tuple.Object
+	return field
+}
+
+// tupleObject formats a tuple's object, appending its condition name in brackets
+// when the tuple is conditioned, together with the rendered context so two
+// tuples that differ only by context are distinguishable.
+func tupleObject(tuple language.Tuple) string {
+	if tuple.Condition == "" {
+		return tuple.Object
+	}
+
+	if len(tuple.Context) > 0 {
+		if ctx, err := json.Marshal(tuple.Context); err == nil {
+			return fmt.Sprintf("%s  [%s %s]", tuple.Object, tuple.Condition, ctx)
+		}
+	}
+
+	return fmt.Sprintf("%s  [%s]", tuple.Object, tuple.Condition)
 }
 
 // renderTrace prints the same rule summary the test command emits: matched rules

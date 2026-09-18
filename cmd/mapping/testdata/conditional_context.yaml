@@ -1,0 +1,10 @@
+version: "1"
+rules:
+  - name: "regional-member"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:acme"
+        condition: "in_region"
+        context:
+          region: "{{ input.region }}"
