@@ -23,8 +23,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/charmbracelet/huh"
-	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/spf13/cobra"
 )
@@ -175,7 +173,7 @@ var (
 )
 
 var testCmd = &cobra.Command{
-	Use:   "test <mapping-file>",
+	Use:   "test [mapping-file]",
 	Short: "Run the embedded tests in a mapping file",
 	Long: `Compiles the mapping and runs its embedded test cases, reporting pass/fail per case.
 Exits 1 when any test fails, 2 when the mapping file cannot be compiled.
@@ -187,25 +185,7 @@ Use --format to choose between human-readable text (default), JSON, or JUnit XML
   fga mapping test --fail-fast mapping.yaml`,
 	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		path := ""
-
-		if len(args) == 0 {
-			if !isatty.IsTerminal(os.Stdin.Fd()) {
-				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
-				os.Exit(2)
-			}
-
-			if err := huh.NewInput().
-				Title("Mapping file").
-				Placeholder("mapping.yaml").
-				Value(&path).
-				Run(); err != nil || path == "" {
-				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
-				os.Exit(2)
-			}
-		} else {
-			path = args[0]
-		}
+		path := promptMappingFile(args, cmd.ErrOrStderr())
 
 		err := runMappingTests(cmd.Context(), path, runMappingTestsOptions{
 			filter:     testRunFilter,

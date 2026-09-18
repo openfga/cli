@@ -1,0 +1,8 @@
+version: "1"
+rules:
+  - name: "guarded"
+    when: 'input.type == "match"'
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "member"
+        object: "org:acme"

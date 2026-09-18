@@ -26,6 +26,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/openfga/mapper/language"
 	"github.com/spf13/cobra"
@@ -470,10 +471,11 @@ var (
 	runInputFile       string
 	runAggregate       bool
 	runContinueOnError bool
+	runInteractive     bool
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run <mapping-file>",
+	Use:   "run [mapping-file]",
 	Short: "Evaluate a mapping against JSON input and emit tuple operations",
 	Long: `Reads JSONL from stdin (or --input) and evaluates it against the mapping file.
 Input is JSON Lines: one JSON object per line. Outputs tuple operations as JSONL (default)
@@ -495,9 +497,48 @@ before emitting; the default streaming JSONL does not.
 continues; the command still exits non-zero if any record was skipped.`,
 	Example: `  echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml
   fga mapping run mapping.yaml --input event.json --format json
-  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl`,
-	Args: cobra.ExactArgs(1),
+  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
+  fga mapping run mapping.yaml -i`,
+	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		errStream := cmd.ErrOrStderr()
+
+		opts := runMappingOptions{
+			format:          runFormat,
+			writesOnly:      runWritesOnly,
+			aggregate:       runAggregate,
+			continueOnError: runContinueOnError,
+		}
+
+		// Validate the interactive invocation before any prompt, so a bad flag
+		// combination or a redirected stream never blocks on asking for a mapping
+		// path first.
+		if runInteractive {
+			if err := checkInteractiveFlags(opts, runInputFile, cmd.Flags().Changed("format")); err != nil {
+				fmt.Fprintln(errStream, "Error: "+err.Error())
+				os.Exit(2)
+			}
+
+			// Both streams must be a TTY: the explorer drives a raw-mode terminal,
+			// so a redirected stdout would send the prompt, echo, and results to a
+			// file and leave the user staring at a blank screen.
+			if !isatty.IsTerminal(os.Stdin.Fd()) || !isatty.IsTerminal(os.Stdout.Fd()) {
+				fmt.Fprintln(errStream, "Error: --interactive requires an interactive terminal")
+				os.Exit(2)
+			}
+		}
+
+		path := promptMappingFile(args, errStream)
+
+		if runInteractive {
+			err := runMappingInteractive(cmd.Context(), path, cmd.InOrStdin(), cmd.OutOrStdout(), errStream)
+			if errors.Is(err, errMappingInvalid) {
+				os.Exit(2)
+			}
+
+			return err
+		}
+
 		inputReader := cmd.InOrStdin()
 
 		if runInputFile != "" {
@@ -512,13 +553,7 @@ continues; the command still exits non-zero if any record was skipped.`,
 		}
 
 		err := runMapping(
-			cmd.Context(), args[0],
-			runMappingOptions{
-				format:          runFormat,
-				writesOnly:      runWritesOnly,
-				aggregate:       runAggregate,
-				continueOnError: runContinueOnError,
-			},
+			cmd.Context(), path, opts,
 			inputReader, cmd.OutOrStdout(), cmd.ErrOrStderr(),
 		)
 		if errors.Is(err, errUnknownRunFormat) {
@@ -549,5 +584,9 @@ func init() {
 	runCmd.Flags().BoolVar(
 		&runContinueOnError, "continue-on-error", false,
 		"Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped",
+	)
+	runCmd.Flags().BoolVarP(
+		&runInteractive, "interactive", "i", false,
+		"Explore the mapping in a terminal loop: paste JSON documents and see the tuples they produce (requires a TTY)",
 	)
 }

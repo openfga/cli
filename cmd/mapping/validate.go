@@ -24,8 +24,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/huh"
-	"github.com/mattn/go-isatty"
 	"github.com/openfga/mapper"
 	"github.com/spf13/cobra"
 )
@@ -187,7 +185,7 @@ var (
 )
 
 var validateCmd = &cobra.Command{
-	Use:   "validate <mapping-file>",
+	Use:   "validate [mapping-file]",
 	Short: "Validate a mapping file",
 	Long: `Validates that a mapping file is syntactically correct and all expressions compile.
 With --model-file, also checks that every tuple template is consistent with the
@@ -197,25 +195,7 @@ authorization model: object types, relations, and user types must exist and be v
   fga mapping validate --model-file model.fga mapping.yaml`,
 	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		path := ""
-
-		if len(args) == 0 {
-			if !isatty.IsTerminal(os.Stdin.Fd()) {
-				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
-				os.Exit(2)
-			}
-
-			if err := huh.NewInput().
-				Title("Mapping file").
-				Placeholder("mapping.yaml").
-				Value(&path).
-				Run(); err != nil || path == "" {
-				fmt.Fprintln(cmd.ErrOrStderr(), "Error: mapping file path is required")
-				os.Exit(2)
-			}
-		} else {
-			path = args[0]
-		}
+		path := promptMappingFile(args, cmd.ErrOrStderr())
 
 		err := validateMapping(
 			path, validateFormat, validateModelFile, validateVerbose,
