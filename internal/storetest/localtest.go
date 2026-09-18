@@ -3,7 +3,7 @@ package storetest
 import (
 	"context"
 
-	pb "github.com/openfga/api/proto/openfga/v1"
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -14,8 +14,8 @@ import (
 func RunSingleLocalCheckTest(
 	ctx context.Context,
 	fgaServer *server.Server,
-	checkRequest *pb.CheckRequest,
-) (*pb.CheckResponse, error) {
+	checkRequest *openfgav1.CheckRequest,
+) (*openfgav1.CheckResponse, error) {
 	return fgaServer.Check(ctx, checkRequest) //nolint:wrapcheck
 }
 
@@ -57,10 +57,10 @@ func RunLocalCheckTest(
 					result.Error = err
 				} else {
 					response, err := RunSingleLocalCheckTest(ctx, fgaServer,
-						&pb.CheckRequest{
+						&openfgav1.CheckRequest{
 							StoreId:              *options.StoreID,
 							AuthorizationModelId: *options.ModelID,
-							TupleKey: &pb.CheckRequestTupleKey{
+							TupleKey: &openfgav1.CheckRequestTupleKey{
 								User:     user,
 								Relation: relation,
 								Object:   object,
@@ -87,8 +87,8 @@ func RunLocalCheckTest(
 func RunSingleLocalListObjectsTest(
 	ctx context.Context,
 	fgaServer *server.Server,
-	listObjectsRequest *pb.ListObjectsRequest,
-) (*pb.ListObjectsResponse, error) {
+	listObjectsRequest *openfgav1.ListObjectsRequest,
+) (*openfgav1.ListObjectsResponse, error) {
 	return fgaServer.ListObjects(ctx, listObjectsRequest) //nolint:wrapcheck
 }
 
@@ -130,7 +130,7 @@ func RunLocalListObjectsTest(
 		}
 
 		response, err := RunSingleLocalListObjectsTest(ctx, fgaServer,
-			&pb.ListObjectsRequest{
+			&openfgav1.ListObjectsRequest{
 				StoreId:              *options.StoreID,
 				AuthorizationModelId: *options.ModelID,
 				User:                 listObjectsTest.User,
@@ -159,8 +159,8 @@ func RunLocalListObjectsTest(
 func RunSingleLocalListUsersTest(
 	ctx context.Context,
 	fgaServer *server.Server,
-	listUsersRequest *pb.ListUsersRequest,
-) (*pb.ListUsersResponse, error) {
+	listUsersRequest *openfgav1.ListUsersRequest,
+) (*openfgav1.ListUsersResponse, error) {
 	return fgaServer.ListUsers(ctx, listUsersRequest) //nolint:wrapcheck
 }
 
@@ -175,7 +175,7 @@ func RunLocalListUsersTest(
 
 	object, pbObject := convertStoreObjectToObject(listUsersTest.Object)
 
-	userFilter := &pb.UserTypeFilter{
+	userFilter := &openfgav1.UserTypeFilter{
 		Type:     listUsersTest.UserFilter[0].GetType(),
 		Relation: listUsersTest.UserFilter[0].GetRelation(),
 	}
@@ -205,12 +205,12 @@ func RunLocalListUsersTest(
 			result.Error = err
 		} else {
 			response, err := RunSingleLocalListUsersTest(ctx, fgaServer,
-				&pb.ListUsersRequest{
+				&openfgav1.ListUsersRequest{
 					StoreId:              *options.StoreID,
 					AuthorizationModelId: *options.ModelID,
 					Object:               pbObject,
 					Relation:             relation,
-					UserFilters:          []*pb.UserTypeFilter{userFilter},
+					UserFilters:          []*openfgav1.UserTypeFilter{userFilter},
 					Context:              reqCtx,
 				},
 			)
