@@ -510,18 +510,15 @@ continues; the command still exits non-zero if any record was skipped.`,
 			continueOnError: runContinueOnError,
 		}
 
-		// Reject incompatible interactive flags before any prompt, so a bad flag
-		// combination never blocks on asking for a mapping path first.
+		// Validate the interactive invocation before any prompt, so a bad flag
+		// combination or a redirected stream never blocks on asking for a mapping
+		// path first.
 		if runInteractive {
-			if err := checkInteractiveFlags(opts, runInputFile); err != nil {
+			if err := checkInteractiveFlags(opts, runInputFile, cmd.Flags().Changed("format")); err != nil {
 				fmt.Fprintln(errStream, "Error: "+err.Error())
 				os.Exit(2)
 			}
-		}
 
-		path := promptMappingFile(args, errStream)
-
-		if runInteractive {
 			// Both streams must be a TTY: the explorer drives a raw-mode terminal,
 			// so a redirected stdout would send the prompt, echo, and results to a
 			// file and leave the user staring at a blank screen.
@@ -529,7 +526,11 @@ continues; the command still exits non-zero if any record was skipped.`,
 				fmt.Fprintln(errStream, "Error: --interactive requires an interactive terminal")
 				os.Exit(2)
 			}
+		}
 
+		path := promptMappingFile(args, errStream)
+
+		if runInteractive {
 			err := runMappingInteractive(cmd.Context(), path, cmd.InOrStdin(), cmd.OutOrStdout(), errStream)
 			if errors.Is(err, errMappingInvalid) {
 				os.Exit(2)

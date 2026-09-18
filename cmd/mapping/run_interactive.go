@@ -51,13 +51,17 @@ const (
 // --writes-only and --format select machine output, --input reads from a file
 // instead of the prompt, and --aggregate and --continue-on-error act on a whole
 // input stream. Rejecting them is clearer than silently ignoring them.
-func checkInteractiveFlags(opts runMappingOptions, inputFile string) error {
+//
+// formatChanged reports whether --format was set on the command line: it has a
+// non-empty default ("jsonl"), so its value alone cannot distinguish an unset
+// flag from one the user explicitly passed. Any explicit --format is rejected.
+func checkInteractiveFlags(opts runMappingOptions, inputFile string, formatChanged bool) error {
 	switch {
 	case opts.writesOnly:
 		return errInteractiveWithWritesOnly
 	case inputFile != "":
 		return errInteractiveWithInput
-	case opts.format != "" && opts.format != "jsonl":
+	case formatChanged:
 		return errInteractiveWithFormat
 	case opts.aggregate:
 		return errInteractiveWithAggregate

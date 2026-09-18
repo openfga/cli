@@ -337,42 +337,49 @@ func TestCheckInteractiveFlags(t *testing.T) {
 	t.Run("rejects --writes-only", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{writesOnly: true}, ""), errInteractiveWithWritesOnly)
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{writesOnly: true}, "", false), errInteractiveWithWritesOnly)
 	})
 
 	t.Run("rejects --input", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{}, "event.json"), errInteractiveWithInput)
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{}, "event.json", false), errInteractiveWithInput)
 	})
 
-	t.Run("rejects a non-default --format", func(t *testing.T) {
+	t.Run("rejects an explicit --format", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{format: "json"}, ""), errInteractiveWithFormat)
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{format: "json"}, "", true), errInteractiveWithFormat)
+	})
+
+	t.Run("rejects an explicit --format even when it matches the default", func(t *testing.T) {
+		t.Parallel()
+
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{format: "jsonl"}, "", true), errInteractiveWithFormat)
 	})
 
 	t.Run("rejects --aggregate", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{aggregate: true}, ""), errInteractiveWithAggregate)
+		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{aggregate: true}, "", false), errInteractiveWithAggregate)
 	})
 
 	t.Run("rejects --continue-on-error", func(t *testing.T) {
 		t.Parallel()
 
-		assert.ErrorIs(t, checkInteractiveFlags(runMappingOptions{continueOnError: true}, ""), errInteractiveWithContinueOnError)
+		assert.ErrorIs(
+			t, checkInteractiveFlags(runMappingOptions{continueOnError: true}, "", false), errInteractiveWithContinueOnError)
 	})
 
 	t.Run("accepts a clean interactive invocation", func(t *testing.T) {
 		t.Parallel()
 
-		assert.NoError(t, checkInteractiveFlags(runMappingOptions{}, ""))
+		assert.NoError(t, checkInteractiveFlags(runMappingOptions{}, "", false))
 	})
 
-	t.Run("accepts the default jsonl format", func(t *testing.T) {
+	t.Run("accepts the default format when it was not set explicitly", func(t *testing.T) {
 		t.Parallel()
 
-		assert.NoError(t, checkInteractiveFlags(runMappingOptions{format: "jsonl"}, ""))
+		assert.NoError(t, checkInteractiveFlags(runMappingOptions{format: "jsonl"}, "", false))
 	})
 }
