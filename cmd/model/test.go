@@ -41,10 +41,21 @@ var errNoTestFilesMatched = errors.New("no test files matched pattern")
 
 // modelTestCmd represents the test command.
 var modelTestCmd = &cobra.Command{
-	Use:     "test",
-	Short:   "Test an Authorization Model",
-	Long:    "Run a set of tests against a particular Authorization Model.",
-	Example: `fga model test --tests model.fga.yaml`,
+	Use:   "test",
+	Short: "Test an Authorization Model",
+	Long:  "Run a set of tests against a particular Authorization Model. If a model is provided the test will run in a built-in OpenFGA instance; otherwise it runs against the configured store.",
+	Example: `fga model test --tests model.fga.yaml
+fga model test --tests "tests/*.fga.yaml"`,
+	Annotations: map[string]string{
+		"docs:response": `(FAILING) test-1: Checks (2/3 passing) | ListObjects (2/2 passing)
+ⅹ Check(user=user:anne,relation=can_share,object=folder:1): expected=false, got=true
+---
+# Test Summary #
+Tests 1/2 passing
+Checks 3/4 passing
+ListObjects 3/3 passing`,
+		"docs:response:lang": "text",
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		// Read and validate all flags
 		testsFileName, err := cmd.Flags().GetString("tests")

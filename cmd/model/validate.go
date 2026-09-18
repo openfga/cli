@@ -96,9 +96,15 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 var validateCmd = &cobra.Command{
 	Use:     "validate",
 	Short:   "Validate Authorization Model",
-	Long:    "Validates that an authorization model is valid.",
+	Long:    "Validates that an authorization model is valid. When the input parses successfully, the JSON response includes size_kb, the protobuf-serialized size of the model in KB.",
 	Example: `fga model validate --file model.json`,
-	Args:    cobra.MaximumNArgs(1),
+	Annotations: map[string]string{
+		"docs:response": `{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true,"size_kb":0.05}
+
+Invalid model:
+{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version","size_kb":0.05}`,
+	},
+	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
 		if err := authorizationmodel.ReadFromInputFileOrArg(

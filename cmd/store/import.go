@@ -298,6 +298,9 @@ var importCmd = &cobra.Command{
 	Short:   "Import Store Data",
 	Long:    `Import a store: updating the name, model and appending the global tuples`,
 	Example: "fga store import --file=model.fga.yaml",
+	Annotations: map[string]string{
+		"docs:response": `{}`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

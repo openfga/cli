@@ -38,6 +38,21 @@ var deleteCmd = &cobra.Command{
 	Long:  "Delete relationship tuples from the store.",
 	Example: `  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
   fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-missing ignore`,
+	Annotations: map[string]string{
+		"docs:response": `{}
+
+Response when using --file:
+{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+  "failed": []
+}`,
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

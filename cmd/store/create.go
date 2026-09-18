@@ -112,11 +112,29 @@ var createCmd = &cobra.Command{
 	Short: "Create Store",
 	Long:  "Create an OpenFGA store.",
 	Example: `fga store create --name "FGA Demo Store"
+fga store create --model Model.fga
+export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)`,
+	Annotations: map[string]string{
+		"docs:response": `{
+    "id": "01H0H015178Y2V4CX10C2KGHF4",
+    "name": "FGA Demo Store",
+    "created_at": "2023-05-19T16:10:07.637585677Z",
+    "updated_at": "2023-05-19T16:10:07.637585677Z"
+}
 
-To set the created store id as an environment variable that will be used by the CLI, you can use the following command:
-
-export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
-	`,
+Response for fga store create --model Model.fga:
+{
+  "store": {
+    "id":"01H6H9CNQRP2TVCFR7899XGNY8",
+    "name":"Model",
+    "created_at":"2023-07-29T16:58:28.984402Z",
+    "updated_at":"2023-07-29T16:58:28.984402Z"
+  },
+  "model": {
+    "authorization_model_id":"01H6H9CNQV36Y9WS1RJGRN8D06"
+  }
+}`,
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
