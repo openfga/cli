@@ -14,25 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package store contains commands to manage OpenFGA stores.
-package store
+// Command gendocs regenerates the Commands section of README.md from cobra
+// command metadata. Run from the repository root: go run ./cmd/gendocs
+package main
 
 import (
-	"github.com/spf13/cobra"
+	"log"
+
+	"github.com/openfga/cli/cmd"
+	"github.com/openfga/cli/internal/doc"
 )
 
-// StoreCmd represents the store command.
-var StoreCmd = &cobra.Command{
-	Use:   "store",
-	Short: "Stores",
-	Long:  "Create, Get, Delete and List OpenFGA Stores",
-}
+func main() {
+	root := cmd.RootCmd()
 
-func init() {
-	StoreCmd.AddCommand(createCmd)
-	StoreCmd.AddCommand(listCmd)
-	StoreCmd.AddCommand(getCmd)
-	StoreCmd.AddCommand(deleteCmd)
-	StoreCmd.AddCommand(importCmd)
-	StoreCmd.AddCommand(exportCmd)
+	section := doc.GenerateCommandsSection(root)
+	if err := doc.SpliceIntoReadme("README.md", section); err != nil {
+		log.Fatalf("gendocs: %v", err)
+	}
+
+	toc := doc.GenerateCommandsTOC(root)
+	if err := doc.SpliceCommandsTOC("README.md", toc); err != nil {
+		log.Fatalf("gendocs: %v", err)
+	}
 }

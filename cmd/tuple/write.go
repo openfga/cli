@@ -76,6 +76,21 @@ var writeCmd = &cobra.Command{
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`,
+	Annotations: map[string]string{
+		"docs:response": `{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+  "failed": [],
+  "failed_count": 0,
+  "successful_count": 1,
+  "total_count": 1
+}`,
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

@@ -18,38 +18,39 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Custom Headers](#custom-headers)
+<!-- BEGIN_COMMANDS_TOC -->
   - [Commands](#commands)
-    - [Stores](#stores)
-      - [List All Stores](#list-stores)
-      - [Create a Store](#create-store)
-      - [Import a Store](#import-store)
-      - [Export a Store](#export-store)
-      - [Get a Store](#get-store)
-      - [Delete a Store](#delete-store)
+    - [Manage JSON-to-tuple mappings](#manage-jsontotuple-mappings)
+      - [Scaffold a starter mapping file](#scaffold-a-starter-mapping-file)
+      - [Evaluate a mapping against JSON input and emit tuple operations](#evaluate-a-mapping-against-json-input-and-emit-tuple-operations)
+      - [Run the embedded tests in a mapping file](#run-the-embedded-tests-in-a-mapping-file)
+      - [Validate a mapping file](#validate-a-mapping-file)
     - [Authorization Models](#authorization-models)
-      - [Read Authorization Models](#read-authorization-models)
-      - [Write Authorization Model](#write-authorization-model)
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
-      - [Read the Latest Authorization Model](#read-the-latest-authorization-model)
-      - [Validate an Authorization Model](#validate-an-authorization-model)
-      - [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model)
+      - [Read Authorization Models](#read-authorization-models)
+      - [Test an Authorization Model](#test-an-authorization-model)
       - [Transform an Authorization Model](#transform-an-authorization-model)
-    - [Relationship Tuples](#relationship-tuples)
-      - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
-      - [Read Relationship Tuples](#read-relationship-tuples)
-      - [Write Relationship Tuples](#write-relationship-tuples)
-      - [Delete Relationship Tuples](#delete-relationship-tuples)
+      - [Validate Authorization Model](#validate-authorization-model)
+      - [Write Authorization Model](#write-authorization-model)
     - [Relationship Queries](#relationship-queries)
       - [Check](#check)
       - [Expand](#expand)
       - [List Objects](#list-objects)
       - [List Relations](#list-relations)
       - [List Users](#list-users)
-    - [Mapping](#mapping)
-      - [Validate a Mapping File](#validate-mapping)
-      - [Run Embedded Tests](#test-mapping)
-      - [Scaffold a Mapping File](#init-mapping)
-      - [Evaluate Against JSON Input](#run-mapping)
+    - [Stores](#stores)
+      - [Create Store](#create-store)
+      - [Delete Store](#delete-store)
+      - [Export Store Data](#export-store-data)
+      - [Get Store](#get-store)
+      - [Import Store Data](#import-store-data)
+      - [List Stores](#list-stores)
+    - [Relationship Tuples](#relationship-tuples)
+      - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
+      - [Delete Relationship Tuples](#delete-relationship-tuples)
+      - [Read Relationship Tuples](#read-relationship-tuples)
+      - [Create Relationship Tuples](#create-relationship-tuples)
+<!-- END_COMMANDS_TOC -->
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -206,257 +207,169 @@ custom-headers:
 
 ### Commands
 
-#### Stores
-| Description                     | command  | parameters      | example                                                  |
-|---------------------------------|----------|-----------------|----------------------------------------------------------|
-| [Create a Store](#create-store) | `create` | `--name`        | `fga store create --name="FGA Demo Store"`               |
-| [Import a Store](#import-store) | `import` | `--file`        | `fga store import --file store.fga.yaml`                 |
-| [Export a Store](#export-store) | `export` | `--store-id`    | `fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4` |
-| [List Stores](#list-stores)     | `list`   | `--name`        | `fga store list --name="FGA Demo Store"`                 |
-| [Get a Store](#get-store)       | `get`    | `--store-id`    | `fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`    |
-| [Delete a Store](#delete-store) | `delete` | `--store-id`    | `fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4` |
+<!-- BEGIN_COMMANDS -->
+#### Manage JSON-to-tuple mappings
 
-##### Create Store
+##### Scaffold a starter mapping file
 
 ###### Command
-fga store **create**
+
+```
+fga mapping init [mapping-file] [flags]
+```
 
 ###### Parameters
-* `--name`: Name of the store to be created. If the `model` parameter is specified, the model file name will be used as the default store name.
-* `--model`: File with the authorization model. Can be in JSON, OpenFGA format, or fga.mod file (optional).
-* `--format` : Authorization model input format. Can be "fga", "json", or "modular" (optional, defaults to the model file extension if present).
+
+* `--force`: Overwrite an existing file
+* `--minimal`: Emit a skeleton without the example test block
 
 ###### Example
-`fga store create --name "FGA Demo Store"`
-
-###### Response
-```json
-{
-    "id": "01H0H015178Y2V4CX10C2KGHF4",
-    "name": "FGA Demo Store",
-    "created_at": "2023-05-19T16:10:07.637585677Z",
-    "updated_at": "2023-05-19T16:10:07.637585677Z"
-}
-```
-
-`fga store create --model Model.fga`
-
-###### Response
-```json
-{
-  "store": {
-    "id":"01H6H9CNQRP2TVCFR7899XGNY8",
-    "name":"Model",
-    "created_at":"2023-07-29T16:58:28.984402Z",
-    "updated_at":"2023-07-29T16:58:28.984402Z"
-  },
-  "model": {
-    "authorization_model_id":"01H6H9CNQV36Y9WS1RJGRN8D06"
-  }
-}
-```
-
-To automatically set the created store id as an environment variable that will then be used by the CLI, you can use the following command:
 
 ```bash
-export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
-```
-##### Import Store
-
-###### Command
-fga store **import**
-
-###### Parameters
-* `--file`: File containing the store. See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
-* `--store-id`: Specifies the store id to import into
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
-* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
-* `--allow-external-files`: Allow `model_file`, `tuple_file` and `tuple_files` references in the store file to resolve outside the store file's directory (optional, default=false). Only enable this for store files you trust.
-
-###### Example
-`fga store import --file model.fga.yaml`
-
-###### Response
-```json
-{}
+fga mapping init
+  fga mapping init my-mapping.yaml
+  fga mapping init --minimal mapping.yaml
+  fga mapping init --force mapping.yaml
 ```
 
-##### Export Store
+##### Evaluate a mapping against JSON input and emit tuple operations
 
 ###### Command
-fga store **export**
 
-###### Parameters
-* `--store-id`: Specifies the store to export
-* `--output-file`: The file to output the store to (optional, writes to the terminal if omitted)
-* `--model-id`: Specifies the model to export (optional, exports the latest model if omitted)
-* `--max-tuples`: Specifies the max number of tuples to include in the output (optional, defaults to 100)
-
-###### Example
-`fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4`
-
-###### Response
-```yaml
-name: Test
-model: |+
-  model
-    schema 1.1
-
-  type user
-
-  type group
-    relations
-      define member: [user]
-      define moderator: [user]
-
-tuples:
-  - user: user:1
-    relation: member
-    object: group:admins
-  - user: user:1
-    relation: member
-    object: group:employees
-  - user: user:2
-    relation: member
-    object: group:employees
-  - user: user:1
-    relation: moderator
-    object: group:employees
-tests:
-  - name: Tests
-    check:
-      - user: user:1
-        object: group:admins
-        assertions:
-          member: true
-      - user: user:2
-        object: group:admins
-        assertions:
-          member: false
-      - user: user:1
-        object: group:employees
-        assertions:
-          member: true
-          moderator: true
-      - user: user:2
-        object: group:employees
-        assertions:
-          member: true
-          moderator: false
-      # checks can also be defined for multiple users sharing the same expectation
-      - object: group:employees
-        users:
-          - user:1
-          - user:2
-        assertions:
-          member: true
-
-      # checks can also target multiple objects with the same expectation
-      - objects:
-          - group:admins
-          - group:employees
-        user: user:1
-        assertions:
-          member: true
+```
+fga mapping run [mapping-file] [flags]
 ```
 
-If using `output-file`, the response will be written to the specified file on disk. If the desired file already exists, you will be prompted to overwrite the file.
-
-##### List Stores
-
-###### Command
-fga store **list**
-
 ###### Parameters
-* `--max-pages`: Max number of pages to retrieve (default: 20)
-* `--name`: Filter stores by exact name (substrings and regexes are not supported)
+
+* `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
+* `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
+* `--format`: Output format: "jsonl" or "json"
+* `--input`: Path to JSONL input file, one JSON object per line (default: stdin)
+* `--interactive`: Explore the mapping in a terminal loop: paste JSON documents and see the tuples they produce (requires a TTY)
+* `--writes-only`: Emit only write operations in ClientTupleKey format (consumable by fga tuple write)
 
 ###### Example
-`fga store list`
 
-`fga store list --name="FGA Demo Store"`
-
-###### Response
-```json
-{
-  "stores": [{
-    "id": "..",
-    "name": "..",
-    "created_at": "",
-    "updated_at": "",
-    "deleted_at": ""
-  }, { .. }]
-}
+```bash
+echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml
+  fga mapping run mapping.yaml --input event.json --format json
+  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
+  fga mapping run mapping.yaml -i
 ```
 
-##### Get Store
+##### Run the embedded tests in a mapping file
 
 ###### Command
-fga store **get**
 
-###### Parameters
-* `--store-id`: Specifies the store id to get
-
-###### Example
-`fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4`
-
-###### Response
-```json
-{
-    "id": "01H0H015178Y2V4CX10C2KGHF4",
-    "name": "FGA Demo Store",
-    "created_at": "2023-05-19T16:10:07.637585677Z",
-    "updated_at": "2023-05-19T16:10:07.637585677Z"
-}
+```
+fga mapping test [mapping-file] [flags]
 ```
 
-##### Delete Store
-
-###### Command
-fga store **delete**
-
 ###### Parameters
-* `--store-id`: Specifies the store id to delete
+
+* `--fail-fast`: Stop after the first failing test
+* `--format`: Output format: "text", "json", or "junit"
+* `--no-color`: Disable color in text output
+* `--output-file`: Write output to a file instead of stdout
+* `--run`: Run only tests whose name contains this substring (case-sensitive)
+* `--verbose`: Show rule trace and tuple details for each test (text format only)
 
 ###### Example
-`fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4`
 
-###### Response
-```json
-{}
+```bash
+fga mapping test mapping.yaml
+  fga mapping test --format json mapping.yaml
+  fga mapping test --format junit --output-file results.xml mapping.yaml
+  fga mapping test --run anne mapping.yaml
+  fga mapping test --fail-fast mapping.yaml
+```
+
+##### Validate a mapping file
+
+###### Command
+
+```
+fga mapping validate [mapping-file] [flags]
+```
+
+###### Parameters
+
+* `--format`: Output format: "text" or "json"
+* `--model-file`: Path to FGA authorization model file (DSL, JSON, or modular)
+* `--verbose`: Show per-rule validation status (text format only)
+
+###### Example
+
+```bash
+fga mapping validate mapping.yaml
+  fga mapping validate --format json mapping.yaml
+  fga mapping validate --model-file model.fga mapping.yaml
 ```
 
 #### Authorization Models
 
-* `model`
+##### Read a Single Authorization Model
 
-| Description                                                                 | command     | parameters                 | example                                                                                     |
-|-----------------------------------------------------------------------------|-------------|----------------------------|---------------------------------------------------------------------------------------------|
-| [Read Authorization Models](#read-authorization-models)                     | `list`      | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
-| [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
-| [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
-| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
-| [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`, `--max-types-per-authorization-model` | `fga model test --tests "**/*.fga.yaml"`                                      |
-| [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
+###### Command
 
+```
+fga model get [flags]
+```
+
+###### Parameters
+
+* `--field`: Fields to display, choices are: id, created_at, size and model
+* `--format`: Authorization model output format. Can be "fga" or "json"
+* `--model-id`: Authorization Model ID
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --field size --field model --field id --field created_at
+fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4
+```
+
+###### Response
+
+```fga
+# Model ID: 01GXSA8YR785C4FYS3C0RTG7B1
+# Created At: 2023-04-11 23:26:34.759 +0000 UTC
+# Size: 20.05 KB
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define can_view: [user]
+```
 
 ##### Read Authorization Models
 
-List all authorization models for a store, in descending order by creation date. The first model in the list is the latest one.
-
 ###### Command
-fga model **list**
+
+```
+fga model list [flags]
+```
 
 ###### Parameters
-* `--store-id`: Specifies the store id
-* `--max-pages`: Max number of pages to retrieve (default: 20)
-* `--field`: Fields to display. Choices are: id, created_at and model. Default are id, created_at.
+
+* `--field`: Fields to display, choices are: id, created_at and model
+* `--max-pages`: Max number of pages to get.
+* `--store-id`: Store ID
 
 ###### Example
-`fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`
+
+```bash
+fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4
+```
 
 ###### Response
-```json5
+
+```json
 {
   "authorization_models": [
     {
@@ -471,247 +384,34 @@ fga model **list**
 }
 ```
 
-##### Write Authorization Model
+##### Test an Authorization Model
 
 ###### Command
-fga model **write**
 
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--file`: File containing the authorization model.
-* `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
-
-###### Example
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.fga`
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=fga.mod`
-* `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions": [ { "type": "user" }, { "type": "document", "relations": { "can_view": { "this": {} } }, "metadata": { "relations": { "can_view": { "directly_related_user_types": [ { "type": "user" } ] }}}} ], "schema_version": "1.1"}' --format json`
-
-###### Response
-```json5
-{
-  "authorization_model_id":"01GXSA8YR785C4FYS3C0RTG7B1"
-}
 ```
-
-##### Read a Single Authorization Model
-
-###### Command
-fga model **get**
-
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id
-* `--format`: Authorization model output format. Can be "fga" or "json" (default fga).
-* `--field`: Fields to display, choices are: `id`, `created_at`, `size` and `model`. Default is `model`.
-
-###### Example
-`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --field size --field model --field id --field created_at`
-
-###### Response
-```python
-# Model ID: 01GXSA8YR785C4FYS3C0RTG7B1
-# Created At: 2023-04-11 23:26:34.759 +0000 UTC
-# Size: 20.05 KB
-model
-  schema 1.1
-
-type user
-
-type document
-  relations
-    define can_view: [user]
+fga model test [flags]
 ```
-
-In `json` format, the fields appear intermixed with the model.
-
-`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --field size --field model --field id --field created_at --format=json`
-
-```json
-{
-  "id":"01GXSA8YR785C4FYS3C0RTG7B1",
-  "created_at":"2023-04-11T23:26:34.759Z",
-  "size_kb":20.05,
-  "schema_version":"1.1",
-  "type_definitions": [...]
-}
-```
-
-##### Read the Latest Authorization Model
-
-If `model-id` is not specified when using the `get` command, the latest authorization model will be returned.
-
-###### Command
-fga model **get**
-
-###### Parameters
-* `--store-id`: Specifies the store id
-
-###### Example
-`fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4`
-
-###### Response
-```python
-model
-  schema 1.1
-
-type user
-
-type document
-  relations
-    define can_view: [user]
-```
-
-##### Validate an Authorization Model
-
-###### Command
-fga model **validate**
-
-###### Parameters
-* `--file`: File containing the authorization model.
-* `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
-
-###### Example
-`fga model validate --file model.json`
-
-When the input parses successfully, the JSON response includes `size_kb`, the protobuf-serialized size of the model in KB. If the input cannot be parsed, the command exits with an error and does not emit a JSON response.
-
-###### JSON Response
-* Valid model with an ID
-```json5
-{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true,"size_kb":0.05}
-```
-* Valid model without an ID
-```json5
-{"is_valid":true,"size_kb":0.05}
-```
-* Invalid model with an ID
-```json5
-{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version","size_kb":0.05}
-```
-* Invalid model without an ID
-```json5
-{"is_valid":false,"error":"the relation type 'employee' on 'member' in object type 'group' is not valid","size_kb":0.05}
-```
-
-##### Run Tests on an Authorization Model
-
-Given a model, and a set of tests (tuples, check and list objects requests, and expected results) report back on any tests that do not return the same results as expected.
-
-###### Command
-fga model **test**
 
 ###### Parameters
 
-* `--tests`: Name of the tests file, or a glob pattern to multiple files (for example `"tests/*.fga.yaml"`,  or `"**/*.fga.yaml"`). Each file must be in yaml format.  See [Store File Format](docs/STORE_FILE.md) for detailed documentation.
-* `--verbose`: Outputs the results in JSON
-* `--max-types-per-authorization-model`: Max allowed number of type definitions per authorization model (default: 100). Increase this when testing models with more than 100 type definitions.
-* `--allow-external-files`: Allow `model_file`, `tuple_file` and `tuple_files` references in the test file to resolve outside the test file's directory (optional, default=false). Only enable this for test files you trust.
-
-If a model is provided, the test will run in a built-in OpenFGA instance (you do not need a separate server). Otherwise, the test will be run against the configured store of your OpenFGA instance. When running against a remote instance, the tuples will be sent as contextual tuples, and will have to abide by the OpenFGA server limits (20 contextual tuples per request).
-
-The tests file should be in yaml and have the following format:
-
-```yaml
----
-name: Store Name # store name, optional
-# model_file: ./model.fga # a global model that would apply to all tests, optional
-# model can be used instead of model_file, optional
-model: |
-  model
-    schema 1.1
-  type user
-  type folder
-    relations
-      define owner: [user]
-      define parent: [folder]
-      define can_view: owner or can_view from parent
-      define can_write: owner or can_write from parent
-      define can_share: owner
-
-# You can use `tuples`, `tuple_file`, and `tuple_files` together or individually to provide global tuples for all tests.
-# Example using a single tuple file:
-# tuple_file: ./tuples.yaml
-# Example using multiple tuple files:
-# tuple_files:
-#   - ./model_tuples_2.yaml
-#   - ./model_tuples_3.yaml
-tuples: # global tuples that would apply to all tests, optional
-  - user: folder:1
-    relation: parent
-    object: folder:2
-tests: # required
-  - name: test-1
-    description: testing that the model works # optional
-    # tuple_file: ./tuples.json # tuples that would apply per test
-    tuples:
-      - user: user:anne
-        relation: owner
-        object: folder:1
-    check: # a set of checks to run
-      - user: user:anne
-        object: folder:1
-        assertions:
-          # a set of expected results for each relation
-          can_view: true
-          can_write: true
-          can_share: false
-      # checks can group multiple users that share the same expected results
-      - object: folder:2
-        users:
-          - user:beth
-          - user:carl
-        assertions:
-          can_view: false
-      # checks can group multiple objects that share the same expected results
-      - objects:
-          - folder:1
-          - folder:2
-        user: user:beth
-        assertions:
-          can_write: false
-      # either "user" or "users" may be provided, but not both
-      # either "object" or "objects" may be provided, but not both
-    list_objects: # a set of list objects to run
-      - user: user:anne
-        type: folder
-        assertions:
-          # a set of expected results for each relation
-          can_view:
-            - folder:1
-            - folder:2
-          can_write:
-            - folder:1
-            - folder:2
-  - name: test-2
-    description: another test
-    tuples:
-      - user: user:anne
-        relation: owner
-        object: folder:1
-    check:
-      - user: user:anne
-        object: folder:1
-        assertions:
-          # a set of expected results for each relation
-          can_view: true
-    list_objects:
-      - user: user:anne
-        type: folder
-        assertions:
-          # a set of expected results for each relation
-          can_view:
-            - folder:1
-            - folder:2
-```
+* `--allow-external-files`: Allow model_file, tuple_file and tuple_files references in the test file to resolve to paths outside the test file's directory. Only enable this for test files you trust.
+* `--max-types-per-authorization-model`: Max allowed number of type definitions per authorization model
+* `--model-id`: Model ID
+* `--store-id`: Store ID
+* `--suppress-summary`: Suppress the plain text summary output
+* `--tests`: Path or glob of YAML test files
+* `--verbose`: Print verbose JSON output
 
 ###### Example
-`fga model test --tests "tests/*.fga.yaml"`
 
-For more examples of `.fga.yaml` files, check our [Store File Format documentation](docs/STORE_FILE.md) and the [sample-stores repository](https://github.com/openfga/sample-stores/).
+```bash
+fga model test --tests model.fga.yaml
+fga model test --tests "tests/*.fga.yaml"
+```
 
 ###### Response
 
-```shell
+```text
 (FAILING) test-1: Checks (2/3 passing) | ListObjects (2/2 passing)
 ⅹ Check(user=user:anne,relation=can_share,object=folder:1): expected=false, got=true
 ---
@@ -723,22 +423,30 @@ ListObjects 3/3 passing
 
 ##### Transform an Authorization Model
 
-The **transform** command lets you convert between different authorization model formats (`.fga`, `.json`, `.mod`).
-
 ###### Command
-fga model **transform**
+
+```
+fga model transform [flags]
+```
 
 ###### Parameters
-* `--file`: File containing the authorization model
-* `--input-format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
-* `--output-format`: Authorization model output format. Can be "fga" or "json". If not specified, it will default to `fga` if the input format is `json` and to `json` otherwise (optional)
 
+* `--file`: File Name. The file should have the model in the JSON or DSL format or be an `fga.mod` format
+* `--input-format`: Authorization model input format. Can be "fga", "json", or "modular"
+* `--output-format`: Authorization model output format. Can be "fga" or "json"."
 
 ###### Example
-`fga model transform --file model.json`
+
+```bash
+fga model transform --file=model.json
+fga model transform --file=model.fga
+fga model transform '{ "schema_version": "1.1", "type_definitions":[{"type":"user"}] }' --input-format json
+fga model transform --file=fga.mod
+```
 
 ###### Response
-```python
+
+```fga
 model
   schema 1.1
 
@@ -749,296 +457,443 @@ type document
     define can_view: [user]
 ```
 
-#### Relationship Tuples
-
-* `tuple`
-
-| Description                                                                       | command   | parameters                                                      | example                                                                                                           |
-|-----------------------------------------------------------------------------------|-----------|-----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| [Write Relationship Tuples](#write-relationship-tuples)                           | `write`   | `--store-id`, `--model-id` `--file` `--on-duplicate`            | `fga tuple write user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`        |
-| [Delete Relationship Tuples](#delete-relationship-tuples)                         | `delete`  | `--store-id`, `--model-id` `--file` `--on-missing`              | `fga tuple delete user:anne can_view document:roadmap --store-id=01H0H015178Y2V4CX10C2KGHF4`                                                          |
-| [Read Relationship Tuples](#read-relationship-tuples)                             | `read`    | `--store-id`                                                    | `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4`                      |
-| [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch) | `changes` | `--store-id`, `--type`, `--start-time`, `--continuation-token`, | `fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --start-time=2022-01-01T00:00:00Z --continuation-token=M3w=`                   |
-
-##### Write Relationship Tuples
+##### Validate Authorization Model
 
 ###### Command
-fga tuple **write** <user> <relation> <object> --store-id=<store-id>
+
+```
+fga model validate [flags]
+```
 
 ###### Parameters
-* `<user>`: User
-* `<relation>`: Relation
-* `<object>`: Object
-* `--condition-name`: Condition name (optional)
-* `--condition-context`: Condition context (optional)
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1, or 40 if `--max-rps` is set and this flag is omitted)
-* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4, or `max-rps/5` if `--max-rps` is set and this flag is omitted)
-* `--hide-imported-tuples`: When importing from a file, do not output successfully imported tuples in the command output (optional, default=false)
-* `--max-rps`: Max requests per second. When set, the CLI will ramp up requests from 1 RPS to the set value. If `--rampup-period-in-sec` is omitted it defaults to `max-rps*2`.
-* `--rampup-period-in-sec`: Time in seconds to wait between each batch of tuples when ramping up. Only used if `--max-rps` is set.
-* `--on-duplicate`: Behavior when a tuple to be written already exists. Options are:
-  * `ignore`: Skip the tuple and do not return an error. Default when importing via a file.
-  * `error`: Return an error for the tuple. Default when writing a single tuple via arguments.
-* All integer parameters must be greater than zero when provided.
 
-###### Example (with arguments)
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`
-- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`
+* `--file`: File Name. The file should have the model in the JSON or DSL format or be an fga.mod file
+* `--format`: Authorization model input format. Can be "fga", "json", or "modular"
+
+###### Example
+
+```bash
+fga model validate --file model.json
+```
 
 ###### Response
-```json5
-{
-  "successful": [
-    {
-      "object":"document:roadmap",
-      "relation":"writer",
-      "user":"user:annie"
-    }
-  ],
-}
-```
-
-###### Example (with file)
-`fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
-
-If using a `csv` file, the format should be:
-
-```csv
-user_type,user_id,user_relation,relation,object_type,object_id,condition_name,condition_context
-folder,product,,parent,folder,product-2021,inOfficeIP,"{""ip_addr"":""10.0.0.1""}"
-```
-
-
-If using a `yaml` file, the format should be:
-
-```yaml
-- user: folder:5
-  relation: parent
-  object: folder:product-2021
-- user: folder:product-2021
-  relation: parent
-  object: folder:product-2021Q1
-```
-
-If using a `jsonl` file, the format should be:
-
-```jsonl
-{"user": "user:anne", "relation": "owner", "object": "folder:product"}
-{"user": "folder:product", "relation": "parent", "object": "folder:product-2021", "condition": {"name": "inOfficeIP", "context": {"ip_addr": "10.0.0.1"}}}
-{"user": "user:beth", "relation": "viewer", "object": "folder:product-2021"}
-```
-
-If using a `json` file, the format should be:
 
 ```json
-[
-  {
-    "user": "user:anne",
-    "relation": "owner",
-    "object": "folder:product"
-  },
-  {
-    "user": "folder:product",
-    "relation": "parent",
-    "object": "folder:product-2021"
-  },
-  {
-    "user": "user:beth",
-    "relation": "viewer",
-    "object": "folder:product-2021"
-  }
-]
+{"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true,"size_kb":0.05}
+
+Invalid model:
+{"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version","size_kb":0.05}
 ```
 
-###### Response
-```json5
-{
-  "successful": [
-    {
-      "object":"document:roadmap",
-      "relation":"writer",
-      "user":"user:annie"
-    }
-  ],
-  "failed": [
-    {
-      "tuple_key": {
-        "object":"document:roadmap",
-        "relation":"writer",
-        "user":"carl"
-      },
-      "reason":"Write validation error ..."
-    }
-  ],
-  "failed_count": 1,
-  "successful_count": 1,
-  "total_count": 2
-}
-```
-
-###### Response with `--hide-imported-tuples`
-```json5
-{
-  "failed": [
-    {
-      "tuple_key": {
-        "object":"document:roadmap",
-        "relation":"writer",
-        "user":"carl"
-      },
-      "reason":"Write validation error ..."
-    }
-  ],
-  "failed_count": 1,
-  "successful_count": 1,
-  "total_count": 2
-}
-```
-
-In some cases you could want to retry failed tuples (e.g. network connectivity error). To achieve that, you can direct the output to a file:
-
-`fga tuple write --file tuples.json' --hide-imported-tuples > results.json`
-
-Then, process the file with `jq` to convert it to format that you can send the CLI again:
-
-`jq -c '[.failed[] | {user: .tuple_key.user, relation: .tuple_key.relation, object: .tuple_key.object}]' result.json > failed_tuples.json`
-
-`fga tuple write --file failed_tuples.json' --hide-imported-tuples `
-
-##### Delete Relationship Tuples
+##### Write Authorization Model
 
 ###### Command
-fga tuple **delete** <user> <relation> <object> --store-id=<store-id>
+
+```
+fga model write [flags]
+```
 
 ###### Parameters
-* `<user>`: User
-* `<relation>`: Relation
-* `<object>`: Object
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--file`: Specifies the file name, `yaml`, `json`, and `jsonl` files are supported
-* `--max-tuples-per-write`: Max tuples to send in a single write (optional, default=1)
-* `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
-* `--on-missing`: Behavior when a tuple to be deleted does not exist. Options are:
-  * `ignore`: Skip the tuple and do not return an error. Default when importing via a file.
-  * `error`: Return an error for the tuple. Default when deleting a single tuple via arguments.
 
-###### Example (with arguments)
-- `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
-- `fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --on-missing ignore`
+* `--file`: File Name. The file should have the model in the JSON or DSL format
+* `--format`: Authorization model input format. Can be "fga", "json", or "modular"
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=model.json
+fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file=fga.mod
+fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 '{"type_definitions":[{"type":"user"},{"type":"document","relations":{"can_view":{"this":{}}},"metadata":{"relations":{"can_view":{"directly_related_user_types":[{"type":"user"}]}}}}],"schema_version":"1.1"}' --format=json
+```
 
 ###### Response
-```json5
+
+```json
+{
+  "authorization_model_id":"01GXSA8YR785C4FYS3C0RTG7B1"
+}
+```
+
+#### Relationship Queries
+
+##### Check
+
+###### Command
+
+```
+fga query check
+```
+
+###### Example
+
+```bash
+fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}' --consistency "HIGHER_CONSISTENCY"
+```
+
+###### Response
+
+```json
+{
+  "allowed": true,
+  "resolution": ""
+}
+```
+
+##### Expand
+
+###### Command
+
+```
+fga query expand
+```
+
+###### Example
+
+```bash
+fga query expand --store-id="01H4P8Z95KTXXEP6Z03T75Q984" can_view document:roadmap --consistency "HIGHER_CONSISTENCY"
+```
+
+###### Response
+
+```json
+{
+  "tree": {
+    "root": {
+      "name": "document:roadmap#can_view",
+      "union": {
+        "nodes": [
+          {
+            "name": "document:roadmap#can_view",
+            "leaf": {
+              "users": {
+                "users": [
+                  "user:anne"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+##### List Objects
+
+###### Command
+
+```
+fga query list-objects
+```
+
+###### Example
+
+```bash
+fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap" --consistency "HIGHER_CONSISTENCY"
+```
+
+###### Response
+
+```json
+{
+  "objects": [
+    "document:roadmap"
+  ]
+}
+```
+
+##### List Relations
+
+###### Command
+
+```
+fga query list-relations [flags]
+```
+
+###### Parameters
+
+* `--relation`: Relation
+
+###### Example
+
+```bash
+fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --consistency "HIGHER_CONSISTENCY"
+```
+
+###### Response
+
+```json
+{
+  "relations": [
+    "can_view"
+  ]
+}
+```
+
+##### List Users
+
+###### Command
+
+```
+fga query list-users [flags]
+```
+
+###### Parameters
+
+* `--object`: Object to list users for
+* `--relation`: Relation to evaluate on
+* `--user-filter`: Filter the responses can be in the formats <type> (to filter objects and typed public bound access) or <type>#<relation> (to filter usersets)
+
+###### Example
+
+```bash
+fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --consistency "HIGHER_CONSISTENCY"
+```
+
+###### Response
+
+```json
+{
+  "users": [
+    {
+      "object": {
+        "type": "user",
+        "id": "anne"
+      }
+    }
+  ]
+}
+```
+
+#### Stores
+
+##### Create Store
+
+###### Command
+
+```
+fga store create [flags]
+```
+
+###### Parameters
+
+* `--format`: Authorization model input format. Can be "fga", "json" or "modular
+* `--model`: Authorization Model File Name
+* `--name`: Store Name
+
+###### Example
+
+```bash
+fga store create --name "FGA Demo Store"
+fga store create --model Model.fga
+export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
+```
+
+###### Response
+
+```json
+{
+    "id": "01H0H015178Y2V4CX10C2KGHF4",
+    "name": "FGA Demo Store",
+    "created_at": "2023-05-19T16:10:07.637585677Z",
+    "updated_at": "2023-05-19T16:10:07.637585677Z"
+}
+
+Response for fga store create --model Model.fga:
+{
+  "store": {
+    "id":"01H6H9CNQRP2TVCFR7899XGNY8",
+    "name":"Model",
+    "created_at":"2023-07-29T16:58:28.984402Z",
+    "updated_at":"2023-07-29T16:58:28.984402Z"
+  },
+  "model": {
+    "authorization_model_id":"01H6H9CNQV36Y9WS1RJGRN8D06"
+  }
+}
+```
+
+##### Delete Store
+
+###### Command
+
+```
+fga store delete [flags]
+```
+
+###### Parameters
+
+* `--force`: Force delete without confirmation
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+fga store delete --store-id=01H0H015178Y2V4CX10C2KGHF4
+```
+
+###### Response
+
+```json
 {}
 ```
 
-###### Example (with file)
-`fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json`
-
-###### Response
-```json5
-{
-  "successful": [
-    {
-      "object":"document:roadmap",
-      "relation":"writer",
-      "user":"user:annie"
-    }
-  ],
-  "failed": [
-    {
-      "tuple_key": {
-        "object":"document:roadmap",
-        "relation":"writer",
-        "user":"carl"
-      },
-      "reason":"Write validation error ..."
-    }
-  ]
-}
-```
-
-If you want to delete all the tuples in a store, you can use the following code:
-
-```
-fga tuple read --output-format=simple-json --max-pages=0 > tuples.json
-fga tuple delete --file tuples.json
-```
-
-##### Read Relationship Tuples
+##### Export Store Data
 
 ###### Command
-fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  --store-id=<store-id>
+
+```
+fga store export [flags]
+```
 
 ###### Parameters
-* `--store-id`: Specifies the store id
-* `--user`: User
-* `--relation`: Relation
-* `--object`: Object
-* `--max-pages`: Max number of pages to get. Set to 0 to get all pages. (default 20)
-* `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
-* `--output-format`: Can be `csv`, `yaml`, `json` or `simple-json`. Use `simple-json` for a simpler json format that can be piped to the write and delete commands
+
+* `--max-tuples`: max number of tuples to return in the output
+* `--model-id`: Authorization Model ID
+* `--output-file`: name of the file to export the store to
+* `--store-id`: store ID
 
 ###### Example
-`fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
+
+```bash
+fga store export --store-id=01H0H015178Y2V4CX10C2KGHF4
+```
 
 ###### Response
-```json5
+
+```yaml
+name: Test
+model: |+
+  model
+    schema 1.1
+
+  type user
+
+tuples:
+  - user: user:1
+    relation: member
+    object: group:admins
+tests: []
+```
+
+##### Get Store
+
+###### Command
+
+```
+fga store get [flags]
+```
+
+###### Parameters
+
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4
+```
+
+###### Response
+
+```json
 {
-  "tuples": [
-    {
-      "key": {
-        "object": "document:roadmap",
-        "relation": "can_view",
-        "user": "user:anne"
-      },
-      "timestamp": "2023-07-06T15:12:55.080666875Z"
-    }
-  ]
+    "id": "01H0H015178Y2V4CX10C2KGHF4",
+    "name": "FGA Demo Store",
+    "created_at": "2023-05-19T16:10:07.637585677Z",
+    "updated_at": "2023-05-19T16:10:07.637585677Z"
 }
 ```
-###### Response (--output-format=simple-json)
-```json5
-[
-  {
-    "object": "document:roadmap",
-    "relation": "can_view",
-    "user": "user:anne"
-  }
-]
-```
 
+##### Import Store Data
 
-If you want to transform this output in a way that can be then imported using the `fga tuple write` you can run
+###### Command
 
 ```
-fga tuple read --output-format=simple-json --max-pages 0 > tuples.json
-fga tuple write --file tuples.json
+fga store import [flags]
 ```
+
+###### Parameters
+
+* `--allow-external-files`: Allow model_file, tuple_file and tuple_files references in the store file to resolve to paths outside the store file's directory. Only enable this for store files you trust.
+* `--file`: File Name. The file should have the store
+* `--max-parallel-requests`: Max number of requests to issue to the server in parallel.
+* `--max-tuples-per-write`: Max tuples per write chunk.
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+fga store import --file=model.fga.yaml
+```
+
+###### Response
+
+```json
+{}
+```
+
+##### List Stores
+
+###### Command
+
+```
+fga store list [flags]
+```
+
+###### Parameters
+
+* `--max-pages`: Max number of pages to get.
+* `--name`: Filter stores by exact name. Substrings and regexes are not supported.
+
+###### Example
+
+```bash
+fga store list
+```
+
+###### Response
+
+```json
+{
+  "stores": [{
+    "id": "..",
+    "name": "..",
+    "created_at": "",
+    "updated_at": "",
+    "deleted_at": ""
+  }]
+}
+```
+
+#### Relationship Tuples
 
 ##### Read Relationship Tuple Changes (Watch)
 
 ###### Command
-fga tuple **changes** --type <type> --store-id=<store-id>
+
+```
+fga tuple changes [flags]
+```
 
 ###### Parameters
-* `--store-id`: Specifies the store id
-* `--type`: Restrict to a specific type (optional)
-* `--start-time`: Return changes since a specified time (optional)
-* `--max-pages`: Max number of pages to retrieve (default: 20)
-* `--continuation-token`: Continuation token to start changes from
+
+* `--continuation-token`: Continuation token to start changes from.
+* `--max-pages`: Max number of pages to get.
+* `--start-time`: Time to return changes since.
+* `--type`: Type to restrict the changes by.
 
 ###### Example
-`fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=`
+
+```bash
+fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=
+```
 
 ###### Response
-```json5
+
+```json
 {
   "changes": [
     {
@@ -1055,302 +910,142 @@ fga tuple **changes** --type <type> --store-id=<store-id>
 }
 ```
 
-#### Relationship Queries
-
-- `query`
-
-| Description                       | command          | parameters                 | example                                                                                     |
-|-----------------------------------|------------------|----------------------------|---------------------------------------------------------------------------------------------|
-| [Check](#check)                   | `check`          | `--store-id`, `--model-id` | `fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap` |
-| [List Objects](#list-objects)     | `list-objects`   | `--store-id`, `--model-id` | `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document`  |
-| [List Relations](#list-relations) | `list-relations` | `--store-id`, `--model-id` | `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document`         |
-| [Expand](#expand)                 | `expand`         | `--store-id`, `--model-id` | `fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`          |
-
-##### Check
+##### Delete Relationship Tuples
 
 ###### Command
-fga query **check** <user> <relation> <object> [--condition] [--contextual-tuple "\<user\> \<relation\> \<object\>"]* --store-id=<store-id> [--model-id=<model-id>]
 
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--contextual-tuple`: Contextual tuples (optional)
-* `--context`: Condition context (optional)
-* `--consistency`: Consistency preference (optional)
-
-###### Example
-- `fga query check --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
-- `fga query check --store-id="01H4P8Z95KTXXEP6Z03T75Q984" user:anne can_view document:roadmap --context '{"ip_address":"127.0.0.1"}' --consistency="HIGHER_CONSISTENCY"`
-
-
-###### Response
-```json5
-{
-    "allowed": true,
-}
+```
+fga tuple delete [flags]
 ```
 
-##### List Objects
-
-###### Command
-fga query **list-objects** <user> <relation> <object_type> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
-
 ###### Parameters
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
-* `--context`: Condition context (optional)
-* `--consistency`: Consistency preference (optional)
+
+* `--file`: Tuples file
+* `--hide-imported-tuples`: Hide successfully imported tuples from output
+* `--max-parallel-requests`: Max number of requests to issue to the server in parallel.
+* `--max-tuples-per-write`: Max tuples per write chunk.
+* `--model-id`: Model ID
+* `--on-missing`: Whether to ignore or error on missing tuples. Valid values are 'ignore' and 'error'. (default: 'ignore' when deleting a file of tuples, 'error' otherwise)
 
 ###### Example
-- `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap"`
-- `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --context '{"ip_address":"127.0.0.1"} --consistency="HIGHER_CONSISTENCY"`
 
-###### Response
-```json5
-{
-    "objects": [
-      "document:roadmap",
-      "document:budget"
-    ],
-}
+```bash
+fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
+  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-missing ignore
 ```
 
-##### List Relations
-
-###### Command
-fga query **list-relations** <user> <object> [--relation <relation>]* [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
-
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
-* `--context`: Condition context (optional)
-* `--consistency`: Consistency preference (optional)
-
-###### Example
-- `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view`
-- `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --contextual-tuple "user:anne can_view folder:product"`
-- `fga query list-relations --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne document:roadmap --relation can_view --context '{"ip_address":"127.0.0.1"} --consistency="HIGHER_CONSISTENCY"`
-
 ###### Response
-```json5
+
+```json
+{}
+
+Response when using --file:
 {
-    "relations": [
-      "can_view"
-    ],
-}
-```
-
-##### Expand
-
-###### Command
-fga query **expand** <relation> <object> --store-id=<store-id> [--model-id=<model-id>]
-
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--model-id`: Specifies the model id to target (optional)
-* `--consistency`: Consistency preference (optional)
-
-###### Example
-`fga query expand --store-id=01H0H015178Y2V4CX10C2KGHF4 can_view document:roadmap`
-
-###### Response
-```json5
-{
-  "tree": {
-    "root": {
-      "name": "repo:openfga/openfga#reader",
-      "union": {
-        "nodes": [{
-          "leaf": {
-            "users": {
-              "users": ["user:anne"]
-            }
-          },
-          "name": "repo:openfga/openfga#reader"
-        }]
-      }
-    }
-  }
-}
-```
-
-##### List Users
-
-###### Command
-fga query **list-users** --object <object> --relation <relation> --user-filter <user-filter> [--contextual-tuple "<user> <relation> <object>"]* --store-id=<store-id> [--model-id=<model-id>]
-
-###### Parameters
-* `--store-id`: Specifies the store id
-* `--object`: Specifies the object to list users for
-* `--relation`: Specifies the relation to search on
-* `--user-filter`: Specifies the type or userset to filter with
-* `--model-id`: Specifies the model id to target (optional)
-* `--contextual-tuple`: Contextual tuples (optional) (can be multiple)
-* `--context`: Condition context (optional)
-* `--consistency`: Consistency preference (optional)
-
-###### Example
-- `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user`
-- `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user --contextual-tuple "user:anne can_view folder:product"`
-- `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter group#member --context '{"ip_address":"127.0.0.1"} --consistency="HIGHER_CONSISTENCY"`
-
-###### Response
-```json5
-{
+  "successful": [
     {
-      "users": [
-        {
-          "object": {
-            "type": "user",
-            "id": "anne"
-          }
-        }
-      ]
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
     }
+  ],
+  "failed": []
 }
 ```
 
-#### Mapping
-
-Offline tooling for authoring, validating, testing, and evaluating JSON→tuple mapping files.
-No store credentials or network access required.
-
-- `mapping`
-
-| Description                                       | command    | parameters                                        | example                                                     |
-|---------------------------------------------------|------------|---------------------------------------------------|-------------------------------------------------------------|
-| [Scaffold a mapping file](#init-mapping)          | `init`     | `[mapping.yaml]`, `--minimal`, `--force`          | `fga mapping init`                                          |
-| [Validate a mapping file](#validate-mapping)      | `validate` | `--format`, `--model-file`, `--verbose`           | `fga mapping validate mapping.yaml`                         |
-| [Run embedded tests](#test-mapping)               | `test`     | `--format`, `--run`, `--fail-fast`, `--output-file`, `--verbose`, `--no-color` | `fga mapping test mapping.yaml` |
-
-##### Validate Mapping
+##### Read Relationship Tuples
 
 ###### Command
-fga mapping **validate** [mapping-file]
 
-The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
+```
+fga tuple read [flags]
+```
 
 ###### Parameters
-* `--format`: Output format — `text` (default) or `json`
-* `--model-file`: Path to an FGA authorization model file (DSL, JSON, or modular). When provided, every tuple template is checked against the model.
-* `--verbose`: Show per-rule validation status (text format only)
+
+* `--consistency`: Consistency preference for the request. Valid options are HIGHER_CONSISTENCY and MINIMIZE_LATENCY.
+* `--max-pages`: Max number of pages to get. Set to 0 to get all pages.
+* `--object`: Object
+* `--output-format`: Specifies the format for data presentation. Valid options: json, simple-json, csv, and yaml.
+* `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
+* `--relation`: Relation
+* `--user`: User
 
 ###### Example
-`fga mapping validate mapping.yaml`
 
-`fga mapping validate --format json --model-file model.fga mapping.yaml`
+```bash
+fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap
+```
 
 ###### Response
-```
-mapping is valid (2 rules)
-```
 
-With `--verbose`:
-```
-  ✓ add-member
-  ✓ add-admin
-mapping is valid (2 rules)
-```
-
-JSON response:
 ```json
-{"valid":true,"rule_count":2,"rules":["add-member","add-admin"]}
+{
+  "tuples": [
+    {
+      "key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      },
+      "timestamp": "2023-07-06T15:12:55.080666875Z"
+    }
+  ]
+}
 ```
 
-##### Test Mapping
+##### Create Relationship Tuples
 
 ###### Command
-fga mapping **test** [mapping-file]
 
-The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
+```
+fga tuple write [flags]
+```
 
 ###### Parameters
-* `--format`: Output format — `text` (default), `json`, or `junit`
-* `--run`: Run only tests whose name contains this substring (case-sensitive)
-* `--fail-fast`: Stop after the first failing test
-* `--output-file` / `-o`: Write output to a file instead of stdout
-* `--verbose`: Show rule trace and tuple details for each test (text: full trace and tuples; junit: trace in `<system-out>`)
-* `--no-color`: Disable color in text output
+
+* `--condition-context`: Condition Context (as a JSON string)
+* `--condition-name`: Condition Name
+* `--file`: Tuples file
+* `--hide-imported-tuples`: Hide successfully imported tuples from output
+* `--max-parallel-requests`: Max number of requests to issue to the server in parallel.
+* `--max-rps`: The maximum requests per second.
+* `--max-tuples-per-write`: Max tuples per write chunk.
+* `--model-id`: Model ID
+* `--on-duplicate`: Whether to ignore or error on duplicate tuples. Valid values are 'ignore' and 'error'. (default: 'ignore' when importing a file of tuples, 'error' otherwise)
+* `--rampup-period-in-sec`: The period over which to ramp up the request rate.
 
 ###### Example
-`fga mapping test mapping.yaml`
 
-`fga mapping test --format junit --output-file results.xml mapping.yaml`
+```bash
+fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-tuples-per-write 10 --max-parallel-requests 5
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore
+```
 
 ###### Response
-```
-PASS  admin gets member and admin (3ms)
-PASS  regular user only gets member (2ms)
-2 passed, 0 failed (5ms)
-```
 
-##### Init Mapping
-
-###### Command
-fga mapping **init** [mapping.yaml]
-
-###### Parameters
-* `[mapping.yaml]`: Output file path (optional, defaults to `mapping.yaml`)
-* `--minimal`: Emit a skeleton file without the example test block
-* `--force`: Overwrite an existing file without prompting
-
-###### Example
-`fga mapping init`
-
-`fga mapping init --minimal my-mapping.yaml`
-
-###### Response
-```
-Created mapping.yaml
-```
-
-##### Run Mapping
-
-###### Command
-fga mapping **run** [mapping-file]
-
-Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
-
-The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
-
-###### Parameters
-* `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
-* `--format`: Output format — `jsonl` (default) or `json`
-* `--writes-only`: Emit only write-action tuples in `ClientTupleKey` format, consumable directly by `fga tuple write --file`
-* `--aggregate`: Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting
-* `--continue-on-error`: Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped
-* `--interactive` / `-i`: Explore the mapping in a terminal loop — type or paste a JSON document and see the tuple operations it produces. The document is evaluated as soon as it forms a complete JSON value, so a single-line object is evaluated on Enter and a multi-line one when its closing brace is typed. Supports line editing (arrow keys, history). Requires an interactive terminal (both stdin and stdout must be a TTY) and cannot be combined with `--input`, `--writes-only`, `--format`, `--aggregate`, or `--continue-on-error`.
-
-###### Example
-`echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
-
-`fga mapping run --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
-
-###### Response
 ```json
-{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
+{
+  "successful": [
+    {
+      "object":"document:roadmap",
+      "relation":"writer",
+      "user":"user:annie"
+    }
+  ],
+  "failed": [],
+  "failed_count": 0,
+  "successful_count": 1,
+  "total_count": 1
+}
 ```
 
-###### Interactive mode
-In a terminal, `-i` starts an explorer loop. Type or paste a JSON document and the resulting tuple operations are printed as an aligned table. The document is evaluated as soon as it parses as complete JSON — a single-line object on Enter, a multi-line one when its closing brace is typed. While more input is expected the prompt shows `...` and a one-time hint notes that the document is not yet valid JSON; pressing Enter on a blank line evaluates whatever is buffered. Invalid JSON is reported with the line, column, and a caret under the offending character. A rule with `tuple_filters` cannot be resolved offline, so its filter conditions are shown as `filter:patch` or `filter:delete` rows (the action distinguishes how the store is reconciled), with the desired-state tuples it reconciles toward shown as indented `desired` rows (they drive a read-diff-write against a store rather than being written directly). Filter fields left unset match any value and render as `*`, and a conditioned tuple shows its condition name and rendered context in brackets. Line editing (arrow keys, history) is available. Available commands: `:reload` re-reads and recompiles the mapping from disk, `:trace on|off` toggles the per-rule trace, and `:quit` exits.
-
-```
-$ fga mapping run mapping.yaml -i
-mapping loaded: 2 rules. Type or paste a JSON document; it is evaluated once complete.  commands: :reload  :trace on|off  :quit
-
-> {"id":"anne","org":"acme"}
-  write   user:anne   member   org:acme
-> {"id": bob}
-Error: invalid JSON at line 1, column 8: invalid character 'b' looking for beginning of value
-  {"id": bob}
-         ^
-> {"id":"anne","org":"acme"}
-  filter:patch   user:anne   *        org:acme
-    desired      user:anne   viewer   org:acme
-> :quit
-```
+<!-- END_COMMANDS -->
 
 ## Contributing
 
