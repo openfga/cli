@@ -36,17 +36,18 @@ var MappingCmd = &cobra.Command{
 
 // promptMappingFile resolves the mapping file path for a command that accepts an
 // optional path argument. An explicit argument is returned unchanged. With no
-// argument and an interactive stdin it prompts with a .yaml/.yml-scoped file
-// picker; the picker renders to stderr (huh's default) so a piped stdout is never
-// corrupted. A missing path with a non-interactive stdin, a cancelled picker, or
-// an empty selection is a usage error: it is reported to errOut and exits with
-// status 2.
+// argument it prompts with a .yaml/.yml-scoped file picker, which needs a real
+// terminal: stdin for keystrokes and stderr for rendering (huh's default output,
+// chosen so a piped stdout is never corrupted). If either is not a TTY the picker
+// cannot be shown or driven, so a missing path is a usage error rather than an
+// invisible hang. A cancelled picker or an empty selection is likewise a usage
+// error: all are reported to errOut and exit with status 2.
 func promptMappingFile(args []string, errOut io.Writer) string {
 	if len(args) > 0 {
 		return args[0]
 	}
 
-	if !isatty.IsTerminal(os.Stdin.Fd()) {
+	if !isatty.IsTerminal(os.Stdin.Fd()) || !isatty.IsTerminal(os.Stderr.Fd()) {
 		fmt.Fprintln(errOut, "Error: mapping file path is required")
 		os.Exit(2)
 	}
