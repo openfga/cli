@@ -1,6 +1,6 @@
 module github.com/openfga/cli
 
-go 1.27
+go 1.26.0 // floor: support one version back; run with the latest (toolchain below)
 
 toolchain go1.27.1
 
