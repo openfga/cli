@@ -70,6 +70,7 @@ var writeCmd = &cobra.Command{
 	Args: ExactArgsOrFlag(writeCommandArgumentsCount, "file"),
 	Example: `  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
+	fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 agent:alice-claude can_call tool:slack_send_message --condition-expression "channel_name == '#product-announcements'" --condition-parameters '{"channel_name":"string"}'
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
@@ -295,6 +296,8 @@ func init() {
 	writeCmd.Flags().String("file", "", "Tuples file")
 	writeCmd.Flags().String("condition-name", "", "Condition Name")
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
+	writeCmd.Flags().String("condition-expression", "", "Dynamic condition CEL expression")
+	writeCmd.Flags().String("condition-parameters", "", "Dynamic condition parameter types (as a JSON object)")
 	writeCmd.Flags().Var(&onDuplicateWriteOption, "on-duplicate", "Whether to ignore or error on duplicate tuples. Valid values are 'ignore' and 'error'. (default: 'ignore' when importing a file of tuples, 'error' otherwise)")
 	writeCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.")

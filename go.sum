@@ -239,6 +239,8 @@ github.com/openfga/mapper v0.0.0-20260916114550-64ae7f46a687 h1:Ioar5QWl0+PKBoP8
 github.com/openfga/mapper v0.0.0-20260916114550-64ae7f46a687/go.mod h1:UdSK58M1OLJ1v+l3hElBFfeCuU3WncuG6H2pySWqNaY=
 github.com/openfga/openfga v1.20.0 h1:5dly6ON46VgH8xA1/tn2lNuJzxol0f7TGAwiDzIS6YA=
 github.com/openfga/openfga v1.20.0/go.mod h1:Rq7ij090J1lZRn322Ttc/b11ZaN/0ogph+rPAP0SNAE=
+github.com/openfga/openfga v1.21.0 h1:NQIrzLjUaWw+ZgFr78+qMcoYnHroPfqeQ8Z8ZMA530Y=
+github.com/openfga/openfga v1.21.0/go.mod h1:yO9enSlCudWGsiuYgD3DZDHwZJTlz3hSiyUCda8NGfk=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pelletier/go-toml/v2 v2.3.1 h1:MYEvvGnQjeNkRF1qUuGolNtNExTDwct51yp7olPtrEc=

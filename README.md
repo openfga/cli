@@ -771,6 +771,8 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `<object>`: Object
 * `--condition-name`: Condition name (optional)
 * `--condition-context`: Condition context (optional)
+* `--condition-expression`: Dynamic condition CEL expression (optional, mutually exclusive with `--condition-name`/`--condition-context`)
+* `--condition-parameters`: Dynamic condition parameter types, as a JSON object (optional, requires `--condition-expression`)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported
@@ -787,6 +789,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 agent:alice-claude can_call tool:slack_send_message --condition-expression "channel_name == '#product-announcements'" --condition-parameters '{"channel_name":"string"}'`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`
