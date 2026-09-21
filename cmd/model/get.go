@@ -29,10 +29,25 @@ import (
 
 // getCmd represents the get command.
 var getCmd = &cobra.Command{
-	Use:     "get",
-	Short:   "Read a Single Authorization Model",
-	Long:    "Read an authorization model, pass in an empty model ID to get latest.",
-	Example: `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1`,
+	Use:   "get",
+	Short: "Read a Single Authorization Model",
+	Long:  "Read an authorization model. Omit --model-id to get the latest model.",
+	Example: `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --field size --field model --field id --field created_at
+fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4`,
+	Annotations: map[string]string{
+		"docs:response": `# Model ID: 01GXSA8YR785C4FYS3C0RTG7B1
+# Created At: 2023-04-11 23:26:34.759 +0000 UTC
+# Size: 20.05 KB
+model
+  schema 1.1
+
+type user
+
+type document
+  relations
+    define can_view: [user]`,
+		"docs:response:lang": "fga",
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

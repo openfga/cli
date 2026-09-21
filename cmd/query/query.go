@@ -27,7 +27,7 @@ import (
 // QueryCmd represents the query command.
 var QueryCmd = &cobra.Command{
 	Use:   "query",
-	Short: "Run Queries",
+	Short: "Relationship Queries",
 	Long:  "Run queries (Check, Expand, ListObjects, ListRelations, ListUsers) that are evaluated according to a particular model.", //nolint:lll
 }
 
