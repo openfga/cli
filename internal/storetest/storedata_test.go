@@ -8,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 func writeTempFile(t *testing.T, dir, name, content string) string {
@@ -143,6 +145,24 @@ func TestReadFromFileWithDynamicCondition(t *testing.T) {
 		"expression": "channel_name == '#product-announcements'",
 		"parameters": map[string]any{"channel_name": "string"},
 	}, *storeData.Tuples[0].Condition.Context)
+}
+
+func TestRunTestsWithDynamicConditionFromFile(t *testing.T) {
+	t.Parallel()
+
+	_, storeData, err := ReadFromFile("../../tests/fixtures/dynamic-condition.fga.yaml", "", false)
+	require.NoError(t, err)
+
+	results, err := RunTests(t.Context(), nil, storeData, authorizationmodel.ModelFormatDefault, LocalServerConfig{
+		MaxTypesPerAuthorizationModel: 100,
+	})
+	require.NoError(t, err)
+	require.Len(t, results.Results, 1)
+
+	testResult := results.Results[0]
+	for _, r := range testResult.CheckResults {
+		assert.True(t, r.TestResult, "check %s/%s/%s failed: got %v, want %v", r.Request.User, r.Request.Relation, r.Request.Object, r.Got, r.Expected)
+	}
 }
 
 func TestStoreDataValidate(t *testing.T) {

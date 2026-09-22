@@ -45,19 +45,6 @@ func TestParseTupleConditionExpressionFlagValidation(t *testing.T) {
 		expectedError string
 	}{
 		{
-			name:          "parameters require an expression",
-			flags:         map[string]string{"condition-parameters": `{"channel_name":"string"}`},
-			expectedError: "condition-parameters requires condition-expression",
-		},
-		{
-			name: "expression conflicts with named condition",
-			flags: map[string]string{
-				"condition-expression": "true",
-				"condition-name":       "existing_condition",
-			},
-			expectedError: "condition-expression cannot be combined with condition-name or condition-context",
-		},
-		{
 			name: "parameters must be valid JSON",
 			flags: map[string]string{
 				"condition-expression": "true",

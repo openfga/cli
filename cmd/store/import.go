@@ -18,6 +18,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -45,6 +46,12 @@ const (
 	progressBarThrottleValue = 65
 	progressBarUpdateDelay   = 5 * time.Millisecond
 	maxAssertionsPerWrite    = 100
+	expressionConditionName  = "$expression"
+)
+
+var errExpressionConditionNotSupported = errors.New( //nolint:err113
+	"writing tuples with $expression conditions is not yet supported by the OpenFGA Go SDK; " +
+		"use 'fga model test' to test models that use inline expressions",
 )
 
 // createStore creates a new store with the given client configuration and store data.
@@ -128,6 +135,12 @@ func importStore(
 ) (*CreateStoreAndModelResponse, error) {
 	if err := storeData.Validate(); err != nil {
 		return nil, err //nolint:wrapcheck
+	}
+
+	for _, t := range storeData.Tuples {
+		if t.Condition != nil && t.Condition.GetName() == expressionConditionName {
+			return nil, errExpressionConditionNotSupported
+		}
 	}
 
 	response, err := createOrUpdateStore(ctx, clientConfig, fgaClient, storeData, format, storeID, fileName)

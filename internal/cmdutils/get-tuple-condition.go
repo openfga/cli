@@ -18,7 +18,6 @@ package cmdutils
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	openfga "github.com/openfga/go-sdk"
@@ -42,38 +41,32 @@ func ParseTupleConditionString(conditionString string) (*openfga.RelationshipCon
 func ParseTupleCondition(cmd *cobra.Command) (*openfga.RelationshipCondition, error) {
 	var condition *openfga.RelationshipCondition
 
-	conditionExpression, err := cmd.Flags().GetString("condition-expression")
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse condition expression due to %w", err)
-	}
-
-	conditionParameters, err := cmd.Flags().GetString("condition-parameters")
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse condition parameters due to %w", err)
-	}
-
-	if conditionExpression != "" {
-		if cmd.Flags().Changed("condition-name") || cmd.Flags().Changed("condition-context") {
-			return nil, errors.New("condition-expression cannot be combined with condition-name or condition-context")
+	if cmd.Flags().Lookup("condition-expression") != nil {
+		conditionExpression, err := cmd.Flags().GetString("condition-expression")
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse condition expression due to %w", err)
 		}
 
-		conditionContext := map[string]any{"expression": conditionExpression}
-		if cmd.Flags().Changed("condition-parameters") {
-			parameters, err := ParseQueryContextInner(conditionParameters)
-			if err != nil {
-				return nil, fmt.Errorf("error parsing condition parameters: %w", err)
+		conditionParameters, err := cmd.Flags().GetString("condition-parameters")
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse condition parameters due to %w", err)
+		}
+
+		if cmd.Flags().Changed("condition-expression") {
+			conditionContext := map[string]any{"expression": conditionExpression}
+			if cmd.Flags().Changed("condition-parameters") && conditionParameters != "" {
+				parameters, err := ParseQueryContextInner(conditionParameters)
+				if err != nil {
+					return nil, fmt.Errorf("error parsing condition parameters: %w", err)
+				}
+				conditionContext["parameters"] = *parameters
 			}
-			conditionContext["parameters"] = *parameters
+
+			return &openfga.RelationshipCondition{
+				Name:    "$expression",
+				Context: &conditionContext,
+			}, nil
 		}
-
-		return &openfga.RelationshipCondition{
-			Name:    "$expression",
-			Context: &conditionContext,
-		}, nil
-	}
-
-	if cmd.Flags().Changed("condition-parameters") {
-		return nil, errors.New("condition-parameters requires condition-expression")
 	}
 
 	conditionName, err := cmd.Flags().GetString("condition-name")

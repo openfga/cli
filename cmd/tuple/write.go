@@ -70,7 +70,7 @@ var writeCmd = &cobra.Command{
 	Args: ExactArgsOrFlag(writeCommandArgumentsCount, "file"),
 	Example: `  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
-	fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 agent:alice-claude can_call tool:slack_send_message --condition-expression "channel_name == '#product-announcements'" --condition-parameters '{"channel_name":"string"}'
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 agent:alice-claude can_call tool:slack_send_message --condition-expression "channel_name == '#product-announcements'" --condition-parameters '{"channel_name":"string"}'
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
@@ -93,7 +93,18 @@ var writeCmd = &cobra.Command{
 	},
 }
 
+const expressionConditionName = "$expression"
+
+var errExpressionConditionNotSupported = errors.New( //nolint:err113
+	"writing tuples with $expression conditions is not yet supported by the OpenFGA Go SDK; " +
+		"use 'fga model test' to test models that use inline expressions",
+)
+
 func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.OpenFgaClient) error {
+	if cmd.Flags().Changed("condition-expression") {
+		return errExpressionConditionNotSupported
+	}
+
 	condition, err := cmdutils.ParseTupleCondition(cmd)
 	if err != nil {
 		return err //nolint:wrapcheck
@@ -246,6 +257,12 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 		return err //nolint:wrapcheck
 	}
 
+	for _, t := range tuples {
+		if t.Condition != nil && t.Condition.Name == expressionConditionName {
+			return errExpressionConditionNotSupported
+		}
+	}
+
 	writeRequest := client.ClientWriteRequest{
 		Writes: tuples,
 	}
@@ -298,6 +315,10 @@ func init() {
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().String("condition-expression", "", "Dynamic condition CEL expression")
 	writeCmd.Flags().String("condition-parameters", "", "Dynamic condition parameter types (as a JSON object)")
+	writeCmd.MarkFlagsMutuallyExclusive("condition-expression", "condition-name")
+	writeCmd.MarkFlagsMutuallyExclusive("condition-expression", "condition-context")
+	writeCmd.MarkFlagsMutuallyExclusive("condition-expression", "file")
+	writeCmd.MarkFlagsRequiredTogether("condition-expression", "condition-parameters")
 	writeCmd.Flags().Var(&onDuplicateWriteOption, "on-duplicate", "Whether to ignore or error on duplicate tuples. Valid values are 'ignore' and 'error'. (default: 'ignore' when importing a file of tuples, 'error' otherwise)")
 	writeCmd.Flags().Int("max-tuples-per-write", tuple.MaxTuplesPerWrite, "Max tuples per write chunk.")
 	writeCmd.Flags().Int("max-parallel-requests", tuple.MaxParallelRequests, "Max number of requests to issue to the server in parallel.")

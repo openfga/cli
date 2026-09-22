@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -426,6 +427,27 @@ func TestUpdateStore(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestImportStoreRejectsExpressionCondition(t *testing.T) {
+	t.Parallel()
+
+	condition := openfga.NewRelationshipCondition("$expression")
+	condition.SetContext(map[string]any{
+		"expression": "channel_name == 'foo'",
+		"parameters": map[string]any{"channel_name": "string"},
+	})
+
+	tk := openfga.NewTupleKey("agent:alice", "can_call", "tool:foo")
+	tk.Condition = condition
+
+	storeData := storetest.StoreData{
+		Name:   "test",
+		Tuples: []openfga.TupleKey{*tk},
+	}
+
+	_, err := importStore(t.Context(), &fga.ClientConfig{}, nil, &storeData, "", "", 10, 1, "")
+	require.ErrorIs(t, err, errExpressionConditionNotSupported)
 }
 
 func setupGetStoreMock(
