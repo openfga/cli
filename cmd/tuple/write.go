@@ -93,17 +93,7 @@ var writeCmd = &cobra.Command{
 	},
 }
 
-const expressionConditionName = "$expression"
-
-var errExpressionConditionNotSupported = errors.New( //nolint:err113
-	"writing tuples with $expression conditions is not yet supported by the OpenFGA Go SDK; " +
-		"use 'fga model test' to test models that use inline expressions",
-)
-
 func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.OpenFgaClient) error {
-	if cmd.Flags().Changed("condition-expression") {
-		return errExpressionConditionNotSupported
-	}
 
 	condition, err := cmdutils.ParseTupleCondition(cmd)
 	if err != nil {
@@ -255,12 +245,6 @@ func writeTuplesFromFile(ctx context.Context, flags *flag.FlagSet, fgaClient *cl
 	tuples, err := tuplefile.ReadTupleFile(fileName)
 	if err != nil {
 		return err //nolint:wrapcheck
-	}
-
-	for _, t := range tuples {
-		if t.Condition != nil && t.Condition.Name == expressionConditionName {
-			return errExpressionConditionNotSupported
-		}
 	}
 
 	writeRequest := client.ClientWriteRequest{

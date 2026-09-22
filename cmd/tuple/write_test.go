@@ -5,41 +5,11 @@ import (
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/openfga/cli/internal/tuplefile"
 )
-
-func TestWriteTuplesFromArgsRejectsExpressionCondition(t *testing.T) {
-	t.Parallel()
-
-	cmd := &cobra.Command{}
-	cmd.Flags().String("condition-expression", "", "")
-	cmd.Flags().String("condition-parameters", "", "")
-	require.NoError(t, cmd.Flags().Set("condition-expression", "channel_name == 'foo'"))
-	require.NoError(t, cmd.Flags().Set("condition-parameters", `{"channel_name":"string"}`))
-
-	err := writeTuplesFromArgs(cmd, []string{"agent:alice", "can_call", "tool:foo"}, nil)
-	require.ErrorIs(t, err, errExpressionConditionNotSupported)
-}
-
-func TestWriteTuplesFromFileRejectsExpressionCondition(t *testing.T) {
-	t.Parallel()
-
-	cmd := &cobra.Command{}
-	cmd.Flags().String("file", "", "")
-	cmd.Flags().Int("max-tuples-per-write", 0, "")
-	cmd.Flags().Int("max-parallel-requests", 0, "")
-	cmd.Flags().Int("max-rps", 0, "")
-	cmd.Flags().Int("rampup-period-in-sec", 0, "")
-	cmd.Flags().Bool("debug", false, "")
-	require.NoError(t, cmd.Flags().Set("file", "testdata/tuples_with_expression_condition.yaml"))
-
-	err := writeTuplesFromFile(t.Context(), cmd.Flags(), nil)
-	require.ErrorIs(t, err, errExpressionConditionNotSupported)
-}
 
 func TestWriteCmdFlagValidation(t *testing.T) {
 	tests := []struct {
