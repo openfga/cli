@@ -237,8 +237,6 @@ github.com/openfga/language/pkg/go v0.3.2-0.20260818192608-0d2ad7fb7c40 h1:E4dgT
 github.com/openfga/language/pkg/go v0.3.2-0.20260818192608-0d2ad7fb7c40/go.mod h1:HJr87kSwUb6NLfspULfl8IoQk6BcXjR+EvzyTnyp7II=
 github.com/openfga/mapper v0.0.0-20260916114550-64ae7f46a687 h1:Ioar5QWl0+PKBoP8034WNgsYqf8inNKLp6ZLw475zFs=
 github.com/openfga/mapper v0.0.0-20260916114550-64ae7f46a687/go.mod h1:UdSK58M1OLJ1v+l3hElBFfeCuU3WncuG6H2pySWqNaY=
-github.com/openfga/openfga v1.20.0 h1:5dly6ON46VgH8xA1/tn2lNuJzxol0f7TGAwiDzIS6YA=
-github.com/openfga/openfga v1.20.0/go.mod h1:Rq7ij090J1lZRn322Ttc/b11ZaN/0ogph+rPAP0SNAE=
 github.com/openfga/openfga v1.21.0 h1:NQIrzLjUaWw+ZgFr78+qMcoYnHroPfqeQ8Z8ZMA530Y=
 github.com/openfga/openfga v1.21.0/go.mod h1:yO9enSlCudWGsiuYgD3DZDHwZJTlz3hSiyUCda8NGfk=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
