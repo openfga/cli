@@ -94,7 +94,6 @@ var writeCmd = &cobra.Command{
 }
 
 func writeTuplesFromArgs(cmd *cobra.Command, args []string, fgaClient *client.OpenFgaClient) error {
-
 	condition, err := cmdutils.ParseTupleCondition(cmd)
 	if err != nil {
 		return err //nolint:wrapcheck
