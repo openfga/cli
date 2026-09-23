@@ -772,7 +772,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `--condition-name`: Condition name (optional)
 * `--condition-context`: Condition context (optional)
 * `--condition-expression`: Dynamic condition CEL expression (optional, mutually exclusive with `--condition-name`/`--condition-context`)
-* `--condition-parameters`: Dynamic condition parameter types, as a JSON object (optional, requires `--condition-expression`)
+* `--condition-parameters`: Dynamic condition parameter types, as a JSON object with at least one parameter (requires `--condition-expression`)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported

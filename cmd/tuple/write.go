@@ -297,7 +297,7 @@ func init() {
 	writeCmd.Flags().String("condition-name", "", "Condition Name")
 	writeCmd.Flags().String("condition-context", "", "Condition Context (as a JSON string)")
 	writeCmd.Flags().String("condition-expression", "", "Dynamic condition CEL expression")
-	writeCmd.Flags().String("condition-parameters", "", "Dynamic condition parameter types (as a JSON object)")
+	writeCmd.Flags().String("condition-parameters", "", "Dynamic condition parameter types (as a JSON object with at least one parameter)")
 	writeCmd.MarkFlagsMutuallyExclusive("condition-expression", "condition-name")
 	writeCmd.MarkFlagsMutuallyExclusive("condition-expression", "condition-context")
 	writeCmd.MarkFlagsMutuallyExclusive("condition-expression", "file")

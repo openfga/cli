@@ -52,6 +52,22 @@ func TestParseTupleConditionExpressionFlagValidation(t *testing.T) {
 			},
 			expectedError: "error parsing condition parameters",
 		},
+		{
+			name: "expression requires at least one parameter",
+			flags: map[string]string{
+				"condition-expression": "true",
+				"condition-parameters": "{}",
+			},
+			expectedError: "condition expression requires at least one parameter",
+		},
+		{
+			name: "expression with empty parameters is rejected",
+			flags: map[string]string{
+				"condition-expression": "true",
+				"condition-parameters": "",
+			},
+			expectedError: "condition expression requires at least one parameter",
+		},
 	}
 
 	for _, test := range tests {
