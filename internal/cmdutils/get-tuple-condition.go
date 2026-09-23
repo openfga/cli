@@ -18,6 +18,7 @@ package cmdutils
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	openfga "github.com/openfga/go-sdk"
@@ -40,6 +41,39 @@ func ParseTupleConditionString(conditionString string) (*openfga.RelationshipCon
 
 func ParseTupleCondition(cmd *cobra.Command) (*openfga.RelationshipCondition, error) {
 	var condition *openfga.RelationshipCondition
+
+	if cmd.Flags().Lookup("condition-expression") != nil {
+		conditionExpression, err := cmd.Flags().GetString("condition-expression")
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse condition expression due to %w", err)
+		}
+
+		conditionParameters, err := cmd.Flags().GetString("condition-parameters")
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse condition parameters due to %w", err)
+		}
+
+		if cmd.Flags().Changed("condition-expression") {
+			parameters, err := ParseQueryContextInner(conditionParameters)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing condition parameters: %w", err)
+			}
+
+			if len(*parameters) == 0 {
+				return nil, errors.New("condition expression requires at least one parameter")
+			}
+
+			conditionContext := map[string]any{
+				"expression": conditionExpression,
+				"parameters": *parameters,
+			}
+
+			return &openfga.RelationshipCondition{
+				Name:    "$expression",
+				Context: &conditionContext,
+			}, nil
+		}
+	}
 
 	conditionName, err := cmd.Flags().GetString("condition-name")
 	if err != nil {

@@ -1,0 +1,48 @@
+name: dynamic-rbac
+model: |
+  model
+    schema 1.1
+
+  type user
+
+  type agent
+
+  type role
+    relations
+      define assignee: [user, agent]
+
+  type tool
+    relations
+      define can_call: [user with $expression, agent with $expression]
+
+tuples:
+  - user: user:charlie
+    relation: assignee
+    object: role:product-ops
+
+  - user: agent:triage-bot
+    relation: can_call
+    object: tool:slack_send_message
+    condition:
+      name: $expression
+      context:
+        expression: "channel_name == '#product-announcements'"
+        parameters:
+          channel_name: string
+
+tests:
+  - name: dynamic-rbac-example
+    check:
+      - user: agent:triage-bot
+        object: tool:slack_send_message
+        context:
+          channel_name: "#product-announcements"
+        assertions:
+          can_call: true
+
+      - user: agent:triage-bot
+        object: tool:slack_send_message
+        context:
+          channel_name: "#general"
+        assertions:
+          can_call: false

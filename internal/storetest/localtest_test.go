@@ -3,6 +3,7 @@ package storetest
 import (
 	"testing"
 
+	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -188,4 +189,59 @@ type document
 	require.NotNil(t, result.Got, "Got should be a non-nil empty slice, not nil")
 	assert.Empty(t, result.Got)
 	assert.True(t, result.TestResult, "test should pass when expected and got are both empty")
+}
+
+func TestRunLocalCheckTestWithDynamicCondition(t *testing.T) {
+	t.Parallel()
+
+	const modelDSL = `model
+  schema 1.1
+
+type agent
+
+type tool
+  relations
+    define can_call: [agent with $expression]`
+
+	conditionContext := map[string]any{
+		"expression": "channel_name == '#product-announcements'",
+		"parameters": map[string]any{"channel_name": "string"},
+	}
+	tuples := []client.ClientContextualTupleKey{{
+		User:     "agent:alice-claude",
+		Relation: "can_call",
+		Object:   "tool:slack_send_message",
+		Condition: &openfga.RelationshipCondition{
+			Name:    "$expression",
+			Context: &conditionContext,
+		},
+	}}
+
+	storeData := &StoreData{Model: modelDSL}
+	config := LocalServerConfig{MaxTypesPerAuthorizationModel: 100}
+	fgaServer, authModel, stopFn, err := getLocalServerModelAndTuples(storeData, authorizationmodel.ModelFormatDefault, config)
+	require.NoError(t, err)
+	defer stopFn()
+
+	storeID, modelID, err := initLocalStore(t.Context(), fgaServer, authModel.GetProtoModel(), tuples)
+	require.NoError(t, err)
+	options := ModelTestOptions{StoreID: storeID, ModelID: modelID}
+
+	for channelName, expected := range map[string]bool{
+		"#product-announcements": true,
+		"#general":               false,
+	} {
+		context := map[string]any{"channel_name": channelName}
+		results := RunLocalCheckTest(t.Context(), fgaServer, ModelTestCheck{
+			User:       "agent:alice-claude",
+			Object:     "tool:slack_send_message",
+			Context:    &context,
+			Assertions: map[string]bool{"can_call": expected},
+		}, tuples, options)
+
+		require.Len(t, results, 1)
+		require.NoError(t, results[0].Error)
+		assert.Equal(t, expected, *results[0].Got)
+		assert.True(t, results[0].TestResult)
+	}
 }

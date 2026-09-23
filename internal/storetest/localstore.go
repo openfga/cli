@@ -8,6 +8,7 @@ import (
 	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	"github.com/openfga/go-sdk/client"
 	"github.com/openfga/openfga/pkg/server"
+	serverconfig "github.com/openfga/openfga/pkg/server/config"
 	"github.com/openfga/openfga/pkg/storage/memory"
 
 	"github.com/openfga/cli/internal/authorizationmodel"
@@ -93,6 +94,7 @@ func getLocalServerModelAndTuples(
 
 	fgaServer, err := server.NewServerWithOpts(
 		server.WithDatastore(datastore),
+		server.WithExperimentals(serverconfig.ExperimentalInlineExpressions),
 	)
 	if err != nil {
 		return nil, nil, stopServerFn, err //nolint:wrapcheck

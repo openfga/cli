@@ -11,6 +11,67 @@ import (
 	"github.com/openfga/cli/internal/tuplefile"
 )
 
+func TestWriteCmdFlagValidation(t *testing.T) {
+	tests := []struct {
+		name          string
+		flags         map[string]string
+		expectedError string
+	}{
+		{
+			name: "condition-expression and condition-name are mutually exclusive",
+			flags: map[string]string{
+				"condition-expression": "true",
+				"condition-parameters": "{}",
+				"condition-name":       "inOffice",
+			},
+			expectedError: "if any flags in the group [condition-expression condition-name] are set none of the others can be",
+		},
+		{
+			name: "condition-expression and condition-context are mutually exclusive",
+			flags: map[string]string{
+				"condition-expression": "true",
+				"condition-parameters": "{}",
+				"condition-context":    `{"ip":"1.2.3.4"}`,
+			},
+			expectedError: "if any flags in the group [condition-expression condition-context] are set none of the others can be",
+		},
+		{
+			name: "condition-expression and file are mutually exclusive",
+			flags: map[string]string{
+				"condition-expression": "true",
+				"condition-parameters": "{}",
+				"file":                 "tuples.json",
+			},
+			expectedError: "if any flags in the group [condition-expression file] are set none of the others can be",
+		},
+		{
+			name: "condition-expression and condition-parameters must be set together",
+			flags: map[string]string{
+				"condition-expression": "true",
+			},
+			expectedError: "if any flags in the group [condition-expression condition-parameters] are set they must all be set",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			for name, value := range test.flags {
+				require.NoError(t, writeCmd.Flags().Set(name, value))
+			}
+			t.Cleanup(func() {
+				for name := range test.flags {
+					f := writeCmd.Flags().Lookup(name)
+					_ = f.Value.Set(f.DefValue)
+					f.Changed = false
+				}
+			})
+
+			err := writeCmd.ValidateFlagGroups()
+			require.ErrorContains(t, err, test.expectedError)
+		})
+	}
+}
+
 func TestParseTuplesFileData(t *testing.T) {
 	t.Parallel()
 
@@ -191,6 +252,29 @@ func TestParseTuplesFileData(t *testing.T) {
 					User:     "user:beth",
 					Relation: "viewer",
 					Object:   "folder:product-2021",
+				},
+			},
+		},
+		{
+			name: "it can correctly parse a yaml file with an $expression condition",
+			file: "testdata/tuples_with_expression_condition.yaml",
+			expectedTuples: []client.ClientTupleKey{
+				{
+					User:     "agent:alice-claude",
+					Relation: "can_call",
+					Object:   "tool:slack_send_message",
+					Condition: &openfga.RelationshipCondition{
+						Name: "$expression",
+						Context: &map[string]any{
+							"expression": "channel_name == '#product-announcements'",
+							"parameters": map[string]any{"channel_name": "string"},
+						},
+					},
+				},
+				{
+					User:     "user:anne",
+					Relation: "owner",
+					Object:   "folder:product",
 				},
 			},
 		},

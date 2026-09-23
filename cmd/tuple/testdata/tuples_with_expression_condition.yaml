@@ -1,0 +1,12 @@
+- user: agent:alice-claude
+  relation: can_call
+  object: tool:slack_send_message
+  condition:
+    name: $expression
+    context:
+      expression: "channel_name == '#product-announcements'"
+      parameters:
+        channel_name: string
+- user: user:anne
+  relation: owner
+  object: folder:product
