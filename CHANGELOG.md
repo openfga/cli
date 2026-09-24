@@ -12,10 +12,6 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 * support for dynamic conditions ([#768](https://github.com/openfga/cli/issues/768)) ([5fae37b](https://github.com/openfga/cli/commit/5fae37b15b352fbbaf65f0816530bb9697700dda))
 
 
-### Miscellaneous
-
-* release 0.8.1 ([ee2516c](https://github.com/openfga/cli/commit/ee2516cd3a1ea5ce8eab69622e16f31f61be3858))
-
 ## [0.8.0](https://github.com/openfga/cli/compare/v0.7.20...v0.8.0) (2026-09-18)
 
 
