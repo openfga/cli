@@ -413,6 +413,54 @@ func TestGenerateCommandsSection_GroupPersistentFlagsRendered(t *testing.T) {
 	assert.Contains(t, section, "`--store-id`")
 }
 
+func TestGenerateCommandsSection_AngleBracketsEscaped(t *testing.T) {
+	t.Parallel()
+
+	root := &cobra.Command{Use: "fga"}
+	group := &cobra.Command{Use: "query", Short: "Queries"}
+	cmd := &cobra.Command{
+		Use:   "list-users",
+		Short: "List Users",
+		RunE:  func(cmd *cobra.Command, args []string) error { return nil },
+	}
+	cmd.Flags().String("user-filter", "", "Filter in format <type> or <type>#<relation>")
+	group.AddCommand(cmd)
+	root.AddCommand(group)
+
+	section := doc.GenerateCommandsSection(root)
+
+	assert.Contains(t, section, "&lt;type&gt;")
+	assert.Contains(t, section, "&lt;type&gt;#&lt;relation&gt;")
+	assert.NotContains(t, section, "<type>")
+}
+
+func TestGenerateCommandsSection_RawResponse(t *testing.T) {
+	t.Parallel()
+
+	rawContent := "```json\n{\"ok\":true}\n```\n\nError case:\n\n```json\n{\"ok\":false}\n```"
+
+	root := &cobra.Command{Use: "fga"}
+	group := &cobra.Command{Use: "store", Short: "Stores"}
+	cmd := &cobra.Command{
+		Use:   "create",
+		Short: "Create Store",
+		Annotations: map[string]string{
+			"docs:response":     rawContent,
+			"docs:response:raw": "true",
+		},
+		RunE: func(cmd *cobra.Command, args []string) error { return nil },
+	}
+	group.AddCommand(cmd)
+	root.AddCommand(group)
+
+	section := doc.GenerateCommandsSection(root)
+
+	assert.Contains(t, section, "###### Response")
+	assert.Contains(t, section, rawContent)
+	// raw mode must not double-wrap in a fence
+	assert.NotContains(t, section, "```json\n```json")
+}
+
 func TestAnchor_PunctuationStripped(t *testing.T) {
 	t.Parallel()
 
@@ -423,6 +471,7 @@ func TestAnchor_PunctuationStripped(t *testing.T) {
 		{"Read Relationship Tuple Changes (Watch)", "read-relationship-tuple-changes-watch"},
 		{"Authorization Models", "authorization-models"},
 		{"List Objects", "list-objects"},
+		{"Manage JSON-to-tuple mappings", "manage-json-to-tuple-mappings"},
 	}
 
 	for _, tc := range cases {

@@ -32,17 +32,15 @@ import (
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
-	Use:   "delete <user> <relation> <object>",
+	Use:   "delete [<user> <relation> <object>]",
 	Short: "Delete Relationship Tuples",
 	Args:  ExactArgsOrFlag(3, "file"), //nolint:mnd
 	Long:  "Delete relationship tuples from the store.",
 	Example: `  fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
   fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-missing ignore`,
 	Annotations: map[string]string{
-		"docs:response": `{}
-
-Response when using --file:
-{
+		"docs:response": "```json\n{}\n```\n\nResponse when using `--file`:\n\n```json\n" +
+			`{
   "successful": [
     {
       "object":"document:roadmap",
@@ -51,7 +49,8 @@ Response when using --file:
     }
   ],
   "failed": []
-}`,
+}` + "\n```",
+		"docs:response:raw": "true",
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)

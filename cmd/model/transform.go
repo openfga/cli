@@ -42,7 +42,7 @@ func determineOutputFormat(input, output authorizationmodel.ModelFormat) authori
 
 // transformCmd represents the transform command.
 var transformCmd = &cobra.Command{
-	Use:   "transform",
+	Use:   "transform [model]",
 	Short: "Transform an Authorization Model",
 	Long:  "Convert an authorization model between formats (.fga, .json, .mod).",
 	Example: `fga model transform --file=model.json
@@ -114,5 +114,5 @@ var (
 func init() {
 	transformCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format or be an `fga.mod` format") //nolint:lll
 	transformCmd.Flags().Var(&transformInputFormat, "input-format", `Authorization model input format. Can be "fga", "json", or "modular"`)  //nolint:lll
-	transformCmd.Flags().Var(&transformOutputFormat, "output-format", `Authorization model output format. Can be "fga" or "json"."`)         //nolint:lll
+	transformCmd.Flags().Var(&transformOutputFormat, "output-format", `Authorization model output format. Can be "fga" or "json".`)          //nolint:lll
 }

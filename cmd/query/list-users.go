@@ -95,7 +95,7 @@ var listUsersCmd = &cobra.Command{
 	Use:     "list-users",
 	Short:   "List Users",
 	Long:    "List all users that have a certain relation with a particular object",
-	Example: `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
+	Example: `fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user --consistency "HIGHER_CONSISTENCY"`, //nolint:lll
 	Annotations: map[string]string{
 		"docs:response": `{
   "users": [

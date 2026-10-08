@@ -45,7 +45,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [List Objects](#list-objects)
       - [List Relations](#list-relations)
       - [List Users](#list-users)
-    - [Manage JSON-to-tuple mappings](#manage-jsontotuple-mappings)
+    - [Manage JSON-to-tuple mappings](#manage-json-to-tuple-mappings)
       - [Scaffold a starter mapping file](#scaffold-a-starter-mapping-file)
       - [Validate a mapping file](#validate-a-mapping-file)
       - [Run the embedded tests in a mapping file](#run-the-embedded-tests-in-a-mapping-file)
@@ -259,7 +259,7 @@ fga store create [flags]
 
 ###### Parameters
 
-* `--format`: Authorization model input format. Can be "fga", "json" or "modular
+* `--format`: Authorization model input format. Can be "fga", "json", or "modular".
 * `--model`: Authorization Model File Name
 * `--name`: Store Name
 
@@ -280,8 +280,11 @@ export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
     "created_at": "2023-05-19T16:10:07.637585677Z",
     "updated_at": "2023-05-19T16:10:07.637585677Z"
 }
+```
 
-Response for fga store create --model Model.fga:
+Response for `fga store create --model Model.fga`:
+
+```json
 {
   "store": {
     "id":"01H6H9CNQRP2TVCFR7899XGNY8",
@@ -477,7 +480,7 @@ Writes a new authorization model.
 ###### Command
 
 ```
-fga model write [flags]
+fga model write [model] [flags]
 ```
 
 ###### Parameters
@@ -549,7 +552,7 @@ Validates that an authorization model is valid. When the input parses successful
 ###### Command
 
 ```
-fga model validate [flags]
+fga model validate [model] [flags]
 ```
 
 ###### Parameters
@@ -567,8 +570,11 @@ fga model validate --file model.json
 
 ```json
 {"id":"01GPGWB8R33HWXS3KK6YG4ETGH","created_at":"2023-01-11T16:59:22Z","is_valid":true,"size_kb":0.05}
+```
 
 Invalid model:
+
+```json
 {"id":"01GPGTVEH5NYTQ19RYFQKE0Q4Z","created_at":"2023-01-11T16:33:15Z","is_valid":false,"error":"invalid schema version","size_kb":0.05}
 ```
 
@@ -579,14 +585,14 @@ Convert an authorization model between formats (.fga, .json, .mod).
 ###### Command
 
 ```
-fga model transform [flags]
+fga model transform [model] [flags]
 ```
 
 ###### Parameters
 
 * `--file`: File Name. The file should have the model in the JSON or DSL format or be an `fga.mod` format
 * `--input-format`: Authorization model input format. Can be "fga", "json", or "modular"
-* `--output-format`: Authorization model output format. Can be "fga" or "json"."
+* `--output-format`: Authorization model output format. Can be "fga" or "json".
 
 ###### Example
 
@@ -764,7 +770,7 @@ This command is flexible in accepting data inputs, making it easier to add multi
 ###### Command
 
 ```
-fga tuple write <user> <relation> <object> [flags]
+fga tuple write [<user> <relation> <object>] [flags]
 ```
 
 ###### Parameters
@@ -821,7 +827,7 @@ Delete relationship tuples from the store.
 ###### Command
 
 ```
-fga tuple delete <user> <relation> <object> [flags]
+fga tuple delete [<user> <relation> <object>] [flags]
 ```
 
 ###### Parameters
@@ -844,8 +850,11 @@ fga tuple delete --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view docume
 
 ```json
 {}
+```
 
-Response when using --file:
+Response when using `--file`:
+
+```json
 {
   "successful": [
     {
@@ -1007,12 +1016,12 @@ fga query list-users [flags]
 
 * `--object`: Object to list users for
 * `--relation`: Relation to evaluate on
-* `--user-filter`: Filter the responses can be in the formats <type> (to filter objects and typed public bound access) or <type>#<relation> (to filter usersets)
+* `--user-filter`: Filter the responses can be in the formats &lt;type&gt; (to filter objects and typed public bound access) or &lt;type&gt;#&lt;relation&gt; (to filter usersets)
 
 ###### Example
 
 ```bash
-fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --consistency "HIGHER_CONSISTENCY"
+fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roadmap --relation can_view --user-filter user --consistency "HIGHER_CONSISTENCY"
 ```
 
 ###### Response

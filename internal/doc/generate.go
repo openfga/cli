@@ -69,7 +69,7 @@ func writeSection(b *strings.Builder, cmd *cobra.Command) {
 					return
 				}
 
-				fmt.Fprintf(b, "* `--%s`: %s\n", f.Name, f.Usage)
+				fmt.Fprintf(b, "* `--%s`: %s\n", f.Name, escapeHTML(f.Usage))
 			})
 
 			fmt.Fprintf(b, "\n")
@@ -102,7 +102,7 @@ func writeSection(b *strings.Builder, cmd *cobra.Command) {
 				return
 			}
 
-			fmt.Fprintf(b, "* `--%s`: %s\n", f.Name, f.Usage)
+			fmt.Fprintf(b, "* `--%s`: %s\n", f.Name, escapeHTML(f.Usage))
 		})
 
 		fmt.Fprintf(b, "\n")
@@ -113,12 +113,18 @@ func writeSection(b *strings.Builder, cmd *cobra.Command) {
 	}
 
 	if response, ok := cmd.Annotations["docs:response"]; ok && response != "" {
-		lang := cmd.Annotations["docs:response:lang"]
-		if lang == "" {
-			lang = "json"
-		}
+		fmt.Fprintf(b, "###### Response\n\n")
 
-		fmt.Fprintf(b, "###### Response\n\n```%s\n%s\n```\n\n", lang, response)
+		if cmd.Annotations["docs:response:raw"] == "true" {
+			fmt.Fprintf(b, "%s\n\n", response)
+		} else {
+			lang := cmd.Annotations["docs:response:lang"]
+			if lang == "" {
+				lang = "json"
+			}
+
+			fmt.Fprintf(b, "```%s\n%s\n```\n\n", lang, response)
+		}
 	}
 }
 
@@ -219,6 +225,7 @@ func writeTOCSection(b *strings.Builder, cmd *cobra.Command) {
 
 // anchor converts a heading string to a GitHub markdown anchor.
 // "Read a Single Authorization Model" -> "read-a-single-authorization-model".
+// Hyphens in the original string are preserved (GitHub keeps them in slugs).
 func anchor(s string) string {
 	s = strings.ToLower(s)
 	var b strings.Builder
@@ -227,10 +234,19 @@ func anchor(s string) string {
 		switch {
 		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
 			b.WriteRune(r)
-		case r == ' ':
+		case r == ' ', r == '-':
 			b.WriteRune('-')
 		}
 	}
 
 	return b.String()
+}
+
+// escapeHTML replaces angle brackets with HTML entities so they render
+// correctly in GitHub Markdown list items (GFM strips unknown HTML tags).
+func escapeHTML(s string) string {
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+
+	return s
 }
