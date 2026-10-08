@@ -21,24 +21,24 @@ A cross-platform CLI to interact with an OpenFGA server
 <!-- BEGIN_COMMANDS_TOC -->
   - [Commands](#commands)
     - [Stores](#stores)
+      - [List Stores](#list-stores)
       - [Create Store](#create-store)
       - [Get Store](#get-store)
-      - [List Stores](#list-stores)
       - [Delete Store](#delete-store)
       - [Import Store Data](#import-store-data)
       - [Export Store Data](#export-store-data)
     - [Authorization Models](#authorization-models)
+      - [Read Authorization Models](#read-authorization-models)
       - [Write Authorization Model](#write-authorization-model)
       - [Read a Single Authorization Model](#read-a-single-authorization-model)
-      - [Read Authorization Models](#read-authorization-models)
       - [Validate Authorization Model](#validate-authorization-model)
       - [Transform an Authorization Model](#transform-an-authorization-model)
       - [Test an Authorization Model](#test-an-authorization-model)
     - [Relationship Tuples](#relationship-tuples)
+      - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
+      - [Read Relationship Tuples](#read-relationship-tuples)
       - [Create Relationship Tuples](#create-relationship-tuples)
       - [Delete Relationship Tuples](#delete-relationship-tuples)
-      - [Read Relationship Tuples](#read-relationship-tuples)
-      - [Read Relationship Tuple Changes (Watch)](#read-relationship-tuple-changes-watch)
     - [Relationship Queries](#relationship-queries)
       - [Check](#check)
       - [Expand](#expand)
@@ -212,6 +212,41 @@ custom-headers:
 
 Create, Get, Delete and List OpenFGA Stores
 
+##### List Stores
+
+Get a list of stores.
+
+###### Command
+
+```
+fga store list [flags]
+```
+
+###### Parameters
+
+* `--max-pages`: Max number of pages to get.
+* `--name`: Filter stores by exact name. Substrings and regexes are not supported.
+
+###### Example
+
+```bash
+fga store list
+```
+
+###### Response
+
+```json
+{
+  "stores": [{
+    "id": "..",
+    "name": "..",
+    "created_at": "",
+    "updated_at": "",
+    "deleted_at": ""
+  }]
+}
+```
+
 ##### Create Store
 
 Create an OpenFGA store.
@@ -288,41 +323,6 @@ fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4
     "name": "FGA Demo Store",
     "created_at": "2023-05-19T16:10:07.637585677Z",
     "updated_at": "2023-05-19T16:10:07.637585677Z"
-}
-```
-
-##### List Stores
-
-Get a list of stores.
-
-###### Command
-
-```
-fga store list [flags]
-```
-
-###### Parameters
-
-* `--max-pages`: Max number of pages to get.
-* `--name`: Filter stores by exact name. Substrings and regexes are not supported.
-
-###### Example
-
-```bash
-fga store list
-```
-
-###### Response
-
-```json
-{
-  "stores": [{
-    "id": "..",
-    "name": "..",
-    "created_at": "",
-    "updated_at": "",
-    "deleted_at": ""
-  }]
 }
 ```
 
@@ -431,6 +431,45 @@ Write, read, list and validate authorization models.
 
 * `--store-id`: Store ID
 
+##### Read Authorization Models
+
+List all authorization models for a store, in descending order by creation date.
+
+###### Command
+
+```
+fga model list [flags]
+```
+
+###### Parameters
+
+* `--field`: Fields to display, choices are: id, created_at and model
+* `--max-pages`: Max number of pages to get.
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4
+```
+
+###### Response
+
+```json
+{
+  "authorization_models": [
+    {
+      "id":"01H6H9XH1G5Q6DK6PFMGDZNH9S",
+      "created_at":"2023-07-29T17:07:41Z"
+    },
+    {
+      "id":"01H6H9PPR6C3P45R75X55ZFP46",
+      "created_at":"2023-07-29T17:03:57Z"
+    }
+  ]
+}
+```
+
 ##### Write Authorization Model
 
 Writes a new authorization model.
@@ -501,45 +540,6 @@ type user
 type document
   relations
     define can_view: [user]
-```
-
-##### Read Authorization Models
-
-List all authorization models for a store, in descending order by creation date.
-
-###### Command
-
-```
-fga model list [flags]
-```
-
-###### Parameters
-
-* `--field`: Fields to display, choices are: id, created_at and model
-* `--max-pages`: Max number of pages to get.
-* `--store-id`: Store ID
-
-###### Example
-
-```bash
-fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4
-```
-
-###### Response
-
-```json
-{
-  "authorization_models": [
-    {
-      "id":"01H6H9XH1G5Q6DK6PFMGDZNH9S",
-      "created_at":"2023-07-29T17:07:41Z"
-    },
-    {
-      "id":"01H6H9PPR6C3P45R75X55ZFP46",
-      "created_at":"2023-07-29T17:03:57Z"
-    }
-  ]
-}
 ```
 
 ##### Validate Authorization Model
@@ -657,6 +657,91 @@ Read, write, delete, import and listen to changes in relationship tuples in a st
 
 * `--store-id`: Store ID
 
+##### Read Relationship Tuple Changes (Watch)
+
+Get a list of relationship tuple changes (Writes and Deletes) across time.
+
+###### Command
+
+```
+fga tuple changes [flags]
+```
+
+###### Parameters
+
+* `--continuation-token`: Continuation token to start changes from.
+* `--max-pages`: Max number of pages to get.
+* `--start-time`: Time to return changes since.
+* `--type`: Type to restrict the changes by.
+
+###### Example
+
+```bash
+fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=
+```
+
+###### Response
+
+```json
+{
+  "changes": [
+    {
+      "operation": "TUPLE_OPERATION_WRITE",
+      "timestamp": "2023-07-06T15:12:40.294950382Z",
+      "tuple_key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      }
+    }
+  ],
+  "continuation_token":"NHw="
+}
+```
+
+##### Read Relationship Tuples
+
+Read relationship tuples that exist in the system (does not evaluate).
+
+###### Command
+
+```
+fga tuple read [flags]
+```
+
+###### Parameters
+
+* `--consistency`: Consistency preference for the request. Valid options are HIGHER_CONSISTENCY and MINIMIZE_LATENCY.
+* `--max-pages`: Max number of pages to get. Set to 0 to get all pages.
+* `--object`: Object
+* `--output-format`: Specifies the format for data presentation. Valid options: json, simple-json, csv, and yaml.
+* `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
+* `--relation`: Relation
+* `--user`: User
+
+###### Example
+
+```bash
+fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap
+```
+
+###### Response
+
+```json
+{
+  "tuples": [
+    {
+      "key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      },
+      "timestamp": "2023-07-06T15:12:55.080666875Z"
+    }
+  ]
+}
+```
+
 ##### Create Relationship Tuples
 
 Add relationship tuples to the store. This command allows for the creation of relationship tuples either through direct command line arguments or by specifying a file. The file can be in JSON, YAML, or CSV format.
@@ -767,91 +852,6 @@ Response when using --file:
     }
   ],
   "failed": []
-}
-```
-
-##### Read Relationship Tuples
-
-Read relationship tuples that exist in the system (does not evaluate).
-
-###### Command
-
-```
-fga tuple read [flags]
-```
-
-###### Parameters
-
-* `--consistency`: Consistency preference for the request. Valid options are HIGHER_CONSISTENCY and MINIMIZE_LATENCY.
-* `--max-pages`: Max number of pages to get. Set to 0 to get all pages.
-* `--object`: Object
-* `--output-format`: Specifies the format for data presentation. Valid options: json, simple-json, csv, and yaml.
-* `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
-* `--relation`: Relation
-* `--user`: User
-
-###### Example
-
-```bash
-fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap
-```
-
-###### Response
-
-```json
-{
-  "tuples": [
-    {
-      "key": {
-        "object": "document:roadmap",
-        "relation": "can_view",
-        "user": "user:anne"
-      },
-      "timestamp": "2023-07-06T15:12:55.080666875Z"
-    }
-  ]
-}
-```
-
-##### Read Relationship Tuple Changes (Watch)
-
-Get a list of relationship tuple changes (Writes and Deletes) across time.
-
-###### Command
-
-```
-fga tuple changes [flags]
-```
-
-###### Parameters
-
-* `--continuation-token`: Continuation token to start changes from.
-* `--max-pages`: Max number of pages to get.
-* `--start-time`: Time to return changes since.
-* `--type`: Type to restrict the changes by.
-
-###### Example
-
-```bash
-fga tuple changes --store-id=01H0H015178Y2V4CX10C2KGHF4 --type=document --continuation-token=M3w=
-```
-
-###### Response
-
-```json
-{
-  "changes": [
-    {
-      "operation": "TUPLE_OPERATION_WRITE",
-      "timestamp": "2023-07-06T15:12:40.294950382Z",
-      "tuple_key": {
-        "object": "document:roadmap",
-        "relation": "can_view",
-        "user": "user:anne"
-      }
-    }
-  ],
-  "continuation_token":"NHw="
 }
 ```
 

@@ -32,10 +32,10 @@ var TupleCmd = &cobra.Command{
 }
 
 func init() {
+	TupleCmd.AddCommand(changesCmd)
+	TupleCmd.AddCommand(readCmd)
 	TupleCmd.AddCommand(writeCmd)
 	TupleCmd.AddCommand(deleteCmd)
-	TupleCmd.AddCommand(readCmd)
-	TupleCmd.AddCommand(changesCmd)
 
 	TupleCmd.PersistentFlags().String("store-id", "", "Store ID")
 
