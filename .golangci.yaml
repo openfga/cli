@@ -42,6 +42,7 @@ linters:
           allow:
             - $gostd
             - github.com/charmbracelet/huh
+            - github.com/charmbracelet/lipgloss
             - github.com/gocarina/gocsv
             - github.com/hashicorp/go-multierror
             - github.com/mattn/go-isatty

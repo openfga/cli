@@ -24,22 +24,22 @@ var errSyncRecordsFailed = errors.New("one or more records failed")
 
 // errStyles holds lipgloss styles bound to a specific output writer.
 type errStyles struct {
-	time    lipgloss.Style
-	writes  lipgloss.Style
-	deletes lipgloss.Style
-	dim     lipgloss.Style
-	ok      lipgloss.Style
+	time     lipgloss.Style
+	writes   lipgloss.Style
+	deletes  lipgloss.Style
+	dim      lipgloss.Style
+	ok       lipgloss.Style
 	errStyle lipgloss.Style
 }
 
 func newErrStyles(w io.Writer) errStyles {
 	r := lipgloss.NewRenderer(w)
 	return errStyles{
-		time:    r.NewStyle().Faint(true),
-		writes:  r.NewStyle().Foreground(lipgloss.Color("10")).Bold(true),
-		deletes: r.NewStyle().Foreground(lipgloss.Color("9")).Bold(true),
-		dim:     r.NewStyle().Faint(true),
-		ok:      r.NewStyle().Foreground(lipgloss.Color("10")),
+		time:     r.NewStyle().Faint(true),
+		writes:   r.NewStyle().Foreground(lipgloss.Color("10")).Bold(true),
+		deletes:  r.NewStyle().Foreground(lipgloss.Color("9")).Bold(true),
+		dim:      r.NewStyle().Faint(true),
+		ok:       r.NewStyle().Foreground(lipgloss.Color("10")),
 		errStyle: r.NewStyle().Foreground(lipgloss.Color("9")),
 	}
 }
@@ -154,9 +154,9 @@ func syncMapping(
 
 	// For dry-run, wrap the base client so writes are printed instead of applied.
 	// Only emit JSONL when stdout is redirected — at a TTY it's unreadable at scale.
-	var writeTarget apply.TupleClient = base
+	writeTarget := base
 	if opts.dryRun {
-		dryOut := io.Writer(io.Discard)
+		dryOut := io.Discard
 		if f, ok := out.(*os.File); ok && !isatty.IsTerminal(f.Fd()) {
 			dryOut = out
 		}
@@ -288,7 +288,6 @@ func processSyncRecord(
 
 	return cc.writes, cc.dels, nil
 }
-
 
 var (
 	syncInputFile       string
