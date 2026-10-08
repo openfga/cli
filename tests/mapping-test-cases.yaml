@@ -80,9 +80,9 @@ tests:
       not-contains:
         - "tests:"
 
-  # fga mapping run
-  012 - run emits JSONL tuple from stdin:
-    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run ./tests/fixtures/basic-mapping.yaml'
+  # fga mapping evaluate (run is a deprecated alias)
+  012 - evaluate emits JSONL tuple from stdin:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping evaluate ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       json:
@@ -91,8 +91,8 @@ tests:
         relation: "member"
         object: "org:acme"
 
-  013 - run --writes-only emits ClientTupleKey shape without op or action field:
-    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run --writes-only ./tests/fixtures/basic-mapping.yaml'
+  013 - evaluate --writes-only emits ClientTupleKey shape without op or action field:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping evaluate --writes-only ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       json:
@@ -103,41 +103,41 @@ tests:
         - '"op"'
         - '"action"'
 
-  014 - run --input reads from file:
-    command: fga mapping run --input ./tests/fixtures/mapping-event.json ./tests/fixtures/basic-mapping.yaml
+  014 - evaluate --input reads from file:
+    command: fga mapping evaluate --input ./tests/fixtures/mapping-event.json ./tests/fixtures/basic-mapping.yaml
     exit-code: 0
     stdout:
       json:
         op: "write"
         user: "user:anne"
 
-  015 - run --format json --writes-only returns a flat array of tuples:
-    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run --format json --writes-only ./tests/fixtures/basic-mapping.yaml'
+  015 - evaluate --format json --writes-only returns a flat array of tuples:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping evaluate --format json --writes-only ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       json:
         0.user: "user:anne"
 
-  016 - run --format json returns a batch object with writes:
-    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run --format json ./tests/fixtures/basic-mapping.yaml'
+  016 - evaluate --format json returns a batch object with writes:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping evaluate --format json ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       json:
         writes.0.user: "user:anne"
 
-  017 - run rejects unknown format:
-    command: bash -c 'echo '"'"'{}'"'"' | fga mapping run --format xml ./tests/fixtures/basic-mapping.yaml'
+  017 - evaluate rejects unknown format:
+    command: bash -c 'echo '"'"'{}'"'"' | fga mapping evaluate --format xml ./tests/fixtures/basic-mapping.yaml'
     exit-code: 2
 
-  018 - run rejects invalid mapping:
-    command: bash -c 'echo '"'"'{}'"'"' | fga mapping run ./tests/fixtures/invalid-mapping.yaml'
+  018 - evaluate rejects invalid mapping:
+    command: bash -c 'echo '"'"'{}'"'"' | fga mapping evaluate ./tests/fixtures/invalid-mapping.yaml'
     exit-code: 2
     stderr:
       contains:
         - "unclosed"
 
-  019 - run streams one op per record for multi-record input:
-    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping run ./tests/fixtures/basic-mapping.yaml'
+  019 - evaluate streams one op per record for multi-record input:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping evaluate ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       line-count: 2
@@ -145,21 +145,21 @@ tests:
         - "user:anne"
         - "user:bob"
 
-  020 - run --aggregate dedups an identical tuple across records:
-    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"anne","org":"acme"}\n'"'"' | fga mapping run --aggregate ./tests/fixtures/basic-mapping.yaml'
+  020 - evaluate --aggregate dedups an identical tuple across records:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"anne","org":"acme"}\n'"'"' | fga mapping evaluate --aggregate ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       line-count: 1
 
-  021 - run --aggregate reports a cross-record write/delete conflict:
-    command: bash -c 'printf '"'"'{"id":"anne","org":"acme","op":"add"}\n{"id":"anne","org":"acme","op":"remove"}\n'"'"' | fga mapping run --aggregate ./tests/fixtures/conflicting-mapping.yaml'
+  021 - evaluate --aggregate reports a cross-record write/delete conflict:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme","op":"add"}\n{"id":"anne","org":"acme","op":"remove"}\n'"'"' | fga mapping evaluate --aggregate ./tests/fixtures/conflicting-mapping.yaml'
     exit-code: 1
     stderr:
       contains:
         - "conflict"
 
-  022 - run --continue-on-error skips a malformed record and exits non-zero:
-    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\nnot json\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping run --continue-on-error ./tests/fixtures/basic-mapping.yaml'
+  022 - evaluate --continue-on-error skips a malformed record and exits non-zero:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\nnot json\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping evaluate --continue-on-error ./tests/fixtures/basic-mapping.yaml'
     exit-code: 1
     stdout:
       line-count: 2
@@ -170,15 +170,28 @@ tests:
       contains:
         - "skipping record on line 2"
 
-  023 - run --continue-on-error with all valid records exits zero:
-    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping run --continue-on-error ./tests/fixtures/basic-mapping.yaml'
+  023 - evaluate --continue-on-error with all valid records exits zero:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"bob","org":"acme"}\n'"'"' | fga mapping evaluate --continue-on-error ./tests/fixtures/basic-mapping.yaml'
     exit-code: 0
     stdout:
       line-count: 2
 
-  024 - run --aggregate dedups identical unresolved filters across records:
-    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"anne","org":"acme"}\n'"'"' | fga mapping run --aggregate --format json ./tests/fixtures/filter-mapping.yaml'
+  024 - evaluate --aggregate dedups identical unresolved filters across records:
+    command: bash -c 'printf '"'"'{"id":"anne","org":"acme"}\n{"id":"anne","org":"acme"}\n'"'"' | fga mapping evaluate --aggregate --format json ./tests/fixtures/filter-mapping.yaml'
     exit-code: 0
     stdout:
       json:
         tuple_filter_operations.#: "1"
+
+  025 - run alias prints deprecation warning and still produces output:
+    command: bash -c 'echo '"'"'{"id":"anne","org":"acme"}'"'"' | fga mapping run ./tests/fixtures/basic-mapping.yaml'
+    exit-code: 0
+    stdout:
+      json:
+        op: "write"
+        user: "user:anne"
+        relation: "member"
+        object: "org:acme"
+    stderr:
+      contains:
+        - "deprecated"
