@@ -21,9 +21,10 @@ package main
 import (
 	"log"
 
+	"github.com/spf13/cobra"
+
 	"github.com/openfga/cli/cmd"
 	"github.com/openfga/cli/internal/doc"
-	"github.com/spf13/cobra"
 )
 
 func main() {
