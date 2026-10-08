@@ -50,6 +50,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Run Embedded Tests](#test-mapping)
       - [Scaffold a Mapping File](#init-mapping)
       - [Evaluate Against JSON Input](#run-mapping)
+      - [Sync to Store](#sync-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1217,8 +1218,7 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
 
 #### Mapping
 
-Offline tooling for authoring, validating, testing, and evaluating JSON→tuple mapping files.
-No store credentials or network access required.
+Tooling for authoring, validating, testing, evaluating, and applying JSON→tuple mapping files. Most commands run offline; `sync` requires store credentials.
 
 - `mapping`
 
@@ -1227,6 +1227,7 @@ No store credentials or network access required.
 | [Scaffold a mapping file](#init-mapping)          | `init`     | `[mapping.yaml]`, `--minimal`, `--force`          | `fga mapping init`                                          |
 | [Validate a mapping file](#validate-mapping)      | `validate` | `--format`, `--model-file`, `--verbose`           | `fga mapping validate mapping.yaml`                         |
 | [Run embedded tests](#test-mapping)               | `test`     | `--format`, `--run`, `--fail-fast`, `--output-file`, `--verbose`, `--no-color` | `fga mapping test mapping.yaml` |
+| [Sync to store](#sync-mapping)                    | `sync`     | `--store-id`, `--model-id`, `--input`, `--dry-run`, `--continue-on-error`, `--quiet` | `fga mapping sync mapping.yaml --store-id $FGA_STORE_ID < events.jsonl` |
 
 ##### Validate Mapping
 
@@ -1355,6 +1356,44 @@ Error: invalid JSON at line 1, column 8: invalid character 'b' looking for begin
   filter:patch   user:anne   *        org:acme
     desired      user:anne   viewer   org:acme
 > :quit
+```
+
+##### Sync Mapping
+
+###### Command
+fga mapping **sync** [mapping-file]
+
+Reads JSONL from stdin (or `--input`) and evaluates each record against the mapping file, then applies the resulting tuple writes and deletes to the store. Rules using `tuple_filters` read current store state, diff against desired state, and derive the minimal write/delete set before applying. Deletes are issued before writes so that a condition change on the same user–relation–object (delete old + write new) lands correctly.
+
+The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
+
+###### Parameters
+* `--store-id` (required): Store ID
+* `--model-id`: Authorization Model ID
+* `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
+* `--dry-run`: Read the store and print planned operations to stdout as JSONL instead of writing them. Suppressed at an interactive terminal where the output would be unreadable.
+* `--continue-on-error`: Skip records that fail to evaluate or apply (shown on stderr) and exit non-zero if any were skipped
+* `--quiet`: Suppress progress output; only errors are written to stderr
+
+###### Example
+`echo '{"id":"anne","org":"acme"}' | fga mapping sync mapping.yaml --store-id $FGA_STORE_ID`
+
+`fga mapping sync mapping.yaml --input events.jsonl --store-id $FGA_STORE_ID --dry-run > planned.jsonl`
+
+`fga mapping sync mapping.yaml --store-id $FGA_STORE_ID --continue-on-error < events.jsonl`
+
+###### Response
+
+Progress is shown on stderr as a single updating line (or once per second when not a terminal):
+```
+15:04:05  ✓  +12 -3  10 records
+```
+With `--quiet`, only errors appear on stderr.
+
+`--dry-run` (with stdout redirected) emits planned operations as JSONL:
+```json
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
+{"op":"delete","user":"user:bob","relation":"member","object":"org:acme"}
 ```
 
 ## Contributing

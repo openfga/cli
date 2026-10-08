@@ -75,4 +75,5 @@ func init() {
 	MappingCmd.AddCommand(testCmd)
 	MappingCmd.AddCommand(initCmd)
 	MappingCmd.AddCommand(evaluateCmd)
+	MappingCmd.AddCommand(syncCmd)
 }
