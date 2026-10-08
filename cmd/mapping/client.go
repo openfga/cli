@@ -87,59 +87,85 @@ func (c *fgaTupleClient) WriteTuples(ctx context.Context, tuples []language.Tupl
 	// land first. The SDK with Transaction.Disable sends writes first then deletes, so we
 	// split them into two calls.
 	if len(deletes) > 0 {
-		resp, err := c.inner.Write(ctx).Options(writeOpts).Body(sdkclient.ClientWriteRequest{
-			Deletes: deletes,
-		}).Execute()
-		if err != nil {
-			return fmt.Errorf("deleting tuples: %w", err)
-		}
-		var errs []error
-		seen := make(map[string]struct{})
-		for _, d := range resp.Deletes {
-			if d.Status == sdkclient.FAILURE {
-				var e error
-				if d.Error != nil {
-					e = d.Error
-				} else {
-					e = fmt.Errorf("delete failed: %s %s %s", d.TupleKey.User, d.TupleKey.Relation, d.TupleKey.Object)
-				}
-				if _, ok := seen[e.Error()]; !ok {
-					seen[e.Error()] = struct{}{}
-					errs = append(errs, e)
-				}
-			}
-		}
-		if len(errs) > 0 {
-			return fmt.Errorf("deleting tuples: %w", errors.Join(errs...))
+		if err := c.executeDeletes(ctx, writeOpts, deletes); err != nil {
+			return err
 		}
 	}
 
 	if len(writes) > 0 {
-		resp, err := c.inner.Write(ctx).Options(writeOpts).Body(sdkclient.ClientWriteRequest{
-			Writes: writes,
-		}).Execute()
-		if err != nil {
-			return fmt.Errorf("writing tuples: %w", err)
+		if err := c.executeWrites(ctx, writeOpts, writes); err != nil {
+			return err
 		}
-		var errs []error
-		seen := make(map[string]struct{})
-		for _, w := range resp.Writes {
-			if w.Status == sdkclient.FAILURE {
-				var e error
-				if w.Error != nil {
-					e = w.Error
-				} else {
-					e = fmt.Errorf("write failed: %s %s %s", w.TupleKey.User, w.TupleKey.Relation, w.TupleKey.Object)
-				}
-				if _, ok := seen[e.Error()]; !ok {
-					seen[e.Error()] = struct{}{}
-					errs = append(errs, e)
-				}
+	}
+
+	return nil
+}
+
+func (c *fgaTupleClient) executeDeletes(
+	ctx context.Context,
+	opts sdkclient.ClientWriteOptions,
+	deletes []sdkclient.ClientTupleKeyWithoutCondition,
+) error {
+	resp, err := c.inner.Write(ctx).Options(opts).Body(sdkclient.ClientWriteRequest{
+		Deletes: deletes,
+	}).Execute()
+	if err != nil {
+		return fmt.Errorf("deleting tuples: %w", err)
+	}
+
+	var errs []error
+	seen := make(map[string]struct{})
+	for _, d := range resp.Deletes {
+		if d.Status == sdkclient.FAILURE {
+			var e error
+			if d.Error != nil {
+				e = d.Error
+			} else {
+				e = fmt.Errorf("delete failed: %s %s %s", d.TupleKey.User, d.TupleKey.Relation, d.TupleKey.Object)
+			}
+			if _, ok := seen[e.Error()]; !ok {
+				seen[e.Error()] = struct{}{}
+				errs = append(errs, e)
 			}
 		}
-		if len(errs) > 0 {
-			return fmt.Errorf("writing tuples: %w", errors.Join(errs...))
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("deleting tuples: %w", errors.Join(errs...))
+	}
+
+	return nil
+}
+
+func (c *fgaTupleClient) executeWrites(
+	ctx context.Context,
+	opts sdkclient.ClientWriteOptions,
+	writes []sdkclient.ClientTupleKey,
+) error {
+	resp, err := c.inner.Write(ctx).Options(opts).Body(sdkclient.ClientWriteRequest{
+		Writes: writes,
+	}).Execute()
+	if err != nil {
+		return fmt.Errorf("writing tuples: %w", err)
+	}
+
+	var errs []error
+	seen := make(map[string]struct{})
+	for _, w := range resp.Writes {
+		if w.Status == sdkclient.FAILURE {
+			var e error
+			if w.Error != nil {
+				e = w.Error
+			} else {
+				e = fmt.Errorf("write failed: %s %s %s", w.TupleKey.User, w.TupleKey.Relation, w.TupleKey.Object)
+			}
+			if _, ok := seen[e.Error()]; !ok {
+				seen[e.Error()] = struct{}{}
+				errs = append(errs, e)
+			}
 		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("writing tuples: %w", errors.Join(errs...))
 	}
 
 	return nil
@@ -201,21 +227,23 @@ func partitionSyncTuples(tuples []language.Tuple) ([]sdkclient.ClientTupleKey, [
 				Relation: t.Relation,
 				Object:   t.Object,
 			})
-		} else {
-			key := sdkclient.ClientTupleKey{
-				User:     t.User,
-				Relation: t.Relation,
-				Object:   t.Object,
-			}
-			if t.Condition != "" {
-				rc := &openfga.RelationshipCondition{Name: t.Condition}
-				if len(t.Context) > 0 {
-					rc.Context = &t.Context
-				}
-				key.Condition = rc
-			}
-			writes = append(writes, key)
+
+			continue
 		}
+
+		key := sdkclient.ClientTupleKey{
+			User:     t.User,
+			Relation: t.Relation,
+			Object:   t.Object,
+		}
+		if t.Condition != "" {
+			rc := &openfga.RelationshipCondition{Name: t.Condition}
+			if len(t.Context) > 0 {
+				rc.Context = &t.Context
+			}
+			key.Condition = rc
+		}
+		writes = append(writes, key)
 	}
 
 	return writes, deletes
