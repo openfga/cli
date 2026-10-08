@@ -1309,14 +1309,16 @@ fga mapping **init** [mapping.yaml]
 Created mapping.yaml
 ```
 
-##### Run Mapping
+##### Evaluate Mapping
 
 ###### Command
-fga mapping **run** [mapping-file]
+fga mapping **evaluate** [mapping-file]
 
 Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
 
 The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
+
+> `fga mapping run` is a deprecated alias for `fga mapping evaluate` and will be removed in a future release.
 
 ###### Parameters
 * `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
@@ -1327,9 +1329,9 @@ The mapping file is optional: omit it in an interactive terminal to choose one f
 * `--interactive` / `-i`: Explore the mapping in a terminal loop — type or paste a JSON document and see the tuple operations it produces. The document is evaluated as soon as it forms a complete JSON value, so a single-line object is evaluated on Enter and a multi-line one when its closing brace is typed. Supports line editing (arrow keys, history). Requires an interactive terminal (both stdin and stdout must be a TTY) and cannot be combined with `--input`, `--writes-only`, `--format`, `--aggregate`, or `--continue-on-error`.
 
 ###### Example
-`echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
+`echo '{"id":"anne","org":"acme"}' | fga mapping evaluate mapping.yaml`
 
-`fga mapping run --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
+`fga mapping evaluate --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
 
 ###### Response
 ```json
@@ -1340,7 +1342,7 @@ The mapping file is optional: omit it in an interactive terminal to choose one f
 In a terminal, `-i` starts an explorer loop. Type or paste a JSON document and the resulting tuple operations are printed as an aligned table. The document is evaluated as soon as it parses as complete JSON — a single-line object on Enter, a multi-line one when its closing brace is typed. While more input is expected the prompt shows `...` and a one-time hint notes that the document is not yet valid JSON; pressing Enter on a blank line evaluates whatever is buffered. Invalid JSON is reported with the line, column, and a caret under the offending character. A rule with `tuple_filters` cannot be resolved offline, so its filter conditions are shown as `filter:patch` or `filter:delete` rows (the action distinguishes how the store is reconciled), with the desired-state tuples it reconciles toward shown as indented `desired` rows (they drive a read-diff-write against a store rather than being written directly). Filter fields left unset match any value and render as `*`, and a conditioned tuple shows its condition name and rendered context in brackets. Line editing (arrow keys, history) is available. Available commands: `:reload` re-reads and recompiles the mapping from disk, `:trace on|off` toggles the per-rule trace, and `:quit` exits.
 
 ```
-$ fga mapping run mapping.yaml -i
+$ fga mapping evaluate mapping.yaml -i
 mapping loaded: 2 rules. Type or paste a JSON document; it is evaluated once complete.  commands: :reload  :trace on|off  :quit
 
 > {"id":"anne","org":"acme"}

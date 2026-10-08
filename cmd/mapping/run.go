@@ -466,17 +466,18 @@ func emitBuffered(
 }
 
 var (
-	runFormat          string
-	runWritesOnly      bool
-	runInputFile       string
-	runAggregate       bool
-	runContinueOnError bool
-	runInteractive     bool
+	evaluateFormat          string
+	evaluateWritesOnly      bool
+	evaluateInputFile       string
+	evaluateAggregate       bool
+	evaluateContinueOnError bool
+	evaluateInteractive     bool
 )
 
-var runCmd = &cobra.Command{
-	Use:   "run [mapping-file]",
-	Short: "Evaluate a mapping against JSON input and emit tuple operations",
+var evaluateCmd = &cobra.Command{
+	Use:     "evaluate [mapping-file]",
+	Aliases: []string{"run"},
+	Short:   "Evaluate a mapping against JSON input and emit tuple operations",
 	Long: `Reads JSONL from stdin (or --input) and evaluates it against the mapping file.
 Input is JSON Lines: one JSON object per line. Outputs tuple operations as JSONL (default)
 or a JSON batch (--format json).
@@ -495,26 +496,30 @@ a conflict is a runtime error. Both --format json and --aggregate buffer the who
 before emitting; the default streaming JSONL does not.
 --continue-on-error skips any record that fails to parse or evaluate (warning to stderr) and
 continues; the command still exits non-zero if any record was skipped.`,
-	Example: `  echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml
-  fga mapping run mapping.yaml --input event.json --format json
-  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
-  fga mapping run mapping.yaml -i`,
+	Example: `  echo '{"id":"anne","org":"acme"}' | fga mapping evaluate mapping.yaml
+  fga mapping evaluate mapping.yaml --input event.json --format json
+  fga mapping evaluate --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
+  fga mapping evaluate mapping.yaml -i`,
 	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if cmd.CalledAs() == "run" {
+			fmt.Fprintln(cmd.ErrOrStderr(), `warning: "fga mapping run" is deprecated, use "fga mapping evaluate" instead`)
+		}
+
 		errStream := cmd.ErrOrStderr()
 
 		opts := runMappingOptions{
-			format:          runFormat,
-			writesOnly:      runWritesOnly,
-			aggregate:       runAggregate,
-			continueOnError: runContinueOnError,
+			format:          evaluateFormat,
+			writesOnly:      evaluateWritesOnly,
+			aggregate:       evaluateAggregate,
+			continueOnError: evaluateContinueOnError,
 		}
 
 		// Validate the interactive invocation before any prompt, so a bad flag
 		// combination or a redirected stream never blocks on asking for a mapping
 		// path first.
-		if runInteractive {
-			if err := checkInteractiveFlags(opts, runInputFile, cmd.Flags().Changed("format")); err != nil {
+		if evaluateInteractive {
+			if err := checkInteractiveFlags(opts, evaluateInputFile, cmd.Flags().Changed("format")); err != nil {
 				fmt.Fprintln(errStream, "Error: "+err.Error())
 				os.Exit(2)
 			}
@@ -530,7 +535,7 @@ continues; the command still exits non-zero if any record was skipped.`,
 
 		path := promptMappingFile(args, errStream)
 
-		if runInteractive {
+		if evaluateInteractive {
 			err := runMappingInteractive(cmd.Context(), path, cmd.InOrStdin(), cmd.OutOrStdout(), errStream)
 			if errors.Is(err, errMappingInvalid) {
 				os.Exit(2)
@@ -541,10 +546,10 @@ continues; the command still exits non-zero if any record was skipped.`,
 
 		inputReader := cmd.InOrStdin()
 
-		if runInputFile != "" {
-			file, err := os.Open(runInputFile)
+		if evaluateInputFile != "" {
+			file, err := os.Open(evaluateInputFile)
 			if err != nil {
-				return fmt.Errorf("opening input %s: %w", runInputFile, err)
+				return fmt.Errorf("opening input %s: %w", evaluateInputFile, err)
 			}
 
 			defer file.Close()
@@ -570,23 +575,23 @@ continues; the command still exits non-zero if any record was skipped.`,
 }
 
 func init() {
-	runCmd.Flags().StringVar(&runFormat, "format", "jsonl", `Output format: "jsonl" or "json"`)
-	runCmd.Flags().BoolVar(
-		&runWritesOnly, "writes-only", false,
+	evaluateCmd.Flags().StringVar(&evaluateFormat, "format", "jsonl", `Output format: "jsonl" or "json"`)
+	evaluateCmd.Flags().BoolVar(
+		&evaluateWritesOnly, "writes-only", false,
 		"Emit only write operations in ClientTupleKey format (consumable by fga tuple write)",
 	)
-	runCmd.Flags().StringVar(
-		&runInputFile, "input", "", "Path to JSONL input file, one JSON object per line (default: stdin)")
-	runCmd.Flags().BoolVar(
-		&runAggregate, "aggregate", false,
+	evaluateCmd.Flags().StringVar(
+		&evaluateInputFile, "input", "", "Path to JSONL input file, one JSON object per line (default: stdin)")
+	evaluateCmd.Flags().BoolVar(
+		&evaluateAggregate, "aggregate", false,
 		"Buffer all records and collapse them (dedup tuples and filters, detect write/delete conflicts) before emitting",
 	)
-	runCmd.Flags().BoolVar(
-		&runContinueOnError, "continue-on-error", false,
+	evaluateCmd.Flags().BoolVar(
+		&evaluateContinueOnError, "continue-on-error", false,
 		"Skip input records that fail to parse or evaluate (warn to stderr) and exit non-zero if any were skipped",
 	)
-	runCmd.Flags().BoolVarP(
-		&runInteractive, "interactive", "i", false,
+	evaluateCmd.Flags().BoolVarP(
+		&evaluateInteractive, "interactive", "i", false,
 		"Explore the mapping in a terminal loop: paste JSON documents and see the tuples they produce (requires a TTY)",
 	)
 }
