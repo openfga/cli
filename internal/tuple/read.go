@@ -14,9 +14,14 @@ const DefaultReadPageSize int32 = 50
 // ErrInvalidPageSize is returned when page size is outside valid range.
 var ErrInvalidPageSize = errors.New("pageSize must be between 1 and 100")
 
+// TupleReaderClient is the subset of client.SdkClient required by Read.
+type TupleReaderClient interface {
+	Read(ctx context.Context) client.SdkClientReadRequestInterface
+}
+
 func Read(
 	ctx context.Context,
-	fgaClient client.SdkClient,
+	fgaClient TupleReaderClient,
 	body *client.ClientReadRequest,
 	maxPages int,
 	pageSize int32,

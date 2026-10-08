@@ -5,7 +5,7 @@ tests:
   # fga mapping sync — store-independent error cases
 
   001 - sync missing store-id flag exits non-zero:
-    command: bash -c 'echo "{}" | fga mapping sync ./tests/fixtures/sync-mapping.yaml'
+    command: env -u FGA_STORE_ID bash -c 'echo "{}" | fga mapping sync ./tests/fixtures/sync-mapping.yaml'
     exit-code: 1
 
   002 - sync invalid mapping exits 2 with diagnostics on stderr:

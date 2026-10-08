@@ -181,6 +181,25 @@ func TestSyncMapping(t *testing.T) {
 		assert.Contains(t, buf.String(), "user:anne")
 	})
 
+	t.Run("error without continue-on-error does not write subsequent records", func(t *testing.T) {
+		t.Parallel()
+
+		var called int
+		client := &mockTupleClient{
+			writeFn: func(_ context.Context, _ []language.Tuple) error {
+				called++
+				return nil
+			},
+		}
+
+		err := syncMapping(context.Background(), "testdata/valid.yaml", syncOptions{},
+			client,
+			strings.NewReader("not json\n{\"id\":\"anne\"}\n"),
+			&bytes.Buffer{}, &bytes.Buffer{})
+		require.Error(t, err)
+		assert.Equal(t, 0, called, "valid record after failure must not be written")
+	})
+
 	t.Run("WriteTuples error is returned wrapped in WriteError", func(t *testing.T) {
 		t.Parallel()
 

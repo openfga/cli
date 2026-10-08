@@ -17,9 +17,15 @@ import (
 
 const maxWriteChunkSize = 40
 
+// sdkWriteReadClient is the subset of sdkclient.SdkClient used by fgaTupleClient.
+type sdkWriteReadClient interface {
+	Read(ctx context.Context) sdkclient.SdkClientReadRequestInterface
+	Write(ctx context.Context) sdkclient.SdkClientWriteRequestInterface
+}
+
 // fgaTupleClient adapts the OpenFGA SDK client to the apply.TupleClient interface.
 type fgaTupleClient struct {
-	inner sdkclient.SdkClient
+	inner sdkWriteReadClient
 }
 
 func (c *fgaTupleClient) ReadTuples(ctx context.Context, filter language.TupleFilter) ([]language.Tuple, error) {
@@ -34,7 +40,8 @@ func (c *fgaTupleClient) ReadTuples(ctx context.Context, filter language.TupleFi
 		body.Object = &filter.Object
 	}
 
-	resp, err := internaltuple.Read(ctx, c.inner, body, 0, internaltuple.DefaultReadPageSize, nil)
+	consistency := openfga.CONSISTENCYPREFERENCE_HIGHER_CONSISTENCY
+	resp, err := internaltuple.Read(ctx, c.inner, body, 0, internaltuple.DefaultReadPageSize, &consistency)
 	if err != nil {
 		return nil, err
 	}
