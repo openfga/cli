@@ -38,7 +38,7 @@ func (m *mockReadRequest) Execute() (*openfga.ReadResponse, error) {
 	return &openfga.ReadResponse{Tuples: m.tuples}, nil
 }
 
-func (m *mockReadRequest) GetStoreIdOverride() *string              { return nil }
+func (m *mockReadRequest) GetStoreIdOverride() *string              { return nil } //nolint:staticcheck
 func (m *mockReadRequest) GetContext() context.Context              { return context.Background() }
 func (m *mockReadRequest) GetBody() *sdkclient.ClientReadRequest    { return nil }
 func (m *mockReadRequest) GetOptions() *sdkclient.ClientReadOptions { return nil }
@@ -70,11 +70,11 @@ func (m *mockWriteRequest) Execute() (*sdkclient.ClientWriteResponse, error) {
 	return &sdkclient.ClientWriteResponse{}, nil
 }
 
-func (m *mockWriteRequest) GetAuthorizationModelIdOverride() *string     { return nil }
-func (m *mockWriteRequest) GetStoreIdOverride() *string                  { return nil }
-func (m *mockWriteRequest) GetContext() context.Context                  { return context.Background() }
-func (m *mockWriteRequest) GetOptions() *sdkclient.ClientWriteOptions    { return nil }
-func (m *mockWriteRequest) GetBody() *sdkclient.ClientWriteRequest       { return nil }
+func (m *mockWriteRequest) GetAuthorizationModelIdOverride() *string  { return nil } //nolint:staticcheck
+func (m *mockWriteRequest) GetStoreIdOverride() *string               { return nil } //nolint:staticcheck
+func (m *mockWriteRequest) GetContext() context.Context               { return context.Background() }
+func (m *mockWriteRequest) GetOptions() *sdkclient.ClientWriteOptions { return nil }
+func (m *mockWriteRequest) GetBody() *sdkclient.ClientWriteRequest    { return nil }
 
 // mockSdkClient implements sdkWriteReadClient.
 // writeReqFn, when set, is called on each Write() invocation; otherwise writeReq is returned.
