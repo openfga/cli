@@ -770,7 +770,9 @@ fga tuple write <user> <relation> <object> [flags]
 ###### Parameters
 
 * `--condition-context`: Condition Context (as a JSON string)
+* `--condition-expression`: Dynamic condition CEL expression
 * `--condition-name`: Condition Name
+* `--condition-parameters`: Dynamic condition parameter types (as a JSON object with at least one parameter)
 * `--file`: Tuples file
 * `--hide-imported-tuples`: Hide successfully imported tuples from output
 * `--max-parallel-requests`: Max number of requests to issue to the server in parallel.
@@ -785,6 +787,7 @@ fga tuple write <user> <relation> <object> [flags]
 ```bash
 fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'
+  fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 agent:alice-claude can_call tool:slack_send_message --condition-expression "channel_name == '#product-announcements'" --condition-parameters '{"channel_name":"string"}'
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.json
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.yaml
   fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv
