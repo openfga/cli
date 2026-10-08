@@ -1,0 +1,31 @@
+config:
+  inherit-env: true
+
+tests:
+  001 - test runs passing tests:
+    command: fga mapping test --format json ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        summary.total: "2"
+        summary.passed: "2"
+        summary.failed: "0"
+
+  002 - test compile error exits with code 2:
+    command: fga mapping test ./tests/fixtures/invalid-mapping.yaml
+    exit-code: 2
+
+  003 - test --run filters by substring:
+    command: fga mapping test --format json --run anne ./tests/fixtures/basic-mapping.yaml
+    exit-code: 0
+    stdout:
+      json:
+        summary.total: "2"
+        summary.passed: "1"
+
+  004 - test --run matching nothing exits non-zero:
+    command: fga mapping test --run NOMATCH ./tests/fixtures/basic-mapping.yaml
+    exit-code: 1
+    stderr:
+      contains:
+        - "matched no tests"
