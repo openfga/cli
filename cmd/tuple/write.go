@@ -45,7 +45,7 @@ type ImportStats struct {
 
 // writeCmd represents the write command.
 var writeCmd = &cobra.Command{
-	Use:     "write",
+	Use:     "write <user> <relation> <object>",
 	Aliases: []string{"import"},
 	Short:   "Create Relationship Tuples",
 	Long: "Add relationship tuples to the store. This command allows for the creation of " +

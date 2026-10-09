@@ -56,7 +56,7 @@ func expand(
 
 // expandCmd represents the expand command.
 var expandCmd = &cobra.Command{
-	Use:     "expand",
+	Use:     "expand <relation> <object>",
 	Short:   "Expand",
 	Long:    "Expands the relationships in userset tree format.",
 	Example: `fga query expand --store-id="01H4P8Z95KTXXEP6Z03T75Q984" can_view document:roadmap --consistency "HIGHER_CONSISTENCY"`, //nolint:lll

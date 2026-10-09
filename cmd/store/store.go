@@ -30,8 +30,8 @@ var StoreCmd = &cobra.Command{
 
 func init() {
 	StoreCmd.AddCommand(createCmd)
-	StoreCmd.AddCommand(listCmd)
 	StoreCmd.AddCommand(getCmd)
+	StoreCmd.AddCommand(listCmd)
 	StoreCmd.AddCommand(deleteCmd)
 	StoreCmd.AddCommand(importCmd)
 	StoreCmd.AddCommand(exportCmd)

@@ -23,9 +23,12 @@ import (
 
 	"github.com/openfga/cli/cmd"
 	"github.com/openfga/cli/internal/doc"
+	"github.com/spf13/cobra"
 )
 
 func main() {
+	cobra.EnableCommandSorting = false
+
 	root := cmd.RootCmd()
 
 	section := doc.GenerateCommandsSection(root)

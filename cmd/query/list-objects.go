@@ -62,7 +62,7 @@ func listObjects(
 
 // listObjectsCmd represents the listObjects command.
 var listObjectsCmd = &cobra.Command{
-	Use:     "list-objects",
+	Use:     "list-objects <user> <relation> <object-type>",
 	Short:   "List Objects",
 	Long:    "List the objects of a certain type that a user has a particular relation to.",
 	Example: `fga query list-objects --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document --contextual-tuple "user:anne can_view folder:product" --contextual-tuple "folder:product parent document:roadmap" --consistency "HIGHER_CONSISTENCY"`, //nolint:lll

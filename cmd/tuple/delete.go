@@ -32,7 +32,7 @@ import (
 
 // deleteCmd represents the delete command.
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   "delete <user> <relation> <object>",
 	Short: "Delete Relationship Tuples",
 	Args:  ExactArgsOrFlag(3, "file"), //nolint:mnd
 	Long:  "Delete relationship tuples from the store.",

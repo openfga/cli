@@ -359,6 +359,60 @@ func TestGenerateCommandsSection_NonJSONResponseLang(t *testing.T) {
 	assert.Contains(t, section, "```fga\nmodel\n  schema 1.1\n```")
 }
 
+func TestGenerateCommandsSection_LongRenderedForRunnable(t *testing.T) {
+	t.Parallel()
+
+	root := buildTestTree()
+	section := doc.GenerateCommandsSection(root)
+
+	// createCmd has Long: "Create an OpenFGA store." — must appear before ###### Command
+	createIdx := strings.Index(section, "##### Create Store")
+	require.NotEqual(t, -1, createIdx)
+	commandBlockIdx := strings.Index(section[createIdx:], "###### Command")
+	longIdx := strings.Index(section[createIdx:], "Create an OpenFGA store.")
+
+	assert.NotEqual(t, -1, longIdx, "Long should appear in runnable section")
+	assert.Less(t, longIdx, commandBlockIdx, "Long should appear before ###### Command")
+}
+
+func TestGenerateCommandsSection_LongRenderedForGroup(t *testing.T) {
+	t.Parallel()
+
+	root := buildTestTree()
+	section := doc.GenerateCommandsSection(root)
+
+	// storeGroup has Long: "Manage OpenFGA stores." — must appear after #### Stores
+	assert.Contains(t, section, "Manage OpenFGA stores.")
+}
+
+func TestGenerateCommandsSection_GroupPersistentFlagsRendered(t *testing.T) {
+	t.Parallel()
+
+	root := &cobra.Command{Use: "fga"}
+	group := &cobra.Command{Use: "query", Short: "Queries", Long: "Run queries."}
+	group.PersistentFlags().String("store-id", "", "Store ID")
+	sub := &cobra.Command{
+		Use:   "check",
+		Short: "Check",
+		RunE:  func(cmd *cobra.Command, args []string) error { return nil },
+	}
+	group.AddCommand(sub)
+	root.AddCommand(group)
+
+	section := doc.GenerateCommandsSection(root)
+
+	groupIdx := strings.Index(section, "#### Queries")
+	require.NotEqual(t, -1, groupIdx)
+
+	checkIdx := strings.Index(section, "##### Check")
+	require.NotEqual(t, -1, checkIdx)
+
+	// Parameters section should appear between group heading and first subcommand
+	paramIdx := strings.Index(section[groupIdx:checkIdx], "##### Parameters")
+	assert.NotEqual(t, -1, paramIdx, "group persistent flags should be rendered under group heading")
+	assert.Contains(t, section, "`--store-id`")
+}
+
 func TestAnchor_PunctuationStripped(t *testing.T) {
 	t.Parallel()
 

@@ -30,8 +30,8 @@ var ModelCmd = &cobra.Command{
 
 func init() {
 	ModelCmd.AddCommand(writeCmd)
-	ModelCmd.AddCommand(listCmd)
 	ModelCmd.AddCommand(getCmd)
+	ModelCmd.AddCommand(listCmd)
 	ModelCmd.AddCommand(validateCmd)
 	ModelCmd.AddCommand(transformCmd)
 	ModelCmd.AddCommand(modelTestCmd)

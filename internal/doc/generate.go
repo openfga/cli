@@ -57,6 +57,24 @@ func writeSection(b *strings.Builder, cmd *cobra.Command) {
 	if !cmd.Runnable() {
 		fmt.Fprintf(b, "#### %s\n\n", cmd.Short)
 
+		if cmd.Long != "" {
+			fmt.Fprintf(b, "%s\n\n", cmd.Long)
+		}
+
+		if hasVisiblePersistentFlags(cmd) {
+			fmt.Fprintf(b, "##### Parameters\n\n")
+
+			cmd.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+				if f.Hidden {
+					return
+				}
+
+				fmt.Fprintf(b, "* `--%s`: %s\n", f.Name, f.Usage)
+			})
+
+			fmt.Fprintf(b, "\n")
+		}
+
 		for _, sub := range cmd.Commands() {
 			if !sub.IsAvailableCommand() || sub.IsAdditionalHelpTopicCommand() {
 				continue
@@ -69,6 +87,10 @@ func writeSection(b *strings.Builder, cmd *cobra.Command) {
 	}
 
 	fmt.Fprintf(b, "##### %s\n\n", cmd.Short)
+
+	if cmd.Long != "" {
+		fmt.Fprintf(b, "%s\n\n", cmd.Long)
+	}
 
 	fmt.Fprintf(b, "###### Command\n\n```\n%s\n```\n\n", cmd.UseLine())
 
@@ -104,6 +126,18 @@ func hasVisibleLocalFlags(cmd *cobra.Command) bool {
 	hasVisible := false
 
 	cmd.NonInheritedFlags().VisitAll(func(f *pflag.Flag) {
+		if !f.Hidden {
+			hasVisible = true
+		}
+	})
+
+	return hasVisible
+}
+
+func hasVisiblePersistentFlags(cmd *cobra.Command) bool {
+	hasVisible := false
+
+	cmd.PersistentFlags().VisitAll(func(f *pflag.Flag) {
 		if !f.Hidden {
 			hasVisible = true
 		}

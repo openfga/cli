@@ -88,11 +88,11 @@ func init() {
 	rootCmd.Version = versionStr
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(manCmd)
-	rootCmd.AddCommand(mapping.MappingCmd)
 	rootCmd.AddCommand(store.StoreCmd)
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)
 	rootCmd.AddCommand(query.QueryCmd)
+	rootCmd.AddCommand(mapping.MappingCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
