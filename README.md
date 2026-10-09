@@ -46,9 +46,9 @@ A cross-platform CLI to interact with an OpenFGA server
       - [List Relations](#list-relations)
       - [List Users](#list-users)
     - [Manage JSON-to-tuple mappings](#manage-json-to-tuple-mappings)
-      - [Scaffold a starter mapping file](#scaffold-a-starter-mapping-file)
       - [Validate a mapping file](#validate-a-mapping-file)
       - [Run the embedded tests in a mapping file](#run-the-embedded-tests-in-a-mapping-file)
+      - [Scaffold a starter mapping file](#scaffold-a-starter-mapping-file)
       - [Evaluate a mapping against JSON input and emit tuple operations](#evaluate-a-mapping-against-json-input-and-emit-tuple-operations)
 <!-- END_COMMANDS_TOC -->
 - [Contributing](#contributing)
@@ -1043,30 +1043,6 @@ fga query list-users --store-id=01H0H015178Y2V4CX10C2KGHF4 --object document:roa
 
 Validate, test, and run JSON-to-tuple mapping files.
 
-##### Scaffold a starter mapping file
-
-Creates a new mapping YAML file with a sample rule and embedded test. Defaults to mapping.yaml.
-
-###### Command
-
-```
-fga mapping init [mapping-file] [flags]
-```
-
-###### Parameters
-
-* `--force`: Overwrite an existing file
-* `--minimal`: Emit a skeleton without the example test block
-
-###### Example
-
-```bash
-fga mapping init
-  fga mapping init my-mapping.yaml
-  fga mapping init --minimal mapping.yaml
-  fga mapping init --force mapping.yaml
-```
-
 ##### Validate a mapping file
 
 Validates that a mapping file is syntactically correct and all expressions compile.
@@ -1124,6 +1100,30 @@ fga mapping test mapping.yaml
   fga mapping test --fail-fast mapping.yaml
 ```
 
+##### Scaffold a starter mapping file
+
+Creates a new mapping YAML file with a sample rule and embedded test. Defaults to mapping.yaml.
+
+###### Command
+
+```
+fga mapping init [mapping-file] [flags]
+```
+
+###### Parameters
+
+* `--force`: Overwrite an existing file
+* `--minimal`: Emit a skeleton without the example test block
+
+###### Example
+
+```bash
+fga mapping init
+  fga mapping init my-mapping.yaml
+  fga mapping init --minimal mapping.yaml
+  fga mapping init --force mapping.yaml
+```
+
 ##### Evaluate a mapping against JSON input and emit tuple operations
 
 Reads JSONL from stdin (or --input) and evaluates it against the mapping file.
@@ -1148,7 +1148,7 @@ continues; the command still exits non-zero if any record was skipped.
 ###### Command
 
 ```
-fga mapping run [mapping-file] [flags]
+fga mapping evaluate [mapping-file] [flags]
 ```
 
 ###### Parameters
@@ -1163,10 +1163,16 @@ fga mapping run [mapping-file] [flags]
 ###### Example
 
 ```bash
-echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml
-  fga mapping run mapping.yaml --input event.json --format json
-  fga mapping run --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
-  fga mapping run mapping.yaml -i
+echo '{"id":"anne","org":"acme"}' | fga mapping evaluate mapping.yaml
+  fga mapping evaluate mapping.yaml --input event.json --format json
+  fga mapping evaluate --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
+  fga mapping evaluate mapping.yaml -i
+```
+
+###### Response
+
+```jsonl
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
 ```
 
 <!-- END_COMMANDS -->
