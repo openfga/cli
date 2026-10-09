@@ -169,6 +169,20 @@ var readCmd = &cobra.Command{
 	Short:   "Read Relationship Tuples",
 	Long:    "Read relationship tuples that exist in the system (does not evaluate).",
 	Example: "fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap", //nolint:lll
+	Annotations: map[string]string{
+		"docs:response": `{
+  "tuples": [
+    {
+      "key": {
+        "object": "document:roadmap",
+        "relation": "can_view",
+        "user": "user:anne"
+      },
+      "timestamp": "2023-07-06T15:12:55.080666875Z"
+    }
+  ]
+}`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

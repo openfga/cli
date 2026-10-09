@@ -27,7 +27,7 @@ import (
 // TupleCmd represents the tuple command.
 var TupleCmd = &cobra.Command{
 	Use:   "tuple",
-	Short: "Interact with Relationship Tuples",
+	Short: "Relationship Tuples",
 	Long:  "Read, write, delete, import and listen to changes in relationship tuples in a store.",
 }
 
