@@ -213,6 +213,10 @@ stderr) and exits non-zero if any were skipped.`,
 	Example: `  echo '{"id":"anne","org":"acme"}' | fga mapping sync mapping.yaml --store-id $STORE_ID
   fga mapping sync mapping.yaml --input events.jsonl --store-id $STORE_ID --dry-run
   fga mapping sync mapping.yaml --store-id $STORE_ID --continue-on-error < events.jsonl`,
+	Annotations: map[string]string{
+		"docs:response":      `{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}`,
+		"docs:response:lang": "jsonl",
+	},
 	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)

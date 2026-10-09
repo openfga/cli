@@ -50,6 +50,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Run the embedded tests in a mapping file](#run-the-embedded-tests-in-a-mapping-file)
       - [Scaffold a starter mapping file](#scaffold-a-starter-mapping-file)
       - [Evaluate a mapping against JSON input and emit tuple operations](#evaluate-a-mapping-against-json-input-and-emit-tuple-operations)
+      - [Apply a mapping against JSON input, writing results to a store](#apply-a-mapping-against-json-input-writing-results-to-a-store)
 <!-- END_COMMANDS_TOC -->
 - [Contributing](#contributing)
 - [License](#license)
@@ -1167,6 +1168,52 @@ echo '{"id":"anne","org":"acme"}' | fga mapping evaluate mapping.yaml
   fga mapping evaluate mapping.yaml --input event.json --format json
   fga mapping evaluate --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
   fga mapping evaluate mapping.yaml -i
+```
+
+###### Response
+
+```jsonl
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
+```
+
+##### Apply a mapping against JSON input, writing results to a store
+
+Reads JSONL from stdin (or --input) and evaluates it against the mapping file,
+then applies the resulting tuple writes and deletes to the store.
+
+Rules using tuple_filters read current store state, diff against desired state,
+and derive concrete writes and deletes before applying them.
+
+Progress is reported to stderr as a single updating line showing running write
+and delete counts. On a non-interactive terminal each update is a new line.
+Use --quiet to suppress all progress output (errors are always shown).
+
+--dry-run evaluates and expands filters (reading the store) but prints the
+planned operations to stdout instead of writing them.
+--continue-on-error skips records that fail to evaluate or apply (shown on
+stderr) and exits non-zero if any were skipped.
+
+###### Command
+
+```
+fga mapping sync [mapping-file] [flags]
+```
+
+###### Parameters
+
+* `--continue-on-error`: Skip records that fail to evaluate or apply (shown on stderr) and exit non-zero if any were skipped
+* `--dry-run`: Read the store and print planned operations to stdout without writing (suppressed at an interactive terminal)
+* `--input`: Path to JSONL input file, one JSON object per line (default: stdin)
+* `--model-id`: Authorization Model ID
+* `--quiet`: Suppress progress output; only errors are written to stderr
+* `--store-id`: Store ID
+
+###### Example
+
+```bash
+echo '{"id":"anne","org":"acme"}' | fga mapping sync mapping.yaml --store-id $STORE_ID
+  fga mapping sync mapping.yaml --input events.jsonl --store-id $STORE_ID --dry-run
+  fga mapping sync mapping.yaml --store-id $STORE_ID --continue-on-error < events.jsonl
 ```
 
 ###### Response
