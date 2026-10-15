@@ -14,8 +14,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-* **mapping:** add evaluate command, deprecate run ([#775](https://github.com/openfga/cli/issues/775)) ([5802421](https://github.com/openfga/cli/commit/5802421bbbe352f91b2a68c483b37d69b8f5288b))
-* **tests:** split mapping-test-cases.yaml by subcommand ([#776](https://github.com/openfga/cli/issues/776)) ([ba733d3](https://github.com/openfga/cli/commit/ba733d394bf109b15b590cde4e4082d5f2374935))
+* **mapping:** deprecate run in favour of evaluate ([#775](https://github.com/openfga/cli/issues/775)) ([5802421](https://github.com/openfga/cli/commit/5802421bbbe352f91b2a68c483b37d69b8f5288b))
 
 ## [0.8.1](https://github.com/openfga/cli/compare/v0.8.0...v0.8.1) (2026-09-24)
 
