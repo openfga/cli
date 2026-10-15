@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.8.2](https://github.com/openfga/cli/compare/v0.8.1...v0.8.2) (2026-10-15)
+
+
+### Added
+
+* **mapping:** add sync command ([#774](https://github.com/openfga/cli/issues/774)) ([9f28d9e](https://github.com/openfga/cli/commit/9f28d9e15ca578f89c3c0f91c1e5ef1626ad9cfd))
+
+
+### Changed
+
+* **mapping:** add evaluate command, deprecate run ([#775](https://github.com/openfga/cli/issues/775)) ([5802421](https://github.com/openfga/cli/commit/5802421bbbe352f91b2a68c483b37d69b8f5288b))
+* **tests:** split mapping-test-cases.yaml by subcommand ([#776](https://github.com/openfga/cli/issues/776)) ([ba733d3](https://github.com/openfga/cli/commit/ba733d394bf109b15b590cde4e4082d5f2374935))
+
 ## [0.8.1](https://github.com/openfga/cli/compare/v0.8.0...v0.8.1) (2026-09-24)
 
 
