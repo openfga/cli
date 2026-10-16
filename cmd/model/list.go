@@ -71,8 +71,22 @@ func listModels(
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "Read Authorization Models",
-	Long:    "List authorization models in a store.",
+	Long:    "List all authorization models for a store, in descending order by creation date.",
 	Example: "fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4",
+	Annotations: map[string]string{
+		"docs:response": `{
+  "authorization_models": [
+    {
+      "id":"01H6H9XH1G5Q6DK6PFMGDZNH9S",
+      "created_at":"2023-07-29T17:07:41Z"
+    },
+    {
+      "id":"01H6H9PPR6C3P45R75X55ZFP46",
+      "created_at":"2023-07-29T17:03:57Z"
+    }
+  ]
+}`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

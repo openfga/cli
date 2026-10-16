@@ -43,6 +43,12 @@ var rootCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+// RootCmd returns the root cobra command, used by tooling that needs to inspect
+// the full command tree without executing it (e.g. doc generation, man pages).
+func RootCmd() *cobra.Command {
+	return rootCmd
+}
+
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -82,11 +88,11 @@ func init() {
 	rootCmd.Version = versionStr
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(manCmd)
-	rootCmd.AddCommand(mapping.MappingCmd)
 	rootCmd.AddCommand(store.StoreCmd)
 	rootCmd.AddCommand(model.ModelCmd)
 	rootCmd.AddCommand(tuple.TupleCmd)
 	rootCmd.AddCommand(query.QueryCmd)
+	rootCmd.AddCommand(mapping.MappingCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

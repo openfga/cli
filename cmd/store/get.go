@@ -46,6 +46,14 @@ var getCmd = &cobra.Command{
 	Short:   "Get Store",
 	Long:    `Get a particular store.`,
 	Example: "fga store get --store-id=01H0H015178Y2V4CX10C2KGHF4",
+	Annotations: map[string]string{
+		"docs:response": `{
+    "id": "01H0H015178Y2V4CX10C2KGHF4",
+    "name": "FGA Demo Store",
+    "created_at": "2023-05-19T16:10:07.637585677Z",
+    "updated_at": "2023-05-19T16:10:07.637585677Z"
+}`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 

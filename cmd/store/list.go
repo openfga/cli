@@ -73,6 +73,17 @@ var listCmd = &cobra.Command{
 	Short:   "List Stores",
 	Long:    `Get a list of stores.`,
 	Example: "fga store list",
+	Annotations: map[string]string{
+		"docs:response": `{
+  "stores": [{
+    "id": "..",
+    "name": "..",
+    "created_at": "",
+    "updated_at": "",
+    "deleted_at": ""
+  }]
+}`,
+	},
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 
