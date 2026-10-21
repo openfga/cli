@@ -2,7 +2,7 @@ module github.com/openfga/cli
 
 go 1.26.0 // floor: support one version back; run with the latest (toolchain below)
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	github.com/charmbracelet/huh v1.0.0
