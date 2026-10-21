@@ -150,6 +150,7 @@ jobs:
       id-token: write # needed for keyless signing
     outputs:
       digest: ${{ steps.image.outputs.digest }}
+      checksums-digest: ${{ steps.checksums.outputs.digest }}
     steps:
       - name: Extract Version from Tag
         id: tag_name
@@ -198,6 +199,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
 
+      - name: Checksums digest
+        id: checksums
+        run: |
+          set -euo pipefail
+          echo "digest=$(sha256sum dist/checksums.txt | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
         with:
@@ -240,12 +247,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # The draft is mutable, so check it against the file GoReleaser built.
       - name: Download checksums
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHECKSUMS_DIGEST: ${{ needs.goreleaser.outputs.checksums-digest }}
         run: |
+          set -euo pipefail
           gh release download "$GITHUB_REF_NAME" -p checksums.txt \
             --repo "$GITHUB_REPOSITORY"
+          echo "$CHECKSUMS_DIGEST  checksums.txt" | sha256sum -c --strict
 
       - name: Attest release artifacts
         id: attest
