@@ -148,8 +148,6 @@ jobs:
       contents: write
       packages: write # publish a new github release
       id-token: write # needed for keyless signing
-      attestations: write # needed for artifact attestations
-      artifact-metadata: write # needed for the image storage record
     outputs:
       digest: ${{ steps.image.outputs.digest }}
     steps:
@@ -226,11 +224,33 @@ jobs:
           digest=$(echo "$artifact" | jq -r '.extra.Digest')
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
 
+  attest:
+    needs: [ goreleaser ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to read the draft release and attach the provenance
+      id-token: write # needed for keyless signing
+      attestations: write # needed for artifact attestations
+      artifact-metadata: write # needed for the image storage record
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Download checksums
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "$GITHUB_REF_NAME" -p checksums.txt \
+            --repo "$GITHUB_REPOSITORY"
+
       - name: Attest release artifacts
         id: attest
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-checksums: dist/checksums.txt
+          subject-checksums: checksums.txt
 
       # Scorecard's Signed-Releases check only detects provenance as a
       # *.intoto.jsonl release asset. The bundle is a single JSON line.
@@ -248,19 +268,15 @@ jobs:
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-name: docker.io/openfga/cli
-          subject-digest: ${{ steps.image.outputs.digest }}
+          subject-digest: ${{ needs.goreleaser.outputs.digest }}
           push-to-registry: true
 
-  undraft-release:
-    needs: [ goreleaser ]
-    permissions:
-      contents: write
-    uses: openfga/.github/.github/workflows/undraft-release.yml@835baf31562809ad9eb884c73efc5b79318f700f # pin@main
-
   verify-binary-provenance:
-    needs: [ undraft-release ]
+    needs: [ attest ]
     runs-on: ubuntu-latest
-    permissions: read-all
+    permissions:
+      contents: write # to download from the draft release
+      attestations: read
     steps:
       - name: Download assets
         env:
@@ -268,22 +284,27 @@ jobs:
         run: |
           set -euo pipefail
           gh -R "$GITHUB_REPOSITORY" release download "$GITHUB_REF_NAME" \
-            -p "*.tar.gz" -p "*.tar.gz.sbom.json"
+            -p "*.tar.gz" -p "*.sbom.json" -p "*.apk" -p "*.deb" -p "*.rpm" -p "*.pkg.tar.zst" \
+            -p fga.intoto.jsonl
 
       - name: Verify assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          for artifact in *.tar.gz *.tar.gz.sbom.json; do
-            gh attestation verify "$artifact" \
+          verify() {
+            gh attestation verify "$@" \
               --repo "$GITHUB_REPOSITORY" \
               --cert-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/main.yaml@$GITHUB_REF" \
               --source-ref "$GITHUB_REF"
+          }
+          for artifact in *.tar.gz *.sbom.json *.apk *.deb *.rpm *.pkg.tar.zst; do
+            verify "$artifact"
+            verify "$artifact" --bundle fga.intoto.jsonl
           done
 
   verify-image-provenance:
-    needs: [ goreleaser ]
+    needs: [ goreleaser, attest ]
     runs-on: ubuntu-latest
     permissions: read-all
     steps:
@@ -298,7 +319,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DIGEST: ${{ needs.goreleaser.outputs.digest }}
         run: |
-          gh attestation verify "oci://docker.io/openfga/cli@$DIGEST" \
-            --repo "$GITHUB_REPOSITORY" \
-            --cert-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/main.yaml@$GITHUB_REF" \
-            --source-ref "$GITHUB_REF"
+          set -euo pipefail
+          verify() {
+            gh attestation verify "oci://docker.io/openfga/cli@$DIGEST" "$@" \
+              --repo "$GITHUB_REPOSITORY" \
+              --cert-identity "https://github.com/$GITHUB_REPOSITORY/.github/workflows/main.yaml@$GITHUB_REF" \
+              --source-ref "$GITHUB_REF"
+          }
+          verify
+          verify --bundle-from-oci
+
+  undraft-release:
+    needs: [ verify-binary-provenance, verify-image-provenance ]
+    permissions:
+      contents: write
+    uses: openfga/.github/.github/workflows/undraft-release.yml@835baf31562809ad9eb884c73efc5b79318f700f # pin@main
