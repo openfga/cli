@@ -28,10 +28,10 @@ dockers_v2:
   - images:
       - openfga/cli
     tags:
-      - latest
+      - "{{ if not .Prerelease }}latest{{ end }}"
       - "{{ .Tag }}"
-      - "v{{ .Major }}"
-      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ if not .Prerelease }}v{{ .Major }}{{ end }}"
+      - "{{ if not .Prerelease }}v{{ .Major }}.{{ .Minor }}{{ end }}"
     dockerfile: .goreleaser.Dockerfile
     platforms:
       - linux/amd64
@@ -82,6 +82,7 @@ docker_signs:
 
 brews:
   - name: "{{.ProjectName}}"
+    skip_upload: auto
     repository:
       owner: openfga
       name: homebrew-tap
@@ -108,6 +109,7 @@ brews:
     test: |
       system "#{bin}/fga version"
   - name: "{{.ProjectName}}@{{.Version}}"
+    skip_upload: auto
     repository:
       owner: openfga
       name: homebrew-tap
