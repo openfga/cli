@@ -988,6 +988,7 @@ fga tuple **read** [--user=<user>] [--relation=<relation>] [--object=<object>]  
 * `--max-pages`: Max number of pages to get. Set to 0 to get all pages. (default 20)
 * `--page-size`: Number of tuples to return per page. Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.
 * `--output-format`: Can be `csv`, `yaml`, `json` or `simple-json`. Use `simple-json` for a simpler json format that can be piped to the write and delete commands
+* `--output-file`: Write the output to this file instead of stdout, using the selected `--output-format`. The file is created with `0600` permissions
 
 ###### Example
 `fga tuple read --store-id=01H0H015178Y2V4CX10C2KGHF4 --user user:anne --relation can_view --object document:roadmap`
