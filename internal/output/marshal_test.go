@@ -103,3 +103,17 @@ func TestMarshalCSVRecordError(t *testing.T) {
 	err := MarshalCSV([]fakeCSVRow{{err: sentinel}}, &buf, "col")
 	assert.ErrorIs(t, err, sentinel)
 }
+
+func TestRender(t *testing.T) {
+	t.Parallel()
+
+	data := map[string]string{"a": "b"}
+
+	jsonOut, err := Render("json", data)
+	require.NoError(t, err)
+	assert.Equal(t, "{\n  \"a\": \"b\"\n}\n", string(jsonOut))
+
+	yamlOut, err := Render("yaml", data)
+	require.NoError(t, err)
+	assert.Equal(t, "a: b\n", string(yamlOut))
+}
