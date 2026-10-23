@@ -18,6 +18,7 @@ package tuple
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -163,6 +164,81 @@ func read(
 	return &res, nil
 }
 
+// displayReadResponse prints the response to stdout, or writes it to outputFile when that is set.
+func displayReadResponse(response *readResponse, outputFormat string, simpleOutput bool, outputFile string) error {
+	if outputFile != "" {
+		return writeReadResponseToFile(response, outputFormat, simpleOutput, outputFile)
+	}
+
+	if outputFormat == "csv" {
+		records, err := response.toCsvDTO()
+		if err != nil {
+			return fmt.Errorf("failed to convert response to csv: %w", err)
+		}
+
+		writer := bufio.NewWriter(os.Stdout)
+		if err := output.MarshalCSV(records, writer, readResponseCSVHeaders...); err != nil {
+			return fmt.Errorf("failed to marshal csv: %w", err)
+		}
+
+		if err := writer.Flush(); err != nil {
+			return fmt.Errorf("failed to display csv: %w", err)
+		}
+
+		return nil
+	}
+
+	dataPrinter := output.NewUniPrinter(outputFormat)
+
+	var data any
+
+	data = *response.complete
+
+	if simpleOutput || outputFormat == "simple-json" {
+		data = response.simple
+	}
+
+	return dataPrinter.Display(data)
+}
+
+// writeReadResponseToFile writes the response, in the selected output format, only to the given file.
+// The file is created with 0600 permissions and is only touched once the output has been produced.
+func writeReadResponseToFile(response *readResponse, outputFormat string, simpleOutput bool, outputFile string) error {
+	var content bytes.Buffer
+
+	if outputFormat == "csv" {
+		records, err := response.toCsvDTO()
+		if err != nil {
+			return fmt.Errorf("failed to convert response to csv: %w", err)
+		}
+
+		if err := output.MarshalCSV(records, &content, readResponseCSVHeaders...); err != nil {
+			return fmt.Errorf("failed to marshal csv: %w", err)
+		}
+	} else {
+		var data any
+
+		data = *response.complete
+
+		if simpleOutput || outputFormat == "simple-json" {
+			data = response.simple
+		}
+
+		rendered, err := output.Render(outputFormat, data)
+		if err != nil {
+			return fmt.Errorf("failed to render output: %w", err)
+		}
+
+		content.Write(rendered)
+	}
+
+	if err := os.WriteFile(outputFile, content.Bytes(), 0o600); err != nil {
+		return fmt.Errorf("failed to write output file %q: %w", outputFile, err)
+	}
+
+	return nil
+}
+
 // readCmd represents the read command.
 var readCmd = &cobra.Command{
 	Use:     "read",
@@ -222,36 +298,9 @@ var readCmd = &cobra.Command{
 
 		simpleOutput, _ := cmd.Flags().GetBool("simple-output")
 		outputFormat, _ := cmd.Flags().GetString("output-format")
+		outputFile, _ := cmd.Flags().GetString("output-file")
 
-		if outputFormat == "csv" {
-			records, err := response.toCsvDTO()
-			if err != nil {
-				return fmt.Errorf("failed to convert response to csv: %w", err)
-			}
-
-			writer := bufio.NewWriter(os.Stdout)
-			if err := output.MarshalCSV(records, writer, readResponseCSVHeaders...); err != nil {
-				return fmt.Errorf("failed to marshal csv: %w", err)
-			}
-
-			if err := writer.Flush(); err != nil {
-				return fmt.Errorf("failed to display csv: %w", err)
-			}
-
-			return nil
-		}
-
-		dataPrinter := output.NewUniPrinter(outputFormat)
-
-		var data any
-
-		data = *response.complete
-
-		if simpleOutput || outputFormat == "simple-json" {
-			data = response.simple
-		}
-
-		return dataPrinter.Display(data)
+		return displayReadResponse(response, outputFormat, simpleOutput, outputFile)
 	},
 }
 
@@ -264,6 +313,8 @@ func init() {
 		"Defaults to 100 when max-pages=0, or 50 otherwise. Max is 100.")
 	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
 		"json, simple-json, csv, and yaml.")
+	readCmd.Flags().String("output-file", "", "Write the output to this file instead of stdout. "+
+		"The file is created with 0600 permissions. The selected output format is used.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
 	readCmd.Flags().String(
 		"consistency",
