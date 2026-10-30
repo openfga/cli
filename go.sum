@@ -233,8 +233,8 @@ github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20 h1:xdVG0EDz9Z9Uh
 github.com/openfga/api/proto v0.0.0-20260319214821-f153694bfc20/go.mod h1:XDX4qYNBUM2Rsa2AbKPh+oocZc2zgme+EF2fFC6amVU=
 github.com/openfga/go-sdk v0.8.3 h1:I4haME2GkR+gzmJY3vuGjuaLfdNyuMixsqj0lQbB4zE=
 github.com/openfga/go-sdk v0.8.3/go.mod h1:4EwBqOVHnIfCsQZ6e7LTbgr+jKfngu3YibPPV1mLXCc=
-github.com/openfga/language/pkg/go v0.3.2 h1:QN/cBYzL50RzEh46e+7ILvFeBs0exge7Sia0B6uXjms=
-github.com/openfga/language/pkg/go v0.3.2/go.mod h1:Ia3Luc0WcZdLogjjnFFKbce8+427wwlDaUG3dREZVCY=
+github.com/openfga/language/pkg/go v0.3.3-0.20261030033413-54f291615578 h1:DRi21aiyljF9fiDFD3FaBbDEudFRg4cLX6mWuDELeqQ=
+github.com/openfga/language/pkg/go v0.3.3-0.20261030033413-54f291615578/go.mod h1:zGMfkAzxOTvbH8AsQC1ocYXERO6lQxN0V8A8kqCCJ0Q=
 github.com/openfga/mapper v0.1.1 h1:PfqGJzEGE/+/00uVELAnyS7IrEu6S0J+kujeixQzN9g=
 github.com/openfga/mapper v0.1.1/go.mod h1:UdSK58M1OLJ1v+l3hElBFfeCuU3WncuG6H2pySWqNaY=
 github.com/openfga/openfga v1.22.0 h1:Rb2X55PYAhb6cP9iJTCJe50DIi505oNUBD5cc/PN+z0=

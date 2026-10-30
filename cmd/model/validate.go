@@ -17,13 +17,12 @@ limitations under the License.
 package model
 
 import (
-	"context"
 	"time"
 
 	"github.com/oklog/ulid/v2"
 	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
-	"github.com/openfga/openfga/pkg/typesystem"
+	"github.com/openfga/language/pkg/go/validation"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -33,14 +32,24 @@ import (
 )
 
 type validationResult struct {
-	ID        string     `json:"id,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	IsValid   bool       `json:"is_valid"`
-	Error     *string    `json:"error,omitempty"`
-	SizeKB    *float64   `json:"size_kb,omitempty"`
+	ID        string          `json:"id,omitempty"`
+	CreatedAt *time.Time      `json:"created_at,omitempty"`
+	IsValid   bool            `json:"is_valid"`
+	Error     *string         `json:"error,omitempty"`
+	Findings  []findingOutput `json:"findings,omitempty"`
+	SizeKB    *float64        `json:"size_kb,omitempty"`
 }
 
-func validate(inputModel authorizationmodel.AuthzModel) validationResult {
+type findingOutput struct {
+	Message string  `json:"msg"`
+	Code    string  `json:"code"`
+	Line    *[2]int `json:"line,omitempty"`
+	Column  *[2]int `json:"column,omitempty"`
+	File    string  `json:"file,omitempty"`
+	Module  string  `json:"module,omitempty"`
+}
+
+func validate(inputModel authorizationmodel.AuthzModel, rawInput string, format authorizationmodel.ModelFormat) validationResult {
 	model := &openfgav1.AuthorizationModel{}
 	output := validationResult{
 		IsValid: true,
@@ -83,9 +92,33 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 		output.CreatedAt = &createdAt
 	}
 
-	if _, err = typesystem.NewAndValidate(context.Background(), model); err != nil {
-		errString := err.Error()
+	var validationErr error
+	if format == authorizationmodel.ModelFormatFGA || format == authorizationmodel.ModelFormatDefault {
+		validationErr = validation.ValidateDSLWithGraph(model, rawInput)
+	} else {
+		validationErr = validation.ValidateJSONWithGraph(model)
+	}
+
+	for _, finding := range validation.ExtractAllAs[*validation.Finding](validationErr) {
+		out := findingOutput{
+			Message: finding.Message,
+			Code:    string(finding.Metadata.Kind),
+			File:    finding.File,
+			Module:  finding.Metadata.Module,
+		}
+		if finding.Line != nil {
+			out.Line = &[2]int{finding.Line.Start, finding.Line.End}
+		}
+		if finding.Column != nil {
+			out.Column = &[2]int{finding.Column.Start, finding.Column.End}
+		}
+
+		output.Findings = append(output.Findings, out)
+	}
+
+	if len(output.Findings) > 0 {
 		output.IsValid = false
+		errString := output.Findings[0].Message
 		output.Error = &errString
 	}
 
@@ -119,7 +152,7 @@ var validateCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		response := validate(authModel)
+		response := validate(authModel, inputModel, validateInputFormat)
 
 		err = output.Display(response)
 		if err != nil {
