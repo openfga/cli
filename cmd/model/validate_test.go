@@ -19,6 +19,40 @@ func TestValidateCmdWithArgs(t *testing.T) {
 	}
 }
 
+func TestValidateCmdWithWeightedGraphFlag(t *testing.T) {
+	// Not parallel: validateCmd is shared, and the flag value persists across tests.
+	t.Cleanup(func() {
+		ModelCmd.SetArgs(nil)
+
+		if err := validateCmd.Flags().Set("weighted-graph", "false"); err != nil {
+			t.Errorf("failed to reset weighted-graph flag: %v", err)
+		}
+	})
+
+	incompatibleModel := `model
+  schema 1.1
+type user
+type organization
+  relations
+    define member: [user]
+type folder
+  relations
+    define viewer: [user]
+type document
+  relations
+    define parent: [organization, folder]
+    define viewer: member from parent
+`
+
+	// Execute runs from the root command, so the args must be set on ModelCmd.
+	ModelCmd.SetArgs([]string{"validate", "--weighted-graph", incompatibleModel})
+
+	err := ModelCmd.Execute()
+	if err == nil || !strings.Contains(err.Error(), "weighted-graph:") {
+		t.Fatalf("expected error containing %q, got %v", "weighted-graph:", err)
+	}
+}
+
 func TestValidate(t *testing.T) {
 	t.Parallel()
 
