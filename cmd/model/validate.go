@@ -84,7 +84,8 @@ func validate(inputModel authorizationmodel.AuthzModel, weightedGraph bool) vali
 		output.CreatedAt = &createdAt
 	}
 
-	if _, err = typesystem.NewAndValidate(context.Background(), model); err != nil {
+	typeSystem, err := typesystem.NewAndValidate(context.Background(), model)
+	if err != nil {
 		errString := err.Error()
 		output.IsValid = false
 		output.Error = &errString
@@ -92,7 +93,7 @@ func validate(inputModel authorizationmodel.AuthzModel, weightedGraph bool) vali
 		return output
 	}
 
-	if weightedGraph {
+	if weightedGraph && typeSystem.GetWeightedGraph() == nil {
 		if _, err := graph.NewWeightedAuthorizationModelGraphBuilder().Build(model); err != nil {
 			errString := "weighted-graph: " + err.Error()
 			output.IsValid = false
