@@ -1,0 +1,54 @@
+config:
+  inherit-env: true
+
+tests:
+  # fga mapping sync — store-independent error cases
+
+  001 - sync missing store-id flag exits non-zero:
+    command: env -u FGA_STORE_ID bash -c 'echo "{}" | fga mapping sync ./tests/fixtures/sync-mapping.yaml'
+    exit-code: 1
+
+  002 - sync invalid mapping exits 2 with diagnostics on stderr:
+    command: bash -c 'echo "{}" | fga mapping sync ./tests/fixtures/invalid-mapping.yaml --store-id=$(./tests/scripts/test-data/get-store-id.sh)'
+    exit-code: 2
+    stderr:
+      contains:
+        - "unclosed"
+
+  # fga mapping sync — store-backed cases
+
+  003 - sync writes a tuple and exits 0:
+    command: bash -c 'cat ./tests/fixtures/sync-event.json | fga mapping sync ./tests/fixtures/sync-mapping.yaml --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh)'
+    exit-code: 0
+    stderr:
+      contains:
+        - "✓"
+
+  004 - sync --dry-run prints JSONL to stdout without writing:
+    command: bash -c 'cat ./tests/fixtures/sync-event.json | fga mapping sync ./tests/fixtures/sync-mapping.yaml --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh) --dry-run'
+    exit-code: 0
+    stdout:
+      json:
+        user: "user:anne"
+        relation: "owner"
+        object: "group:eng"
+        op: "write"
+
+  005 - sync --quiet suppresses progress output:
+    command: bash -c 'cat ./tests/fixtures/sync-event.json | fga mapping sync ./tests/fixtures/sync-mapping.yaml --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh) --quiet'
+    exit-code: 0
+    stderr:
+      not-contains:
+        - "✓"
+        - "records"
+
+  006 - sync --continue-on-error skips bad records and exits 1:
+    command: bash -c 'printf "bad json\n{\"id\":\"anne\",\"group\":\"eng\"}\n" | fga mapping sync ./tests/fixtures/sync-mapping.yaml --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh) --continue-on-error'
+    exit-code: 1
+    stderr:
+      contains:
+        - "✗"
+
+  007 - sync --input reads from file and exits 0:
+    command: fga mapping sync ./tests/fixtures/sync-mapping.yaml --input ./tests/fixtures/sync-event.json --store-id=$(./tests/scripts/test-data/get-store-id.sh) --model-id=$(./tests/scripts/test-data/get-model-id.sh)
+    exit-code: 0

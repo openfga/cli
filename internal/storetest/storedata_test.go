@@ -3,10 +3,13 @@ package storetest
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/openfga/cli/internal/authorizationmodel"
 )
 
 func writeTempFile(t *testing.T, dir, name, content string) string {
@@ -104,6 +107,61 @@ func TestLoadTuples(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestReadFromFileWithDynamicCondition(t *testing.T) {
+	t.Parallel()
+
+	contents := strings.Join([]string{
+		"name: dynamic-condition",
+		"model: |",
+		"  model",
+		"    schema 1.1",
+		"  type agent",
+		"  type tool",
+		"    relations",
+		"      define can_call: [agent with $expression]",
+		"tuples:",
+		"  - user: agent:alice-claude",
+		"    relation: can_call",
+		"    object: tool:slack_send_message",
+		"    condition:",
+		"      name: $expression",
+		"      context:",
+		`        expression: "channel_name == '#product-announcements'"`,
+		"        parameters:",
+		"          channel_name: string",
+		"tests: []",
+	}, "\n")
+	file := writeTempFile(t, t.TempDir(), "dynamic-condition.fga.yaml", contents)
+
+	_, storeData, err := ReadFromFile(file, "", false)
+	require.NoError(t, err)
+	require.Len(t, storeData.Tuples, 1)
+	require.NotNil(t, storeData.Tuples[0].Condition)
+	assert.Equal(t, "$expression", storeData.Tuples[0].Condition.Name)
+	assert.Equal(t, map[string]any{
+		"expression": "channel_name == '#product-announcements'",
+		"parameters": map[string]any{"channel_name": "string"},
+	}, *storeData.Tuples[0].Condition.Context)
+}
+
+func TestRunTestsWithDynamicConditionFromFile(t *testing.T) {
+	t.Parallel()
+
+	_, storeData, err := ReadFromFile("../../tests/fixtures/dynamic-condition.fga.yaml", "", false)
+	require.NoError(t, err)
+
+	results, err := RunTests(t.Context(), nil, storeData, authorizationmodel.ModelFormatDefault, LocalServerConfig{
+		MaxTypesPerAuthorizationModel: 100,
+	})
+	require.NoError(t, err)
+	require.Len(t, results.Results, 1)
+
+	testResult := results.Results[0]
+	for _, r := range testResult.CheckResults {
+		assert.True(t, r.TestResult, "check %s/%s/%s failed: got %v, want %v", r.Request.User, r.Request.Relation, r.Request.Object, r.Got, r.Expected)
 	}
 }
 

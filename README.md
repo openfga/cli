@@ -50,6 +50,7 @@ A cross-platform CLI to interact with an OpenFGA server
       - [Run Embedded Tests](#test-mapping)
       - [Scaffold a Mapping File](#init-mapping)
       - [Evaluate Against JSON Input](#run-mapping)
+      - [Sync to Store](#sync-mapping)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -776,6 +777,8 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 * `<object>`: Object
 * `--condition-name`: Condition name (optional)
 * `--condition-context`: Condition context (optional)
+* `--condition-expression`: Dynamic condition CEL expression (optional, mutually exclusive with `--condition-name`/`--condition-context`)
+* `--condition-parameters`: Dynamic condition parameter types, as a JSON object with at least one parameter (requires `--condition-expression`)
 * `--store-id`: Specifies the store id
 * `--model-id`: Specifies the model id to target (optional)
 * `--file`: Specifies the file name, `json`, `jsonl`, `yaml` and `csv` files are supported
@@ -792,6 +795,7 @@ fga tuple **write** <user> <relation> <object> --store-id=<store-id>
 ###### Example (with arguments)
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 user:anne can_view document:roadmap --condition-name inOffice --condition-context '{"office_ip":"10.0.1.10"}'`
+- `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 agent:alice-claude can_call tool:slack_send_message --condition-expression "channel_name == '#product-announcements'" --condition-parameters '{"channel_name":"string"}'`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1 --file tuples.json`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --max-rps 10`
 - `fga tuple write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file tuples.csv --on-duplicate ignore`
@@ -1219,8 +1223,7 @@ fga query **list-users** --object <object> --relation <relation> --user-filter <
 
 #### Mapping
 
-Offline tooling for authoring, validating, testing, and evaluating JSON→tuple mapping files.
-No store credentials or network access required.
+Tooling for authoring, validating, testing, evaluating, and applying JSON→tuple mapping files. Most commands run offline; `sync` requires store credentials.
 
 - `mapping`
 
@@ -1229,6 +1232,7 @@ No store credentials or network access required.
 | [Scaffold a mapping file](#init-mapping)          | `init`     | `[mapping.yaml]`, `--minimal`, `--force`          | `fga mapping init`                                          |
 | [Validate a mapping file](#validate-mapping)      | `validate` | `--format`, `--model-file`, `--verbose`           | `fga mapping validate mapping.yaml`                         |
 | [Run embedded tests](#test-mapping)               | `test`     | `--format`, `--run`, `--fail-fast`, `--output-file`, `--verbose`, `--no-color` | `fga mapping test mapping.yaml` |
+| [Sync to store](#sync-mapping)                    | `sync`     | `--store-id`, `--model-id`, `--input`, `--dry-run`, `--continue-on-error`, `--quiet` | `fga mapping sync mapping.yaml --store-id $FGA_STORE_ID < events.jsonl` |
 
 ##### Validate Mapping
 
@@ -1311,14 +1315,16 @@ fga mapping **init** [mapping.yaml]
 Created mapping.yaml
 ```
 
-##### Run Mapping
+##### Evaluate Mapping
 
 ###### Command
-fga mapping **run** [mapping-file]
+fga mapping **evaluate** [mapping-file]
 
 Reads JSONL (one JSON object per line) from stdin (or `--input`) and emits tuple operations as JSONL (default) or a JSON batch. Runs entirely offline. Rules using `tuple_filters` cannot be expanded without a store; they are reported as warnings on stderr, or under `tuple_filter_operations` with `--format json`.
 
 The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
+
+> `fga mapping run` is a deprecated alias for `fga mapping evaluate` and will be removed in a future release.
 
 ###### Parameters
 * `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
@@ -1329,9 +1335,9 @@ The mapping file is optional: omit it in an interactive terminal to choose one f
 * `--interactive` / `-i`: Explore the mapping in a terminal loop — type or paste a JSON document and see the tuple operations it produces. The document is evaluated as soon as it forms a complete JSON value, so a single-line object is evaluated on Enter and a multi-line one when its closing brace is typed. Supports line editing (arrow keys, history). Requires an interactive terminal (both stdin and stdout must be a TTY) and cannot be combined with `--input`, `--writes-only`, `--format`, `--aggregate`, or `--continue-on-error`.
 
 ###### Example
-`echo '{"id":"anne","org":"acme"}' | fga mapping run mapping.yaml`
+`echo '{"id":"anne","org":"acme"}' | fga mapping evaluate mapping.yaml`
 
-`fga mapping run --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
+`fga mapping evaluate --writes-only mapping.yaml --input event.json > out.jsonl && fga tuple write --store-id $FGA_STORE_ID --file out.jsonl`
 
 ###### Response
 ```json
@@ -1342,7 +1348,7 @@ The mapping file is optional: omit it in an interactive terminal to choose one f
 In a terminal, `-i` starts an explorer loop. Type or paste a JSON document and the resulting tuple operations are printed as an aligned table. The document is evaluated as soon as it parses as complete JSON — a single-line object on Enter, a multi-line one when its closing brace is typed. While more input is expected the prompt shows `...` and a one-time hint notes that the document is not yet valid JSON; pressing Enter on a blank line evaluates whatever is buffered. Invalid JSON is reported with the line, column, and a caret under the offending character. A rule with `tuple_filters` cannot be resolved offline, so its filter conditions are shown as `filter:patch` or `filter:delete` rows (the action distinguishes how the store is reconciled), with the desired-state tuples it reconciles toward shown as indented `desired` rows (they drive a read-diff-write against a store rather than being written directly). Filter fields left unset match any value and render as `*`, and a conditioned tuple shows its condition name and rendered context in brackets. Line editing (arrow keys, history) is available. Available commands: `:reload` re-reads and recompiles the mapping from disk, `:trace on|off` toggles the per-rule trace, and `:quit` exits.
 
 ```
-$ fga mapping run mapping.yaml -i
+$ fga mapping evaluate mapping.yaml -i
 mapping loaded: 2 rules. Type or paste a JSON document; it is evaluated once complete.  commands: :reload  :trace on|off  :quit
 
 > {"id":"anne","org":"acme"}
@@ -1355,6 +1361,44 @@ Error: invalid JSON at line 1, column 8: invalid character 'b' looking for begin
   filter:patch   user:anne   *        org:acme
     desired      user:anne   viewer   org:acme
 > :quit
+```
+
+##### Sync Mapping
+
+###### Command
+fga mapping **sync** [mapping-file]
+
+Reads JSONL from stdin (or `--input`) and evaluates each record against the mapping file, then applies the resulting tuple writes and deletes to the store. Rules using `tuple_filters` read current store state, diff against desired state, and derive the minimal write/delete set before applying. Deletes are issued before writes so that a condition change on the same user–relation–object (delete old + write new) lands correctly.
+
+The mapping file is optional: omit it in an interactive terminal to choose one from a `.yaml`/`.yml` file picker.
+
+###### Parameters
+* `--store-id` (required): Store ID
+* `--model-id`: Authorization Model ID
+* `--input`: Path to a JSONL input file, one JSON object per line (default: stdin)
+* `--dry-run`: Read the store and print planned operations to stdout as JSONL instead of writing them. Suppressed at an interactive terminal where the output would be unreadable.
+* `--continue-on-error`: Skip records that fail to evaluate or apply (shown on stderr) and exit non-zero if any were skipped
+* `--quiet`: Suppress progress output; only errors are written to stderr
+
+###### Example
+`echo '{"id":"anne","org":"acme"}' | fga mapping sync mapping.yaml --store-id $FGA_STORE_ID`
+
+`fga mapping sync mapping.yaml --input events.jsonl --store-id $FGA_STORE_ID --dry-run > planned.jsonl`
+
+`fga mapping sync mapping.yaml --store-id $FGA_STORE_ID --continue-on-error < events.jsonl`
+
+###### Response
+
+Progress is shown on stderr as a single updating line (or once per second when not a terminal):
+```
+15:04:05  ✓  +12 -3  10 records
+```
+With `--quiet`, only errors appear on stderr.
+
+`--dry-run` (with stdout redirected) emits planned operations as JSONL:
+```json
+{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}
+{"op":"delete","user":"user:bob","relation":"member","object":"org:acme"}
 ```
 
 ## Contributing

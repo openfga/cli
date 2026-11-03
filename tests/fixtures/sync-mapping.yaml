@@ -1,0 +1,7 @@
+version: "1"
+rules:
+  - name: "add-owner"
+    tuples:
+      - user: "user:{{ input.id }}"
+        relation: "owner"
+        object: "group:{{ input.group }}"
