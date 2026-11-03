@@ -84,21 +84,20 @@ func validate(inputModel authorizationmodel.AuthzModel, weightedGraph bool) vali
 		output.CreatedAt = &createdAt
 	}
 
-	typeSystem, err := typesystem.NewAndValidate(context.Background(), model)
-	if err != nil {
-		errString := err.Error()
-		output.IsValid = false
-		output.Error = &errString
-
-		return output
-	}
-
-	if weightedGraph && typeSystem.GetWeightedGraph() == nil {
+	if weightedGraph {
 		if _, err := graph.NewWeightedAuthorizationModelGraphBuilder().Build(model); err != nil {
 			errString := "weighted-graph: " + err.Error()
 			output.IsValid = false
 			output.Error = &errString
 		}
+
+		return output
+	}
+
+	if _, err := typesystem.NewAndValidate(context.Background(), model); err != nil {
+		errString := err.Error()
+		output.IsValid = false
+		output.Error = &errString
 	}
 
 	return output
@@ -109,7 +108,7 @@ var validateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate Authorization Model",
 	Long: "Validates that an authorization model is valid. " +
-		"Use --weighted-graph to also verify compatibility with weighted-graph optimizations.",
+		"Use --weighted-graph to instead validate compatibility with weighted-graph optimizations.",
 	Example: "fga model validate --file model.json\nfga model validate --file model.fga --weighted-graph",
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -156,7 +155,7 @@ var validateCmd = &cobra.Command{
 var validateInputFormat = authorizationmodel.ModelFormatDefault
 
 func init() {
-	validateCmd.Flags().Bool("weighted-graph", false, "Also validate compatibility with weighted-graph optimizations")
+	validateCmd.Flags().Bool("weighted-graph", false, "Validate compatibility with weighted-graph optimizations instead of type-system validation")
 	validateCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format or be an fga.mod file") //nolint:lll
 	validateCmd.Flags().Var(&validateInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular"`)     //nolint:lll
 }

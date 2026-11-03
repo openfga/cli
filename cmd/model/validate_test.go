@@ -92,11 +92,10 @@ func TestValidate(t *testing.T) {
 			size := model.GetSizeInKB()
 			expected.SizeKB = &size
 
-			for _, weightedGraph := range []bool{false, true} {
-				output := validate(model, weightedGraph)
-				if !reflect.DeepEqual(output, expected) {
-					t.Fatalf("weighted graph %t: expect output %v actual %v", weightedGraph, expected, output)
-				}
+			output := validate(model, false)
+
+			if !reflect.DeepEqual(output, expected) {
+				t.Fatalf("Expect output %v actual %v", expected, output)
 			}
 		})
 	}
@@ -270,5 +269,22 @@ type document
 				t.Fatal("expected model size to be preserved")
 			}
 		})
+	}
+}
+
+func TestValidateWeightedGraphSkipsTypeSystemValidation(t *testing.T) {
+	t.Parallel()
+
+	model := authorizationmodel.AuthzModel{}
+	if err := model.ReadFromJSONString(`{"schema_version":"1.1","type_definitions":[{"type":"user"},{"type":"user"}]}`); err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	if result := validate(model, false); result.IsValid {
+		t.Fatal("expected normal validation to reject duplicate types")
+	}
+
+	if result := validate(model, true); !result.IsValid {
+		t.Fatalf("expected weighted graph validation to skip type-system validation, got: %+v", result)
 	}
 }
