@@ -569,14 +569,14 @@ fga model **validate**
 ###### Parameters
 * `--file`: File containing the authorization model.
 * `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
-* `--weighted-graph`: Also verify that the model is compatible with weighted-graph optimizations (optional, default=false).
+* `--weighted-graph`: Also verify that the model is compatible with [weighted-graph optimizations](https://openfga.dev/blog/weighted-graph-upcoming-changes) (optional, default=false).
 
 ###### Example
 `fga model validate --file model.json`
 
 `fga model validate --file model.fga --weighted-graph`
 
-With `--weighted-graph`, the command runs normal model validation first, then attempts to build the weighted graph. The JSON response reports `is_valid: true` if both checks pass, or `is_valid: false` with an `error` explaining the failure. A failed validation exits with a non-zero status. A model can pass normal validation but be incompatible with weighted-graph optimizations.
+With `--weighted-graph`, the command runs normal model validation first, then attempts to build the [weighted graph](https://openfga.dev/blog/weighted-graph-upcoming-changes). The JSON response reports `is_valid: true` if both checks pass, or `is_valid: false` with an `error` explaining the failure. A failed validation exits with a non-zero status. A model can pass normal validation but be incompatible with weighted-graph optimizations.
 
 When the input parses successfully, the JSON response includes `size_kb`, the protobuf-serialized size of the model in KB. If the input cannot be parsed, the command exits with an error and does not emit a JSON response.
 
