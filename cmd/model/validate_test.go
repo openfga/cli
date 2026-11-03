@@ -233,6 +233,97 @@ type document
 `,
 			expectedError: "cycle",
 		},
+		// Cases below are from https://openfga.dev/blog/weighted-graph-upcoming-changes
+		{
+			name: "blog: missing relation",
+			model: `model
+  schema 1.1
+type user
+type organization
+  relations
+    define member: [user]
+type folder
+  relations
+    define viewer: [user]
+type document
+  relations
+    define parent: [organization, folder]
+    define viewer: member from parent
+`,
+			expectedError: "relation",
+		},
+		{
+			name: "blog: missing relation fixed with alias",
+			model: `model
+  schema 1.1
+type user
+type organization
+  relations
+    define member: [user]
+type folder
+  relations
+    define viewer: [user]
+    define member: viewer
+type document
+  relations
+    define parent: [organization, folder]
+    define viewer: member from parent
+`,
+		},
+		{
+			name: "blog: missing relation fixed with explicit per-type relations",
+			model: `model
+  schema 1.1
+type user
+type organization
+  relations
+    define member: [user]
+type folder
+  relations
+    define viewer: [user]
+type document
+  relations
+    define organization: [organization]
+    define folder: [folder]
+    define viewer: member from organization or viewer from folder
+`,
+		},
+		{
+			name: "blog: tuple cycle with intersection",
+			model: `model
+  schema 1.1
+type user
+type group
+  relations
+    define approved: [user, group#member]
+    define member: [user, group#member] and approved
+`,
+			expectedError: "cycle",
+		},
+		{
+			name: "blog: tuple cycle with exclusion",
+			model: `model
+  schema 1.1
+type user
+type group
+  relations
+    define blocked: [user, group#member]
+    define member: [user, group#member] but not blocked
+`,
+			expectedError: "cycle",
+		},
+		{
+			name: "blog: tuple cycle fixed by splitting base and gated relations",
+			model: `model
+  schema 1.1
+type user
+type group
+  relations
+    define blocked: [user, group#member]
+    define member: [user, group#member]
+    define allowed_member: member but not blocked
+`,
+		},
 	}
 
 	for _, test := range tests {
