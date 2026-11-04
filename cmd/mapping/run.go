@@ -500,6 +500,10 @@ continues; the command still exits non-zero if any record was skipped.`,
   fga mapping evaluate mapping.yaml --input event.json --format json
   fga mapping evaluate --writes-only mapping.yaml > out.jsonl && fga tuple write --store-id $STORE_ID --file out.jsonl
   fga mapping evaluate mapping.yaml -i`,
+	Annotations: map[string]string{
+		"docs:response":      `{"op":"write","user":"user:anne","relation":"member","object":"org:acme"}`,
+		"docs:response:lang": "jsonl",
+	},
 	Args: cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if cmd.CalledAs() == "run" {

@@ -112,11 +112,29 @@ var createCmd = &cobra.Command{
 	Short: "Create Store",
 	Long:  "Create an OpenFGA store.",
 	Example: `fga store create --name "FGA Demo Store"
-
-To set the created store id as an environment variable that will be used by the CLI, you can use the following command:
-
-export FGA_STORE_ID=$(fga store create --model Model.fga | jq -r .store.id)
-	`,
+fga store create --model Model.fga
+export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)`,
+	Annotations: map[string]string{
+		"docs:response": "```json\n" +
+			`{
+    "id": "01H0H015178Y2V4CX10C2KGHF4",
+    "name": "FGA Demo Store",
+    "created_at": "2023-05-19T16:10:07.637585677Z",
+    "updated_at": "2023-05-19T16:10:07.637585677Z"
+}` + "\n```\n\nResponse for `fga store create --model Model.fga`:\n\n```json\n" +
+			`{
+  "store": {
+    "id":"01H6H9CNQRP2TVCFR7899XGNY8",
+    "name":"Model",
+    "created_at":"2023-07-29T16:58:28.984402Z",
+    "updated_at":"2023-07-29T16:58:28.984402Z"
+  },
+  "model": {
+    "authorization_model_id":"01H6H9CNQV36Y9WS1RJGRN8D06"
+  }
+}` + "\n```",
+		"docs:response:raw": "true",
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		clientConfig := cmdutils.GetClientConfig(cmd)
 		storeName, _ := cmd.Flags().GetString("name")
@@ -152,5 +170,5 @@ var createModelInputFormat = authorizationmodel.ModelFormatDefault
 func init() {
 	createCmd.Flags().String("name", "", "Store Name")
 	createCmd.Flags().String("model", "", "Authorization Model File Name")
-	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga", "json" or "modular`) //nolint:lll
+	createCmd.Flags().Var(&createModelInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular".`) //nolint:lll
 }
