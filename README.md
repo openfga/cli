@@ -294,6 +294,8 @@ fga store **import**
 * `--max-parallel-requests`: Max requests to send in parallel (optional, default=4)
 * `--allow-external-files`: Allow `model_file`, `tuple_file` and `tuple_files` references in the store file to resolve outside the store file's directory (optional, default=false). Only enable this for store files you trust.
 
+The `check` tests in the store file are also written to the store as assertions (at most 100). Each assertion includes the check's `context` and its test's `tuples` (or `tuple_file`) as contextual tuples. A test with more than 20 tuples is written without contextual tuples, because assertions accept at most 20, and the CLI prints a warning.
+
 ###### Example
 `fga store import --file model.fga.yaml`
 

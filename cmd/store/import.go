@@ -46,7 +46,9 @@ const (
 	progressBarThrottleValue = 65
 	progressBarUpdateDelay   = 5 * time.Millisecond
 	maxAssertionsPerWrite    = 100
-	expressionConditionName  = "$expression"
+	// The API accepts at most 20 contextual tuples per assertion
+	maxContextualTuplesPerAssertion = 20
+	expressionConditionName         = "$expression"
 )
 
 var errExpressionConditionNotSupported = errors.New( //nolint:err113
@@ -233,7 +235,17 @@ func importAssertions(
 
 	for _, modelTest := range modelTests {
 		if len(modelTest.Check) > 0 {
-			checkAssertions := getCheckAssertions(modelTest.Check)
+			contextualTuples := modelTest.Tuples
+			if len(contextualTuples) > maxContextualTuplesPerAssertion {
+				fmt.Fprintf(os.Stderr,
+					"Warning: test %q has %d tuples, but assertions accept at most %d contextual tuples, "+
+						"so its assertions are written without them\n",
+					modelTest.Name, len(contextualTuples), maxContextualTuplesPerAssertion)
+
+				contextualTuples = nil
+			}
+
+			checkAssertions := getCheckAssertions(modelTest.Check, contextualTuples)
 			assertions = append(assertions, checkAssertions...)
 		}
 	}
@@ -259,7 +271,12 @@ func importAssertions(
 	return nil
 }
 
-func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAssertion {
+// getCheckAssertions turns check tests into assertions. Each assertion carries the check's context and the
+// test's tuples as contextual tuples, so it holds without writing those tuples to the store.
+func getCheckAssertions(
+	checkTests []storetest.ModelTestCheck,
+	contextualTuples []client.ClientContextualTupleKey,
+) []client.ClientAssertion {
 	assertions := make([]client.ClientAssertion, 0, len(checkTests))
 
 	for _, checkTest := range checkTests {
@@ -270,10 +287,12 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 			for _, object := range objects {
 				for relation, expectation := range checkTest.Assertions {
 					assertions = append(assertions, client.ClientAssertion{
-						User:        user,
-						Relation:    relation,
-						Object:      object,
-						Expectation: expectation,
+						User:             user,
+						Relation:         relation,
+						Object:           object,
+						Expectation:      expectation,
+						Context:          checkTest.Context,
+						ContextualTuples: contextualTuples,
 					})
 				}
 			}
