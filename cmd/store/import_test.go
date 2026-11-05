@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -493,4 +494,112 @@ func setupWriteAssertionsMock(
 	mockWriteAssertions.EXPECT().Body(expectedAssertions).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Options(expectedOptions).Return(mockWriteAssertions)
 	mockWriteAssertions.EXPECT().Execute().Return(nil, nil)
+}
+
+func TestImportStoreAssertionsCarryTestTuplesAndContext(t *testing.T) {
+	t.Parallel()
+
+	modelID, storeID := testModelID, testStoreID
+	expectedOptions := client.ClientWriteAssertionsOptions{AuthorizationModelId: &modelID, StoreId: &storeID}
+
+	testTuples := []client.ClientContextualTupleKey{
+		{User: "folder:5", Relation: "parent", Object: "folder:product-2021"},
+	}
+	context := map[string]any{"some": "value"}
+
+	expectedAssertions := []client.ClientAssertion{
+		{
+			User:             "user:anne",
+			Relation:         "viewer",
+			Object:           "folder:product-2021",
+			Expectation:      true,
+			Context:          &context,
+			ContextualTuples: testTuples,
+		},
+	}
+
+	mockCtrl := gomock.NewController(t)
+	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
+
+	defer mockCtrl.Finish()
+
+	setupWriteAssertionsMock(mockCtrl, mockFgaClient, expectedAssertions, expectedOptions)
+	setupWriteModelMock(mockCtrl, mockFgaClient, modelID)
+	setupCreateStoreMock(mockCtrl, mockFgaClient, storeID)
+
+	testStore := storetest.StoreData{
+		Model: `type user
+                type folder
+                        relations
+                                define parent: [folder]
+                                define viewer: [user]`,
+		Tests: []storetest.ModelTest{
+			{
+				Name:   "Test",
+				Tuples: testTuples,
+				Check: []storetest.ModelTestCheck{
+					{
+						User:       "user:anne",
+						Object:     "folder:product-2021",
+						Context:    &context,
+						Assertions: map[string]bool{"viewer": true},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := importStore(t.Context(), &fga.ClientConfig{}, mockFgaClient, &testStore, "", "", 10, 1, "")
+	require.NoError(t, err)
+}
+
+func TestImportStoreAssertionsWithoutTooManyTestTuples(t *testing.T) {
+	t.Parallel()
+
+	modelID, storeID := testModelID, testStoreID
+	expectedOptions := client.ClientWriteAssertionsOptions{AuthorizationModelId: &modelID, StoreId: &storeID}
+
+	// One more tuple than an assertion accepts as contextual tuples
+	testTuples := make([]client.ClientContextualTupleKey, maxContextualTuplesPerAssertion+1)
+	for i := range testTuples {
+		testTuples[i] = client.ClientContextualTupleKey{
+			User: fmt.Sprintf("user:%d", i), Relation: "viewer", Object: "document:doc1",
+		}
+	}
+
+	expectedAssertions := []client.ClientAssertion{
+		{User: "user:anne", Relation: "viewer", Object: "document:doc1", Expectation: false},
+	}
+
+	mockCtrl := gomock.NewController(t)
+	mockFgaClient := mockclient.NewMockSdkClient(mockCtrl)
+
+	defer mockCtrl.Finish()
+
+	setupWriteAssertionsMock(mockCtrl, mockFgaClient, expectedAssertions, expectedOptions)
+	setupWriteModelMock(mockCtrl, mockFgaClient, modelID)
+	setupCreateStoreMock(mockCtrl, mockFgaClient, storeID)
+
+	testStore := storetest.StoreData{
+		Model: `type user
+                type document
+                        relations
+                                define viewer: [user]`,
+		Tests: []storetest.ModelTest{
+			{
+				Name:   "Test",
+				Tuples: testTuples,
+				Check: []storetest.ModelTestCheck{
+					{
+						User:       "user:anne",
+						Object:     "document:doc1",
+						Assertions: map[string]bool{"viewer": false},
+					},
+				},
+			},
+		},
+	}
+
+	_, err := importStore(t.Context(), &fga.ClientConfig{}, mockFgaClient, &testStore, "", "", 10, 1, "")
+	require.NoError(t, err)
 }
