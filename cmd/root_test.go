@@ -48,6 +48,20 @@ func TestReadConfig(t *testing.T) {
 		assert.Empty(t, viperInstance.GetString("api-url"))
 	})
 
+	t.Run("config file given with --config doesn't exist", func(t *testing.T) {
+		t.Parallel()
+
+		configFile := filepath.Join(t.TempDir(), "missing.fga.yaml")
+
+		viperInstance := viper.New()
+		viperInstance.SetConfigFile(configFile)
+
+		var stderr bytes.Buffer
+		readConfig(viperInstance, &stderr)
+
+		assert.Contains(t, stderr.String(), "Warning: ignoring config file "+configFile+": ")
+	})
+
 	t.Run("no config file found", func(t *testing.T) {
 		t.Parallel()
 
