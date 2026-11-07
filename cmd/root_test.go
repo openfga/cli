@@ -48,6 +48,27 @@ func TestReadConfig(t *testing.T) {
 		assert.Empty(t, viperInstance.GetString("api-url"))
 	})
 
+	t.Run("invalid config file found in the search paths", func(t *testing.T) {
+		t.Parallel()
+
+		configDir := t.TempDir()
+		configFile := filepath.Join(configDir, ".fga.yaml")
+		// YAML doesn't allow tabs for indentation
+		content := "api-url: https://api.fga.example\nstore-id: 01H0H015178Y2V4CX10C2KGHF4\n\tapi-token: token\n"
+		require.NoError(t, os.WriteFile(configFile, []byte(content), 0o600))
+
+		viperInstance := viper.New()
+		viperInstance.AddConfigPath(configDir)
+		viperInstance.SetConfigName(".fga")
+		viperInstance.SetConfigType("yaml")
+
+		var stderr bytes.Buffer
+		readConfig(viperInstance, &stderr)
+
+		assert.Contains(t, stderr.String(), "Warning: ignoring config file "+configFile+": ")
+		assert.Empty(t, viperInstance.GetString("api-url"))
+	})
+
 	t.Run("config file given with --config doesn't exist", func(t *testing.T) {
 		t.Parallel()
 
