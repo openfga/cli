@@ -42,7 +42,11 @@ var rootCmd = &cobra.Command{
 	Short:        "OpenFGA CLI",
 	Long:         ``,
 	SilenceUsage: true,
-	// Commands whose output does not go through output.Display would otherwise ignore --jq.
+	// Reject --jq before running commands that never print through output.Display.
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+		return checkJQSupported(cmd)
+	},
+	// Fallback for commands that only use output.Display for some of their output formats.
 	PersistentPostRunE: func(_ *cobra.Command, _ []string) error {
 		return output.CheckJQFilterApplied()
 	},
@@ -141,6 +145,28 @@ func initConfig() {
 	cmdutils.BindViperToFlags(rootCmd, viperInstance)
 
 	cobra.CheckErr(output.SetJQFilter(jqExpression(jqFromFlag)))
+}
+
+// checkJQSupported returns an error if --jq is set for a command that never prints through
+// output.Display: one annotated with output.JQUnsupportedAnnotation, under such a command, or one
+// of cobra's help and completion commands.
+func checkJQSupported(cmd *cobra.Command) error {
+	if !output.JQFilterSet() {
+		return nil
+	}
+
+	for current := cmd; current != nil; current = current.Parent() {
+		switch {
+		case current.Annotations[output.JQUnsupportedAnnotation] == "true",
+			current.Name() == "help",
+			current.Name() == "completion",
+			current.Name() == cobra.ShellCompRequestCmd,
+			current.Name() == cobra.ShellCompNoDescRequestCmd:
+			return fmt.Errorf("%w, not by %s", output.ErrJQNotApplied, cmd.CommandPath())
+		}
+	}
+
+	return nil
 }
 
 // jqExpression returns the --jq flag. Values from FGA_JQ or the config file are ignored: a filter
