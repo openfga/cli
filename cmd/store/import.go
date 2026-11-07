@@ -18,6 +18,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -46,7 +47,12 @@ const (
 	progressBarThrottleValue = 65
 	progressBarUpdateDelay   = 5 * time.Millisecond
 	maxAssertionsPerWrite    = 100
-	expressionConditionName  = "$expression"
+	// The API accepts at most 20 contextual tuples per assertion.
+	maxContextualTuplesPerAssertion = 20
+	// The API rejects WriteAssertions requests over 64000 bytes. Assertions are measured by their JSON size,
+	// which is larger than their size in the request, and kept a bit under the limit.
+	maxAssertionsRequestBytes = 60000
+	expressionConditionName   = "$expression"
 )
 
 var errExpressionConditionNotSupported = errors.New( //nolint:err113
@@ -233,7 +239,17 @@ func importAssertions(
 
 	for _, modelTest := range modelTests {
 		if len(modelTest.Check) > 0 {
-			checkAssertions := getCheckAssertions(modelTest.Check)
+			contextualTuples := modelTest.Tuples
+			if len(contextualTuples) > maxContextualTuplesPerAssertion {
+				fmt.Fprintf(os.Stderr,
+					"Warning: test %q has %d tuples, but assertions accept at most %d contextual tuples, "+
+						"so its assertions are written without them\n",
+					modelTest.Name, len(contextualTuples), maxContextualTuplesPerAssertion)
+
+				contextualTuples = nil
+			}
+
+			checkAssertions := getCheckAssertions(modelTest.Check, contextualTuples)
 			assertions = append(assertions, checkAssertions...)
 		}
 	}
@@ -250,6 +266,8 @@ func importAssertions(
 			assertions = assertions[:maxAssertionsPerWrite]
 		}
 
+		dropContextualTuplesOverSizeLimit(assertions)
+
 		_, err := fgaClient.WriteAssertions(ctx).Body(assertions).Options(writeOptions).Execute()
 		if err != nil {
 			return fmt.Errorf("failed to import test assertions: %w", err)
@@ -259,7 +277,53 @@ func importAssertions(
 	return nil
 }
 
-func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAssertion {
+// dropContextualTuplesOverSizeLimit removes the contextual tuples of assertions, starting from the last one,
+// until the assertions fit in one WriteAssertions request.
+func dropContextualTuplesOverSizeLimit(assertions []client.ClientAssertion) {
+	sizes := make([]int, len(assertions))
+	total := 0
+
+	for i := range assertions {
+		sizes[i] = assertionSize(assertions[i])
+		total += sizes[i]
+	}
+
+	dropped := 0
+
+	for i := len(assertions) - 1; i >= 0 && total > maxAssertionsRequestBytes; i-- {
+		if len(assertions[i].ContextualTuples) == 0 {
+			continue
+		}
+
+		assertions[i].ContextualTuples = nil
+		size := assertionSize(assertions[i])
+		total -= sizes[i] - size
+		sizes[i] = size
+		dropped++
+	}
+
+	if dropped > 0 {
+		fmt.Fprintf(os.Stderr,
+			"Warning: the test assertions are over the API's request size limit, "+
+				"so %d of them are written without their test's tuples\n", dropped)
+	}
+}
+
+func assertionSize(assertion client.ClientAssertion) int {
+	encoded, err := json.Marshal(assertion)
+	if err != nil {
+		return 0
+	}
+
+	return len(encoded)
+}
+
+// getCheckAssertions turns check tests into assertions. Each assertion carries the check's context and the
+// test's tuples as contextual tuples, so it holds without writing those tuples to the store.
+func getCheckAssertions(
+	checkTests []storetest.ModelTestCheck,
+	contextualTuples []client.ClientContextualTupleKey,
+) []client.ClientAssertion {
 	assertions := make([]client.ClientAssertion, 0, len(checkTests))
 
 	for _, checkTest := range checkTests {
@@ -270,10 +334,12 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 			for _, object := range objects {
 				for relation, expectation := range checkTest.Assertions {
 					assertions = append(assertions, client.ClientAssertion{
-						User:        user,
-						Relation:    relation,
-						Object:      object,
-						Expectation: expectation,
+						User:             user,
+						Relation:         relation,
+						Object:           object,
+						Expectation:      expectation,
+						Context:          checkTest.Context,
+						ContextualTuples: contextualTuples,
 					})
 				}
 			}
