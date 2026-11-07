@@ -18,7 +18,9 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -119,10 +121,7 @@ func initConfig() {
 		viperInstance.SetConfigName(".fga")
 	}
 
-	// If a config file is found, read it in.
-	if err := viperInstance.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viperInstance.ConfigFileUsed())
-	}
+	readConfig(viperInstance, os.Stderr)
 
 	viperInstance.SetEnvPrefix("FGA")
 	viperInstance.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
@@ -130,4 +129,20 @@ func initConfig() {
 	viperInstance.AutomaticEnv() // read in environment variables that match
 
 	cmdutils.BindViperToFlags(rootCmd, viperInstance)
+}
+
+// readConfig reads the config file into viperInstance, if one is found, and reports on stderr which file is
+// used. A config file that exists but can't be read, e.g. because of invalid YAML, is reported as a
+// warning instead of being ignored silently.
+func readConfig(viperInstance *viper.Viper, stderr io.Writer) {
+	err := viperInstance.ReadInConfig()
+	if err == nil {
+		fmt.Fprintln(stderr, "Using config file:", viperInstance.ConfigFileUsed())
+
+		return
+	}
+
+	if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
+		fmt.Fprintf(stderr, "Warning: ignoring config file %s: %v\n", viperInstance.ConfigFileUsed(), err)
+	}
 }
