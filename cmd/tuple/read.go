@@ -177,6 +177,11 @@ var readCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
+		outputFormat, _ := cmd.Flags().GetString("output-format")
+		if outputFormat == "csv" && output.JQFilterSet() {
+			return fmt.Errorf("%w, not with --output-format csv", output.ErrJQNotApplied)
+		}
+
 		user, _ := cmd.Flags().GetString("user")
 		relation, _ := cmd.Flags().GetString("relation")
 		object, _ := cmd.Flags().GetString("object")
@@ -221,7 +226,6 @@ var readCmd = &cobra.Command{
 		}
 
 		simpleOutput, _ := cmd.Flags().GetBool("simple-output")
-		outputFormat, _ := cmd.Flags().GetString("output-format")
 
 		if outputFormat == "csv" {
 			records, err := response.toCsvDTO()

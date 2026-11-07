@@ -80,6 +80,10 @@ fga model transform --file=fga.mod`,
 		transformOutputFormat = determineOutputFormat(transformInputFormat, transformOutputFormat)
 
 		if transformOutputFormat == authorizationmodel.ModelFormatFGA {
+			if output.JQFilterSet() {
+				return fmt.Errorf("%w, not with the DSL output", output.ErrJQNotApplied)
+			}
+
 			dslModel, err := authModel.DisplayAsDSL([]string{"model"})
 			if err != nil {
 				return fmt.Errorf("failed to transform model due to %w", err)

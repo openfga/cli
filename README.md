@@ -18,6 +18,7 @@ A cross-platform CLI to interact with an OpenFGA server
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Custom Headers](#custom-headers)
+  - [Filtering Output](#filtering-output)
   - [Commands](#commands)
     - [Stores](#stores)
       - [List All Stores](#list-stores)
@@ -205,6 +206,15 @@ custom-headers:
   - "X-Request-ID: abc123"
 ```
 
+#### Filtering Output
+
+Commands that print JSON or YAML accept a `--jq` flag with a [jq](https://jqlang.org/manual/) expression, so you can pick fields out of the output without installing `jq`. The expression runs on the JSON form of the output. String results are printed without quotes, and other results in the command's output format (JSON, or YAML with `--output-format yaml`). Commands that print something else, like CSV, the model DSL or `version`, fail when `--jq` is set. Filters can read environment variables with `env.NAME`. The flag is only read from the command line, not from `FGA_JQ` or the configuration file.
+
+```shell
+export FGA_STORE_ID=$(fga store create --model model.fga --jq .store.id)
+fga tuple read --output-format simple-json --jq '.[].object'
+```
+
 ### Commands
 
 #### Stores
@@ -260,7 +270,7 @@ fga store **create**
 To automatically set the created store id as an environment variable that will then be used by the CLI, you can use the following command:
 
 ```bash
-export FGA_STORE_ID=$(fga store create --model model.fga | jq -r .store.id)
+export FGA_STORE_ID=$(fga store create --model model.fga --jq .store.id)
 ```
 ##### Import Store
 
