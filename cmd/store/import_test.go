@@ -553,7 +553,7 @@ func TestImportStoreAssertionsCarryTestTuplesAndContext(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestImportStoreAssertionsWithoutTooManyTestTuples(t *testing.T) {
+func TestImportStoreAssertionsDropTestTuplesOverLimit(t *testing.T) {
 	t.Parallel()
 
 	modelID, storeID := testModelID, testStoreID
@@ -602,4 +602,48 @@ func TestImportStoreAssertionsWithoutTooManyTestTuples(t *testing.T) {
 
 	_, err := importStore(t.Context(), &fga.ClientConfig{}, mockFgaClient, &testStore, "", "", 10, 1, "")
 	require.NoError(t, err)
+}
+
+func TestDropContextualTuplesOverSizeLimit(t *testing.T) {
+	t.Parallel()
+
+	tuples := make([]client.ClientContextualTupleKey, maxContextualTuplesPerAssertion)
+	for i := range tuples {
+		tuples[i] = client.ClientContextualTupleKey{
+			User: fmt.Sprintf("user:member-%02d", i), Relation: "viewer", Object: "document:roadmap-2026",
+		}
+	}
+
+	t.Run("small requests are left alone", func(t *testing.T) {
+		t.Parallel()
+
+		assertions := []client.ClientAssertion{
+			{User: "user:anne", Relation: "viewer", Object: "document:roadmap-2026", ContextualTuples: tuples},
+		}
+		dropContextualTuplesOverSizeLimit(assertions)
+		require.Len(t, assertions[0].ContextualTuples, maxContextualTuplesPerAssertion)
+	})
+
+	t.Run("the last assertions lose their tuples until the request fits", func(t *testing.T) {
+		t.Parallel()
+
+		assertions := make([]client.ClientAssertion, maxAssertionsPerWrite)
+		for i := range assertions {
+			assertions[i] = client.ClientAssertion{
+				User: fmt.Sprintf("user:%d", i), Relation: "viewer", Object: "document:roadmap-2026",
+				ContextualTuples: tuples,
+			}
+		}
+
+		dropContextualTuplesOverSizeLimit(assertions)
+
+		total := 0
+		for _, assertion := range assertions {
+			total += assertionSize(assertion)
+		}
+
+		require.LessOrEqual(t, total, maxAssertionsRequestBytes)
+		require.Len(t, assertions[0].ContextualTuples, maxContextualTuplesPerAssertion)
+		require.Empty(t, assertions[len(assertions)-1].ContextualTuples)
+	})
 }

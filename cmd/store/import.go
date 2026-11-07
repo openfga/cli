@@ -18,6 +18,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -46,9 +47,12 @@ const (
 	progressBarThrottleValue = 65
 	progressBarUpdateDelay   = 5 * time.Millisecond
 	maxAssertionsPerWrite    = 100
-	// The API accepts at most 20 contextual tuples per assertion
+	// The API accepts at most 20 contextual tuples per assertion.
 	maxContextualTuplesPerAssertion = 20
-	expressionConditionName         = "$expression"
+	// The API rejects WriteAssertions requests over 64000 bytes. Assertions are measured by their JSON size,
+	// which is larger than their size in the request, and kept a bit under the limit.
+	maxAssertionsRequestBytes = 60000
+	expressionConditionName   = "$expression"
 )
 
 var errExpressionConditionNotSupported = errors.New( //nolint:err113
@@ -262,6 +266,8 @@ func importAssertions(
 			assertions = assertions[:maxAssertionsPerWrite]
 		}
 
+		dropContextualTuplesOverSizeLimit(assertions)
+
 		_, err := fgaClient.WriteAssertions(ctx).Body(assertions).Options(writeOptions).Execute()
 		if err != nil {
 			return fmt.Errorf("failed to import test assertions: %w", err)
@@ -269,6 +275,47 @@ func importAssertions(
 	}
 
 	return nil
+}
+
+// dropContextualTuplesOverSizeLimit removes the contextual tuples of assertions, starting from the last one,
+// until the assertions fit in one WriteAssertions request.
+func dropContextualTuplesOverSizeLimit(assertions []client.ClientAssertion) {
+	sizes := make([]int, len(assertions))
+	total := 0
+
+	for i := range assertions {
+		sizes[i] = assertionSize(assertions[i])
+		total += sizes[i]
+	}
+
+	dropped := 0
+
+	for i := len(assertions) - 1; i >= 0 && total > maxAssertionsRequestBytes; i-- {
+		if len(assertions[i].ContextualTuples) == 0 {
+			continue
+		}
+
+		assertions[i].ContextualTuples = nil
+		size := assertionSize(assertions[i])
+		total -= sizes[i] - size
+		sizes[i] = size
+		dropped++
+	}
+
+	if dropped > 0 {
+		fmt.Fprintf(os.Stderr,
+			"Warning: the test assertions are over the API's request size limit, "+
+				"so %d of them are written without their test's tuples\n", dropped)
+	}
+}
+
+func assertionSize(assertion client.ClientAssertion) int {
+	encoded, err := json.Marshal(assertion)
+	if err != nil {
+		return 0
+	}
+
+	return len(encoded)
 }
 
 // getCheckAssertions turns check tests into assertions. Each assertion carries the check's context and the
