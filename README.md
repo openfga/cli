@@ -208,11 +208,11 @@ custom-headers:
 
 #### Filtering Output
 
-Commands that print JSON accept a `--jq` flag with a [jq](https://jqlang.org/manual/) expression, so you can pick fields out of the output without installing `jq`. String results are printed without quotes, and other values are printed as JSON. The expression is applied to the output of the command, after `--output-format` and `--simple-output`.
+Commands that print JSON or YAML accept a `--jq` flag with a [jq](https://jqlang.org/manual/) expression, so you can pick fields out of the output without installing `jq`. The expression runs on the JSON form of the output. String results are printed without quotes, and other results in the command's output format (JSON, or YAML with `--output-format yaml`). Commands that print something else, like CSV, the model DSL or `version`, fail when `--jq` is set. Filters can read environment variables with `env.NAME`. The flag is only read from the command line, not from `FGA_JQ` or the configuration file.
 
 ```shell
 export FGA_STORE_ID=$(fga store create --model model.fga --jq .store.id)
-fga tuple read --simple-output --jq '.[].object'
+fga tuple read --output-format simple-json --jq '.[].object'
 ```
 
 ### Commands

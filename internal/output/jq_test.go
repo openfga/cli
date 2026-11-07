@@ -51,7 +51,7 @@ func TestApplyJQFilter(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require.NoError(t, SetJQFilter(test.expression))
 
-			results, err := applyJQFilter(jqFilter, data)
+			results, err := collectJQResults(data)
 			require.NoError(t, err)
 			assert.Equal(t, test.expected, results)
 		})
@@ -63,7 +63,7 @@ func TestApplyJQFilterRuntimeError(t *testing.T) {
 
 	require.NoError(t, SetJQFilter(".stores.id"))
 
-	_, err := applyJQFilter(jqFilter, jqTestResponse{Stores: []jqTestStore{}})
+	_, err := collectJQResults(jqTestResponse{Stores: []jqTestStore{}})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to apply jq expression")
 }
@@ -84,4 +84,51 @@ func TestDisplayFilteredPrintsStringsRaw(t *testing.T) {
 	require.NoError(t, err)
 	// The string result is printed directly, only the object goes through the display function.
 	assert.Equal(t, []any{map[string]any{"id": "01A", "name": "one"}}, displayed)
+}
+
+func collectJQResults(data any) ([]any, error) {
+	var results []any
+
+	err := runJQFilter(jqFilter, data, func(result any) error {
+		results = append(results, result)
+
+		return nil
+	})
+
+	return results, err
+}
+
+func TestRunJQFilterEmitsResultsBeforeAnError(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+
+	require.NoError(t, SetJQFilter(`.stores[].id, error("boom")`))
+
+	results, err := collectJQResults(jqTestResponse{Stores: []jqTestStore{{ID: "01A"}}})
+	require.Error(t, err)
+	assert.Equal(t, []any{"01A"}, results)
+}
+
+func TestJQFilterReadsEnvironment(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+	t.Setenv("FGA_JQ_TEST_STORE", "01B")
+
+	require.NoError(t, SetJQFilter(`.stores[] | select(.id == env.FGA_JQ_TEST_STORE) | .name`))
+
+	results, err := collectJQResults(jqTestResponse{Stores: []jqTestStore{{ID: "01A", Name: "one"}, {ID: "01B", Name: "two"}}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"two"}, results)
+}
+
+func TestCheckJQFilterApplied(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+
+	require.NoError(t, SetJQFilter(""))
+	require.NoError(t, CheckJQFilterApplied())
+
+	require.NoError(t, SetJQFilter(".stores"))
+	assert.True(t, JQFilterSet())
+	require.ErrorIs(t, CheckJQFilterApplied(), ErrJQNotApplied)
+
+	require.NoError(t, displayFiltered(jqFilter, jqTestResponse{}, func(any) error { return nil }))
+	require.NoError(t, CheckJQFilterApplied())
 }
