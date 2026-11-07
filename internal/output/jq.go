@@ -20,16 +20,29 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/itchyny/gojq"
 )
 
-// jqFilter is the jq expression set with the --jq flag, applied to the JSON output of every command.
-var jqFilter *gojq.Code
+// ErrJQNotApplied is returned by CheckJQFilterApplied when --jq is set but the command printed
+// its output without going through the filter.
+var ErrJQNotApplied = errors.New("--jq is only supported by commands that print JSON or YAML output")
+
+var (
+	// jqFilter is the jq expression set with the --jq flag, applied to the output of Display and
+	// UniPrinter.Display.
+	jqFilter *gojq.Code
+
+	// jqApplied records whether the filter has been applied to any output.
+	jqApplied bool
+)
 
 // SetJQFilter compiles a jq expression that filters the output of Display and UniPrinter.Display.
 // An empty expression turns filtering off.
 func SetJQFilter(expression string) error {
+	jqApplied = false
+
 	if expression == "" {
 		jqFilter = nil
 
@@ -41,7 +54,8 @@ func SetJQFilter(expression string) error {
 		return fmt.Errorf("invalid jq expression %q: %w", expression, err)
 	}
 
-	code, err := gojq.Compile(query)
+	// Pass the environment, so filters can use env.NAME and $ENV.NAME like in jq.
+	code, err := gojq.Compile(query, gojq.WithEnvironLoader(os.Environ))
 	if err != nil {
 		return fmt.Errorf("invalid jq expression %q: %w", expression, err)
 	}
@@ -51,62 +65,69 @@ func SetJQFilter(expression string) error {
 	return nil
 }
 
-// applyJQFilter runs the jq filter on the JSON form of data and returns its results.
-func applyJQFilter(code *gojq.Code, data any) ([]any, error) {
+// JQFilterSet reports whether a --jq filter is set.
+func JQFilterSet() bool {
+	return jqFilter != nil
+}
+
+// CheckJQFilterApplied returns ErrJQNotApplied if a --jq filter is set but no output went
+// through it, so that commands whose output is not filtered do not silently ignore the flag.
+func CheckJQFilterApplied() error {
+	if jqFilter != nil && !jqApplied {
+		return ErrJQNotApplied
+	}
+
+	return nil
+}
+
+// runJQFilter runs the jq filter on the JSON form of data and calls emit with each result as it
+// is produced, so results emitted before an error are not lost.
+func runJQFilter(code *gojq.Code, data any, emit func(any) error) error {
 	encoded, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("unable to marshal json with error %w", err)
+		return fmt.Errorf("unable to marshal json with error %w", err)
 	}
 
 	var input any
 	if err := json.Unmarshal(encoded, &input); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal json with error %w", err)
+		return fmt.Errorf("unable to unmarshal json with error %w", err)
 	}
-
-	var results []any
 
 	iter := code.Run(input)
 
 	for {
 		result, ok := iter.Next()
 		if !ok {
-			break
+			return nil
 		}
 
 		if err, isErr := result.(error); isErr {
 			var haltErr *gojq.HaltError
 			if errors.As(err, &haltErr) && haltErr.Value() == nil {
-				break
+				return nil
 			}
 
-			return nil, fmt.Errorf("failed to apply jq expression: %w", err)
+			return fmt.Errorf("failed to apply jq expression: %w", err)
 		}
 
-		results = append(results, result)
+		if err := emit(result); err != nil {
+			return err
+		}
 	}
-
-	return results, nil
 }
 
 // displayFiltered applies the jq filter to data and prints each result: strings as raw text, like
 // `jq -r`, so they can be used directly in scripts, and any other value with display.
 func displayFiltered(code *gojq.Code, data any, display func(any) error) error {
-	results, err := applyJQFilter(code, data)
-	if err != nil {
-		return err
-	}
+	jqApplied = true
 
-	for _, result := range results {
+	return runJQFilter(code, data, func(result any) error {
 		if text, isString := result.(string); isString {
 			fmt.Println(text)
 
-			continue
+			return nil
 		}
 
-		if err := display(result); err != nil {
-			return err
-		}
-	}
-
-	return nil
+		return display(result)
+	})
 }
