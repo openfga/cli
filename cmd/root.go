@@ -31,6 +31,7 @@ import (
 	"github.com/openfga/cli/cmd/store"
 	"github.com/openfga/cli/cmd/tuple"
 	"github.com/openfga/cli/internal/cmdutils"
+	"github.com/openfga/cli/internal/output"
 )
 
 var cfgFile string
@@ -71,6 +72,7 @@ func init() {
 	rootCmd.PersistentFlags().StringArray("api-scopes", []string{}, "API Scopes (repeat option for multiple values). Used in the Client Credentials flow")   //nolint:lll
 	rootCmd.PersistentFlags().StringArray("custom-headers", []string{}, "Custom HTTP headers in 'Header: value' format (repeat option for multiple values)") //nolint:lll
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode - can print more detailed information for debugging")
+	rootCmd.PersistentFlags().String("jq", "", "Filter JSON output using a jq expression, e.g. --jq '.store.id'")
 
 	_ = rootCmd.Flags().MarkHidden("debug")
 	rootCmd.MarkFlagsRequiredTogether(
@@ -130,4 +132,8 @@ func initConfig() {
 	viperInstance.AutomaticEnv() // read in environment variables that match
 
 	cmdutils.BindViperToFlags(rootCmd, viperInstance)
+
+	jqExpression, err := rootCmd.PersistentFlags().GetString("jq")
+	cobra.CheckErr(err)
+	cobra.CheckErr(output.SetJQFilter(jqExpression))
 }
