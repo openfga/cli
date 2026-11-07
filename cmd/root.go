@@ -42,6 +42,10 @@ var rootCmd = &cobra.Command{
 	Short:        "OpenFGA CLI",
 	Long:         ``,
 	SilenceUsage: true,
+	// Commands whose output does not go through output.Display would otherwise ignore --jq.
+	PersistentPostRunE: func(_ *cobra.Command, _ []string) error {
+		return output.CheckJQFilterApplied()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -72,7 +76,7 @@ func init() {
 	rootCmd.PersistentFlags().StringArray("api-scopes", []string{}, "API Scopes (repeat option for multiple values). Used in the Client Credentials flow")   //nolint:lll
 	rootCmd.PersistentFlags().StringArray("custom-headers", []string{}, "Custom HTTP headers in 'Header: value' format (repeat option for multiple values)") //nolint:lll
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode - can print more detailed information for debugging")
-	rootCmd.PersistentFlags().String("jq", "", "Filter JSON output using a jq expression, e.g. --jq '.store.id'")
+	rootCmd.PersistentFlags().String("jq", "", "Filter the JSON or YAML output of a command using a jq expression, e.g. --jq '.store.id'")
 
 	_ = rootCmd.Flags().MarkHidden("debug")
 	rootCmd.MarkFlagsRequiredTogether(
@@ -131,9 +135,21 @@ func initConfig() {
 
 	viperInstance.AutomaticEnv() // read in environment variables that match
 
+	// Check this before BindViperToFlags, which marks the flags it sets as changed.
+	jqFromFlag := rootCmd.PersistentFlags().Changed("jq")
+
 	cmdutils.BindViperToFlags(rootCmd, viperInstance)
 
-	jqExpression, err := rootCmd.PersistentFlags().GetString("jq")
-	cobra.CheckErr(err)
-	cobra.CheckErr(output.SetJQFilter(jqExpression))
+	cobra.CheckErr(output.SetJQFilter(jqExpression(jqFromFlag)))
+}
+
+// jqExpression returns the --jq flag. Values from FGA_JQ or the config file are ignored: a filter
+// set there would apply to every command, and BindViperToFlags splits values on whitespace, which
+// would keep only the last part of an expression such as ".a, .b".
+func jqExpression(fromFlag bool) string {
+	if !fromFlag {
+		return ""
+	}
+
+	return rootCmd.PersistentFlags().Lookup("jq").Value.String()
 }
