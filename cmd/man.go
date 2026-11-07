@@ -23,10 +23,13 @@ import (
 	mcobra "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/output"
 )
 
 var manCmd = &cobra.Command{
 	Use:                   "man",
+	Annotations:           map[string]string{output.JQUnsupportedAnnotation: "true"},
 	Short:                 "Generates manpages",
 	SilenceUsage:          true,
 	DisableFlagsInUseLine: true,

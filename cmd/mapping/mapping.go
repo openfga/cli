@@ -25,6 +25,8 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
+
+	"github.com/openfga/cli/internal/output"
 )
 
 // MappingCmd is the root of the fga mapping command group.
@@ -32,6 +34,8 @@ var MappingCmd = &cobra.Command{
 	Use:   "mapping",
 	Short: "Manage JSON-to-tuple mappings",
 	Long:  "Validate, test, and run JSON-to-tuple mapping files.",
+	// The mapping commands print through their own writers, so --jq cannot filter them.
+	Annotations: map[string]string{output.JQUnsupportedAnnotation: "true"},
 }
 
 // promptMappingFile resolves the mapping file path for a command that accepts an

@@ -1,6 +1,9 @@
 package output
 
 import (
+	"encoding/json"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -131,4 +134,69 @@ func TestCheckJQFilterApplied(t *testing.T) {
 
 	require.NoError(t, displayFiltered(jqFilter, jqTestResponse{}, func(any) error { return nil }))
 	require.NoError(t, CheckJQFilterApplied())
+}
+
+func TestJQFilterKeepsLargeIntegers(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+
+	require.NoError(t, SetJQFilter(".n, .n + 1"))
+
+	results, err := collectJQResults(map[string]uint64{"n": 9007199254740993})
+	require.NoError(t, err)
+	require.Len(t, results, 2)
+
+	encoded, err := json.Marshal(results)
+	require.NoError(t, err)
+	assert.JSONEq(t, "[9007199254740993, 9007199254740994]", string(encoded))
+}
+
+func TestJQFilterHalt(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+
+	require.NoError(t, SetJQFilter(`.stores[].id, halt`))
+
+	results, err := collectJQResults(jqTestResponse{Stores: []jqTestStore{{ID: "01A"}}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"01A"}, results)
+
+	require.NoError(t, SetJQFilter(`null | halt_error(7)`))
+
+	_, err = collectJQResults(jqTestResponse{})
+	require.Error(t, err)
+}
+
+func TestUniPrinterSeparatesFilteredYAMLResults(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+
+	require.NoError(t, SetJQFilter(".stores[]"))
+
+	printed := captureStdout(t, func() {
+		printer := UniPrinter{Printer: &yamlPrinter{}}
+		require.NoError(t, printer.Display(jqTestResponse{Stores: []jqTestStore{{ID: "01A", Name: "one"}, {ID: "01B", Name: "two"}}}))
+	})
+
+	assert.Equal(t, "id: 01A\nname: one\n\n---\nid: 01B\nname: two\n\n", printed)
+}
+
+func captureStdout(t *testing.T, run func()) string {
+	t.Helper()
+
+	reader, writer, err := os.Pipe()
+	require.NoError(t, err)
+
+	stdout := os.Stdout
+	os.Stdout = writer
+
+	t.Cleanup(func() { os.Stdout = stdout })
+
+	run()
+
+	require.NoError(t, writer.Close())
+
+	os.Stdout = stdout
+
+	printed, err := io.ReadAll(reader)
+	require.NoError(t, err)
+
+	return string(printed)
 }

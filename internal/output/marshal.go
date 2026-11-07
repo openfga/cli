@@ -143,7 +143,19 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 // Display prints the data using the configured printer and color settings, after applying the --jq filter if set.
 func (prt UniPrinter) Display(data any) error {
 	if jqFilter != nil {
-		return displayFiltered(jqFilter, data, prt.display)
+		_, isYAML := prt.Printer.(*yamlPrinter)
+		first := true
+
+		return displayFiltered(jqFilter, data, func(result any) error {
+			// Separate successive YAML results into documents, like yq does.
+			if isYAML && !first {
+				fmt.Println("---")
+			}
+
+			first = false
+
+			return prt.display(result)
+		})
 	}
 
 	return prt.display(data)

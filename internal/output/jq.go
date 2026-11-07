@@ -17,6 +17,7 @@ limitations under the License.
 package output
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,6 +25,10 @@ import (
 
 	"github.com/itchyny/gojq"
 )
+
+// JQUnsupportedAnnotation marks a command, and the commands under it, as never printing through
+// Display, so that --jq is rejected before the command runs.
+const JQUnsupportedAnnotation = "jq-unsupported"
 
 // ErrJQNotApplied is returned by CheckJQFilterApplied when --jq is set but the command printed
 // its output without going through the filter.
@@ -88,8 +93,12 @@ func runJQFilter(code *gojq.Code, data any, emit func(any) error) error {
 		return fmt.Errorf("unable to marshal json with error %w", err)
 	}
 
+	// Decode numbers as json.Number, so integers above 2^53 keep their precision in gojq.
+	decoder := json.NewDecoder(bytes.NewReader(encoded))
+	decoder.UseNumber()
+
 	var input any
-	if err := json.Unmarshal(encoded, &input); err != nil {
+	if err := decoder.Decode(&input); err != nil {
 		return fmt.Errorf("unable to unmarshal json with error %w", err)
 	}
 
@@ -102,8 +111,9 @@ func runJQFilter(code *gojq.Code, data any, emit func(any) error) error {
 		}
 
 		if err, isErr := result.(error); isErr {
+			// halt stops the filter successfully, halt_error with a non-zero exit code is an error.
 			var haltErr *gojq.HaltError
-			if errors.As(err, &haltErr) && haltErr.Value() == nil {
+			if errors.As(err, &haltErr) && haltErr.Value() == nil && haltErr.ExitCode() == 0 {
 				return nil
 			}
 

@@ -58,6 +58,10 @@ var getCmd = &cobra.Command{
 			return output.Display(authModel.DisplayAsJSON(fields))
 		}
 
+		if output.JQFilterSet() {
+			return fmt.Errorf("%w, use --format json", output.ErrJQNotApplied)
+		}
+
 		dslModel, err := authModel.DisplayAsDSL(fields)
 		if err != nil {
 			return fmt.Errorf("failed to display model due to %w", err)
