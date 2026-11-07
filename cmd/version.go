@@ -22,15 +22,17 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/openfga/cli/internal/build"
+	"github.com/openfga/cli/internal/output"
 )
 
 var versionStr = fmt.Sprintf("v`%s` (commit: `%s`, date: `%s`)", build.Version, build.Commit, build.Date)
 
 // versionCmd is the entrypoint for the `fga version“ command.
 var versionCmd *cobra.Command = &cobra.Command{
-	Use:   "version",
-	Short: "Reports the FGA CLI version",
-	Long:  "Reports the FGA CLI version.",
+	Use:         "version",
+	Annotations: map[string]string{output.JQUnsupportedAnnotation: "true"},
+	Short:       "Reports the FGA CLI version",
+	Long:        "Reports the FGA CLI version.",
 	RunE: func(_ *cobra.Command, _ []string) error {
 		fmt.Printf("fga version %s\n", versionStr)
 
