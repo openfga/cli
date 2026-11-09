@@ -17,7 +17,6 @@ limitations under the License.
 package tuple
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -166,44 +165,15 @@ func read(
 
 // displayReadResponse prints the response to stdout, or writes it to outputFile when that is set.
 func displayReadResponse(response *readResponse, outputFormat string, simpleOutput bool, outputFile string) error {
-	if outputFile != "" {
-		return writeReadResponseToFile(response, outputFormat, simpleOutput, outputFile)
-	}
-
-	if outputFormat == "csv" {
-		records, err := response.toCsvDTO()
-		if err != nil {
-			return fmt.Errorf("failed to convert response to csv: %w", err)
-		}
-
-		writer := bufio.NewWriter(os.Stdout)
-		if err := output.MarshalCSV(records, writer, readResponseCSVHeaders...); err != nil {
-			return fmt.Errorf("failed to marshal csv: %w", err)
-		}
-
-		if err := writer.Flush(); err != nil {
-			return fmt.Errorf("failed to display csv: %w", err)
-		}
-
-		return nil
-	}
-
-	dataPrinter := output.NewUniPrinter(outputFormat)
-
-	var data any
-
-	data = *response.complete
-
+	var data any = *response.complete
 	if simpleOutput || outputFormat == "simple-json" {
 		data = response.simple
 	}
 
-	return dataPrinter.Display(data)
-}
+	if outputFile == "" && outputFormat != "csv" {
+		return output.NewUniPrinter(outputFormat).Display(data)
+	}
 
-// writeReadResponseToFile writes the response, in the selected output format, only to the given file.
-// The file is created with 0600 permissions and is only touched once the output has been produced.
-func writeReadResponseToFile(response *readResponse, outputFormat string, simpleOutput bool, outputFile string) error {
 	var content bytes.Buffer
 
 	if outputFormat == "csv" {
@@ -216,20 +186,20 @@ func writeReadResponseToFile(response *readResponse, outputFormat string, simple
 			return fmt.Errorf("failed to marshal csv: %w", err)
 		}
 	} else {
-		var data any
-
-		data = *response.complete
-
-		if simpleOutput || outputFormat == "simple-json" {
-			data = response.simple
-		}
-
 		rendered, err := output.Render(outputFormat, data)
 		if err != nil {
 			return fmt.Errorf("failed to render output: %w", err)
 		}
 
 		content.Write(rendered)
+	}
+
+	if outputFile == "" {
+		if _, err := os.Stdout.Write(content.Bytes()); err != nil {
+			return fmt.Errorf("failed to display csv: %w", err)
+		}
+
+		return nil
 	}
 
 	if err := os.WriteFile(outputFile, content.Bytes(), 0o600); err != nil {
@@ -314,7 +284,7 @@ func init() {
 	readCmd.Flags().String("output-format", "json", "Specifies the format for data presentation. Valid options: "+
 		"json, simple-json, csv, and yaml.")
 	readCmd.Flags().String("output-file", "", "Write the output to this file instead of stdout. "+
-		"The file is created with 0600 permissions. The selected output format is used.")
+		"Uses --output-format. Overwrites an existing file; new files are created with 0600 permissions.")
 	readCmd.Flags().Bool("simple-output", false, "Output data in simpler version. (It can be used by write and delete commands)") //nolint:lll
 	readCmd.Flags().String(
 		"consistency",
