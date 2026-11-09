@@ -162,24 +162,19 @@ func (prt UniPrinter) Display(data any) error {
 // Render encodes data in the given output format ("yaml", anything else is JSON) without colors,
 // and returns the bytes. The result always ends with a newline.
 func Render(outputFormat string, data any) ([]byte, error) {
-	var (
-		result []byte
-		err    error
-	)
-
 	if outputFormat == "yaml" {
-		result, err = yaml.Marshal(data)
+		result, err := yaml.Marshal(data)
 		if err != nil {
 			return nil, fmt.Errorf("unable to marshal yaml with error %w", err)
 		}
 
 		// yaml.Marshal already ends with a newline.
 		return result, nil
-	} else {
-		result, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			return nil, fmt.Errorf("unable to marshal json with error %w", err)
-		}
+	}
+
+	result, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("unable to marshal json with error %w", err)
 	}
 
 	return append(result, '\n'), nil
