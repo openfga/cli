@@ -28,9 +28,12 @@ import (
 
 	"github.com/schollz/progressbar/v3"
 
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/internal/authorizationmodel"
@@ -49,9 +52,8 @@ const (
 	maxAssertionsPerWrite    = 100
 	// The API accepts at most 20 contextual tuples per assertion.
 	maxContextualTuplesPerAssertion = 20
-	// The API rejects WriteAssertions requests over 64000 bytes. Assertions are measured by their JSON size,
-	// which is larger than their size in the request, and kept a bit under the limit.
-	maxAssertionsRequestBytes = 60000
+	// The API rejects WriteAssertions requests whose assertions add up to more than 64000 bytes in proto encoding.
+	maxAssertionsRequestBytes = 64000
 	expressionConditionName   = "$expression"
 )
 
@@ -278,7 +280,8 @@ func importAssertions(
 }
 
 // dropContextualTuplesOverSizeLimit removes the contextual tuples of assertions, starting from the last one,
-// until the assertions fit in one WriteAssertions request.
+// until the assertions fit in one WriteAssertions request. If they still don't fit, it then removes the
+// context of the last assertions too, which main never wrote.
 func dropContextualTuplesOverSizeLimit(assertions []client.ClientAssertion) {
 	sizes := make([]int, len(assertions))
 	total := 0
@@ -288,34 +291,59 @@ func dropContextualTuplesOverSizeLimit(assertions []client.ClientAssertion) {
 		total += sizes[i]
 	}
 
-	dropped := 0
+	shrink := func(skip func(client.ClientAssertion) bool, drop func(*client.ClientAssertion)) int {
+		dropped := 0
 
-	for i := len(assertions) - 1; i >= 0 && total > maxAssertionsRequestBytes; i-- {
-		if len(assertions[i].ContextualTuples) == 0 {
-			continue
+		for i := len(assertions) - 1; i >= 0 && total > maxAssertionsRequestBytes; i-- {
+			if skip(assertions[i]) {
+				continue
+			}
+
+			drop(&assertions[i])
+			size := assertionSize(assertions[i])
+			total -= sizes[i] - size
+			sizes[i] = size
+			dropped++
 		}
 
-		assertions[i].ContextualTuples = nil
-		size := assertionSize(assertions[i])
-		total -= sizes[i] - size
-		sizes[i] = size
-		dropped++
+		return dropped
 	}
 
-	if dropped > 0 {
+	droppedTuples := shrink(
+		func(a client.ClientAssertion) bool { return len(a.ContextualTuples) == 0 },
+		func(a *client.ClientAssertion) { a.ContextualTuples = nil },
+	)
+	if droppedTuples > 0 {
 		fmt.Fprintf(os.Stderr,
 			"Warning: the test assertions are over the API's request size limit, "+
-				"so %d of them are written without their test's tuples\n", dropped)
+				"so %d of them are written without their test's tuples\n", droppedTuples)
+	}
+
+	droppedContexts := shrink(
+		func(a client.ClientAssertion) bool { return a.Context == nil },
+		func(a *client.ClientAssertion) { a.Context = nil },
+	)
+	if droppedContexts > 0 {
+		fmt.Fprintf(os.Stderr,
+			"Warning: the test assertions are still over the API's request size limit, "+
+				"so %d of them are written without their check's context\n", droppedContexts)
 	}
 }
 
+// assertionSize returns the size of the assertion as the server measures it: the SDK's JSON body decoded
+// into the API's proto message.
 func assertionSize(assertion client.ClientAssertion) int {
-	encoded, err := json.Marshal(assertion)
+	encoded, err := json.Marshal(assertion.ToAssertion())
 	if err != nil {
 		return 0
 	}
 
-	return len(encoded)
+	var protoAssertion openfgav1.Assertion
+	if err := protojson.Unmarshal(encoded, &protoAssertion); err != nil {
+		return len(encoded)
+	}
+
+	return proto.Size(&protoAssertion)
 }
 
 // getCheckAssertions turns check tests into assertions. Each assertion carries the check's context and the

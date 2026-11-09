@@ -646,4 +646,34 @@ func TestDropContextualTuplesOverSizeLimit(t *testing.T) {
 		require.Len(t, assertions[0].ContextualTuples, maxContextualTuplesPerAssertion)
 		require.Empty(t, assertions[len(assertions)-1].ContextualTuples)
 	})
+
+	t.Run("the last assertions lose their context when dropping tuples isn't enough", func(t *testing.T) {
+		t.Parallel()
+
+		values := make([]any, 60)
+		for i := range values {
+			values[i] = i
+		}
+
+		checkContext := map[string]any{"allowed": values}
+
+		assertions := make([]client.ClientAssertion, maxAssertionsPerWrite)
+		for i := range assertions {
+			assertions[i] = client.ClientAssertion{
+				User: fmt.Sprintf("user:%d", i), Relation: "viewer", Object: "document:roadmap-2026",
+				Context: &checkContext,
+			}
+		}
+
+		dropContextualTuplesOverSizeLimit(assertions)
+
+		total := 0
+		for _, assertion := range assertions {
+			total += assertionSize(assertion)
+		}
+
+		require.LessOrEqual(t, total, maxAssertionsRequestBytes)
+		require.NotNil(t, assertions[0].Context)
+		require.Nil(t, assertions[len(assertions)-1].Context)
+	})
 }
