@@ -577,7 +577,7 @@ fga model **validate**
 
 `fga model validate --file model.fga --weighted-graph`
 
-With `--weighted-graph`, the JSON response reports `is_valid: true` if the graph builds successfully, or `is_valid: false` with an `error` explaining the failure. A failed validation exits with a non-zero status. A model can pass normal validation but be incompatible with weighted-graph optimizations.
+With `--weighted-graph`, the JSON response reports `is_valid: true` if the model builds successfully, or `is_valid: false` with an `error` explaining the failure. A model can pass normal validation but be incompatible with weighted-graph optimizations.
 
 When the input parses successfully, the JSON response includes `size_kb`, the protobuf-serialized size of the model in KB. If the input cannot be parsed, the command exits with an error and does not emit a JSON response.
 
