@@ -4,13 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/openfga/cli/internal/fga"
 	mockclient "github.com/openfga/cli/internal/mocks"
@@ -676,4 +680,116 @@ func TestDropContextualTuplesOverSizeLimit(t *testing.T) {
 		require.NotNil(t, assertions[0].Context)
 		require.Nil(t, assertions[len(assertions)-1].Context)
 	})
+}
+
+func TestAssertionSizeMatchesProtoSize(t *testing.T) {
+	t.Parallel()
+
+	conditionContext := map[string]any{"ip": "10.0.0.1"}
+	checkContext := map[string]any{"allowed": []any{1, 22, 333}, "now": "2026-11-10T00:00:00Z"}
+
+	assertion := client.ClientAssertion{
+		User:        "user:anne",
+		Relation:    "viewer",
+		Object:      "document:roadmap",
+		Expectation: true,
+		Context:     &checkContext,
+		ContextualTuples: []client.ClientContextualTupleKey{
+			{User: "user:anne", Relation: "member", Object: "group:eng"},
+			{
+				User: "group:eng#member", Relation: "viewer", Object: "document:roadmap",
+				Condition: &openfga.RelationshipCondition{Name: "in_network", Context: &conditionContext},
+			},
+		},
+	}
+
+	protoConditionContext, err := structpb.NewStruct(conditionContext)
+	require.NoError(t, err)
+
+	protoCheckContext, err := structpb.NewStruct(checkContext)
+	require.NoError(t, err)
+
+	want := &openfgav1.Assertion{
+		TupleKey: &openfgav1.AssertionTupleKey{
+			User: "user:anne", Relation: "viewer", Object: "document:roadmap",
+		},
+		Expectation: true,
+		Context:     protoCheckContext,
+		ContextualTuples: []*openfgav1.TupleKey{
+			{User: "user:anne", Relation: "member", Object: "group:eng"},
+			{
+				User: "group:eng#member", Relation: "viewer", Object: "document:roadmap",
+				Condition: &openfgav1.RelationshipCondition{Name: "in_network", Context: protoConditionContext},
+			},
+		},
+	}
+
+	require.Equal(t, proto.Size(want), assertionSize(assertion))
+}
+
+func TestDropContextualTuplesAtExactSizeLimit(t *testing.T) {
+	t.Parallel()
+
+	tuples := make([]client.ClientContextualTupleKey, maxContextualTuplesPerAssertion)
+	for i := range tuples {
+		tuples[i] = client.ClientContextualTupleKey{
+			User: fmt.Sprintf("user:member-%02d", i), Relation: "viewer", Object: "document:roadmap-2026",
+		}
+	}
+
+	// build returns 50 assertions with tuples, the last one padded with a
+	// context string of the given length.
+	build := func(padding int) []client.ClientAssertion {
+		assertions := make([]client.ClientAssertion, 50)
+		for i := range assertions {
+			assertions[i] = client.ClientAssertion{
+				User: fmt.Sprintf("user:%d", i), Relation: "viewer", Object: "document:roadmap-2026",
+				ContextualTuples: tuples,
+			}
+		}
+
+		checkContext := map[string]any{"pad": strings.Repeat("x", padding)}
+		assertions[len(assertions)-1].Context = &checkContext
+
+		return assertions
+	}
+
+	total := func(assertions []client.ClientAssertion) int {
+		sum := 0
+		for _, assertion := range assertions {
+			sum += assertionSize(assertion)
+		}
+
+		return sum
+	}
+
+	// Between 128 and 16383 bytes every length prefix takes two bytes, so one
+	// more byte of padding adds exactly one byte to the request.
+	const basePadding = 1000
+
+	padding := basePadding + maxAssertionsRequestBytes - total(build(basePadding))
+	require.Greater(t, padding, 200)
+	require.Less(t, padding, 16000)
+
+	atLimit := build(padding)
+	require.Equal(t, maxAssertionsRequestBytes, total(atLimit))
+
+	dropContextualTuplesOverSizeLimit(atLimit)
+
+	for _, assertion := range atLimit {
+		require.Len(t, assertion.ContextualTuples, maxContextualTuplesPerAssertion)
+	}
+
+	overLimit := build(padding + 1)
+	require.Equal(t, maxAssertionsRequestBytes+1, total(overLimit))
+
+	dropContextualTuplesOverSizeLimit(overLimit)
+
+	last := len(overLimit) - 1
+	for _, assertion := range overLimit[:last] {
+		require.Len(t, assertion.ContextualTuples, maxContextualTuplesPerAssertion)
+	}
+
+	require.Empty(t, overLimit[last].ContextualTuples)
+	require.NotNil(t, overLimit[last].Context)
 }
