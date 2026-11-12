@@ -219,3 +219,76 @@ func TestListUsersWithConsistency(t *testing.T) {
 		t.Errorf("Expect %v but actual %v", expectedResponse, *output)
 	}
 }
+
+func TestListUsersObjectWithoutTypeReturnsError(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	_, err := listUsers(
+		t.Context(),
+		mockFgaClient,
+		"roadmap",
+		"admin",
+		"user",
+		[]client.ClientContextualTupleKey{},
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	)
+	if err == nil {
+		t.Fatal("expected an error for an object with no type separator, got nil")
+	}
+}
+
+func TestListUsersObjectIDKeepsColons(t *testing.T) {
+	t.Parallel()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockFgaClient := mock_client.NewMockSdkClient(mockCtrl)
+
+	mockExecute := mock_client.NewMockSdkClientListUsersRequestInterface(mockCtrl)
+
+	expectedResponse := client.ClientListUsersResponse{Users: []openfga.User{}}
+
+	mockExecute.EXPECT().Execute().Return(&expectedResponse, nil)
+
+	mockRequest := mock_client.NewMockSdkClientListUsersRequestInterface(mockCtrl)
+	options := client.ClientListUsersOptions{}
+	mockRequest.EXPECT().Options(options).Return(mockExecute)
+
+	mockBody := mock_client.NewMockSdkClientListUsersRequestInterface(mockCtrl)
+
+	contextualTuples := []client.ClientContextualTupleKey{}
+
+	body := client.ClientListUsersRequest{
+		Object: openfga.FgaObject{
+			Type: "doc",
+			Id:   "urn:ietf:rfc:2648",
+		},
+		Relation:         "admin",
+		UserFilters:      []openfga.UserTypeFilter{{Type: "user"}},
+		ContextualTuples: contextualTuples,
+		Context:          queryContext,
+	}
+	mockBody.EXPECT().Body(body).Return(mockRequest)
+
+	mockFgaClient.EXPECT().ListUsers(t.Context()).Return(mockBody)
+
+	if _, err := listUsers(
+		t.Context(),
+		mockFgaClient,
+		"doc:urn:ietf:rfc:2648",
+		"admin",
+		"user",
+		contextualTuples,
+		queryContext,
+		openfga.CONSISTENCYPREFERENCE_UNSPECIFIED.Ptr(),
+	); err != nil {
+		t.Fatal(err)
+	}
+}

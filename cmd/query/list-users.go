@@ -26,6 +26,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
 
+	"github.com/openfga/cli/internal/clierrors"
 	"github.com/openfga/cli/internal/cmdutils"
 	"github.com/openfga/cli/internal/output"
 )
@@ -50,13 +51,18 @@ func parseUserFilters(rawUserFilter string) []openfga.UserTypeFilter {
 	return userFilters
 }
 
-func parseObject(rawObject string) openfga.FgaObject {
-	splitObject := strings.Split(rawObject, ":")
+func parseObject(rawObject string) (openfga.FgaObject, error) {
+	objectType, objectID, found := strings.Cut(rawObject, ":")
+	if !found || objectType == "" || objectID == "" {
+		return openfga.FgaObject{}, clierrors.ValidationError( //nolint:wrapcheck
+			"parseObject",
+			"Failed to parse object, it must be of the format \"<type>:<id>\", for example \"document:roadmap\"")
+	}
 
 	return openfga.FgaObject{
-		Type: splitObject[0],
-		Id:   splitObject[1],
-	}
+		Type: objectType,
+		Id:   objectID,
+	}, nil
 }
 
 func listUsers(
@@ -69,8 +75,13 @@ func listUsers(
 	queryContext *map[string]any,
 	consistency *openfga.ConsistencyPreference,
 ) (*client.ClientListUsersResponse, error) {
+	object, err := parseObject(rawObject)
+	if err != nil {
+		return nil, err
+	}
+
 	body := &client.ClientListUsersRequest{
-		Object:           parseObject(rawObject),
+		Object:           object,
 		Relation:         relation,
 		UserFilters:      parseUserFilters(rawUserFilter),
 		ContextualTuples: contextualTuples,
