@@ -2,7 +2,7 @@ module github.com/openfga/cli
 
 go 1.26.0 // floor: support one version back; run with the latest (toolchain below)
 
-toolchain go1.27.3
+toolchain go1.27.4
 
 require (
 	github.com/charmbracelet/huh v1.0.0
@@ -19,7 +19,7 @@ require (
 	github.com/openfga/openfga v1.22.1
 	github.com/schollz/progressbar/v3 v3.19.1
 	github.com/spf13/cobra v1.10.2
-	github.com/spf13/pflag v1.0.10
+	github.com/spf13/pflag v1.1.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/mock v0.6.0
