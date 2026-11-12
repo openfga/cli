@@ -138,7 +138,7 @@ func initConfig() {
 
 // checkJQSupported returns an error if --jq is set for a command that never prints through
 // output.Display: one annotated with output.JQUnsupportedAnnotation, under such a command, or one
-// of cobra's help and completion commands.
+// of the help and completion commands.
 func checkJQSupported(cmd *cobra.Command) error {
 	if !output.JQFilterSet() {
 		return nil
@@ -148,9 +148,7 @@ func checkJQSupported(cmd *cobra.Command) error {
 		switch {
 		case current.Annotations[output.JQUnsupportedAnnotation] == "true",
 			current.Name() == "help",
-			current.Name() == "completion",
-			current.Name() == cobra.ShellCompRequestCmd,
-			current.Name() == cobra.ShellCompNoDescRequestCmd:
+			current.Name() == "completion":
 			return fmt.Errorf("%w, not by %s", output.ErrJQNotApplied, cmd.CommandPath())
 		}
 	}
