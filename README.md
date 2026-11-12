@@ -436,7 +436,7 @@ fga store **delete**
 | [Read Authorization Models](#read-authorization-models)                     | `list`      | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
-| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
+| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`, `--weighted-graph` | `fga model validate --file model.fga`                                                       |
 | [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`, `--max-types-per-authorization-model` | `fga model test --tests "**/*.fga.yaml"`                                      |
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
@@ -570,9 +570,14 @@ fga model **validate**
 ###### Parameters
 * `--file`: File containing the authorization model.
 * `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
+* `--weighted-graph`: Validate that the model is compatible with [weighted-graph optimizations](https://openfga.dev/blog/weighted-graph-upcoming-changes) (optional, default=false).
 
 ###### Example
 `fga model validate --file model.json`
+
+`fga model validate --file model.fga --weighted-graph`
+
+With `--weighted-graph`, the command skips normal type-system validation and instead attempts to build the [weighted graph](https://openfga.dev/blog/weighted-graph-upcoming-changes). The JSON response reports `is_valid: true` if the graph builds successfully, or `is_valid: false` with an `error` explaining the failure. A failed validation exits with a non-zero status. A model can pass normal validation but be incompatible with weighted-graph optimizations.
 
 When the input parses successfully, the JSON response includes `size_kb`, the protobuf-serialized size of the model in KB. If the input cannot be parsed, the command exits with an error and does not emit a JSON response.
 
