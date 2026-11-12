@@ -174,6 +174,26 @@ api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
 ```
 
+#### Config File Locations
+
+When no `--config` flag is passed, the CLI looks for a `.fga.yaml` (or `.fga.yml`) file in, in order:
+
+1. The os-specific config directory (for example `~/.config` on Linux, `~/Library/Application Support` on macOS, `%AppData%` on Windows)
+2. The `fga` subdirectory of that config directory (for example `~/.config/fga`)
+3. The current user's home directory
+
+The first file found is used; the remaining locations are not read and are not merged in. The CLI prints `Using config file: <path>` to stderr. Flags and `FGA_*` environment variables take precedence over the file.
+
+To use a config file kept alongside a project, name it explicitly:
+
+```shell
+fga --config ./.fga.yaml store list
+```
+
+Or set the equivalent `FGA_*` environment variables from the table above.
+
+> **Note:** versions 0.7.0 through 0.8.2 treated a `.fga.yaml` from the current working directory as the highest precedence. If you relied on that, switch to `--config` or `FGA_*` environment variables.
+
 #### Custom Headers
 
 You can add custom HTTP headers to all requests sent to the API using the `--custom-headers` flag. Headers are specified in `<name>: <value>` format, and the flag can be repeated to add multiple headers.

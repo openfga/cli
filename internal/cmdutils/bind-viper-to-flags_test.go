@@ -103,3 +103,81 @@ func TestBindViperToFlags(t *testing.T) {
 		})
 	}
 }
+
+// newDebugCmd builds a command with a bound debug flag and a viper instance
+// that behaves like the real one: the "debug" key is present (as a config file
+// would set it) and FGA_* environment variables are read automatically.
+func newDebugCmd(t *testing.T, configDebug bool) (*cobra.Command, *viper.Viper) {
+	t.Helper()
+
+	cmd := &cobra.Command{Use: "root"}
+	cmd.Flags().Bool("debug", false, "")
+
+	viperInstance := viper.New()
+	viperInstance.SetEnvPrefix("FGA")
+	viperInstance.AutomaticEnv()
+
+	if configDebug {
+		// Simulate a config file having set debug: true.
+		viperInstance.Set("debug", true)
+	}
+
+	return cmd, viperInstance
+}
+
+func debugValue(t *testing.T, cmd *cobra.Command) bool {
+	t.Helper()
+
+	val, err := cmd.Flags().GetBool("debug")
+	require.NoError(t, err)
+
+	return val
+}
+
+func TestDebugFlagIgnoredFromConfigFile(t *testing.T) {
+	t.Setenv("FGA_DEBUG", "")
+
+	cmd, viperInstance := newDebugCmd(t, true)
+	BindViperToFlags(cmd, viperInstance)
+
+	assert.False(t, debugValue(t, cmd), "config file debug:true must not enable debug")
+}
+
+func TestDebugFlagFromEmptyEnvIgnoresConfigFile(t *testing.T) {
+	// An empty env var must not re-open the config-file binding path.
+	t.Setenv("FGA_DEBUG", "")
+
+	cmd, viperInstance := newDebugCmd(t, true)
+	BindViperToFlags(cmd, viperInstance)
+
+	assert.False(t, debugValue(t, cmd), "empty FGA_DEBUG must not enable debug from config file")
+}
+
+func TestDebugFlagFalseEnvIgnoresConfigFile(t *testing.T) {
+	t.Setenv("FGA_DEBUG", "false")
+
+	cmd, viperInstance := newDebugCmd(t, true)
+	BindViperToFlags(cmd, viperInstance)
+
+	assert.False(t, debugValue(t, cmd), "FGA_DEBUG=false must keep debug off despite config file")
+}
+
+func TestDebugFlagEnabledByEnv(t *testing.T) {
+	t.Setenv("FGA_DEBUG", "true")
+
+	cmd, viperInstance := newDebugCmd(t, false)
+	BindViperToFlags(cmd, viperInstance)
+
+	assert.True(t, debugValue(t, cmd), "FGA_DEBUG=true must enable debug")
+}
+
+func TestDebugFlagExplicitFlagWins(t *testing.T) {
+	t.Setenv("FGA_DEBUG", "")
+
+	cmd, viperInstance := newDebugCmd(t, true)
+	require.NoError(t, cmd.Flags().Set("debug", "true"))
+
+	BindViperToFlags(cmd, viperInstance)
+
+	assert.True(t, debugValue(t, cmd), "an explicit --debug flag must be preserved")
+}
