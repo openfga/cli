@@ -140,8 +140,28 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 	return &uniPrinter
 }
 
-// Display prints the data using the configured printer and color settings.
+// Display prints the data using the configured printer and color settings, after applying the --jq filter if set.
 func (prt UniPrinter) Display(data any) error {
+	if jqFilter != nil {
+		_, isYAML := prt.Printer.(*yamlPrinter)
+		first := true
+
+		return displayFiltered(jqFilter, data, func(result any) error {
+			// Separate successive YAML results into documents, like yq does.
+			if isYAML && !first {
+				fmt.Println("---")
+			}
+
+			first = false
+
+			return prt.display(result)
+		})
+	}
+
+	return prt.display(data)
+}
+
+func (prt UniPrinter) display(data any) error {
 	if prt.Colorful {
 		err := prt.Printer.DisplayColor(data)
 		if err != nil {
@@ -199,7 +219,16 @@ func outputNonTerminal(data any) error {
 }
 
 // Display will decorate the output if possible.  Otherwise, will print out the standard JSON.
+// If the --jq filter is set, it prints the results of the filter instead.
 func Display(data any) error {
+	if jqFilter != nil {
+		return displayFiltered(jqFilter, data, display)
+	}
+
+	return display(data)
+}
+
+func display(data any) error {
 	if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		if os.Getenv("NO_COLOR") != "" {
 			return displayNoColorTerminal(data)

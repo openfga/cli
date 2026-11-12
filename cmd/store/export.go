@@ -143,6 +143,11 @@ var exportCmd = &cobra.Command{
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
 		}
 
+		fileName, _ := cmd.Flags().GetString("output-file")
+		if fileName == "" && output.JQFilterSet() {
+			return fmt.Errorf("%w, not by store export without --output-file", output.ErrJQNotApplied)
+		}
+
 		maxTupleCount, _ := cmd.Flags().GetUint("max-tuples")
 
 		storeData, err := buildStoreData(cmd.Context(), clientConfig, fgaClient, maxTupleCount)
@@ -156,7 +161,6 @@ var exportCmd = &cobra.Command{
 				return fmt.Errorf("unable to marshal storedata yaml: %w", err)
 			}
 
-			fileName, _ := cmd.Flags().GetString("output-file")
 			if fileName == "" {
 				fmt.Println(string(storeYaml))
 
