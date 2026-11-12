@@ -174,6 +174,26 @@ api-token-issuer: auth.fga.dev
 store-id: 01H0H015178Y2V4CX10C2KGHF4
 ```
 
+#### Config File Locations
+
+When no `--config` flag is passed, the CLI looks for a `.fga.yaml` (or `.fga.yml`) file in, in order:
+
+1. The os-specific config directory (for example `~/.config` on Linux, `~/Library/Application Support` on macOS, `%AppData%` on Windows)
+2. The `fga` subdirectory of that config directory (for example `~/.config/fga`)
+3. The current user's home directory
+
+The first file found is used; the remaining locations are not read and are not merged in. The CLI prints `Using config file: <path>` to stderr. Flags and `FGA_*` environment variables take precedence over the file.
+
+To use a config file kept alongside a project, name it explicitly:
+
+```shell
+fga --config ./.fga.yaml store list
+```
+
+Or set the equivalent `FGA_*` environment variables from the table above.
+
+> **Note:** versions 0.7.0 through 0.8.2 treated a `.fga.yaml` from the current working directory as the highest precedence. If you relied on that, switch to `--config` or `FGA_*` environment variables.
+
 #### Custom Headers
 
 You can add custom HTTP headers to all requests sent to the API using the `--custom-headers` flag. Headers are specified in `<name>: <value>` format, and the flag can be repeated to add multiple headers.
@@ -436,7 +456,7 @@ fga store **delete**
 | [Read Authorization Models](#read-authorization-models)                     | `list`      | `--store-id`               | `fga model list --store-id=01H0H015178Y2V4CX10C2KGHF4`                                      |
 | [Write Authorization Model ](#write-authorization-model)                    | `write`     | `--store-id`, `--file`     | `fga model write --store-id=01H0H015178Y2V4CX10C2KGHF4 --file model.fga`                    |
 | [Read a Single Authorization Model](#read-a-single-authorization-model)     | `get`       | `--store-id`, `--model-id` | `fga model get --store-id=01H0H015178Y2V4CX10C2KGHF4 --model-id=01GXSA8YR785C4FYS3C0RTG7B1` |
-| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`       | `fga model validate --file model.fga`                                                       |
+| [Validate an Authorization Model](#validate-an-authorization-model)         | `validate`  | `--file`, `--format`, `--weighted-graph` | `fga model validate --file model.fga`                                                       |
 | [Run Tests on an Authorization Model](#run-tests-on-an-authorization-model) | `test`      | `--tests`, `--verbose`, `--max-types-per-authorization-model` | `fga model test --tests "**/*.fga.yaml"`                                      |
 | [Transform an Authorization Model](#transform-an-authorization-model)       | `transform` | `--file`, `--input-format` | `fga model transform --file model.json`                                                     |
 
@@ -570,9 +590,14 @@ fga model **validate**
 ###### Parameters
 * `--file`: File containing the authorization model.
 * `--format`: Authorization model input format. Can be "fga", "json", or "modular". Defaults to the file extension if provided (optional)
+* `--weighted-graph`: Validate that the model is compatible with [weighted-graph optimizations](https://openfga.dev/blog/weighted-graph-upcoming-changes) (optional, default=false).
 
 ###### Example
 `fga model validate --file model.json`
+
+`fga model validate --file model.fga --weighted-graph`
+
+With `--weighted-graph`, the command skips normal type-system validation and instead attempts to build the [weighted graph](https://openfga.dev/blog/weighted-graph-upcoming-changes). The JSON response reports `is_valid: true` if the graph builds successfully, or `is_valid: false` with an `error` explaining the failure. A failed validation exits with a non-zero status. A model can pass normal validation but be incompatible with weighted-graph optimizations.
 
 When the input parses successfully, the JSON response includes `size_kb`, the protobuf-serialized size of the model in KB. If the input cannot be parsed, the command exits with an error and does not emit a JSON response.
 

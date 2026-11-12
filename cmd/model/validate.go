@@ -23,6 +23,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
+	"github.com/openfga/language/pkg/go/graph"
 	"github.com/openfga/openfga/pkg/typesystem"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -40,7 +41,7 @@ type validationResult struct {
 	SizeKB    *float64   `json:"size_kb,omitempty"`
 }
 
-func validate(inputModel authorizationmodel.AuthzModel) validationResult {
+func validate(inputModel authorizationmodel.AuthzModel, weightedGraph bool) validationResult {
 	model := &openfgav1.AuthorizationModel{}
 	output := validationResult{
 		IsValid: true,
@@ -83,7 +84,17 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 		output.CreatedAt = &createdAt
 	}
 
-	if _, err = typesystem.NewAndValidate(context.Background(), model); err != nil {
+	if weightedGraph {
+		if _, err := graph.NewWeightedAuthorizationModelGraphBuilder().Build(model); err != nil {
+			errString := "weighted-graph: " + err.Error()
+			output.IsValid = false
+			output.Error = &errString
+		}
+
+		return output
+	}
+
+	if _, err := typesystem.NewAndValidate(context.Background(), model); err != nil {
 		errString := err.Error()
 		output.IsValid = false
 		output.Error = &errString
@@ -94,10 +105,11 @@ func validate(inputModel authorizationmodel.AuthzModel) validationResult {
 
 // validateCmd represents the validate command.
 var validateCmd = &cobra.Command{
-	Use:     "validate",
-	Short:   "Validate Authorization Model",
-	Long:    "Validates that an authorization model is valid.",
-	Example: `fga model validate --file model.json`,
+	Use:   "validate",
+	Short: "Validate Authorization Model",
+	Long: "Validates that an authorization model is valid. " +
+		"Use --weighted-graph to instead validate compatibility with weighted-graph optimizations.",
+	Example: "fga model validate --file model.json\nfga model validate --file model.fga --weighted-graph",
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputModel string
@@ -119,7 +131,12 @@ var validateCmd = &cobra.Command{
 			return err //nolint:wrapcheck
 		}
 
-		response := validate(authModel)
+		weightedGraph, err := cmd.Flags().GetBool("weighted-graph")
+		if err != nil {
+			return err //nolint:wrapcheck
+		}
+
+		response := validate(authModel, weightedGraph)
 
 		err = output.Display(response)
 		if err != nil {
@@ -138,6 +155,7 @@ var validateCmd = &cobra.Command{
 var validateInputFormat = authorizationmodel.ModelFormatDefault
 
 func init() {
+	validateCmd.Flags().Bool("weighted-graph", false, "Validate compatibility with weighted-graph optimizations instead of type-system validation")
 	validateCmd.Flags().String("file", "", "File Name. The file should have the model in the JSON or DSL format or be an fga.mod file") //nolint:lll
 	validateCmd.Flags().Var(&validateInputFormat, "format", `Authorization model input format. Can be "fga", "json", or "modular"`)     //nolint:lll
 }
