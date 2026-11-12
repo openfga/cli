@@ -16,6 +16,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 * release 0.9.0 ([138ce22](https://github.com/openfga/cli/commit/138ce22cf4a21ac57124b7231e3b3a029dc32ea9))
 
+
+### Security
+
+* Fixed [GHSA-6mmf-c7m2-3pv9](https://github.com/openfga/cli/security/advisories/GHSA-6mmf-c7m2-3pv9), where a configuration file in the current working directory could override the server endpoint and token issuer. Thank you to [@bugbunny-research](https://github.com/bugbunny-research) for the report. ([1edf486](https://github.com/openfga/cli/commit/1edf486f410f6faf5384fca6793a999a03127e33))
+
 ## [0.8.2](https://github.com/openfga/cli/compare/v0.8.1...v0.8.2) (2026-10-15)
 
 
