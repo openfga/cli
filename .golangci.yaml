@@ -84,6 +84,7 @@ linters:
             - github.com/spf13/cobra
             - github.com/spf13/viper
             - google.golang.org/protobuf/proto
+            - google.golang.org/protobuf/types/known/structpb
   exclusions:
     generated: lax
     presets:
