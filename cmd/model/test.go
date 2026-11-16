@@ -57,6 +57,10 @@ var modelTestCmd = &cobra.Command{
 			return fmt.Errorf("failed to get verbose flag: %w", err)
 		}
 
+		if !verbose && output.JQFilterSet() {
+			return fmt.Errorf("%w, use --verbose to print the test results as JSON", output.ErrJQNotApplied)
+		}
+
 		suppressSummary, err := cmd.Flags().GetBool("suppress-summary")
 		if err != nil {
 			return fmt.Errorf("failed to get suppress-summary flag: %w", err)
