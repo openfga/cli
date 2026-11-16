@@ -18,6 +18,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -27,9 +28,12 @@ import (
 
 	"github.com/schollz/progressbar/v3"
 
+	openfgav1 "github.com/openfga/api/proto/openfga/v1"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/openfga/cli/cmd/model"
 	"github.com/openfga/cli/internal/authorizationmodel"
@@ -46,7 +50,11 @@ const (
 	progressBarThrottleValue = 65
 	progressBarUpdateDelay   = 5 * time.Millisecond
 	maxAssertionsPerWrite    = 100
-	expressionConditionName  = "$expression"
+	// The API accepts at most 20 contextual tuples per assertion.
+	maxContextualTuplesPerAssertion = 20
+	// The API rejects WriteAssertions requests whose assertions add up to more than 64000 bytes in proto encoding.
+	maxAssertionsRequestBytes = 64000
+	expressionConditionName   = "$expression"
 )
 
 var errExpressionConditionNotSupported = errors.New( //nolint:err113
@@ -233,7 +241,17 @@ func importAssertions(
 
 	for _, modelTest := range modelTests {
 		if len(modelTest.Check) > 0 {
-			checkAssertions := getCheckAssertions(modelTest.Check)
+			contextualTuples := modelTest.Tuples
+			if len(contextualTuples) > maxContextualTuplesPerAssertion {
+				fmt.Fprintf(os.Stderr,
+					"Warning: test %q has %d tuples, but assertions accept at most %d contextual tuples, "+
+						"so its assertions are written without them\n",
+					modelTest.Name, len(contextualTuples), maxContextualTuplesPerAssertion)
+
+				contextualTuples = nil
+			}
+
+			checkAssertions := getCheckAssertions(modelTest.Check, contextualTuples)
 			assertions = append(assertions, checkAssertions...)
 		}
 	}
@@ -250,6 +268,8 @@ func importAssertions(
 			assertions = assertions[:maxAssertionsPerWrite]
 		}
 
+		dropContextualTuplesOverSizeLimit(assertions)
+
 		_, err := fgaClient.WriteAssertions(ctx).Body(assertions).Options(writeOptions).Execute()
 		if err != nil {
 			return fmt.Errorf("failed to import test assertions: %w", err)
@@ -259,7 +279,79 @@ func importAssertions(
 	return nil
 }
 
-func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAssertion {
+// dropContextualTuplesOverSizeLimit removes the contextual tuples of assertions, starting from the last one,
+// until the assertions fit in one WriteAssertions request. If they still don't fit, it then removes the
+// context of the last assertions too, which main never wrote.
+func dropContextualTuplesOverSizeLimit(assertions []client.ClientAssertion) {
+	sizes := make([]int, len(assertions))
+	total := 0
+
+	for i := range assertions {
+		sizes[i] = assertionSize(assertions[i])
+		total += sizes[i]
+	}
+
+	shrink := func(skip func(client.ClientAssertion) bool, drop func(*client.ClientAssertion)) int {
+		dropped := 0
+
+		for i := len(assertions) - 1; i >= 0 && total > maxAssertionsRequestBytes; i-- {
+			if skip(assertions[i]) {
+				continue
+			}
+
+			drop(&assertions[i])
+			size := assertionSize(assertions[i])
+			total -= sizes[i] - size
+			sizes[i] = size
+			dropped++
+		}
+
+		return dropped
+	}
+
+	droppedTuples := shrink(
+		func(a client.ClientAssertion) bool { return len(a.ContextualTuples) == 0 },
+		func(a *client.ClientAssertion) { a.ContextualTuples = nil },
+	)
+	if droppedTuples > 0 {
+		fmt.Fprintf(os.Stderr,
+			"Warning: the test assertions are over the API's request size limit, "+
+				"so %d of them are written without their test's tuples\n", droppedTuples)
+	}
+
+	droppedContexts := shrink(
+		func(a client.ClientAssertion) bool { return a.Context == nil },
+		func(a *client.ClientAssertion) { a.Context = nil },
+	)
+	if droppedContexts > 0 {
+		fmt.Fprintf(os.Stderr,
+			"Warning: the test assertions are still over the API's request size limit, "+
+				"so %d of them are written without their check's context\n", droppedContexts)
+	}
+}
+
+// assertionSize returns the size of the assertion as the server measures it: the SDK's JSON body decoded
+// into the API's proto message.
+func assertionSize(assertion client.ClientAssertion) int {
+	encoded, err := json.Marshal(assertion.ToAssertion())
+	if err != nil {
+		return 0
+	}
+
+	var protoAssertion openfgav1.Assertion
+	if err := protojson.Unmarshal(encoded, &protoAssertion); err != nil {
+		return len(encoded)
+	}
+
+	return proto.Size(&protoAssertion)
+}
+
+// getCheckAssertions turns check tests into assertions. Each assertion carries the check's context and the
+// test's tuples as contextual tuples, so it holds without writing those tuples to the store.
+func getCheckAssertions(
+	checkTests []storetest.ModelTestCheck,
+	contextualTuples []client.ClientContextualTupleKey,
+) []client.ClientAssertion {
 	assertions := make([]client.ClientAssertion, 0, len(checkTests))
 
 	for _, checkTest := range checkTests {
@@ -270,10 +362,12 @@ func getCheckAssertions(checkTests []storetest.ModelTestCheck) []client.ClientAs
 			for _, object := range objects {
 				for relation, expectation := range checkTest.Assertions {
 					assertions = append(assertions, client.ClientAssertion{
-						User:        user,
-						Relation:    relation,
-						Object:      object,
-						Expectation: expectation,
+						User:             user,
+						Relation:         relation,
+						Object:           object,
+						Expectation:      expectation,
+						Context:          checkTest.Context,
+						ContextualTuples: contextualTuples,
 					})
 				}
 			}
