@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.0](https://github.com/openfga/cli/compare/v0.8.2...v0.9.0) (2026-11-12)
+
+
+### Added
+
+* **model:** add weighted graph validation ([#788](https://github.com/openfga/cli/issues/788)) ([bd4b95d](https://github.com/openfga/cli/commit/bd4b95dfd62f0b25c6413b82aba09e038175991a))
+
+
+### Miscellaneous
+
+* release 0.9.0 ([138ce22](https://github.com/openfga/cli/commit/138ce22cf4a21ac57124b7231e3b3a029dc32ea9))
+
 ## [0.8.2](https://github.com/openfga/cli/compare/v0.8.1...v0.8.2) (2026-10-15)
 
 

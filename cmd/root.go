@@ -105,18 +105,7 @@ func initConfig() {
 		homeDir, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search for .fga.yml or .fga.yaml in:
-		// 1- The current working directory
-		// 2- The user-specific config directory
-		// 3- The fga subdirectory under the user-specific config directory
-		// 4- The current user's home directory
-		viperInstance.AddConfigPath(".")
-		viperInstance.AddConfigPath(configDir)
-		viperInstance.AddConfigPath(configDir + "/" + "fga")
-		viperInstance.AddConfigPath(homeDir)
-		viperInstance.SetConfigType("yml")
-		viperInstance.SetConfigType("yaml")
-		viperInstance.SetConfigName(".fga")
+		applyConfigSearch(viperInstance, configDir, homeDir)
 	}
 
 	// If a config file is found, read it in.
@@ -130,4 +119,20 @@ func initConfig() {
 	viperInstance.AutomaticEnv() // read in environment variables that match
 
 	cmdutils.BindViperToFlags(rootCmd, viperInstance)
+}
+
+// applyConfigSearch registers where .fga.yml or .fga.yaml is looked for:
+//   - the os-specific config directory, and its fga subdirectory
+//   - the user's home directory
+//
+// Note: we should not autoload the current working directory, as it is not
+// necessarily under the user's control. Use --config or FGA_* for a config
+// file kept alongside a project.
+func applyConfigSearch(viperInstance *viper.Viper, configDir, homeDir string) {
+	viperInstance.AddConfigPath(configDir)
+	viperInstance.AddConfigPath(configDir + "/" + "fga")
+	viperInstance.AddConfigPath(homeDir)
+	viperInstance.SetConfigType("yml")
+	viperInstance.SetConfigType("yaml")
+	viperInstance.SetConfigName(".fga")
 }
