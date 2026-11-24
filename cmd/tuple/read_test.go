@@ -3,6 +3,9 @@ package tuple
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -733,4 +736,85 @@ func TestReadWithInvalidPageSize(t *testing.T) {
 	if err != nil && err.Error() != "pageSize must be between 1 and 100: got 0" {
 		t.Errorf("Expected specific error message, got: %v", err)
 	}
+}
+
+func TestDisplayReadResponseToFile(t *testing.T) {
+	t.Parallel()
+
+	tupleKey := openfga.TupleKey{User: "user:anne", Relation: "reader", Object: "doc:roadmap"}
+	response := &readResponse{
+		complete: &openfga.ReadResponse{Tuples: []openfga.Tuple{{Key: tupleKey}}},
+		simple:   []openfga.TupleKey{tupleKey},
+	}
+
+	tests := []struct {
+		name         string
+		outputFormat string
+		contains     []string
+	}{
+		{"json", "json", []string{`"tuples"`, `"user": "user:anne"`}},
+		{"simple-json", "simple-json", []string{`"user": "user:anne"`, `"object": "doc:roadmap"`}},
+		{"yaml", "yaml", []string{"tuples:", "user: user:anne"}},
+		{"csv", "csv", []string{"user_type,user_id", "user,anne,,reader,doc,roadmap"}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			path := filepath.Join(t.TempDir(), "tuples.out")
+
+			require.NoError(t, displayReadResponse(response, test.outputFormat, false, path))
+
+			content, err := os.ReadFile(path)
+			require.NoError(t, err)
+
+			for _, want := range test.contains {
+				assert.Contains(t, string(content), want)
+			}
+
+			if runtime.GOOS != "windows" {
+				info, err := os.Stat(path)
+				require.NoError(t, err)
+				assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
+			}
+		})
+	}
+}
+
+func TestDisplayReadResponseToFileJSONIsValid(t *testing.T) {
+	t.Parallel()
+
+	tupleKey := openfga.TupleKey{User: "user:anne", Relation: "reader", Object: "doc:roadmap"}
+	response := &readResponse{
+		complete: &openfga.ReadResponse{Tuples: []openfga.Tuple{{Key: tupleKey}}},
+		simple:   []openfga.TupleKey{tupleKey},
+	}
+
+	path := filepath.Join(t.TempDir(), "tuples.json")
+	require.NoError(t, displayReadResponse(response, "simple-json", false, path))
+
+	content, err := os.ReadFile(path)
+	require.NoError(t, err)
+
+	var keys []openfga.TupleKey
+
+	require.NoError(t, json.Unmarshal(content, &keys))
+	assert.Equal(t, []openfga.TupleKey{tupleKey}, keys)
+}
+
+func TestDisplayReadResponseToFileWriteError(t *testing.T) {
+	t.Parallel()
+
+	response := &readResponse{
+		complete: &openfga.ReadResponse{Tuples: []openfga.Tuple{}},
+		simple:   []openfga.TupleKey{},
+	}
+
+	// The parent directory does not exist, so the file cannot be created.
+	path := filepath.Join(t.TempDir(), "missing-dir", "tuples.json")
+
+	err := displayReadResponse(response, "json", false, path)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to write output file")
 }
