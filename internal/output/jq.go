@@ -111,9 +111,12 @@ func runJQFilter(code *gojq.Code, data any, emit func(any) error) error {
 		}
 
 		if err, isErr := result.(error); isErr {
-			// halt stops the filter successfully, halt_error with a non-zero exit code is an error.
+			// halt and halt_error(0) stop the filter successfully, any other exit code is an error.
+			// Like jq, halt_error prints its payload to stderr: strings as they are, other values as JSON.
 			var haltErr *gojq.HaltError
-			if errors.As(err, &haltErr) && haltErr.Value() == nil && haltErr.ExitCode() == 0 {
+			if errors.As(err, &haltErr) && haltErr.ExitCode() == 0 {
+				printHaltPayload(haltErr.Value())
+
 				return nil
 			}
 
@@ -122,6 +125,20 @@ func runJQFilter(code *gojq.Code, data any, emit func(any) error) error {
 
 		if err := emit(result); err != nil {
 			return err
+		}
+	}
+}
+
+// printHaltPayload writes the value given to halt_error to stderr, like jq does.
+func printHaltPayload(value any) {
+	switch payload := value.(type) {
+	case nil:
+	case string:
+		fmt.Fprint(os.Stderr, payload)
+	default:
+		encoded, err := json.Marshal(payload)
+		if err == nil {
+			fmt.Fprintln(os.Stderr, string(encoded))
 		}
 	}
 }

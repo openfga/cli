@@ -159,6 +159,12 @@ func TestJQFilterHalt(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []any{"01A"}, results)
 
+	require.NoError(t, SetJQFilter(`.stores[].id, ("done" | halt_error(0))`))
+
+	results, err = collectJQResults(jqTestResponse{Stores: []jqTestStore{{ID: "01A"}}})
+	require.NoError(t, err)
+	assert.Equal(t, []any{"01A"}, results)
+
 	require.NoError(t, SetJQFilter(`null | halt_error(7)`))
 
 	_, err = collectJQResults(jqTestResponse{})
@@ -199,4 +205,18 @@ func captureStdout(t *testing.T, run func()) string {
 	require.NoError(t, err)
 
 	return string(printed)
+}
+
+func TestUniPrinterKeepsBigIntegersAsYAMLNumbers(t *testing.T) {
+	t.Cleanup(func() { _ = SetJQFilter("") })
+
+	require.NoError(t, SetJQFilter(`{n: 18446744073709551616, nested: [18446744073709551617]}`))
+
+	printed := captureStdout(t, func() {
+		printer := UniPrinter{Printer: &yamlPrinter{}}
+		require.NoError(t, printer.Display(jqTestResponse{}))
+	})
+
+	assert.Contains(t, printed, "!!int 18446744073709551616"+"\n")
+	assert.Contains(t, printed, "- !!int 18446744073709551617"+"\n")
 }

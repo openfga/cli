@@ -19,6 +19,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"io"
 	"math"
 	"os"
 
@@ -129,6 +130,16 @@ func buildStoreData(ctx context.Context, config fga.ClientConfig, fgaClient clie
 	return storeData, nil
 }
 
+// statusWriter is where progress messages go: stderr when --jq is set, so that stdout carries only
+// the filter results.
+func statusWriter() io.Writer {
+	if output.JQFilterSet() {
+		return os.Stderr
+	}
+
+	return os.Stdout
+}
+
 // exportCmd represents the export store command.
 var exportCmd = &cobra.Command{
 	Use:     "export",
@@ -174,7 +185,7 @@ var exportCmd = &cobra.Command{
 				}
 
 				if !confirm {
-					fmt.Println("cancelled")
+					fmt.Fprintln(statusWriter(), "cancelled")
 
 					return output.Display(output.EmptyStruct{})
 				}
@@ -185,7 +196,7 @@ var exportCmd = &cobra.Command{
 				return err //nolint:wrapcheck
 			}
 
-			fmt.Printf("model written to %s\n", fileName)
+			fmt.Fprintf(statusWriter(), "model written to %s\n", fileName)
 		}
 
 		return output.Display(output.EmptyStruct{})
