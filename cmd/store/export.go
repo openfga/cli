@@ -19,6 +19,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"io"
 	"math"
 	"os"
 
@@ -129,6 +130,16 @@ func buildStoreData(ctx context.Context, config fga.ClientConfig, fgaClient clie
 	return storeData, nil
 }
 
+// statusWriter is where progress messages go: stderr when --jq is set, so that stdout carries only
+// the filter results.
+func statusWriter() io.Writer {
+	if output.JQFilterSet() {
+		return os.Stderr
+	}
+
+	return os.Stdout
+}
+
 // exportCmd represents the export store command.
 var exportCmd = &cobra.Command{
 	Use:     "export",
@@ -141,6 +152,11 @@ var exportCmd = &cobra.Command{
 		fgaClient, err := clientConfig.GetFgaClient()
 		if err != nil {
 			return fmt.Errorf("failed to initialize FGA Client due to %w", err)
+		}
+
+		fileName, _ := cmd.Flags().GetString("output-file")
+		if fileName == "" && output.JQFilterSet() {
+			return fmt.Errorf("%w, not by store export without --output-file", output.ErrJQNotApplied)
 		}
 
 		maxTupleCount, _ := cmd.Flags().GetUint("max-tuples")
@@ -156,7 +172,6 @@ var exportCmd = &cobra.Command{
 				return fmt.Errorf("unable to marshal storedata yaml: %w", err)
 			}
 
-			fileName, _ := cmd.Flags().GetString("output-file")
 			if fileName == "" {
 				fmt.Println(string(storeYaml))
 
@@ -170,7 +185,7 @@ var exportCmd = &cobra.Command{
 				}
 
 				if !confirm {
-					fmt.Println("cancelled")
+					fmt.Fprintln(statusWriter(), "cancelled")
 
 					return output.Display(output.EmptyStruct{})
 				}
@@ -181,7 +196,7 @@ var exportCmd = &cobra.Command{
 				return err //nolint:wrapcheck
 			}
 
-			fmt.Printf("model written to %s\n", fileName)
+			fmt.Fprintf(statusWriter(), "model written to %s\n", fileName)
 		}
 
 		return output.Display(output.EmptyStruct{})

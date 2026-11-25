@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -107,7 +108,7 @@ func (prt *yamlPrinter) DisplayColor(data any) error {
 }
 
 func (prt *yamlPrinter) DisplayNoColor(data any) error {
-	result, err := yaml.Marshal(data)
+	result, err := yaml.Marshal(yamlValue(data))
 	if err != nil {
 		return fmt.Errorf("unable to marshal yaml with error %w", err)
 	}
@@ -115,6 +116,31 @@ func (prt *yamlPrinter) DisplayNoColor(data any) error {
 	fmt.Println(string(result))
 
 	return nil
+}
+
+// yamlValue replaces the arbitrary-precision integers that a jq filter can produce with YAML integer
+// nodes, because the YAML encoder would otherwise print them as strings.
+func yamlValue(data any) any {
+	switch value := data.(type) {
+	case *big.Int:
+		return &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!int", Value: value.String()}
+	case map[string]any:
+		converted := make(map[string]any, len(value))
+		for key, item := range value {
+			converted[key] = yamlValue(item)
+		}
+
+		return converted
+	case []any:
+		converted := make([]any, len(value))
+		for i, item := range value {
+			converted[i] = yamlValue(item)
+		}
+
+		return converted
+	default:
+		return data
+	}
 }
 
 // UniPrinter is a universal printer that can handle different output formats.
@@ -140,8 +166,28 @@ func NewUniPrinter(outputFormat string) *UniPrinter {
 	return &uniPrinter
 }
 
-// Display prints the data using the configured printer and color settings.
+// Display prints the data using the configured printer and color settings, after applying the --jq filter if set.
 func (prt UniPrinter) Display(data any) error {
+	if jqFilter != nil {
+		_, isYAML := prt.Printer.(*yamlPrinter)
+		first := true
+
+		return displayFiltered(jqFilter, data, func(result any) error {
+			// Separate successive YAML results into documents, like yq does.
+			if isYAML && !first {
+				fmt.Println("---")
+			}
+
+			first = false
+
+			return prt.display(result)
+		})
+	}
+
+	return prt.display(data)
+}
+
+func (prt UniPrinter) display(data any) error {
 	if prt.Colorful {
 		err := prt.Printer.DisplayColor(data)
 		if err != nil {
@@ -199,7 +245,16 @@ func outputNonTerminal(data any) error {
 }
 
 // Display will decorate the output if possible.  Otherwise, will print out the standard JSON.
+// If the --jq filter is set, it prints the results of the filter instead.
 func Display(data any) error {
+	if jqFilter != nil {
+		return displayFiltered(jqFilter, data, display)
+	}
+
+	return display(data)
+}
+
+func display(data any) error {
 	if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		if os.Getenv("NO_COLOR") != "" {
 			return displayNoColorTerminal(data)
